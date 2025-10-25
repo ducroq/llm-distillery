@@ -127,7 +127,7 @@ class GenericBatchLabeler:
                     "Gemini API key not found. Set GOOGLE_API_KEY or GEMINI_API_KEY in environment or secrets.ini"
                 )
             genai.configure(api_key=api_key)
-            return genai.GenerativeModel('gemini-1.5-pro')
+            return genai.GenerativeModel('gemini-2.5-pro')
 
         elif self.llm_provider == "gpt4":
             import openai
@@ -159,6 +159,66 @@ class GenericBatchLabeler:
         self.state['last_updated'] = datetime.utcnow().isoformat()
         with open(self.state_file, 'w') as f:
             json.dump(self.state, f, indent=2)
+
+    def _post_process_uplifting(self, analysis: Dict) -> Dict:
+        """
+        Post-process uplifting filter analysis to calculate tier and overall_uplift_score.
+        This matches the NexusMind-Filter implementation.
+        """
+        # Dimension weights
+        weights = {
+            'agency': 0.14,
+            'progress': 0.19,
+            'collective_benefit': 0.38,
+            'connection': 0.10,
+            'innovation': 0.08,
+            'justice': 0.04,
+            'resilience': 0.02,
+            'wonder': 0.05
+        }
+
+        # Extract dimensions
+        dimensions = {k: analysis.get(k, 0) for k in weights.keys()}
+
+        # Calculate base score
+        base_score = sum(dimensions[k] * weights[k] for k in dimensions)
+
+        # Apply content-type caps
+        content_type = analysis.get('content_type', '')
+        max_score = 10.0
+
+        if content_type == "corporate_finance":
+            max_score = 2.0
+        elif content_type == "military_security":
+            max_score = 4.0
+        elif content_type == "business_news" and dimensions['collective_benefit'] < 6:
+            max_score = 4.0
+
+        # Apply gatekeeper rule
+        if dimensions['collective_benefit'] < 5:
+            # Wonder exemption
+            if dimensions['wonder'] >= 7 and dimensions['collective_benefit'] >= 3:
+                pass  # No cap
+            else:
+                max_score = min(max_score, 3.0)
+
+        # Apply cap
+        final_score = min(base_score, max_score)
+
+        # Determine tier
+        if final_score >= 7.0:
+            tier = "impact"
+        elif final_score >= 4.0:
+            tier = "connection"
+        else:
+            tier = "not_uplifting"
+
+        # Add calculated fields to analysis
+        analysis['dimensions'] = dimensions
+        analysis['overall_uplift_score'] = round(final_score, 2)
+        analysis['tier'] = tier
+
+        return analysis
 
     def build_prompt(self, article: Dict) -> str:
         """Build prompt by filling in article data."""
@@ -213,6 +273,10 @@ class GenericBatchLabeler:
 
             # Parse JSON
             analysis = json.loads(response_text.strip())
+
+            # Filter-specific post-processing
+            if self.filter_name == 'uplifting':
+                analysis = self._post_process_uplifting(analysis)
 
             # Add metadata
             analysis['analyzed_at'] = datetime.utcnow().isoformat() + 'Z'

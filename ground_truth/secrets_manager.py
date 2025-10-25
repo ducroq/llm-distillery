@@ -152,7 +152,12 @@ class SecretsManager:
         return self.get('API_ANTHROPIC_API_KEY')
 
     def get_gemini_key(self) -> Optional[str]:
-        """Get Google Gemini API key"""
+        """Get Google Gemini API key (prioritize billing key for higher rate limits)"""
+        # Try billing key first (150 RPM)
+        billing_key = self.get('API_GEMINI_BILLING_API_KEY')
+        if billing_key:
+            return billing_key
+        # Fall back to regular key (2 RPM free tier)
         return self.get('API_GEMINI_API_KEY')
 
     def get_openai_key(self) -> Optional[str]:

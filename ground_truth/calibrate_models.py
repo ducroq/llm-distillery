@@ -19,10 +19,16 @@ Usage:
 import json
 import random
 import argparse
+import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 from collections import Counter
 from datetime import datetime
+
+# Fix encoding for Windows console
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from .batch_labeler import GenericBatchLabeler
 
@@ -98,22 +104,19 @@ def extract_tier_and_score(analysis: Dict, filter_name: str) -> Tuple[str, float
     """Extract tier and score from analysis (generic for any filter)."""
     tier = analysis.get('tier', 'unknown')
 
-    # Try multiple score keys (filter_name_score, overall_score, etc.)
+    # Try multiple score keys in order of preference
     score_keys = [
-        f'{filter_name}_score',
-        'overall_uplift_score',
-        'sustainability_score',
-        'overall_score'
+        'overall_uplift_score',  # Uplifting filter
+        'sustainability_score',  # Sustainability filter
+        f'{filter_name}_score',  # Generic pattern
+        'overall_score',         # Fallback
     ]
 
-    score = None
+    score = 0.0
     for key in score_keys:
-        if key in analysis:
-            score = analysis[key]
+        if key in analysis and analysis[key] is not None:
+            score = float(analysis[key])
             break
-
-    if score is None:
-        score = 0.0
 
     return tier, score
 
