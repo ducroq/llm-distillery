@@ -6,42 +6,44 @@ How to securely manage API keys for Claude, Gemini, and GPT-4 in LLM Distillery.
 
 ## 🔐 Quick Setup
 
-### Method 1: Environment Variables (Recommended)
+### Method 1: secrets.ini File (Recommended for Local Development)
 
-**Create `.env` file** in project root:
+**Create `secrets.ini` file** in `config/credentials/`:
 
 ```bash
 # Navigate to project root
 cd C:\local_dev\llm-distillery
 
 # Copy example file
-cp .env.example .env
+cp config/credentials/secrets.ini.example config/credentials/secrets.ini
 
-# Edit .env with your API keys
+# Edit secrets.ini with your API keys
 # (Use your text editor - DO NOT commit this file!)
 ```
 
-**`.env` contents**:
-```bash
-# LLM API Keys (choose one or more)
-ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
-GOOGLE_API_KEY=AIza-your-gemini-key-here
-OPENAI_API_KEY=sk-your-openai-key-here
+**`secrets.ini` contents**:
+```ini
+[api_keys]
+# LLM API Keys for ground truth generation
+# Get from:
+# - Anthropic Claude: https://console.anthropic.com/
+# - Google Gemini: https://aistudio.google.com/app/apikey
+# - OpenAI GPT-4: https://platform.openai.com/api-keys
 
-# Optional: Weights & Biases for experiment tracking
-WANDB_API_KEY=your-wandb-key-here
-WANDB_PROJECT=llm-distillery
+anthropic_api_key = sk-ant-api03-your-key-here
+gemini_api_key = AIza-your-gemini-key-here
+openai_api_key = sk-your-openai-key-here
 
-# Optional: Content Aggregator data path
-CONTENT_AGGREGATOR_DATA_PATH=../content-aggregator/data/collected
+# Optional: For experiment tracking
+wandb_api_key = your-wandb-key-here
 ```
 
 **How it works**:
-- The `batch_labeler.py` automatically loads `.env` using `python-dotenv`
-- Keys are read with `os.getenv('ANTHROPIC_API_KEY')`
-- `.env` is in `.gitignore` - never committed to git
+- The `SecretsManager` automatically loads `config/credentials/secrets.ini`
+- Keys are accessed with `secrets.get_anthropic_key()`, `secrets.get_gemini_key()`, etc.
+- `secrets.ini` is in `.gitignore` - never committed to git
 
-### Method 2: System Environment Variables
+### Method 2: Environment Variables (Recommended for CI/CD)
 
 **Windows (PowerShell)**:
 ```powershell
@@ -62,16 +64,23 @@ echo 'export ANTHROPIC_API_KEY="sk-ant-your-key-here"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### Method 3: Command-Line Argument
+### Priority Order
 
-```bash
-python -m ground_truth.batch_labeler \
-    --prompt prompts/uplifting.md \
-    --source articles.jsonl \
-    --api-key "sk-ant-your-key-here"
-```
+The `SecretsManager` checks for API keys in this order:
 
-⚠️ **Not recommended**: API key visible in command history
+1. **Environment variables** (highest priority)
+   - `ANTHROPIC_API_KEY`, `CLAUDE_API_KEY`
+   - `GEMINI_API_KEY`, `GOOGLE_API_KEY`
+   - `OPENAI_API_KEY`
+   - `WANDB_API_KEY`
+
+2. **secrets.ini file** (fallback)
+   - `config/credentials/secrets.ini`
+
+This allows:
+- Local development: Use `secrets.ini`
+- CI/CD: Use environment variables
+- Override `secrets.ini` with environment variables if needed
 
 ---
 
@@ -122,14 +131,14 @@ python -m ground_truth.batch_labeler \
 ## 🔒 Security Best Practices
 
 ### DO ✅
-- Use `.env` file (in `.gitignore`)
+- Use `secrets.ini` file (in `.gitignore`)
 - Rotate keys periodically
 - Use separate keys for dev/prod
 - Set spending limits in provider dashboards
 - Revoke unused keys immediately
 
 ### DON'T ❌
-- Commit `.env` to git
+- Commit `secrets.ini` to git
 - Share keys in chat/email
 - Use production keys in examples
 - Hardcode keys in scripts
@@ -138,11 +147,11 @@ python -m ground_truth.batch_labeler \
 ### File Permissions (Linux/Mac)
 
 ```bash
-# Make .env readable only by you
-chmod 600 .env
+# Make secrets.ini readable only by you
+chmod 600 config/credentials/secrets.ini
 
 # Verify permissions
-ls -la .env
+ls -la config/credentials/secrets.ini
 # Should show: -rw------- (600)
 ```
 
@@ -208,7 +217,7 @@ python -m ground_truth.batch_labeler \
 ### Common Errors
 
 **Error**: `ValueError: Claude API key not found`
-**Solution**: Check `.env` file exists and has `ANTHROPIC_API_KEY=...`
+**Solution**: Check `config/credentials/secrets.ini` exists and has `anthropic_api_key = ...` under `[api_keys]` section, or set `ANTHROPIC_API_KEY` environment variable
 
 **Error**: `AuthenticationError: Invalid API key`
 **Solution**: Verify key is correct, not expired
@@ -242,15 +251,14 @@ python -m ground_truth.batch_labeler \
 
 **`.gitignore` includes**:
 ```
-.env
-.env.local
-.env.*.local
+config/credentials/secrets.ini
+secrets.ini
 ```
 
 **Team workflow**:
 1. Each team member gets own API keys
-2. Each creates own `.env` file (not committed)
-3. Use `.env.example` as template
+2. Each creates own `secrets.ini` file (not committed)
+3. Use `secrets.ini.example` as template
 4. Document required keys in README
 
 ### CI/CD Secrets
@@ -269,65 +277,27 @@ Settings → CI/CD → Variables → Add variable (Protected, Masked)
 
 ---
 
-## 📝 Example `.env` File
+## 📝 Example secrets.ini File
 
-```bash
-# =============================================================================
-# LLM Distillery - API Keys & Configuration
-# =============================================================================
-#
-# IMPORTANT: This file contains secrets - DO NOT commit to git!
-# Copy from .env.example and add your actual keys below.
-#
+See `config/credentials/secrets.ini.example` for the complete template.
 
-# -----------------------------------------------------------------------------
-# LLM API Keys (at least one required)
-# -----------------------------------------------------------------------------
+**Minimal example**:
+```ini
+[api_keys]
+# At least one LLM API key required
+anthropic_api_key = sk-ant-api03-your-actual-key-here
+gemini_api_key = AIza-your-actual-key-here
 
-# Anthropic Claude (recommended for high quality)
-# Get from: https://console.anthropic.com/
-# Cost: ~$0.009/article for ground truth generation
-ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
-
-# Google Gemini (recommended for low cost)
-# Get from: https://aistudio.google.com/app/apikey
-# IMPORTANT: Enable Cloud Billing for Tier 1 (150 RPM)
-# Cost: ~$0.00018/article (50x cheaper than Claude)
-GOOGLE_API_KEY=AIza-your-gemini-key-here
-
-# OpenAI GPT-4 (optional)
-# Get from: https://platform.openai.com/api-keys
-# Cost: ~$0.012/article
-# OPENAI_API_KEY=sk-your-openai-key-here
-
-# -----------------------------------------------------------------------------
-# Optional: Experiment Tracking
-# -----------------------------------------------------------------------------
-
-# Weights & Biases (for tracking training experiments)
-# Get from: https://wandb.ai/authorize
-# WANDB_API_KEY=your-wandb-key-here
-# WANDB_PROJECT=llm-distillery
-
-# -----------------------------------------------------------------------------
-# Optional: Data Source Configuration
-# -----------------------------------------------------------------------------
-
-# Path to Content Aggregator data
-CONTENT_AGGREGATOR_DATA_PATH=../content-aggregator/data/collected
-
-# -----------------------------------------------------------------------------
-# Optional: Model Training Configuration
-# -----------------------------------------------------------------------------
-
-# GPU configuration
-# CUDA_VISIBLE_DEVICES=0
-# PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
-
-# Inference settings
-# INFERENCE_BATCH_SIZE=32
-# INFERENCE_MAX_LENGTH=512
+# Optional: For experiment tracking
+wandb_api_key = your-wandb-key-here
 ```
+
+**Location**: `config/credentials/secrets.ini`
+
+**Security**:
+- This file is in `.gitignore` - it will NEVER be committed
+- Each team member creates their own copy from `secrets.ini.example`
+- Set file permissions to 600 (Linux/Mac): `chmod 600 config/credentials/secrets.ini`
 
 ---
 
@@ -335,8 +305,8 @@ CONTENT_AGGREGATOR_DATA_PATH=../content-aggregator/data/collected
 
 Before running in production:
 
-- [ ] `.env` file exists and has valid keys
-- [ ] `.env` is in `.gitignore` (verify: `git status` should not show it)
+- [ ] `secrets.ini` file exists and has valid keys
+- [ ] `secrets.ini` is in `.gitignore` (verify: `git status` should not show it)
 - [ ] Spending limits set in provider dashboards
 - [ ] Keys are unique per environment (dev/staging/prod)
 - [ ] File permissions set to 600 (Linux/Mac)

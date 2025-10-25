@@ -30,6 +30,10 @@ ENV/
 .env
 .env.local
 
+# Secrets (NexusMind-style)
+config/credentials/secrets.ini
+secrets.ini
+
 # IDE
 .vscode/
 .idea/

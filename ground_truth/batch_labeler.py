@@ -22,10 +22,9 @@ from typing import Dict, List, Optional
 import anthropic
 import google.generativeai as genai
 from datetime import datetime
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Import secrets manager
+from .secrets_manager import get_secrets_manager
 
 
 class GenericBatchLabeler:
@@ -110,31 +109,33 @@ class GenericBatchLabeler:
 
     def _init_llm_client(self, api_key: Optional[str]):
         """Initialize LLM client based on provider."""
+        # Use SecretsManager if no API key provided
+        if api_key is None:
+            secrets = get_secrets_manager()
+            api_key = secrets.get_llm_key(self.llm_provider)
+
         if self.llm_provider == "claude":
-            key = api_key or os.getenv('ANTHROPIC_API_KEY')
-            if not key:
+            if not api_key:
                 raise ValueError(
-                    "Claude API key not found. Set ANTHROPIC_API_KEY environment variable."
+                    "Claude API key not found. Set ANTHROPIC_API_KEY in environment or secrets.ini"
                 )
-            return anthropic.Anthropic(api_key=key)
+            return anthropic.Anthropic(api_key=api_key)
 
         elif self.llm_provider == "gemini":
-            key = api_key or os.getenv('GOOGLE_API_KEY')
-            if not key:
+            if not api_key:
                 raise ValueError(
-                    "Gemini API key not found. Set GOOGLE_API_KEY environment variable."
+                    "Gemini API key not found. Set GOOGLE_API_KEY or GEMINI_API_KEY in environment or secrets.ini"
                 )
-            genai.configure(api_key=key)
+            genai.configure(api_key=api_key)
             return genai.GenerativeModel('gemini-1.5-pro')
 
         elif self.llm_provider == "gpt4":
             import openai
-            key = api_key or os.getenv('OPENAI_API_KEY')
-            if not key:
+            if not api_key:
                 raise ValueError(
-                    "OpenAI API key not found. Set OPENAI_API_KEY environment variable."
+                    "OpenAI API key not found. Set OPENAI_API_KEY in environment or secrets.ini"
                 )
-            return openai.OpenAI(api_key=key)
+            return openai.OpenAI(api_key=api_key)
 
         else:
             raise ValueError(f"Unsupported LLM provider: {self.llm_provider}")
