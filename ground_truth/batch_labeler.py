@@ -229,39 +229,67 @@ class GenericBatchLabeler:
             text=article.get('content', '')[:4000]  # Truncate to fit context window
         )
 
-    def analyze_article(self, article: Dict) -> Optional[Dict]:
-        """Analyze a single article using LLM."""
+    def analyze_article(self, article: Dict, timeout_seconds: int = 60) -> Optional[Dict]:
+        """Analyze a single article using LLM with timeout protection."""
         prompt = self.build_prompt(article)
 
         try:
-            if self.llm_provider == "claude":
-                message = self.llm_client.messages.create(
-                    model="claude-3-5-sonnet-20241022",
-                    max_tokens=2048,
-                    temperature=0.3,  # Lower for more consistent ground truth
-                    system="You are an expert analyst. You respond only with valid JSON following the exact format specified.",
-                    messages=[{"role": "user", "content": prompt}]
-                )
-                response_text = message.content[0].text.strip()
+            # Use threading.Timer for cross-platform timeout
+            import threading
 
-            elif self.llm_provider == "gemini":
-                response = self.llm_client.generate_content(
-                    prompt,
-                    generation_config=genai.types.GenerationConfig(
-                        temperature=0.3,
-                        max_output_tokens=2048,
-                    )
-                )
-                response_text = response.text.strip()
+            result = [None]  # Mutable container for thread result
+            exception = [None]  # Mutable container for exceptions
 
-            elif self.llm_provider == "gpt4":
-                response = self.llm_client.chat.completions.create(
-                    model="gpt-4-turbo-preview",
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.3,
-                    max_tokens=2048,
-                )
-                response_text = response.choices[0].message.content.strip()
+            def call_llm():
+                try:
+                    if self.llm_provider == "claude":
+                        message = self.llm_client.messages.create(
+                            model="claude-3-5-sonnet-20241022",
+                            max_tokens=2048,
+                            temperature=0.3,  # Lower for more consistent ground truth
+                            system="You are an expert analyst. You respond only with valid JSON following the exact format specified.",
+                            messages=[{"role": "user", "content": prompt}]
+                        )
+                        result[0] = message.content[0].text.strip()
+
+                    elif self.llm_provider == "gemini":
+                        response = self.llm_client.generate_content(
+                            prompt,
+                            generation_config=genai.types.GenerationConfig(
+                                temperature=0.3,
+                                max_output_tokens=2048,
+                            )
+                        )
+                        result[0] = response.text.strip()
+
+                    elif self.llm_provider == "gpt4":
+                        response = self.llm_client.chat.completions.create(
+                            model="gpt-4-turbo-preview",
+                            messages=[{"role": "user", "content": prompt}],
+                            temperature=0.3,
+                            max_tokens=2048,
+                        )
+                        result[0] = response.choices[0].message.content.strip()
+                except Exception as e:
+                    exception[0] = e
+
+            # Run LLM call in thread with timeout
+            thread = threading.Thread(target=call_llm)
+            thread.daemon = True
+            thread.start()
+            thread.join(timeout=timeout_seconds)
+
+            if thread.is_alive():
+                print(f"  ⏱️  Timeout after {timeout_seconds}s for article {article.get('id')}")
+                return None
+
+            if exception[0]:
+                raise exception[0]
+
+            response_text = result[0]
+            if not response_text:
+                print(f"  ⚠️  No response for article {article.get('id')}")
+                return None
 
             # Remove markdown formatting if present
             if response_text.startswith("```json"):

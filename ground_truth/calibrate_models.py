@@ -58,7 +58,8 @@ def label_with_provider(
     articles: List[Dict],
     prompt_path: str,
     provider: str,
-    filter_name: str
+    filter_name: str,
+    cache_dir: Path = None
 ) -> List[Dict]:
     """Label articles with specified LLM provider."""
     print(f"\n{'='*70}")
@@ -97,6 +98,18 @@ def label_with_provider(
             print(f"ERROR: {e}")
 
     print(f"\nSuccessfully labeled: {len(labeled_articles)}/{len(articles)} articles")
+
+    # Cache results if cache_dir provided
+    if cache_dir:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        cache_file = cache_dir / f"{provider}_labels.jsonl"
+
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            for article in labeled_articles:
+                f.write(json.dumps(article, ensure_ascii=False) + '\n')
+
+        print(f"Cached {len(labeled_articles)} labeled articles to: {cache_file}")
+
     return labeled_articles
 
 
@@ -307,12 +320,27 @@ def generate_calibration_report(
     # Sample Comparisons (show 5 articles with biggest disagreement)
     lines.append("## Sample Article Comparisons")
     lines.append("")
-    lines.append("Showing 5 articles with largest score disagreement:")
+    lines.append(f"Comparing {len(claude_articles)} Claude articles vs {len(gemini_articles)} Gemini articles")
     lines.append("")
 
     # Find articles with biggest score disagreement
+    # Create dictionaries keyed by article ID to match articles correctly
+    claude_by_id = {art.get('id', art.get('url', '')): art for art in claude_articles}
+    gemini_by_id = {art.get('id', art.get('url', '')): art for art in gemini_articles}
+
+    # Find common articles (analyzed by both models)
+    common_ids = set(claude_by_id.keys()) & set(gemini_by_id.keys())
+
+    lines.append(f"**Matched articles**: {len(common_ids)} (analyzed successfully by both models)")
+    lines.append("")
+    lines.append("Showing 5 articles with largest score disagreement:")
+    lines.append("")
+
     disagreements = []
-    for claude_art, gemini_art in zip(claude_articles, gemini_articles):
+    for article_id in common_ids:
+        claude_art = claude_by_id[article_id]
+        gemini_art = gemini_by_id[article_id]
+
         claude_analysis = claude_art[f'{filter_name}_analysis']
         gemini_analysis = gemini_art[f'{filter_name}_analysis']
 
@@ -438,11 +466,16 @@ def main():
         print("ERROR: No articles available for calibration!")
         return 1
 
+    # Set up cache directory: calibrations/<filter_name>/
+    cache_dir = Path('calibrations') / filter_name
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Cache directory: {cache_dir}\n")
+
     # Label with Claude
-    claude_articles = label_with_provider(articles, args.prompt, 'claude', filter_name)
+    claude_articles = label_with_provider(articles, args.prompt, 'claude', filter_name, cache_dir)
 
     # Label with Gemini
-    gemini_articles = label_with_provider(articles, args.prompt, 'gemini', filter_name)
+    gemini_articles = label_with_provider(articles, args.prompt, 'gemini', filter_name, cache_dir)
 
     if len(claude_articles) == 0 or len(gemini_articles) == 0:
         print("\nERROR: One or both models failed to label articles!")

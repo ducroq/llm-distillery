@@ -20,69 +20,125 @@ Large language models excel at nuanced judgment tasks but are expensive and slow
 - **Quality assessment**: Clinical evidence, regulatory status, technical credibility
 - **Multi-dimensional scoring**: Rate content on 8+ dimensions simultaneously
 
+## Current Status (October 2025)
+
+### ✅ Completed
+- **Model Calibration**: Compare Claude vs Gemini to select best oracle
+- **Generic Batch Labeler**: Universal labeling engine for any semantic filter
+- **Secrets Management**: Secure API key handling (env vars + secrets.ini)
+- **Uplifting Filter**: 8-dimension framework with prompt and validation
+- **Timeout Protection**: 60s timeouts for LLM API calls
+- **Caching System**: Save calibration results to `calibrations/<filter>/`
+- **Comprehensive Documentation**: Architecture, guides, API reference
+
+### 🚧 In Progress
+- Ground truth generation CLI (`generate.py`)
+- Stratified sampling strategies
+
+### 📝 Planned
+- Training pipeline (BERT, DeBERTa, T5)
+- Evaluation framework
+- Inference server
+
 ## Quick Start
 
 ### 1. Install Dependencies
 
 ```bash
-# Using pip
-pip install -r requirements.txt
+cd C:\local_dev\llm-distillery
 
-# Or using Poetry
-poetry install
+# Using pip
+pip install anthropic google-generativeai
+
+# Or install all planned dependencies
+pip install -r requirements.txt  # (when available)
 ```
 
 ### 2. Set Up API Keys
 
-```bash
-cp .env.example .env
-# Edit .env and add your API keys:
-# ANTHROPIC_API_KEY=your_key_here
+Create `config/credentials/secrets.ini`:
+
+```ini
+[api_keys]
+anthropic_api_key = sk-ant-your_key_here
+gemini_api_key = AIza_your_key_here
+gemini_billing_api_key = AIza_billing_key  # Optional: 150 RPM vs 2 RPM
 ```
 
-### 3. Generate Ground Truth
+**Important**: This file is git-ignored for security.
+
+### 3. Run Model Calibration
+
+Compare Claude vs Gemini to choose the best LLM for ground truth:
 
 ```bash
-python ground_truth/generate.py \
-    --prompt prompts/sustainability.md \
-    --input-dir ../content-aggregator/data/collected \
-    --output datasets/sustainability_50k.jsonl \
+python -m ground_truth.calibrate_models \
+    --prompt prompts/uplifting.md \
+    --source ../content-aggregator/data/content_items_20251022_145619.jsonl \
+    --sample-size 100 \
+    --output reports/uplifting_calibration.md \
+    --seed 42
+```
+
+**Output**:
+- Calibration report: `reports/uplifting_calibration.md`
+- Cached labels: `calibrations/uplifting/{claude,gemini}_labels.jsonl`
+
+See [Calibration Guide](docs/guides/calibration.md) for details.
+
+### 4. Generate Ground Truth (Planned)
+
+```bash
+# Coming soon
+python -m ground_truth.generate \
+    --prompt prompts/uplifting.md \
+    --input ../content-aggregator/data/content_items_*.jsonl \
+    --output datasets/uplifting_50k.jsonl \
     --num-samples 50000 \
-    --llm claude-3.5-sonnet
+    --llm claude  # or gemini, based on calibration
 ```
 
-### 4. Train a Model
+### 5. Train a Model (Planned)
 
 ```bash
-python training/train.py \
-    --config training/configs/sustainability_deberta.yaml \
-    --dataset datasets/sustainability_50k.jsonl \
-    --output inference/models/sustainability_v1
+# Coming soon
+python -m training.train \
+    --config training/configs/uplifting_deberta.yaml \
+    --dataset datasets/uplifting_50k.jsonl \
+    --output inference/models/uplifting_v1
 ```
 
-### 5. Evaluate Quality
+### 6. Evaluate Quality (Planned)
 
 ```bash
-python evaluation/evaluate.py \
-    --model inference/models/sustainability_v1 \
-    --test-set datasets/splits/sustainability_test.jsonl \
-    --oracle claude-3.5-sonnet
+# Coming soon
+python -m evaluation.evaluate \
+    --model inference/models/uplifting_v1 \
+    --test-set datasets/splits/uplifting_test.jsonl \
+    --oracle claude
 ```
 
-### 6. Run Inference
+### 7. Run Inference (Planned)
 
 ```bash
-# Single prediction
-python inference/predict.py \
-    --model inference/models/sustainability_v1 \
-    --text "Tesla announces new battery recycling facility..."
+# Coming soon - single prediction
+python -m inference.predict \
+    --model inference/models/uplifting_v1 \
+    --text "Community members organize climate action workshop..."
 
 # Batch prediction
-python inference/batch_predict.py \
-    --model inference/models/sustainability_v1 \
+python -m inference.batch_predict \
+    --model inference/models/uplifting_v1 \
     --input articles.jsonl \
     --output predictions.jsonl
 ```
+
+## Documentation
+
+- **[Full Documentation](docs/README.md)** - Complete docs index
+- **[Calibration Guide](docs/guides/calibration.md)** - How to compare Claude vs Gemini
+- **[Architecture Overview](docs/architecture/overview.md)** - System design and components
+- **[Project Structure](#project-structure)** - Directory organization
 
 ## Architecture
 
@@ -233,15 +289,36 @@ If processing **4,000 articles/day**:
 
 ## Roadmap
 
-- [x] Sustainability filter (v1.0)
-- [x] Uplifting content filter (v1.0)
-- [ ] EU policy relevance filter (v1.1)
-- [ ] Healthcare AI readiness filter (v1.1)
-- [ ] Multi-task learning (single model, multiple dimensions)
-- [ ] Active learning for continuous improvement
-- [ ] Model compression (quantization, pruning)
+### Phase 1: Ground Truth Generation ✅ (Current)
+- [x] Model calibration (Claude vs Gemini)
+- [x] Generic batch labeler
+- [x] Uplifting filter prompt & validation
+- [x] Secrets management
+- [x] Timeout protection & caching
+- [ ] Full ground truth generation CLI
+- [ ] Stratified sampling
+
+### Phase 2: Training Pipeline (Next)
+- [ ] PyTorch training script
+- [ ] Model architectures (BERT, DeBERTa, T5)
+- [ ] Training configs
+- [ ] Experiment tracking (W&B)
+
+### Phase 3: Evaluation & Deployment
+- [ ] Model vs oracle comparison
+- [ ] Calibration drift detection
 - [ ] FastAPI inference server
 - [ ] Docker deployment
+
+### Phase 4: Additional Filters
+- [ ] Sustainability filter
+- [ ] EU policy relevance filter
+- [ ] Healthcare AI readiness filter
+
+### Phase 5: Advanced Features
+- [ ] Multi-task learning
+- [ ] Active learning
+- [ ] Model compression (quantization, pruning)
 - [ ] Model registry with versioning
 
 ## Contributing
