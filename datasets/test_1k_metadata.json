@@ -1,0 +1,13 @@
+{
+  "created": "2025-10-26T07:55:24.907156",
+  "source_pattern": "I:/Mijn Drive/NexusMind/historical-database/current/*/*.jsonl",
+  "total_articles": 1000,
+  "unique_articles": 1000,
+  "duplicates_removed": 0,
+  "invalid_articles": 0,
+  "output_file": "datasets\\test_1k.jsonl",
+  "statistics": {
+    "total_read": 1000,
+    "written": 1000
+  }
+}

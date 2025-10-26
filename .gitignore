@@ -60,7 +60,12 @@ inference/models/*/
 
 # Datasets (large files - track metadata only)
 datasets/*.jsonl
+datasets/raw/
+datasets/processed/
 datasets/splits/
+
+# Track metadata files for documentation
+!datasets/*_metadata.json
 
 # Keep .gitkeep files for empty directories
 !datasets/.gitkeep

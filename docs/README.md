@@ -5,14 +5,18 @@ Complete guides for generating ground truth datasets and training specialized se
 ## 📚 Documentation Index
 
 ### Getting Started
-- **[Quick Start Guide](../GETTING_STARTED.md)** - First steps with LLM Distillery
-- **[Migration Guide](../MIGRATION_FROM_NEXUSMIND.md)** - Understanding the migration from NexusMind-Filter
-- **[Migration Complete](../README_MIGRATION_COMPLETE.md)** - Current status and what's ready
+- **[Quick Start Guide](guides/getting-started.md)** - First steps with LLM Distillery
+- **[Migration Guide](guides/migration-from-nexusmind.md)** - Understanding the migration from NexusMind-Filter
+- **[Migration Complete](guides/migration-complete.md)** - Current status and what's ready
+
+### Data Preparation
+- **[Data Preparation Guide](guides/data-preparation.md)** - Merge historical databases and create master datasets
+- **[Calibration Guide](guides/calibration.md)** - Compare Claude vs Gemini to select best LLM oracle
 
 ### Ground Truth Generation
-- **[Best Practices](ground_truth_best_practices.md)** - Tips for high-quality labeling
-- **[Cost Optimization](cost_optimization.md)** - Minimize API costs
-- **[Quality Assurance](quality_assurance.md)** - Validation and calibration
+- **[Best Practices](ground_truth_best_practices.md)** - Tips for high-quality labeling *(planned)*
+- **[Cost Optimization](cost_optimization.md)** - Minimize API costs *(planned)*
+- **[Quality Assurance](quality_assurance.md)** - Validation and calibration *(planned)*
 
 ### Semantic Filters
 - **[Creating New Filters](creating_new_filters.md)** - How to add your own semantic dimensions
