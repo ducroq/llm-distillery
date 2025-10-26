@@ -63,9 +63,12 @@ datasets/*.jsonl
 datasets/raw/
 datasets/processed/
 datasets/splits/
+datasets/test/
 
 # Track metadata files for documentation
 !datasets/*_metadata.json
+!datasets/*/.*_metadata.json
+!datasets/README.md
 
 # Keep .gitkeep files for empty directories
 !datasets/.gitkeep
