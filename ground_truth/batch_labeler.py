@@ -364,13 +364,61 @@ class GenericBatchLabeler:
 
         return analysis
 
+    def _smart_compress_content(self, content: str, max_words: int = 800) -> str:
+        """
+        Intelligently compress long articles while preserving key information.
+
+        Strategy:
+        - Keep full content if short enough
+        - For long articles: Keep beginning (context) + end (conclusions/impact)
+        - Preserve structure for uplifting detection
+
+        Args:
+            content: Article text
+            max_words: Target maximum word count (default 800 ≈ 3000 tokens)
+
+        Returns:
+            Compressed content
+        """
+        words = content.split()
+        word_count = len(words)
+
+        # Short enough - keep as is
+        if word_count <= max_words:
+            return content
+
+        # Long article - intelligent sampling
+        # Strategy: 70% from beginning (context), 30% from end (conclusions)
+        start_words = int(max_words * 0.7)
+        end_words = int(max_words * 0.3)
+
+        beginning = ' '.join(words[:start_words])
+        ending = ' '.join(words[-end_words:])
+
+        # Add marker to indicate compression
+        compressed = f"{beginning}\n\n[...content compressed...]\n\n{ending}"
+
+        return compressed
+
     def build_prompt(self, article: Dict) -> str:
-        """Build prompt by filling in article data."""
+        """
+        Build prompt by filling in article data with smart content compression.
+
+        Uses intelligent compression for long articles to:
+        - Stay within context window limits
+        - Preserve key information (beginning + ending)
+        - Prepare for future small-model compatibility
+        """
+        content = article.get('content', '')
+
+        # Smart compression (targets ~800 words ≈ 3000 tokens)
+        compressed_content = self._smart_compress_content(content, max_words=800)
+
         return self.prompt_template.format(
             title=article.get('title', 'N/A'),
             source=article.get('source', 'N/A'),
             published_date=article.get('published_date', 'N/A'),
-            text=article.get('content', '')[:4000]  # Truncate to fit context window
+            text=compressed_content
         )
 
     def analyze_article(
@@ -865,13 +913,136 @@ class GenericBatchLabeler:
 
 def uplifting_pre_filter(article: Dict) -> bool:
     """
-    Pre-filter for uplifting content (migrated from NexusMind).
-    Only analyze articles with VADER >= 5.0 OR joy >= 0.25.
-    This reduces labeling costs by ~50% with minimal false negatives.
+    Pre-filter for uplifting content - Multilingual, source-aware, and inclusive.
+
+    Multi-criteria filter:
+    1. Source-based word count thresholds (different minimums per source type)
+    2. NO language filter - supports English, Dutch, Spanish, and more
+    3. Emotion-based filter (joy OR low negative emotions)
+    4. Source exclusions (GitHub only - repos rarely uplifting)
+    5. Multilingual keyword boosting
+
+    Expected reduction: ~65-70% of articles filtered out
+    Estimated pass rate: ~25-30% (~13,000-15,000 articles)
     """
-    sentiment_score = article.get('metadata', {}).get('sentiment_score', 0)
-    joy = article.get('metadata', {}).get('raw_emotions', {}).get('joy', 0)
-    return sentiment_score >= 5.0 or joy >= 0.25
+    # 1. Source-based word count thresholds
+    word_count = article.get('metadata', {}).get('word_count', 0)
+    source = article.get('source', '')
+
+    # GitHub: Exclude entirely (repos, not articles)
+    if source == 'github':
+        return False
+
+    # News aggregators: RSS excerpts/teasers (20+ words acceptable)
+    # These are designed to convey story essence in short form
+    if any(src in source for src in ['newsapi', 'reuters', 'bbc', 'npr', 'ap_news']):
+        if word_count < 20:
+            return False
+
+    # Long-form sources: Require substantial content (200+ words)
+    elif any(src in source for src in ['longform', 'new_yorker', 'atlantic', 'fast_company']):
+        if word_count < 200:
+            return False
+
+    # Positive news sites: Medium threshold (100+ words)
+    elif any(src in source for src in ['positive_news', 'good_news', 'upworthy', 'optimist']):
+        if word_count < 100:
+            return False
+
+    # Academic/Research: Need context (150+ words)
+    elif any(src in source for src in ['arxiv', 'nature', 'science', 'plos', 'frontiers']):
+        if word_count < 150:
+            return False
+
+    # Default: 50 words minimum
+    else:
+        if word_count < 50:
+            return False
+
+    # 2. NO language filter - multilingual support!
+    # Modern LLMs handle Dutch, Spanish, etc. very well
+
+    # 3. Quality filter
+    quality = article.get('metadata', {}).get('quality_score', 1.0)
+    if quality < 0.7:
+        return False
+
+    # 4. Source exclusions - GitHub only (repos are rarely uplifting articles)
+    source = article.get('source', '')
+    if source == 'github':
+        return False
+
+    # 5. Emotion-based filter (using available raw_emotions)
+    emotions = article.get('metadata', {}).get('raw_emotions', {})
+    joy = emotions.get('joy', 0)
+    sadness = emotions.get('sadness', 0)
+    fear = emotions.get('fear', 0)
+    anger = emotions.get('anger', 0)
+
+    # Calculate positive/negative balance
+    positive_emotion = joy
+    negative_emotion = sadness + fear + anger
+
+    # Pass if: high joy OR low negative emotions
+    has_positive_emotion = joy >= 0.15
+    has_low_negative = negative_emotion < 0.05
+
+    # 6. Multilingual keyword boosting
+    text = (article.get('title', '') + ' ' + article.get('content', ''))[:500].lower()
+
+    # English keywords
+    uplifting_keywords_en = [
+        'breakthrough', 'innovation', 'solution', 'success', 'achievement',
+        'hope', 'progress', 'inspiring', 'positive', 'transforms', 'improves',
+        'saves', 'helps', 'benefits', 'advance', 'discovered', 'cure', 'solved',
+        'revolutionary', 'pioneer'
+    ]
+
+    negative_keywords_en = [
+        'war', 'death', 'killed', 'disaster', 'catastrophe', 'attack',
+        'violence', 'shooting', 'bomb', 'crisis', 'collapse', 'scandal',
+        'conflict', 'terror'
+    ]
+
+    # Dutch keywords
+    uplifting_keywords_nl = [
+        'doorbraak', 'innovatie', 'oplossing', 'succes', 'prestatie',
+        'hoop', 'vooruitgang', 'inspirerend', 'positief', 'transformeert',
+        'verbetert', 'helpt', 'voordelen', 'ontdekt'
+    ]
+
+    negative_keywords_nl = [
+        'oorlog', 'dood', 'gedood', 'ramp', 'catastrofe', 'aanval',
+        'geweld', 'schietpartij', 'bom', 'crisis', 'instorting', 'schandaal'
+    ]
+
+    # Spanish keywords
+    uplifting_keywords_es = [
+        'avance', 'innovación', 'solución', 'éxito', 'logro',
+        'esperanza', 'progreso', 'inspirador', 'positivo', 'transforma',
+        'mejora', 'ayuda', 'beneficios', 'descubierto'
+    ]
+
+    negative_keywords_es = [
+        'guerra', 'muerte', 'muerto', 'desastre', 'catástrofe', 'ataque',
+        'violencia', 'tiroteo', 'bomba', 'crisis', 'colapso', 'escándalo'
+    ]
+
+    # Combine all keywords
+    uplifting_keywords = uplifting_keywords_en + uplifting_keywords_nl + uplifting_keywords_es
+    negative_keywords = negative_keywords_en + negative_keywords_nl + negative_keywords_es
+
+    has_uplifting_keywords = any(kw in text for kw in uplifting_keywords)
+    has_negative_keywords = any(kw in text for kw in negative_keywords)
+
+    # Decision logic
+    # Must have: good length, decent quality
+    # And either: positive emotions OR uplifting keywords
+    # But not: strong negative keywords
+    if has_negative_keywords:
+        return False
+
+    return (has_positive_emotion or has_low_negative) or has_uplifting_keywords
 
 
 def sustainability_pre_filter(article: Dict) -> bool:
