@@ -1347,7 +1347,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--pre-filter',
-        choices=['uplifting', 'sustainability', 'none'],
+        choices=['uplifting', 'sustainability', 'seece', 'none'],
         default='none',
         help='Pre-filter to apply before labeling'
     )
@@ -1364,6 +1364,8 @@ if __name__ == '__main__':
         pre_filter_func = uplifting_pre_filter
     elif args.pre_filter == 'sustainability':
         pre_filter_func = sustainability_pre_filter
+    elif args.pre_filter == 'seece':
+        pre_filter_func = seece_pre_filter
 
     # Create labeler
     labeler = GenericBatchLabeler(
