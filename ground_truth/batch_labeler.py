@@ -22,9 +22,22 @@ from typing import Dict, List, Optional
 import anthropic
 import google.generativeai as genai
 from datetime import datetime
+import sys
 
 # Import secrets manager
 from .secrets_manager import get_secrets_manager
+
+
+def safe_print(msg: str):
+    """
+    Print message with fallback for systems that don't support Unicode.
+    Handles Windows console encoding issues (cp1252).
+    """
+    try:
+        print(msg)
+    except UnicodeEncodeError:
+        # Fallback: encode as ASCII, replacing unsupported characters
+        print(msg.encode('ascii', errors='replace').decode('ascii'))
 
 
 class GenericBatchLabeler:
@@ -280,7 +293,7 @@ class GenericBatchLabeler:
             thread.join(timeout=timeout_seconds)
 
             if thread.is_alive():
-                print(f"  ⏱️  Timeout after {timeout_seconds}s for article {article.get('id')}")
+                safe_print(f"  TIMEOUT after {timeout_seconds}s for article {article.get('id')}")
                 return None
 
             if exception[0]:
@@ -288,7 +301,7 @@ class GenericBatchLabeler:
 
             response_text = result[0]
             if not response_text:
-                print(f"  ⚠️  No response for article {article.get('id')}")
+                safe_print(f"  WARNING: No response for article {article.get('id')}")
                 return None
 
             # Remove markdown formatting if present
@@ -314,11 +327,11 @@ class GenericBatchLabeler:
             return analysis
 
         except json.JSONDecodeError as e:
-            print(f"  ⚠️  JSON decode error for article {article.get('id')}: {e}")
-            print(f"     Response: {response_text[:200]}...")
+            safe_print(f"  WARNING: JSON decode error for article {article.get('id')}: {e}")
+            safe_print(f"     Response: {response_text[:200]}...")
             return None
         except Exception as e:
-            print(f"  ⚠️  Error analyzing article {article.get('id')}: {e}")
+            safe_print(f"  WARNING: Error analyzing article {article.get('id')}: {e}")
             return None
 
     def process_batch(self, articles: List[Dict], batch_num: int) -> Dict:
@@ -335,10 +348,10 @@ class GenericBatchLabeler:
 
             # Skip if already processed
             if article_id in self.state['processed']:
-                print(f"  [{i}/{len(articles)}] ⏭️  Skipping {article_id} (already processed)")
+                print(f"  [{i}/{len(articles)}] SKIP Skipping {article_id} (already processed)")
                 continue
 
-            print(f"  [{i}/{len(articles)}] 🔄 Analyzing {article_id}...")
+            print(f"  [{i}/{len(articles)}] Analyzing {article_id}...")
 
             analysis = self.analyze_article(article)
 
@@ -353,13 +366,13 @@ class GenericBatchLabeler:
                 if self.llm_provider == "claude":
                     time.sleep(1.5)  # 50 RPM limit → ~40 req/min to be safe
                 elif self.llm_provider == "gemini":
-                    time.sleep(0.5)  # 150 RPM limit (Tier 1) → ~120 req/min
+                    time.sleep(0.1)  # 150 RPM limit (Tier 1) → ~600 req/min (5x faster)
                 elif self.llm_provider == "gpt4":
                     time.sleep(1.0)  # Vary based on tier
 
-                print(f"     ✅ Success")
+                print(f"     SUCCESS")
             else:
-                print(f"     ❌ Failed to analyze")
+                print(f"     FAILED to analyze")
 
         # Save batch results
         if results:
@@ -368,7 +381,7 @@ class GenericBatchLabeler:
                 for article in results:
                     f.write(json.dumps(article, ensure_ascii=False, separators=(',', ':')) + '\n')
 
-            print(f"\n💾 Saved {len(results)} labeled articles to {output_file.name}")
+            print(f"\nSAVED {len(results)} labeled articles to {output_file.name}")
 
         # Update state
         self.state['processed'].extend(processed_ids)
@@ -439,7 +452,7 @@ class GenericBatchLabeler:
             batch_size: Articles per batch
             pre_filter: Optional function to pre-filter articles before labeling
         """
-        print(f"\n🥃 LLM Distillery - Batch Labeling")
+        print(f"\nLLM Distillery - Batch Labeling")
         print(f"{'='*60}")
         print(f"Filter: {self.filter_name}")
         print(f"Prompt: {self.prompt_path}")
@@ -458,14 +471,14 @@ class GenericBatchLabeler:
         while True:
             # Check if we've hit max batches
             if max_batches and batch_num > self.state['batches_completed'] + max_batches:
-                print(f"\n✋ Reached max batches ({max_batches})")
+                print(f"\nReached max batches ({max_batches})")
                 break
 
             # Load next batch
             articles = self.load_unlabeled_articles(source_file, batch_size, pre_filter)
 
             if not articles:
-                print(f"\n🏁 No more unlabeled articles found")
+                print(f"\nDONE - No more unlabeled articles found")
                 break
 
             # Process batch
@@ -473,15 +486,15 @@ class GenericBatchLabeler:
             total_processed += result['articles_processed']
             total_failed += result['articles_failed']
 
-            print(f"\n📊 Batch {batch_num} Summary:")
-            print(f"   ✅ Processed: {result['articles_processed']}")
-            print(f"   ❌ Failed: {result['articles_failed']}")
+            print(f"\nBatch {batch_num} Summary:")
+            print(f"   Processed: {result['articles_processed']}")
+            print(f"   Failed: {result['articles_failed']}")
 
             batch_num += 1
 
         # Final summary
         print(f"\n{'='*60}")
-        print(f"🎉 Batch Labeling Complete!")
+        print(f"Batch Labeling Complete!")
         print(f"{'='*60}")
         print(f"Articles labeled this run: {total_processed}")
         print(f"Articles failed this run: {total_failed}")
