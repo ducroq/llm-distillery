@@ -17,8 +17,11 @@ Usage:
 import json
 import os
 import time
+import re
+import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
+from enum import Enum
 import anthropic
 import google.generativeai as genai
 from datetime import datetime
@@ -26,6 +29,16 @@ import sys
 
 # Import secrets manager
 from .secrets_manager import get_secrets_manager
+
+
+class ErrorType(Enum):
+    """Classification of errors during distillation."""
+    TIMEOUT = "timeout"
+    JSON_PARSE_ERROR = "json_parse_error"
+    JSON_EXTRACTION_FAILED = "json_extraction_failed"
+    LLM_API_ERROR = "llm_api_error"
+    EMPTY_RESPONSE = "empty_response"
+    UNKNOWN = "unknown"
 
 
 def safe_print(msg: str):
@@ -38,6 +51,110 @@ def safe_print(msg: str):
     except UnicodeEncodeError:
         # Fallback: encode as ASCII, replacing unsupported characters
         print(msg.encode('ascii', errors='replace').decode('ascii'))
+
+
+def extract_json_from_response(response_text: str) -> str:
+    """
+    Robustly extract JSON from LLM response that may contain markdown or extra text.
+
+    Handles:
+    - Markdown code fences (```json ... ``` or ``` ... ```)
+    - Extra text before/after JSON
+    - Multiple whitespace/newlines
+
+    Returns:
+        Extracted JSON string (still needs parsing)
+    """
+    if not response_text:
+        return ""
+
+    # Try to extract JSON from markdown code fence using regex
+    # Pattern: ```json (optional) followed by JSON, then closing ```
+    markdown_pattern = r'```(?:json)?\s*\n?(.*?)\n?```'
+    match = re.search(markdown_pattern, response_text, re.DOTALL)
+
+    if match:
+        response_text = match.group(1).strip()
+    else:
+        # No markdown fence, try to find JSON object boundaries
+        # Look for first { and last }
+        first_brace = response_text.find('{')
+        last_brace = response_text.rfind('}')
+
+        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+            response_text = response_text[first_brace:last_brace + 1]
+
+    return response_text.strip()
+
+
+def repair_json(json_str: str) -> str:
+    """
+    Attempt to repair common JSON syntax issues.
+
+    Fixes:
+    - Trailing commas before closing braces/brackets
+    - Unescaped newlines in string values
+    - Common patterns that cause parse errors
+
+    Returns:
+        Repaired JSON string
+    """
+    # Remove trailing commas before closing braces or brackets
+    json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
+
+    # Remove comments (// or /* */ style)
+    json_str = re.sub(r'//.*?$', '', json_str, flags=re.MULTILINE)
+    json_str = re.sub(r'/\*.*?\*/', '', json_str, flags=re.DOTALL)
+
+    return json_str.strip()
+
+
+def setup_logging(output_dir: Path, filter_name: str) -> Tuple[logging.Logger, Path]:
+    """
+    Set up logging infrastructure for the distillation process.
+
+    Creates:
+    - Main log file: distillation.log (human-readable)
+    - Metrics log file: metrics.jsonl (structured, machine-readable)
+
+    Returns:
+        Tuple of (logger, metrics_log_path)
+    """
+    log_dir = output_dir
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    # Main logger for human-readable logs
+    logger = logging.getLogger(f'distillery.{filter_name}')
+    logger.setLevel(logging.DEBUG)
+
+    # Clear any existing handlers
+    logger.handlers.clear()
+
+    # File handler - detailed logs
+    log_file = log_dir / 'distillation.log'
+    file_handler = logging.FileHandler(log_file, encoding='utf-8')
+    file_handler.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter(
+        '%(asctime)s | %(levelname)-8s | %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    file_handler.setFormatter(file_formatter)
+    logger.addHandler(file_handler)
+
+    # Console handler - important messages only
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_formatter = logging.Formatter('%(levelname)s: %(message)s')
+    console_handler.setFormatter(console_formatter)
+    logger.addHandler(console_handler)
+
+    # Metrics log path (JSONL format for structured analysis)
+    metrics_log = log_dir / 'metrics.jsonl'
+
+    logger.info(f"Logging initialized - Log file: {log_file}")
+    logger.info(f"Metrics tracking - Metrics file: {metrics_log}")
+
+    return logger, metrics_log
 
 
 class GenericBatchLabeler:
@@ -88,9 +205,23 @@ class GenericBatchLabeler:
         self.output_dir = Path(output_dir) / self.filter_name
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+        # Setup logging
+        self.logger, self.metrics_log_path = setup_logging(self.output_dir, self.filter_name)
+
         # Load state
         self.state_file = self.output_dir / '.labeled_ids.json'
         self.state = self._load_state()
+
+        # Session statistics
+        self.session_stats = {
+            'started_at': datetime.utcnow().isoformat(),
+            'articles_attempted': 0,
+            'articles_succeeded': 0,
+            'articles_failed': 0,
+            'total_retries': 0,
+            'errors_by_type': {},
+            'total_processing_time': 0.0
+        }
 
     def _load_prompt_template(self) -> str:
         """Load prompt template from markdown file."""
@@ -242,103 +373,328 @@ class GenericBatchLabeler:
             text=article.get('content', '')[:4000]  # Truncate to fit context window
         )
 
-    def analyze_article(self, article: Dict, timeout_seconds: int = 60) -> Optional[Dict]:
-        """Analyze a single article using LLM with timeout protection."""
+    def analyze_article(
+        self,
+        article: Dict,
+        timeout_seconds: int = 60,
+        max_retries: int = 3
+    ) -> Optional[Dict]:
+        """
+        Analyze a single article using LLM with timeout protection and retry logic.
+
+        Args:
+            article: Article to analyze
+            timeout_seconds: Timeout for LLM call
+            max_retries: Maximum number of retry attempts for failed JSON parsing
+
+        Returns:
+            Analysis dict or None if all retries failed
+        """
+        start_time = time.time()
         prompt = self.build_prompt(article)
+        article_id = article.get('id', 'unknown')
 
-        try:
-            # Use threading.Timer for cross-platform timeout
-            import threading
+        # Tracking variables
+        json_repaired = False
+        error_type = None
+        error_message = None
+        final_attempt = 0
 
-            result = [None]  # Mutable container for thread result
-            exception = [None]  # Mutable container for exceptions
+        # Directory for error logs
+        error_log_dir = self.output_dir / 'error_logs'
+        error_log_dir.mkdir(exist_ok=True)
 
-            def call_llm():
-                try:
-                    if self.llm_provider == "claude":
-                        message = self.llm_client.messages.create(
-                            model="claude-3-5-sonnet-20241022",
-                            max_tokens=2048,
-                            temperature=0.3,  # Lower for more consistent ground truth
-                            system="You are an expert analyst. You respond only with valid JSON following the exact format specified.",
-                            messages=[{"role": "user", "content": prompt}]
-                        )
-                        result[0] = message.content[0].text.strip()
+        for attempt in range(max_retries):
+            final_attempt = attempt + 1
+            try:
+                # Use threading for cross-platform timeout
+                import threading
 
-                    elif self.llm_provider == "gemini":
-                        response = self.llm_client.generate_content(
-                            prompt,
-                            generation_config=genai.types.GenerationConfig(
+                result = [None]  # Mutable container for thread result
+                exception = [None]  # Mutable container for exceptions
+
+                def call_llm():
+                    try:
+                        if self.llm_provider == "claude":
+                            message = self.llm_client.messages.create(
+                                model="claude-3-5-sonnet-20241022",
+                                max_tokens=4096,  # Increased from 2048 to reduce truncation
                                 temperature=0.3,
-                                max_output_tokens=2048,
+                                system="You are an expert analyst. You respond only with valid JSON following the exact format specified. DO NOT include any text outside the JSON object.",
+                                messages=[{"role": "user", "content": prompt}]
                             )
-                        )
-                        result[0] = response.text.strip()
+                            result[0] = message.content[0].text.strip()
 
-                    elif self.llm_provider == "gpt4":
-                        response = self.llm_client.chat.completions.create(
-                            model="gpt-4-turbo-preview",
-                            messages=[{"role": "user", "content": prompt}],
-                            temperature=0.3,
-                            max_tokens=2048,
-                        )
-                        result[0] = response.choices[0].message.content.strip()
-                except Exception as e:
-                    exception[0] = e
+                        elif self.llm_provider == "gemini":
+                            response = self.llm_client.generate_content(
+                                prompt,
+                                generation_config=genai.types.GenerationConfig(
+                                    temperature=0.3,
+                                    max_output_tokens=4096,  # Increased from 2048
+                                )
+                            )
+                            result[0] = response.text.strip()
 
-            # Run LLM call in thread with timeout
-            thread = threading.Thread(target=call_llm)
-            thread.daemon = True
-            thread.start()
-            thread.join(timeout=timeout_seconds)
+                        elif self.llm_provider == "gpt4":
+                            response = self.llm_client.chat.completions.create(
+                                model="gpt-4-turbo-preview",
+                                messages=[{"role": "user", "content": prompt}],
+                                temperature=0.3,
+                                max_tokens=4096,  # Increased from 2048
+                            )
+                            result[0] = response.choices[0].message.content.strip()
+                    except Exception as e:
+                        exception[0] = e
 
-            if thread.is_alive():
-                safe_print(f"  TIMEOUT after {timeout_seconds}s for article {article.get('id')}")
+                # Run LLM call in thread with timeout
+                thread = threading.Thread(target=call_llm)
+                thread.daemon = True
+                thread.start()
+                thread.join(timeout=timeout_seconds)
+
+                if thread.is_alive():
+                    error_type = ErrorType.TIMEOUT
+                    error_message = f"Timeout after {timeout_seconds}s"
+                    safe_print(f"  TIMEOUT after {timeout_seconds}s for article {article_id} (attempt {attempt + 1}/{max_retries})")
+                    if attempt < max_retries - 1:
+                        time.sleep(2 ** attempt)  # Exponential backoff
+                        continue
+                    # Log and return after all retries exhausted
+                    time_taken = time.time() - start_time
+                    self._log_metrics(article_id, False, error_type, final_attempt, time_taken, False, error_message)
+                    return None
+
+                if exception[0]:
+                    raise exception[0]
+
+                response_text = result[0]
+                if not response_text:
+                    error_type = ErrorType.EMPTY_RESPONSE
+                    error_message = "Empty response from LLM"
+                    safe_print(f"  WARNING: No response for article {article_id}")
+                    time_taken = time.time() - start_time
+                    self._log_metrics(article_id, False, error_type, final_attempt, time_taken, False, error_message)
+                    return None
+
+                # Use robust JSON extraction
+                json_str = extract_json_from_response(response_text)
+
+                if not json_str:
+                    error_type = ErrorType.JSON_EXTRACTION_FAILED
+                    error_message = "Could not extract JSON from response"
+                    safe_print(f"  WARNING: Could not extract JSON from response for article {article_id}")
+                    self._log_failed_response(article_id, response_text, "No JSON found", attempt + 1)
+                    if attempt < max_retries - 1:
+                        time.sleep(2 ** attempt)
+                        continue
+                    # Log and return after all retries exhausted
+                    time_taken = time.time() - start_time
+                    self._log_metrics(article_id, False, error_type, final_attempt, time_taken, False, error_message)
+                    return None
+
+                # Try parsing JSON with repair if needed
+                analysis = None
+                parse_error = None
+
+                try:
+                    # First try: parse as-is
+                    analysis = json.loads(json_str)
+                except json.JSONDecodeError as e:
+                    parse_error = e
+                    # Second try: repair and parse
+                    try:
+                        repaired_json = repair_json(json_str)
+                        analysis = json.loads(repaired_json)
+                        json_repaired = True
+                        safe_print(f"  INFO: JSON repair successful for article {article_id}")
+                    except json.JSONDecodeError as e2:
+                        parse_error = e2
+
+                if analysis is None:
+                    error_type = ErrorType.JSON_PARSE_ERROR
+                    error_message = str(parse_error)
+                    # Log full response for debugging
+                    self._log_failed_response(article_id, response_text, str(parse_error), attempt + 1)
+
+                    if attempt < max_retries - 1:
+                        safe_print(f"  WARNING: JSON parse failed for article {article_id} (attempt {attempt + 1}/{max_retries}): {parse_error}")
+                        safe_print(f"  Retrying in {2 ** attempt} seconds...")
+                        time.sleep(2 ** attempt)  # Exponential backoff: 1s, 2s, 4s
+                        continue
+                    else:
+                        safe_print(f"  ERROR: JSON parse failed for article {article_id} after {max_retries} attempts")
+                        safe_print(f"     Error: {parse_error}")
+                        safe_print(f"     Response preview: {response_text[:200]}...")
+                        # Log and return after all retries exhausted
+                        time_taken = time.time() - start_time
+                        self._log_metrics(article_id, False, error_type, final_attempt, time_taken, json_repaired, error_message)
+                        return None
+
+                # Success! Post-process and return
+                # Filter-specific post-processing
+                if self.filter_name == 'uplifting':
+                    analysis = self._post_process_uplifting(analysis)
+
+                # Add metadata
+                analysis['analyzed_at'] = datetime.utcnow().isoformat() + 'Z'
+                analysis['analyzed_by'] = f'{self.llm_provider}-api-batch'
+                analysis['filter_name'] = self.filter_name
+
+                # Log success metrics
+                time_taken = time.time() - start_time
+                self._log_metrics(article_id, True, None, final_attempt, time_taken, json_repaired, None)
+
+                return analysis
+
+            except Exception as e:
+                error_type = ErrorType.LLM_API_ERROR
+                error_message = str(e)
+                safe_print(f"  WARNING: Error analyzing article {article_id} (attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)
+                    continue
+                # Log and return after all retries exhausted
+                time_taken = time.time() - start_time
+                self._log_metrics(article_id, False, error_type, final_attempt, time_taken, False, error_message)
                 return None
 
-            if exception[0]:
-                raise exception[0]
+        # Should not reach here, but just in case
+        time_taken = time.time() - start_time
+        self._log_metrics(article_id, False, ErrorType.UNKNOWN, final_attempt, time_taken, False, "Unknown error")
+        return None
 
-            response_text = result[0]
-            if not response_text:
-                safe_print(f"  WARNING: No response for article {article.get('id')}")
-                return None
+    def _log_failed_response(self, article_id: str, response_text: str, error: str, attempt: int):
+        """Log full response from failed JSON parse for debugging."""
+        error_log_dir = self.output_dir / 'error_logs'
+        error_log_dir.mkdir(exist_ok=True)
 
-            # Remove markdown formatting if present
-            if response_text.startswith("```json"):
-                response_text = response_text[7:]
-            if response_text.startswith("```"):
-                response_text = response_text[3:]
-            if response_text.endswith("```"):
-                response_text = response_text[:-3]
+        timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+        log_file = error_log_dir / f'{article_id}_attempt{attempt}_{timestamp}.txt'
 
-            # Parse JSON
-            analysis = json.loads(response_text.strip())
+        with open(log_file, 'w', encoding='utf-8') as f:
+            f.write(f"Article ID: {article_id}\n")
+            f.write(f"Attempt: {attempt}\n")
+            f.write(f"Error: {error}\n")
+            f.write(f"Timestamp: {datetime.utcnow().isoformat()}\n")
+            f.write(f"\n{'='*60}\n")
+            f.write(f"Full Response:\n")
+            f.write(f"{'='*60}\n")
+            f.write(response_text)
 
-            # Filter-specific post-processing
-            if self.filter_name == 'uplifting':
-                analysis = self._post_process_uplifting(analysis)
+    def _log_metrics(
+        self,
+        article_id: str,
+        success: bool,
+        error_type: Optional[ErrorType] = None,
+        attempts_made: int = 1,
+        time_taken: float = 0.0,
+        json_repaired: bool = False,
+        error_message: Optional[str] = None
+    ):
+        """
+        Log structured metrics for analysis and optimization.
 
-            # Add metadata
-            analysis['analyzed_at'] = datetime.utcnow().isoformat() + 'Z'
-            analysis['analyzed_by'] = f'{self.llm_provider}-api-batch'
-            analysis['filter_name'] = self.filter_name
+        Args:
+            article_id: Article identifier
+            success: Whether analysis succeeded
+            error_type: Type of error if failed
+            attempts_made: Number of retry attempts needed
+            time_taken: Time in seconds for analysis
+            json_repaired: Whether JSON repair was needed
+            error_message: Detailed error message
+        """
+        metric = {
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'article_id': article_id,
+            'filter_name': self.filter_name,
+            'llm_provider': self.llm_provider,
+            'success': success,
+            'attempts_made': attempts_made,
+            'time_taken_seconds': round(time_taken, 2),
+            'json_repaired': json_repaired
+        }
 
-            return analysis
+        if not success and error_type:
+            metric['error_type'] = error_type.value
+            metric['error_message'] = error_message
 
-        except json.JSONDecodeError as e:
-            safe_print(f"  WARNING: JSON decode error for article {article.get('id')}: {e}")
-            safe_print(f"     Response: {response_text[:200]}...")
-            return None
-        except Exception as e:
-            safe_print(f"  WARNING: Error analyzing article {article.get('id')}: {e}")
-            return None
+        # Write to metrics log (JSONL format)
+        with open(self.metrics_log_path, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(metric, ensure_ascii=False) + '\n')
+
+        # Update session statistics
+        self.session_stats['articles_attempted'] += 1
+        self.session_stats['total_processing_time'] += time_taken
+        if success:
+            self.session_stats['articles_succeeded'] += 1
+        else:
+            self.session_stats['articles_failed'] += 1
+            error_key = error_type.value if error_type else 'unknown'
+            self.session_stats['errors_by_type'][error_key] = \
+                self.session_stats['errors_by_type'].get(error_key, 0) + 1
+
+        if attempts_made > 1:
+            self.session_stats['total_retries'] += (attempts_made - 1)
+
+        # Log to human-readable log
+        if success:
+            self.logger.info(
+                f"SUCCESS | {article_id} | attempts={attempts_made} | "
+                f"time={time_taken:.2f}s | repaired={json_repaired}"
+            )
+        else:
+            self.logger.warning(
+                f"FAILED  | {article_id} | error={error_type.value if error_type else 'unknown'} | "
+                f"attempts={attempts_made} | time={time_taken:.2f}s"
+            )
+
+    def _write_summary_report(self):
+        """Write a summary report of the session statistics."""
+        self.session_stats['ended_at'] = datetime.utcnow().isoformat()
+        self.session_stats['duration_seconds'] = round(
+            (datetime.fromisoformat(self.session_stats['ended_at']) -
+             datetime.fromisoformat(self.session_stats['started_at'])).total_seconds(),
+            2
+        )
+
+        # Calculate success rate
+        total = self.session_stats['articles_attempted']
+        success_rate = (self.session_stats['articles_succeeded'] / total * 100) if total > 0 else 0
+
+        # Calculate average processing time
+        avg_time = (self.session_stats['total_processing_time'] / total) if total > 0 else 0
+
+        summary_file = self.output_dir / 'session_summary.json'
+        with open(summary_file, 'w', encoding='utf-8') as f:
+            json.dump(self.session_stats, f, indent=2)
+
+        # Log summary
+        self.logger.info("="*60)
+        self.logger.info("SESSION SUMMARY")
+        self.logger.info("="*60)
+        self.logger.info(f"Articles attempted: {total}")
+        self.logger.info(f"Articles succeeded: {self.session_stats['articles_succeeded']}")
+        self.logger.info(f"Articles failed: {self.session_stats['articles_failed']}")
+        self.logger.info(f"Success rate: {success_rate:.1f}%")
+        self.logger.info(f"Total retries: {self.session_stats['total_retries']}")
+        self.logger.info(f"Average processing time: {avg_time:.2f}s per article")
+
+        if self.session_stats['errors_by_type']:
+            self.logger.info(f"Errors by type:")
+            for error_type, count in self.session_stats['errors_by_type'].items():
+                self.logger.info(f"  - {error_type}: {count}")
+
+        self.logger.info(f"Summary saved to: {summary_file}")
+        self.logger.info("="*60)
 
     def process_batch(self, articles: List[Dict], batch_num: int) -> Dict:
         """Process a batch of articles."""
         results = []
         processed_ids = []
 
+        self.logger.info("="*60)
+        self.logger.info(f"Processing batch {batch_num} ({len(articles)} articles)")
+        self.logger.info("="*60)
         print(f"\n{'='*60}")
         print(f"Processing batch {batch_num} ({len(articles)} articles)")
         print(f"{'='*60}")
@@ -502,6 +858,9 @@ class GenericBatchLabeler:
         print(f"Total batches completed: {self.state['batches_completed']}")
         print(f"Output directory: {self.output_dir}")
         print(f"{'='*60}\n")
+
+        # Write summary report
+        self._write_summary_report()
 
 
 def uplifting_pre_filter(article: Dict) -> bool:
