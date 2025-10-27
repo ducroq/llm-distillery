@@ -59,6 +59,7 @@ inference/models/*/
 *.safetensors
 
 # Datasets (large files - track metadata only)
+datasets/
 datasets/*.jsonl
 datasets/raw/
 datasets/processed/
@@ -112,3 +113,4 @@ tmp/
 temp/
 *.tmp
 cache/
+
