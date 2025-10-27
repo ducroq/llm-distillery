@@ -232,23 +232,30 @@ class GenericBatchLabeler:
             content = f.read()
 
         # Extract prompt from markdown code blocks
-        start_marker = "```\nAnalyze this article"
+        # Try to find prompt template section
+        # Look for ## PROMPT TEMPLATE section with ```...``` block
+        prompt_section_marker = "## PROMPT TEMPLATE"
         end_marker = "DO NOT include any text outside the JSON object.\n```"
 
-        start_idx = content.find(start_marker)
-        end_idx = content.find(end_marker, start_idx)
+        prompt_section_idx = content.find(prompt_section_marker)
+        if prompt_section_idx == -1:
+            raise ValueError(f"Could not find '## PROMPT TEMPLATE' section in {self.prompt_path}")
 
-        if start_idx == -1 or end_idx == -1:
+        # Find the opening ``` after the section header
+        start_idx = content.find("\n```\n", prompt_section_idx)
+        if start_idx == -1:
+            raise ValueError(f"Could not find opening ``` in PROMPT TEMPLATE section of {self.prompt_path}")
+
+        # Find the closing marker
+        end_idx = content.find(end_marker, start_idx)
+        if end_idx == -1:
             raise ValueError(
-                f"Could not find prompt template in {self.prompt_path}\n"
-                f"Expected format:\n"
-                f"```\n"
-                f"Analyze this article...\n"
-                f"DO NOT include any text outside the JSON object.\n"
-                f"```"
+                f"Could not find closing marker in {self.prompt_path}\n"
+                f"Expected: 'DO NOT include any text outside the JSON object.\\n```'"
             )
 
-        prompt = content[start_idx + 4:end_idx + len(end_marker) - 4]
+        # Extract prompt (skip the opening ``` and newline, exclude closing marker)
+        prompt = content[start_idx + 5:end_idx + len(end_marker) - 4]
         return prompt.strip()
 
     def _init_llm_client(self, api_key: Optional[str]):
@@ -954,9 +961,9 @@ def uplifting_pre_filter(article: Dict) -> bool:
         if word_count < 150:
             return False
 
-    # Default: 50 words minimum
+    # Default: 20 words minimum (allow RSS excerpts, let LLM score quality)
     else:
-        if word_count < 50:
+        if word_count < 20:
             return False
 
     # 2. NO language filter - multilingual support!
@@ -1047,27 +1054,257 @@ def uplifting_pre_filter(article: Dict) -> bool:
 
 def sustainability_pre_filter(article: Dict) -> bool:
     """
-    Pre-filter for sustainability content.
-    Only analyze articles likely related to climate/environment/energy.
-    """
-    # Check if source category is sustainability-related
-    category = article.get('metadata', {}).get('source_category', '')
-    sustainability_categories = [
-        'climate_solutions', 'energy_utilities', 'renewable_energy',
-        'automotive_transport', 'science', 'economics'
-    ]
+    Pre-filter for sustainability content - Climate tech, renewable energy, decarbonization.
 
-    if category in sustainability_categories:
+    Multi-criteria filter:
+    1. Source-based word count thresholds (like uplifting)
+    2. Quality threshold (0.7+)
+    3. Source category OR keyword matching
+    4. GitHub exclusion
+
+    Expected reduction: ~70-75% of articles filtered out
+    Estimated pass rate: ~20-30% (~10,000-15,000 articles)
+    """
+    # 1. Source-based word count thresholds
+    word_count = article.get('metadata', {}).get('word_count', 0)
+    source = article.get('source', '')
+
+    # GitHub: Exclude entirely
+    if source == 'github':
+        return False
+
+    # News aggregators: RSS excerpts acceptable (20+ words)
+    if any(src in source for src in ['newsapi', 'reuters', 'bbc', 'npr', 'ap_news']):
+        if word_count < 20:
+            return False
+    # Long-form: Need substantial content (200+ words)
+    elif any(src in source for src in ['longform', 'new_yorker', 'atlantic', 'fast_company']):
+        if word_count < 200:
+            return False
+    # Academic/Research: Need context (150+ words)
+    elif any(src in source for src in ['arxiv', 'nature', 'science', 'plos', 'frontiers']):
+        if word_count < 150:
+            return False
+    # Default: 20 words minimum (allow RSS excerpts, let LLM score quality)
+    else:
+        if word_count < 20:
+            return False
+
+    # 2. Quality filter
+    quality = article.get('metadata', {}).get('quality_score', 1.0)
+    if quality < 0.7:
+        return False
+
+    # 3. Check highly relevant sources (pass automatically - Option B expanded)
+    # These sources have high sustainability relevance, so accept all articles that pass word/quality filters
+    auto_pass_sources = [
+        # Core climate/energy sources
+        'climate_solutions', 'energy_utilities', 'renewable_energy',
+        'automotive_transport', 'clean_technica', 'electrek',
+        'mdpi_sustainability', 'pv_magazine', 'inside_climate_news',
+        # Science journals (Option B: likely to have relevant research)
+        'science', 'arxiv', 'biorxiv', 'mdpi', 'plos', 'frontiers',
+        'nature', 'springer',
+        # General news with sustainability focus (Option B: cast wider net)
+        'newsapi', 'reuters', 'bbc', 'ap_news', 'dutch'
+    ]
+    if any(cat in source for cat in auto_pass_sources):
         return True
 
-    # Or check for sustainability keywords in title/content
-    text = (article.get('title', '') + ' ' + article.get('content', '')).lower()
-    keywords = [
-        'climate', 'carbon', 'renewable', 'solar', 'wind', 'battery',
-        'ev', 'electric', 'sustainability', 'green', 'emission'
+    # 4. Fallback: Other sources need keyword match
+    # (This catches any remaining sources not in auto_pass list)
+
+    # 5. Broad keyword check - cast wide net, let LLM sort quality
+    # Use word boundaries to avoid false positives (e.g., "ev" in "every")
+    text = ' ' + (article.get('title', '') + ' ' + article.get('content', ''))[:500].lower() + ' '
+
+    # Multi-word phrases (very broad sustainability/climate/energy terms)
+    multi_word_keywords = [
+        # Climate/sustainability
+        'net zero', 'clean energy', 'climate change', 'decarbonization', 'carbon neutral',
+        'carbon footprint', 'greenhouse gas', 'global warming', 'climate action',
+        'climate crisis', 'climate summit', 'paris agreement', 'cop28', 'cop29',
+        # Energy technologies
+        'fuel cell', 'heat pump', 'grid storage', 'electric vehicle', 'renewable energy',
+        'solar power', 'wind power', 'solar panel', 'wind turbine', 'energy storage',
+        'battery storage', 'energy efficiency', 'solar energy', 'wind energy',
+        # Fossil fuels (transition topics)
+        'fossil fuel', 'natural gas', 'oil company', 'coal plant', 'gas plant',
+        # Policy/agreements
+        'green deal', 'energy policy', 'climate policy', 'energy transition'
     ]
 
-    return any(kw in text for kw in keywords)
+    # Single words with word boundaries (broad energy/climate terms)
+    single_word_keywords = [
+        # Core climate terms
+        ' climate ', ' carbon ', ' emission ', ' emissions ', ' sustainability ',
+        # Energy types
+        ' renewable ', ' solar ', ' wind ', ' battery ', ' hydrogen ', ' nuclear ',
+        ' geothermal ', ' hydro ', ' hydroelectric ', ' biofuel ', ' biomass ',
+        # Electric mobility
+        ' electric ', ' ev ', ' evs ', ' tesla ', ' rivian ', ' charging ',
+        # Energy infrastructure
+        ' grid ', ' turbine ', ' photovoltaic ', ' inverter ', ' energy ',
+        # Environmental
+        ' green ', ' sustainable ', ' decarbonization ', ' electrification '
+    ]
+
+    # All other sources: pass if they have keywords
+    return (
+        any(kw in text for kw in multi_word_keywords) or
+        any(kw in text for kw in single_word_keywords)
+    )
+
+
+def seece_pre_filter(article: Dict) -> bool:
+    """
+    Pre-filter for SEECE energy tech intelligence - Applied research focus (TRL 4-7).
+
+    Multi-criteria filter:
+    1. Source-based word count thresholds
+    2. Quality threshold (0.7+)
+    3. SEECE-specific source categories
+    4. SEECE priority topic keywords
+    5. GitHub exclusion
+
+    Geographic preference: Netherlands, EU (but include global breakthroughs)
+    TRL preference: 4-7 (applied research, pilots, early commercial)
+
+    Expected reduction: ~75-80% of articles filtered out
+    Estimated pass rate: ~15-25% (~8,000-13,000 articles)
+    """
+    # 1. Source-based word count thresholds
+    word_count = article.get('metadata', {}).get('word_count', 0)
+    source = article.get('source', '')
+
+    # GitHub: Exclude entirely
+    if source == 'github':
+        return False
+
+    # News aggregators: RSS excerpts acceptable (20+ words)
+    if any(src in source for src in ['newsapi', 'reuters', 'bbc', 'npr', 'ap_news']):
+        if word_count < 20:
+            return False
+    # Long-form: Need substantial content (200+ words)
+    elif any(src in source for src in ['longform', 'new_yorker', 'atlantic', 'fast_company']):
+        if word_count < 200:
+            return False
+    # Academic/Research: Need context (150+ words)
+    elif any(src in source for src in ['arxiv', 'nature', 'science', 'plos', 'frontiers']):
+        if word_count < 150:
+            return False
+    # Default: 20 words minimum (allow RSS excerpts, let LLM score quality)
+    else:
+        if word_count < 20:
+            return False
+
+    # 2. Quality filter
+    quality = article.get('metadata', {}).get('quality_score', 1.0)
+    if quality < 0.7:
+        return False
+
+    # 3. Check SEECE-relevant sources (Option B: cast wider net)
+    # Highly relevant sources pass automatically - expanded to include science and news sources
+    auto_pass_seece_sources = [
+        # Core SEECE sources
+        'energy_utilities', 'automotive_transport', 'clean_technica', 'electrek',
+        'eu_policy', 'dutch', 'pv_magazine', 'mdpi_sustainability',
+        'inside_climate_news', 'climate_solutions',
+        # Science journals (Option B: likely to have relevant research)
+        'science', 'arxiv', 'biorxiv', 'mdpi', 'plos', 'frontiers',
+        'nature', 'springer',
+        # General news with potential SEECE content (Option B: cast wider net)
+        'newsapi', 'reuters', 'bbc', 'ap_news'
+    ]
+    if any(cat in source for cat in auto_pass_seece_sources):
+        return True
+
+    # 4. Fallback: Other sources need keyword match
+    # (This catches industry_intelligence, semiconductor, biotech, etc.)
+    keyword_required_sources = ['industry_intelligence', 'semiconductor', 'biotech_pharma']
+    if any(cat in source for cat in keyword_required_sources):
+        # Check for SEECE keywords (broad energy tech terms)
+        # Use word boundaries to avoid false positives
+        text = ' ' + (article.get('title', '') + ' ' + article.get('content', ''))[:500].lower() + ' '
+
+        # Multi-word phrases (very broad energy tech terms)
+        multi_word_keywords = [
+            # SEECE priority topics
+            'fuel cell', 'green hydrogen', 'battery storage', 'grid storage',
+            'energy storage', 'smart grid', 'vehicle-to-grid', 'demand response',
+            'grid flexibility', 'electric vehicle', 'charging infrastructure',
+            'charging station', 'heat pump', 'building efficiency', 'district heating',
+            'industrial heat', 'process electrification', 'industrial decarbonization',
+            'solar integration', 'wind integration', 'power-to-x', 'sector coupling',
+            'power electronics', 'wide bandgap',
+            # General sustainability/energy
+            'renewable energy', 'energy transition', 'carbon neutral', 'net zero',
+            'clean energy', 'solar power', 'wind power', 'solar panel', 'wind turbine',
+            'energy efficiency', 'climate change', 'greenhouse gas', 'fossil fuel',
+            # Dutch/EU policy
+            'green deal', 'energy policy', 'climate policy', 'eu policy',
+            'european union', 'paris agreement'
+        ]
+        if any(kw in text for kw in multi_word_keywords):
+            return True
+
+        # Single words/abbreviations with word boundaries (broad energy terms)
+        single_word_keywords = [
+            # SEECE priority
+            ' hydrogen ', ' electrolysis ', ' h2 ', ' pemfc ', ' sofc ',
+            ' v2g ', ' microgrid ', ' bess ', ' ev ', ' evs ', ' e-mobility ',
+            ' hvac ', ' insulation ', ' inverter ', ' converter ',
+            ' sic ', ' gan ', ' charging ',
+            # General energy
+            ' battery ', ' solar ', ' wind ', ' renewable ', ' grid ',
+            ' energy ', ' electric ', ' sustainability ', ' climate ',
+            ' carbon ', ' emission ', ' emissions ', ' turbine ',
+            ' geothermal ', ' hydro ', ' nuclear ', ' tesla ', ' rivian '
+        ]
+        if any(kw in text for kw in single_word_keywords):
+            return True
+        return False
+
+    # 5. All other sources: pass if they have SEECE keywords
+    text = ' ' + (article.get('title', '') + ' ' + article.get('content', ''))[:500].lower() + ' '
+
+    # Multi-word phrases (very broad energy tech terms)
+    multi_word_keywords = [
+        # SEECE priority topics
+        'fuel cell', 'green hydrogen', 'battery storage', 'grid storage',
+        'energy storage', 'smart grid', 'vehicle-to-grid', 'demand response',
+        'grid flexibility', 'electric vehicle', 'charging infrastructure',
+        'charging station', 'heat pump', 'building efficiency', 'district heating',
+        'industrial heat', 'process electrification', 'industrial decarbonization',
+        'solar integration', 'wind integration', 'power-to-x', 'sector coupling',
+        'power electronics', 'wide bandgap',
+        # General sustainability/energy
+        'renewable energy', 'energy transition', 'carbon neutral', 'net zero',
+        'clean energy', 'solar power', 'wind power', 'solar panel', 'wind turbine',
+        'energy efficiency', 'climate change', 'greenhouse gas', 'fossil fuel',
+        # Dutch/EU policy
+        'green deal', 'energy policy', 'climate policy', 'eu policy',
+        'european union', 'paris agreement'
+    ]
+
+    # Single words/abbreviations with word boundaries (broad energy terms)
+    single_word_keywords = [
+        # SEECE priority
+        ' hydrogen ', ' electrolysis ', ' h2 ', ' pemfc ', ' sofc ',
+        ' v2g ', ' microgrid ', ' bess ', ' ev ', ' evs ', ' e-mobility ',
+        ' hvac ', ' insulation ', ' inverter ', ' converter ',
+        ' sic ', ' gan ', ' charging ',
+        # General energy
+        ' battery ', ' solar ', ' wind ', ' renewable ', ' grid ',
+        ' energy ', ' electric ', ' sustainability ', ' climate ',
+        ' carbon ', ' emission ', ' emissions ', ' turbine ',
+        ' geothermal ', ' hydro ', ' nuclear ', ' tesla ', ' rivian '
+    ]
+
+    return (
+        any(kw in text for kw in multi_word_keywords) or
+        any(kw in text for kw in single_word_keywords)
+    )
 
 
 if __name__ == '__main__':
