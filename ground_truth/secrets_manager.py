@@ -184,12 +184,12 @@ class SecretsManager:
         provider = provider.lower()
         if provider in ('claude', 'anthropic'):
             return self.get_anthropic_key()
-        elif provider in ('gemini', 'google'):
+        elif provider in ('gemini', 'gemini-flash', 'google'):
             return self.get_gemini_key()
         elif provider in ('openai', 'gpt4', 'gpt-4'):
             return self.get_openai_key()
         else:
-            raise ValueError(f"Unknown LLM provider: {provider}. Use 'claude', 'gemini', or 'openai'")
+            raise ValueError(f"Unknown LLM provider: {provider}. Use 'claude', 'gemini', 'gemini-flash', or 'openai'")
     
     def is_production(self) -> bool:
         """Check if running in production (CI/CD environment)"""

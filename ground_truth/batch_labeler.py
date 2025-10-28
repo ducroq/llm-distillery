@@ -278,7 +278,15 @@ class GenericBatchLabeler:
                     "Gemini API key not found. Set GOOGLE_API_KEY or GEMINI_API_KEY in environment or secrets.ini"
                 )
             genai.configure(api_key=api_key)
-            return genai.GenerativeModel('gemini-2.5-pro')
+            return genai.GenerativeModel('gemini-2.0-flash')
+
+        elif self.llm_provider == "gemini-flash":
+            if not api_key:
+                raise ValueError(
+                    "Gemini API key not found. Set GOOGLE_API_KEY or GEMINI_API_KEY in environment or secrets.ini"
+                )
+            genai.configure(api_key=api_key)
+            return genai.GenerativeModel('gemini-2.0-flash')
 
         elif self.llm_provider == "gpt4":
             import openai
@@ -356,10 +364,10 @@ class GenericBatchLabeler:
         # Apply cap
         final_score = min(base_score, max_score)
 
-        # Determine tier
-        if final_score >= 7.0:
+        # Determine tier (raised thresholds for selectivity)
+        if final_score >= 8.0:
             tier = "impact"
-        elif final_score >= 4.0:
+        elif final_score >= 5.0:
             tier = "connection"
         else:
             tier = "not_uplifting"
@@ -480,7 +488,7 @@ class GenericBatchLabeler:
                             )
                             result[0] = message.content[0].text.strip()
 
-                        elif self.llm_provider == "gemini":
+                        elif self.llm_provider in ["gemini", "gemini-flash"]:
                             response = self.llm_client.generate_content(
                                 prompt,
                                 generation_config=genai.types.GenerationConfig(
@@ -776,7 +784,7 @@ class GenericBatchLabeler:
                 # Rate limiting based on provider
                 if self.llm_provider == "claude":
                     time.sleep(1.5)  # 50 RPM limit → ~40 req/min to be safe
-                elif self.llm_provider == "gemini":
+                elif self.llm_provider in ["gemini", "gemini-flash"]:
                     time.sleep(0.1)  # 150 RPM limit (Tier 1) → ~600 req/min (5x faster)
                 elif self.llm_provider == "gpt4":
                     time.sleep(1.0)  # Vary based on tier
@@ -1331,7 +1339,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--llm',
         default='claude',
-        choices=['claude', 'gemini', 'gpt4'],
+        choices=['claude', 'gemini', 'gemini-flash', 'gpt4'],
         help='LLM provider (default: claude)'
     )
     parser.add_argument(
