@@ -27,9 +27,37 @@ python -m ground_truth.batch_labeler \
     --prompt prompts/uplifting.md \
     --source datasets/raw/master_dataset.jsonl \
     --llm gemini \
+    --pre-filter uplifting \
     --batch-size 50 \
     --output-dir datasets
 ```
+
+  <!-- 1. Uplifting:
+  python -m ground_truth.batch_labeler \
+      --prompt prompts/uplifting.md \
+      --source datasets/raw/master_dataset.jsonl \
+      --llm gemini \
+      --pre-filter uplifting \
+      --batch-size 50 \
+      --output-dir datasets
+
+  2. Sustainability:
+  python -m ground_truth.batch_labeler \
+      --prompt prompts/sustainability.md \
+      --source datasets/raw/master_dataset.jsonl \
+      --llm gemini \
+      --pre-filter sustainability \
+      --batch-size 50 \
+      --output-dir datasets
+
+  3. SEECE:
+  python -m ground_truth.batch_labeler \
+      --prompt prompts/seece-energy-tech.md \
+      --source datasets/raw/master_dataset.jsonl \
+      --llm gemini \
+      --pre-filter seece \
+      --batch-size 50 \
+      --output-dir datasets -->
 
 ## Detaching from Tmux
 

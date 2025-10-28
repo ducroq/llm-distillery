@@ -32,6 +32,7 @@ Complete guides for generating ground truth datasets and training specialized se
 - **[Integration with NexusMind-Filter](nexusmind_integration.md)** - Coming soon
 
 ### Reference
+- **[Repository Organization](ORGANIZATION.md)** - Directory structure and file conventions
 - **[API Keys & Secrets](secrets_management.md)** - Managing credentials securely
 - **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
 - **[FAQ](faq.md)** - Frequently asked questions

@@ -3,27 +3,27 @@ DATASET ANALYSIS REPORT
 ================================================================================
 
 Dataset: datasets/raw/master_dataset.jsonl
-Total articles: 51,869
+Total articles: 51,860
 
 DATE INFORMATION
 --------------------------------------------------------------------------------
-Articles with valid published dates: 51,861
-  Earliest: 2022-05-13 00:00:00
+Articles with valid published dates: 51,860
+  Earliest: 2025-07-24 00:00:00
   Latest: 2025-10-26 14:18:00
-  Duration: 1262 days
+  Duration: 94 days
 
-Articles with collection dates: 51,869
+Articles with collection dates: 51,860
   Earliest: 2025-10-09 12:51:30
   Latest: 2025-10-25 18:55:34
 
 Missing published dates: 0
-Invalid/placeholder dates: 8
+Invalid/placeholder dates: 0
 
 
 SOURCE DISTRIBUTION (Top 20)
 --------------------------------------------------------------------------------
   science_arxiv_cs                                  : 10,361 (19.98%)
-  newsapi_general                                   :  4,095 ( 7.89%)
+  newsapi_general                                   :  4,095 ( 7.90%)
   science_arxiv_math                                :  2,917 ( 5.62%)
   arxiv                                             :  2,148 ( 4.14%)
   global_news_el_pais                               :  1,576 ( 3.04%)
@@ -46,7 +46,7 @@ SOURCE DISTRIBUTION (Top 20)
 
 LANGUAGE DISTRIBUTION
 --------------------------------------------------------------------------------
-  en        : 43,076 (83.05%)
+  en        : 43,067 (83.04%)
   nl        :  4,654 ( 8.97%)
   es        :  2,479 ( 4.78%)
   de        :  1,257 ( 2.42%)
@@ -60,7 +60,7 @@ LANGUAGE DISTRIBUTION
 
 QUALITY SCORES
 --------------------------------------------------------------------------------
-  Articles with quality scores: 51,869
+  Articles with quality scores: 51,860
   Mean: 0.963
   Median: 1.000
   Std Dev: 0.101
@@ -70,21 +70,9 @@ QUALITY SCORES
 
 WORD COUNTS
 --------------------------------------------------------------------------------
-  Articles with word counts: 51,869
+  Articles with word counts: 51,860
   Mean: 126.1
   Median: 56.0
   Std Dev: 287.1
   Min: 10
   Max: 34115
-
-
-INVALID/PLACEHOLDER DATES (Sample)
---------------------------------------------------------------------------------
-  longform_new_yorker_science_b7efd6d3b58d: 9999-01-01 00:00:00
-  NASA-Images_a3c03f6e3c97: 1998-06-04 18:10:28
-  NASA-Images_cfa40dddc2d8: 1996-02-08 10:48:12
-  NASA-Images_2a96558d7b6f: 1996-01-29 14:44:56
-  NASA-Images_9b9dab73d9f0: 1996-01-29 14:50:07
-  NASA-Images_fc979cd5b9f5: 2019-05-31 00:00:00
-  NASA-Images_b093fc14fb63: 1991-01-01 00:00:00
-  NASA-Images_e8ed6a475089: 1969-01-01 00:00:00
