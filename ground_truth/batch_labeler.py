@@ -288,6 +288,14 @@ class GenericBatchLabeler:
             genai.configure(api_key=api_key)
             return genai.GenerativeModel('gemini-2.0-flash')
 
+        elif self.llm_provider == "gemini-pro":
+            if not api_key:
+                raise ValueError(
+                    "Gemini API key not found. Set GOOGLE_API_KEY or GEMINI_API_KEY in environment or secrets.ini"
+                )
+            genai.configure(api_key=api_key)
+            return genai.GenerativeModel('gemini-2.5-pro')
+
         elif self.llm_provider == "gpt4":
             import openai
             if not api_key:
@@ -480,7 +488,7 @@ class GenericBatchLabeler:
                     try:
                         if self.llm_provider == "claude":
                             message = self.llm_client.messages.create(
-                                model="claude-3-5-sonnet-20241022",
+                                model="claude-3-7-sonnet-20250219",
                                 max_tokens=4096,  # Increased from 2048 to reduce truncation
                                 temperature=0.3,
                                 system="You are an expert analyst. You respond only with valid JSON following the exact format specified. DO NOT include any text outside the JSON object.",
@@ -488,7 +496,7 @@ class GenericBatchLabeler:
                             )
                             result[0] = message.content[0].text.strip()
 
-                        elif self.llm_provider in ["gemini", "gemini-flash"]:
+                        elif self.llm_provider in ["gemini", "gemini-pro", "gemini-flash"]:
                             response = self.llm_client.generate_content(
                                 prompt,
                                 generation_config=genai.types.GenerationConfig(
@@ -784,7 +792,7 @@ class GenericBatchLabeler:
                 # Rate limiting based on provider
                 if self.llm_provider == "claude":
                     time.sleep(1.5)  # 50 RPM limit → ~40 req/min to be safe
-                elif self.llm_provider in ["gemini", "gemini-flash"]:
+                elif self.llm_provider in ["gemini", "gemini-pro", "gemini-flash"]:
                     time.sleep(0.1)  # 150 RPM limit (Tier 1) → ~600 req/min (5x faster)
                 elif self.llm_provider == "gpt4":
                     time.sleep(1.0)  # Vary based on tier
@@ -889,7 +897,7 @@ class GenericBatchLabeler:
 
         while True:
             # Check if we've hit max batches
-            if max_batches and batch_num > self.state['batches_completed'] + max_batches:
+            if max_batches and (batch_num - self.state['batches_completed']) > max_batches:
                 print(f"\nReached max batches ({max_batches})")
                 break
 
@@ -1339,7 +1347,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--llm',
         default='claude',
-        choices=['claude', 'gemini', 'gemini-flash', 'gpt4'],
+        choices=['claude', 'gemini', 'gemini-pro', 'gemini-flash', 'gpt4'],
         help='LLM provider (default: claude)'
     )
     parser.add_argument(
