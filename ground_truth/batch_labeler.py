@@ -809,7 +809,7 @@ class GenericBatchLabeler:
                 if self.llm_provider == "claude":
                     time.sleep(1.5)  # 50 RPM limit → ~40 req/min to be safe
                 elif self.llm_provider in ["gemini", "gemini-pro", "gemini-flash"]:
-                    time.sleep(0.1)  # 150 RPM limit (Tier 1) → ~600 req/min (5x faster)
+                    time.sleep(0.5)  # 150 RPM limit → ~120 req/min to avoid 429 errors
                 elif self.llm_provider == "gpt4":
                     time.sleep(1.0)  # Vary based on tier
 
