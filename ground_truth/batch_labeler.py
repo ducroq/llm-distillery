@@ -952,30 +952,56 @@ class GenericBatchLabeler:
 
 def uplifting_pre_filter(article: Dict) -> bool:
     """
-    Pre-filter for uplifting content - Multilingual, source-aware, and inclusive.
+    Pre-filter for uplifting content - Quality and source-based filtering only.
+
+    Design philosophy:
+    - Pre-filter handles DATA QUALITY (not semantic content)
+    - LLM handles SEMANTIC FILTERING (uplifting vs not uplifting)
+    - Avoid conflating emotion with uplifting content (factual breakthroughs have low joy but high uplift)
 
     Multi-criteria filter:
-    1. Source-based word count thresholds (different minimums per source type)
-    2. NO language filter - supports English, Dutch, Spanish, and more
-    3. Emotion-based filter (joy OR low negative emotions)
-    4. Source exclusions (GitHub only - repos rarely uplifting)
-    5. Multilingual keyword boosting
+    1. Source blacklist (social media, dev platforms, user-generated content)
+    2. Quality threshold (0.7+)
+    3. Low word count minimum (15 words for newsapi excerpts)
+    4. NO emotion-based filtering
+    5. NO keyword-based filtering
 
-    Expected reduction: ~65-70% of articles filtered out
-    Estimated pass rate: ~25-30% (~13,000-15,000 articles)
+    Expected pass rate: ~20-30% (~10,000-15,000 articles)
     """
-    # 1. Source-based word count thresholds
-    word_count = article.get('metadata', {}).get('word_count', 0)
-    source = article.get('source', '')
+    # 1. Source blacklist - exclude low-quality sources
+    source = article.get('source', '').lower()
+    url = article.get('url', '').lower()
 
-    # GitHub: Exclude entirely (repos, not articles)
-    if source == 'github':
+    # Blacklisted source patterns (social media, dev platforms, user-generated content)
+    blacklisted_sources = [
+        'github', 'reddit', 'twitter', 'nitter',  # Social/dev platforms
+        'mastodon', 'bsky', 'bluesky',             # Fediverse
+        'medium', 'substack',                       # User-generated content
+        'dev.to', 'stackoverflow',                  # Dev blogs
+        'hackernews', 'hnrss',                      # Aggregators
+        'feedburner',                               # Feed services
+    ]
+
+    # Check source string
+    if any(blocked in source for blocked in blacklisted_sources):
         return False
 
-    # News aggregators: RSS excerpts/teasers (20+ words acceptable)
+    # Check URL for blacklisted domains
+    if any(blocked in url for blocked in blacklisted_sources):
+        return False
+
+    # 2. Quality filter
+    quality = article.get('metadata', {}).get('quality_score', 1.0)
+    if quality < 0.7:
+        return False
+
+    # 3. Source-aware word count thresholds
+    word_count = article.get('metadata', {}).get('word_count', 0)
+
+    # News aggregators: Low threshold (15+ words for RSS excerpts)
     # These are designed to convey story essence in short form
     if any(src in source for src in ['newsapi', 'reuters', 'bbc', 'npr', 'ap_news']):
-        if word_count < 20:
+        if word_count < 15:
             return False
 
     # Long-form sources: Require substantial content (200+ words)
@@ -993,95 +1019,13 @@ def uplifting_pre_filter(article: Dict) -> bool:
         if word_count < 150:
             return False
 
-    # Default: 20 words minimum (allow RSS excerpts, let LLM score quality)
+    # Default: 15 words minimum (allow RSS excerpts, let LLM handle semantic filtering)
     else:
-        if word_count < 20:
+        if word_count < 15:
             return False
 
-    # 2. NO language filter - multilingual support!
-    # Modern LLMs handle Dutch, Spanish, etc. very well
-
-    # 3. Quality filter
-    quality = article.get('metadata', {}).get('quality_score', 1.0)
-    if quality < 0.7:
-        return False
-
-    # 4. Source exclusions - GitHub only (repos are rarely uplifting articles)
-    source = article.get('source', '')
-    if source == 'github':
-        return False
-
-    # 5. Emotion-based filter (using available raw_emotions)
-    emotions = article.get('metadata', {}).get('raw_emotions', {})
-    joy = emotions.get('joy', 0)
-    sadness = emotions.get('sadness', 0)
-    fear = emotions.get('fear', 0)
-    anger = emotions.get('anger', 0)
-
-    # Calculate positive/negative balance
-    positive_emotion = joy
-    negative_emotion = sadness + fear + anger
-
-    # Pass if: high joy OR low negative emotions
-    has_positive_emotion = joy >= 0.15
-    has_low_negative = negative_emotion < 0.05
-
-    # 6. Multilingual keyword boosting
-    text = (article.get('title', '') + ' ' + article.get('content', ''))[:500].lower()
-
-    # English keywords
-    uplifting_keywords_en = [
-        'breakthrough', 'innovation', 'solution', 'success', 'achievement',
-        'hope', 'progress', 'inspiring', 'positive', 'transforms', 'improves',
-        'saves', 'helps', 'benefits', 'advance', 'discovered', 'cure', 'solved',
-        'revolutionary', 'pioneer'
-    ]
-
-    negative_keywords_en = [
-        'war', 'death', 'killed', 'disaster', 'catastrophe', 'attack',
-        'violence', 'shooting', 'bomb', 'crisis', 'collapse', 'scandal',
-        'conflict', 'terror'
-    ]
-
-    # Dutch keywords
-    uplifting_keywords_nl = [
-        'doorbraak', 'innovatie', 'oplossing', 'succes', 'prestatie',
-        'hoop', 'vooruitgang', 'inspirerend', 'positief', 'transformeert',
-        'verbetert', 'helpt', 'voordelen', 'ontdekt'
-    ]
-
-    negative_keywords_nl = [
-        'oorlog', 'dood', 'gedood', 'ramp', 'catastrofe', 'aanval',
-        'geweld', 'schietpartij', 'bom', 'crisis', 'instorting', 'schandaal'
-    ]
-
-    # Spanish keywords
-    uplifting_keywords_es = [
-        'avance', 'innovación', 'solución', 'éxito', 'logro',
-        'esperanza', 'progreso', 'inspirador', 'positivo', 'transforma',
-        'mejora', 'ayuda', 'beneficios', 'descubierto'
-    ]
-
-    negative_keywords_es = [
-        'guerra', 'muerte', 'muerto', 'desastre', 'catástrofe', 'ataque',
-        'violencia', 'tiroteo', 'bomba', 'crisis', 'colapso', 'escándalo'
-    ]
-
-    # Combine all keywords
-    uplifting_keywords = uplifting_keywords_en + uplifting_keywords_nl + uplifting_keywords_es
-    negative_keywords = negative_keywords_en + negative_keywords_nl + negative_keywords_es
-
-    has_uplifting_keywords = any(kw in text for kw in uplifting_keywords)
-    has_negative_keywords = any(kw in text for kw in negative_keywords)
-
-    # Decision logic
-    # Must have: good length, decent quality
-    # And either: positive emotions OR uplifting keywords
-    # But not: strong negative keywords
-    if has_negative_keywords:
-        return False
-
-    return (has_positive_emotion or has_low_negative) or has_uplifting_keywords
+    # Passed all quality checks - let LLM determine if content is actually uplifting
+    return True
 
 
 def sustainability_pre_filter(article: Dict) -> bool:
