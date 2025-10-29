@@ -1283,6 +1283,97 @@ def seece_pre_filter(article: Dict) -> bool:
     )
 
 
+def future_of_education_pre_filter(article: Dict) -> bool:
+    """
+    Pre-filter for Future of Education - AI execution paradox focus.
+
+    Focuses on articles exploring how AI/automation reshapes education:
+    - Traditional execution skills → Less valuable (AI does it)
+    - Foundational understanding → MORE valuable (to validate AI)
+    - New critical skill: Knowing when to trust AI vs human judgment
+
+    Multi-criteria filter:
+    1. Source blacklist (social media, dev platforms, user-generated content)
+    2. Quality threshold (0.7+)
+    3. Source-aware word count thresholds
+    4. Education + AI/tech keyword combination
+
+    Expected pass rate: ~10-15% (~5,000-7,500 articles)
+    """
+    # 1. Source blacklist - exclude low-quality sources
+    source = article.get('source', '').lower()
+    url = article.get('url', '').lower()
+
+    blacklisted_sources = [
+        'github', 'reddit', 'twitter', 'nitter',
+        'mastodon', 'bsky', 'bluesky',
+        'medium', 'substack',
+        'dev.to', 'stackoverflow',
+        'hackernews', 'hnrss',
+        'feedburner',
+    ]
+
+    if any(blocked in source for blocked in blacklisted_sources):
+        return False
+    if any(blocked in url for blocked in blacklisted_sources):
+        return False
+
+    # 2. Quality filter
+    quality = article.get('metadata', {}).get('quality_score', 1.0)
+    if quality < 0.7:
+        return False
+
+    # 3. Source-aware word count thresholds
+    word_count = article.get('metadata', {}).get('word_count', 0)
+
+    if any(src in source for src in ['newsapi', 'reuters', 'bbc', 'npr', 'ap_news']):
+        if word_count < 20:
+            return False
+    elif any(src in source for src in ['longform', 'new_yorker', 'atlantic', 'fast_company', 'aeon']):
+        if word_count < 200:
+            return False
+    elif any(src in source for src in ['arxiv', 'nature', 'science', 'plos', 'frontiers']):
+        if word_count < 150:
+            return False
+    else:
+        if word_count < 20:
+            return False
+
+    # 4. Keyword filter: Education + AI/Tech combination
+    text = ' ' + (article.get('title', '') + ' ' + article.get('content', ''))[:500].lower() + ' '
+
+    # Education keywords
+    education_keywords = [
+        'education', 'learning', 'teaching', 'pedagogy', 'curriculum',
+        'student', 'school', 'university', 'college', 'training',
+        'classroom', 'assessment', 'exam', 'course', 'skill',
+        'knowledge', 'literacy', 'competency', 'professor', 'instructor'
+    ]
+
+    # AI/Tech transformation keywords
+    tech_keywords = [
+        ' ai ', ' artificial intelligence', ' machine learning', ' ml ',
+        'chatgpt', 'claude', 'gpt-4', 'llm', 'generative ai',
+        'automation', 'simulation', 'digital', 'technology',
+        'copilot', 'algorithm', 'model', 'neural network'
+    ]
+
+    # Paradox/transformation keywords (bonus)
+    paradox_keywords = [
+        'fundamental', 'validation', 'critical thinking', 'judgment',
+        'sense-making', 'understanding', 'reasoning', 'literacy',
+        'paradox', 'rethink', 'transform', 'shift', 'changing',
+        'future of', 'expertise', 'skill', 'competency'
+    ]
+
+    has_education = any(kw in text for kw in education_keywords)
+    has_tech = any(kw in text for kw in tech_keywords)
+    has_paradox = any(kw in text for kw in paradox_keywords)
+
+    # Pass if: (education AND tech) OR (education AND paradox keywords)
+    return (has_education and has_tech) or (has_education and has_paradox)
+
+
 if __name__ == '__main__':
     import argparse
 
@@ -1323,7 +1414,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--pre-filter',
-        choices=['uplifting', 'sustainability', 'seece', 'none'],
+        choices=['uplifting', 'sustainability', 'seece', 'future-of-education', 'none'],
         default='none',
         help='Pre-filter to apply before labeling'
     )
@@ -1342,6 +1433,8 @@ if __name__ == '__main__':
         pre_filter_func = sustainability_pre_filter
     elif args.pre_filter == 'seece':
         pre_filter_func = seece_pre_filter
+    elif args.pre_filter == 'future-of-education':
+        pre_filter_func = future_of_education_pre_filter
 
     # Create labeler
     labeler = GenericBatchLabeler(
