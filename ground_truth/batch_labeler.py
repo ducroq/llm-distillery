@@ -26,6 +26,8 @@ import anthropic
 import google.generativeai as genai
 from datetime import datetime
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 # Import secrets manager
 from .secrets_manager import get_secrets_manager
@@ -94,6 +96,7 @@ def repair_json(json_str: str) -> str:
     Fixes:
     - Trailing commas before closing braces/brackets
     - Unescaped newlines in string values
+    - Invalid escape sequences (e.g., \theta, \alpha from LaTeX)
     - Common patterns that cause parse errors
 
     Returns:
@@ -105,6 +108,19 @@ def repair_json(json_str: str) -> str:
     # Remove comments (// or /* */ style)
     json_str = re.sub(r'//.*?$', '', json_str, flags=re.MULTILINE)
     json_str = re.sub(r'/\*.*?\*/', '', json_str, flags=re.DOTALL)
+
+    # Fix invalid escape sequences (preserve valid JSON escapes: \n \t \r \" \\ \/ \b \f)
+    # This regex finds backslashes followed by characters that aren't valid JSON escapes
+    # and escapes them properly
+    def fix_escapes(match):
+        text = match.group(0)
+        # Replace backslash with double backslash for invalid escapes
+        # Valid JSON escapes: n, t, r, ", \, /, b, f, u (unicode)
+        text = re.sub(r'\\(?![ntr"\\/bfu])', r'\\\\', text)
+        return text
+
+    # Apply to string values only (between quotes)
+    json_str = re.sub(r'"[^"]*"', fix_escapes, json_str)
 
     return json_str.strip()
 
