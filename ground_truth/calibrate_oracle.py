@@ -20,6 +20,7 @@ import json
 import random
 import argparse
 import sys
+import glob as glob_module
 from pathlib import Path
 from typing import Dict, List, Tuple
 from collections import Counter
@@ -34,18 +35,34 @@ from .batch_labeler import GenericBatchLabeler
 
 
 def select_calibration_sample(
-    source_file: Path,
+    source_pattern: str,
     sample_size: int = 100,
     seed: int = 42
 ) -> List[Dict]:
-    """Select random articles for calibration."""
+    """Select random articles for calibration. Supports glob patterns."""
     random.seed(seed)
 
+    # Handle glob patterns
+    source_files = glob_module.glob(source_pattern)
+    if not source_files:
+        # Try as literal path
+        source_files = [source_pattern]
+
+    print(f"Loading articles from {len(source_files)} file(s)...")
+
     articles = []
-    with open(source_file, 'r', encoding='utf-8') as f:
-        for line in f:
-            article = json.loads(line.strip())
-            articles.append(article)
+    for source_file in source_files:
+        source_path = Path(source_file)
+        if not source_path.exists():
+            continue
+
+        print(f"  Reading: {source_path.name}")
+        with open(source_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                article = json.loads(line.strip())
+                articles.append(article)
+
+    print(f"Loaded {len(articles)} total articles")
 
     if len(articles) > sample_size:
         articles = random.sample(articles, sample_size)
@@ -400,17 +417,23 @@ def generate_calibration_report(
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Calibrate Claude vs Gemini for any semantic filter prompt'
+        description='Compare multiple LLM models for any semantic filter prompt'
     )
     parser.add_argument(
         '--prompt',
         required=True,
-        help='Path to prompt markdown file (e.g., prompts/sustainability.md)'
+        help='Path to prompt markdown file (e.g., filters/uplifting/v1/prompt-compressed.md)'
     )
     parser.add_argument(
         '--source',
         required=True,
-        help='Source JSONL file with articles'
+        help='Source JSONL file(s) with articles (supports glob patterns)'
+    )
+    parser.add_argument(
+        '--models',
+        type=str,
+        default='gemini-flash,gemini-pro',
+        help='Comma-separated list of models to compare (default: gemini-flash,gemini-pro). Options: gemini-flash, gemini-pro, claude-sonnet'
     )
     parser.add_argument(
         '--sample-size',
@@ -431,6 +454,12 @@ def main():
 
     args = parser.parse_args()
 
+    # Parse models list
+    model_list = [m.strip() for m in args.models.split(',')]
+    if len(model_list) < 2:
+        print("ERROR: Must specify at least 2 models to compare")
+        return 1
+
     # Auto-detect filter name from prompt path
     prompt_path = Path(args.prompt)
     filter_name = prompt_path.stem  # e.g., "sustainability" from "sustainability.md"
@@ -448,19 +477,15 @@ def main():
     print("="*70)
     print(f"Prompt:      {args.prompt}")
     print(f"Source:      {args.source}")
+    print(f"Models:      {', '.join(model_list)}")
     print(f"Sample size: {args.sample_size}")
     print(f"Output:      {output_file}")
     print(f"Random seed: {args.seed}")
     print("="*70)
     print()
 
-    # Select sample
-    source_file = Path(args.source)
-    if not source_file.exists():
-        print(f"ERROR: Source file not found: {source_file}")
-        return 1
-
-    articles = select_calibration_sample(source_file, args.sample_size, args.seed)
+    # Select sample (now supports glob patterns)
+    articles = select_calibration_sample(args.source, args.sample_size, args.seed)
 
     if not articles:
         print("ERROR: No articles available for calibration!")
@@ -471,26 +496,38 @@ def main():
     cache_dir.mkdir(parents=True, exist_ok=True)
     print(f"Cache directory: {cache_dir}\n")
 
-    # Label with Claude
-    claude_articles = label_with_provider(articles, args.prompt, 'claude', filter_name, cache_dir)
+    # Label with each model
+    labeled_results = {}
+    for model in model_list:
+        # Map model names to provider names
+        provider_map = {
+            'gemini-flash': 'gemini',
+            'gemini-pro': 'gemini-pro',
+            'claude-sonnet': 'claude'
+        }
+        provider = provider_map.get(model, model)
 
-    # Label with Gemini
-    gemini_articles = label_with_provider(articles, args.prompt, 'gemini', filter_name, cache_dir)
+        labeled_articles = label_with_provider(articles, args.prompt, provider, filter_name, cache_dir)
 
-    if len(claude_articles) == 0 or len(gemini_articles) == 0:
-        print("\nERROR: One or both models failed to label articles!")
-        return 1
+        if len(labeled_articles) == 0:
+            print(f"\nERROR: {model} failed to label articles!")
+            return 1
 
-    # Analyze results
+        labeled_results[model] = labeled_articles
+
+    # Analyze results for each model
     print(f"\n{'='*70}")
     print("ANALYZING RESULTS")
     print(f"{'='*70}\n")
 
-    claude_stats = analyze_batch(claude_articles, 'Claude', filter_name)
-    gemini_stats = analyze_batch(gemini_articles, 'Gemini', filter_name)
+    stats_results = {}
+    for model, labeled_articles in labeled_results.items():
+        stats = analyze_batch(labeled_articles, model, filter_name)
+        stats_results[model] = stats
 
-    # Print comparison
-    print_stats_comparison(claude_stats, gemini_stats)
+    # Print comparison (first two models)
+    models = list(model_list)
+    print_stats_comparison(stats_results[models[0]], stats_results[models[1]])
 
     # Generate report
     print(f"\n{'='*70}")
@@ -498,10 +535,10 @@ def main():
     print(f"{'='*70}\n")
 
     generate_calibration_report(
-        claude_articles,
-        gemini_articles,
-        claude_stats,
-        gemini_stats,
+        labeled_results[models[0]],
+        labeled_results[models[1]],
+        stats_results[models[0]],
+        stats_results[models[1]],
         filter_name,
         args.prompt,
         output_file
