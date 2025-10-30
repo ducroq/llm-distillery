@@ -1,24 +1,38 @@
 # Ground Truth Generation Guide
 
-**Version:** 2.0
-**Last Updated:** October 29, 2025
+**Version:** 3.0
+**Last Updated:** October 30, 2025
 **Purpose:** Create labeled training data for fine-tuning Qwen agents
 **Next Step:** After labeling → See `qwen-finetuning-guide.md`
 
 ---
 
+## ⚠️ Important: Run Calibration First!
+
+**Before following this guide**, you should complete the two-phase calibration workflow:
+
+1. **Pre-filter Calibration** (500 articles) - Test blocking patterns
+2. **Oracle Calibration** (100 articles) - Compare model quality
+
+See: [ground_truth/README.md](../../ground_truth/README.md) for the complete calibration workflow.
+
+**Why calibrate?** 30 minutes of calibration can save you $10-40+ on large batches and ensure high-quality ground truth.
+
+---
+
 ## Overview
 
-This guide shows you how to create labeled training data (ground truth) for fine-tuning semantic classification agents.
+This guide shows you how to create labeled training data (ground truth) for fine-tuning semantic classification agents **after you've completed calibration**.
 
 **What you'll do:**
 1. Sample 2,500 articles from your master datasets
-2. Label them with Gemini Flash using `batch_labeler.py`
-3. Convert to training format for Qwen fine-tuning
-4. Validate data quality
+2. Label them with your chosen LLM (Gemini Flash recommended after calibration)
+3. Pre-filter blocks noise automatically (saves 5-30% API calls)
+4. Convert to training format for Qwen fine-tuning
+5. Validate data quality
 
 **Time required:** 4-6 hours (mostly automated)
-**Cost:** ~$8-15 (Gemini Flash API)
+**Cost:** ~$0.85-0.90 (Gemini Flash API with pre-filter savings)
 
 ---
 
@@ -32,10 +46,14 @@ datasets/raw/master_dataset_20250929_20251008.jsonl  (37K articles)
 datasets/raw/master_dataset_20251009_20251025.jsonl  (52K articles)
 datasets/raw/master_dataset_20251026_20251029.jsonl  (11K articles)
 
-# Prompt files (should exist)
-prompts/uplifting.md              # For uplifting filter
-prompts/sustainability.md         # For sustainability filter
-prompts/seece.md                  # For SEECE filter
+# Filter packages (should exist - see filters/README.md)
+filters/uplifting/v1/             # Complete filter package
+  ├── prefilter.py                # Pre-filter (blocks noise)
+  ├── prompt-compressed.md        # Prompt for labeling
+  └── config.yaml                 # Configuration
+
+filters/sustainability/v1/        # For sustainability filter
+filters/investment-risk/v1/       # For investment-risk filter
 # ... (create more as needed)
 ```
 
@@ -184,21 +202,27 @@ The `batch_labeler.py` script:
 
 ```bash
 python -m ground_truth.batch_labeler \
-  --prompt prompts/uplifting.md \
+  --filter filters/uplifting/v1 \
   --source datasets/training/sample_train.jsonl \
-  --output-dir datasets/labeled/uplifting \
+  --output-dir datasets/uplifting \
   --llm gemini-flash \
   --batch-size 50 \
   --max-batches 50
 ```
 
-**For Sustainability Filter (same articles, different prompt):**
+**What happens:**
+1. Loads pre-filter from `filters/uplifting/v1/prefilter.py`
+2. Blocks articles matching rage/outrage/decline patterns (~5%)
+3. Labels remaining articles with Gemini Flash
+4. Saves to `datasets/uplifting/labeled_batch_*.jsonl`
+
+**For Sustainability Filter (same articles, different filter package):**
 
 ```bash
 python -m ground_truth.batch_labeler \
-  --prompt prompts/sustainability.md \
+  --filter filters/sustainability/v1 \
   --source datasets/training/sample_train.jsonl \
-  --output-dir datasets/labeled/sustainability \
+  --output-dir datasets/sustainability \
   --llm gemini-flash \
   --batch-size 50 \
   --max-batches 50
@@ -237,14 +261,14 @@ The batch labeler saves progress automatically. If interrupted:
 ```bash
 # Just run the same command again
 python -m ground_truth.batch_labeler \
-  --prompt prompts/uplifting.md \
+  --filter filters/uplifting/v1 \
   --source datasets/training/sample_train.jsonl \
-  --output-dir datasets/labeled/uplifting \
+  --output-dir datasets/uplifting \
   --llm gemini-flash \
   --batch-size 50
 ```
 
-It will skip already-labeled articles.
+It will skip already-labeled articles (tracked in `.labeled_ids.json`).
 
 ### Monitor Progress
 
@@ -514,15 +538,15 @@ python convert_to_training_format.py \
 ```bash
 # Label validation set
 python -m ground_truth.batch_labeler \
-  --prompt prompts/uplifting.md \
+  --filter filters/uplifting/v1 \
   --source datasets/training/sample_val.jsonl \
-  --output-dir datasets/labeled/uplifting_val \
+  --output-dir datasets/uplifting_val \
   --llm gemini-flash
 
 # Convert
 python convert_to_training_format.py \
-  datasets/labeled/uplifting_val \
-  prompts/uplifting.md \
+  datasets/uplifting_val \
+  filters/uplifting/v1/prompt-compressed.md \
   datasets/qwen_training/uplifting_val.jsonl \
   uplifting
 ```
@@ -597,36 +621,48 @@ python inspect_training_data.py datasets/qwen_training/uplifting_train.jsonl
 ### For One Filter (e.g., Uplifting)
 
 ```bash
+# 0. CALIBRATION (do this first! - see ground_truth/README.md)
+python -m ground_truth.calibrate_prefilter \
+  --filter filters/uplifting/v1 \
+  --source "datasets/raw/master_dataset_*.jsonl" \
+  --sample-size 500
+
+python -m ground_truth.calibrate_oracle \
+  --filter filters/uplifting/v1 \
+  --source "datasets/raw/master_dataset_*.jsonl" \
+  --sample-size 100 \
+  --models gemini-flash,gemini-pro
+
 # 1. Create sample (once for all filters)
 python create_sample.py
 
-# 2. Label training set
+# 2. Label training set (with pre-filter)
 python -m ground_truth.batch_labeler \
-  --prompt prompts/uplifting.md \
+  --filter filters/uplifting/v1 \
   --source datasets/training/sample_train.jsonl \
-  --output-dir datasets/labeled/uplifting \
+  --output-dir datasets/uplifting \
   --llm gemini-flash
 
-# 3. Label validation set
+# 3. Label validation set (with pre-filter)
 python -m ground_truth.batch_labeler \
-  --prompt prompts/uplifting.md \
+  --filter filters/uplifting/v1 \
   --source datasets/training/sample_val.jsonl \
-  --output-dir datasets/labeled/uplifting_val \
+  --output-dir datasets/uplifting_val \
   --llm gemini-flash
 
 # 4. Validate quality
-python validate_labels.py datasets/labeled/uplifting uplifting
+python validate_labels.py datasets/uplifting uplifting
 
 # 5. Convert to training format
 python convert_to_training_format.py \
-  datasets/labeled/uplifting \
-  prompts/uplifting.md \
+  datasets/uplifting \
+  filters/uplifting/v1/prompt-compressed.md \
   datasets/qwen_training/uplifting_train.jsonl \
   uplifting
 
 python convert_to_training_format.py \
-  datasets/labeled/uplifting_val \
-  prompts/uplifting.md \
+  datasets/uplifting_val \
+  filters/uplifting/v1/prompt-compressed.md \
   datasets/qwen_training/uplifting_val.jsonl \
   uplifting
 
@@ -636,22 +672,24 @@ python inspect_training_data.py datasets/qwen_training/uplifting_train.jsonl
 
 ### For Multiple Filters
 
-You can label the SAME sample with different prompts:
+You can label the SAME sample with different filter packages:
 
 ```bash
-# Same sample, different prompts
+# Same sample, different filters (with pre-filtering)
 python -m ground_truth.batch_labeler \
-  --prompt prompts/uplifting.md \
+  --filter filters/uplifting/v1 \
   --source datasets/training/sample_train.jsonl \
-  --output-dir datasets/labeled/uplifting \
+  --output-dir datasets/uplifting \
   --llm gemini-flash
 
 python -m ground_truth.batch_labeler \
-  --prompt prompts/sustainability.md \
+  --filter filters/sustainability/v1 \
   --source datasets/training/sample_train.jsonl \
-  --output-dir datasets/labeled/sustainability \
+  --output-dir datasets/sustainability \
   --llm gemini-flash
 ```
+
+**Note**: Each filter's pre-filter will block different articles, so final labeled counts may differ.
 
 ---
 
