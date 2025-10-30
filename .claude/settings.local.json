@@ -5,7 +5,15 @@
       "Bash(tree:*)",
       "Bash(rm:*)",
       "Bash(mv:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Read(//c/Users/scbry/Downloads/**)",
+      "Read(//c/local_dev/content-aggregator//**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Read(//i/Mijn Drive/NexusMind/historical-database/**)",
+      "Bash(cat:*)",
+      "Read(//c/local_dev/content-aggregator/**)"
     ],
     "deny": [],
     "ask": []

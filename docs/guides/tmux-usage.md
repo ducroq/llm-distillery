@@ -36,7 +36,7 @@ python -m ground_truth.batch_labeler \
   python -m ground_truth.batch_labeler \
       --prompt prompts/uplifting.md \
       --source datasets/raw/master_dataset.jsonl \
-      --llm gemini \
+      --llm gemini-flash \
       --pre-filter uplifting \
       --batch-size 50 \
       --output-dir datasets
