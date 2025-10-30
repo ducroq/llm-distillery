@@ -1,0 +1,147 @@
+# Sustainability Impact Filter - Version 1.0
+# Focus: DEPLOYED TECHNOLOGY and MEASURED OUTCOMES
+
+filter:
+  name: sustainability
+  version: "1.0"
+  description: "Rate content for sustainability relevance, impact potential, and credibility"
+  focus: "Distinguishes announcements from deployments, detects greenwashing/vaporware/fossil fuel delay tactics"
+
+prefilter:
+  enabled: true
+  expected_pass_rate: null  # To be determined during calibration
+  description: "Blocks greenwashing, vaporware, and fossil fuel transition delay tactics"
+
+oracle:
+  recommended: null  # To be determined during calibration
+  candidates:
+    - gemini-flash
+    - gemini-pro
+    - claude-sonnet
+  target_model: "Gemini Flash 1.5 / Claude Haiku"
+
+scoring:
+  dimensions:
+    climate_impact:
+      weight: 0.25
+      description: "Demonstrable GHG reduction/carbon sequestration/adaptation"
+      scale: "0-2: Minimal/unproven | 3-4: Modest/theoretical | 5-6: Significant/pilot-proven | 7-8: Transformative/deployed | 9-10: Breakthrough/scaling"
+      requirements:
+        - "Direct climate mechanism with quantified impact"
+        - "Lifecycle accounting (EVs only count if grid is clean)"
+
+    technical_credibility:
+      weight: 0.20
+      description: "Scientific evidence and independent verification (GATEKEEPER)"
+      scale: "0-2: Unverified claims | 3-4: Industry sources | 5-6: Some independent data | 7-8: Peer-reviewed | 9-10: Multiple independent confirmations"
+      gatekeeper: true
+      gatekeeper_threshold: 5
+      gatekeeper_max_score: 4
+
+    economic_viability:
+      weight: 0.15
+      description: "Path to cost-competitiveness with fossil alternatives"
+      scale: "0-2: No path | 3-4: Needs major subsidies | 5-6: Approaching parity | 7-8: Competitive now | 9-10: Cheaper than fossil"
+
+    deployment_readiness:
+      weight: 0.15
+      description: "Technology readiness level (TRL)"
+      scale: "0-2: Concept/lab (TRL 1-3) | 3-4: Pilot (TRL 4-5) | 5-6: First commercial (TRL 6-7) | 7-8: Proven at scale (TRL 8) | 9-10: Mass deployment (TRL 9)"
+
+    systemic_impact:
+      weight: 0.10
+      description: "Enables broader decarbonization, addresses bottlenecks, gigaton-scale potential"
+      scale: "0-2: Niche | 3-4: Sectoral | 5-6: Cross-sectoral | 7-8: Economy-wide | 9-10: Global infrastructure"
+
+    justice_equity:
+      weight: 0.05
+      description: "Avoids harm to frontline/indigenous communities, equitable access"
+      scale: "0: Actively harmful | 3: Neutral | 5: Some equity considerations | 7: Equity-centered | 10: Reparative"
+
+    innovation_quality:
+      weight: 0.05
+      description: "Genuine breakthrough or incremental improvement"
+      scale: "0-2: Hype | 3-4: Incremental | 5-6: Significant | 7-8: Breakthrough | 9-10: Paradigm shift"
+
+    evidence_strength:
+      weight: 0.05
+      description: "Quality and independence of sources"
+      scale: "0-2: Unverified claims | 3-4: Industry sources | 5-6: Some independent data | 7-8: Peer-reviewed | 9-10: Multiple confirmations"
+      source_hierarchy:
+        - "Peer-reviewed"
+        - "Government data"
+        - "Third-party audits"
+        - "Industry reports"
+        - "Press releases"
+
+  tiers:
+    breakthrough:
+      threshold: 7.5
+      description: "High-impact, credible, deployable climate solutions"
+    promising:
+      threshold: 5.0
+      description: "Credible developments with moderate impact potential"
+    monitoring:
+      threshold: 3.0
+      description: "Early-stage or limited-scope initiatives"
+    not_relevant:
+      threshold: 0.0
+      description: "Low credibility or minimal climate impact"
+
+  content_type_caps:
+    greenwashing_risk:
+      max_credibility: 3
+      max_overall: 4.0
+      triggers:
+        - "Corporate sustainability reports"
+        - "Net-zero pledges"
+        - "Carbon offsets"
+        - "ESG ratings, awards"
+        - "Green marketing"
+      requirements_to_pass:
+        - "Third-party verification"
+        - "Specific emissions data"
+        - "Deployed technology"
+        - "Regulatory compliance"
+
+    vaporware:
+      max_investment_readiness: 4
+      max_overall: 5.0
+      triggers:
+        - "Product announcements"
+        - "Prototypes"
+        - "Pilots"
+        - "Early-stage concepts"
+      requirements_to_pass:
+        - "Deployed units"
+        - "Customer contracts"
+        - "Operational data"
+        - "Peer-reviewed validation"
+
+    fossil_transition:
+      max_impact: 4
+      max_overall: 4.0
+      triggers:
+        - "Clean coal"
+        - "Natural gas bridge"
+        - "CCS for oil recovery"
+        - "Fossil hydrogen without lifecycle accounting"
+      exceptions:
+        - "Genuine renewable H2"
+        - "Direct air capture for storage"
+        - "Fossil asset retirement"
+
+training:
+  target_samples: 2500
+  train_val_split: 0.9
+  quality_threshold: 0.7
+  recommended_model: "Qwen2.5-7B"
+  expected_accuracy: "90-95%"
+
+deployment:
+  inference_time: "20-50ms"
+  cost_per_article: "$0.00"
+  use_cases:
+    - "Climate tech investment intelligence"
+    - "Greenwashing detection"
+    - "Progress tracking for climate solutions"

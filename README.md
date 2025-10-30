@@ -8,10 +8,10 @@ LLM Distillery is a framework for distilling knowledge from large foundation mod
 
 Large language models excel at nuanced judgment tasks but are expensive and slow for production use. This framework:
 
-1. **Generates ground truth datasets** using LLM oracles (Claude, Gemini)
-2. **Fine-tunes small models** (BERT, DeBERTa, T5) on the ground truth
-3. **Validates quality** by comparing small model predictions to LLM oracle
-4. **Deploys locally** for fast, cost-effective inference
+1. **Generates ground truth datasets** using Gemini Flash as labeling oracle
+2. **Fine-tunes Qwen 2.5 agents** (7B parameters) specialized per semantic dimension
+3. **Validates quality** by comparing model predictions to ground truth
+4. **Deploys locally** for fast, cost-effective batch inference
 
 ### Use Cases
 
@@ -23,22 +23,23 @@ Large language models excel at nuanced judgment tasks but are expensive and slow
 ## Current Status (October 2025)
 
 ### ✅ Completed
-- **Model Calibration**: Compare Claude vs Gemini to select best oracle
-- **Generic Batch Labeler**: Universal labeling engine for any semantic filter
+- **Filter Architecture**: Versioned filter packages (pre-filter + prompt + config)
+- **Uplifting Filter v1**: 8-dimension framework with rule-based pre-filter (93% pass rate)
+- **Sustainability Filter v1**: 8-dimension framework with greenwashing/vaporware detection
+- **Oracle Calibration**: Compare Flash/Pro/Sonnet to select best LLM
+- **Pre-filter Calibration**: Measure blocking effectiveness before ground truth generation
+- **Generic Batch Labeler**: Universal labeling engine supporting filter packages
 - **Secrets Management**: Secure API key handling (env vars + secrets.ini)
-- **Uplifting Filter**: 8-dimension framework with prompt and validation
-- **Timeout Protection**: 60s timeouts for LLM API calls
-- **Caching System**: Save calibration results to `calibrations/<filter>/`
-- **Comprehensive Documentation**: Architecture, guides, API reference
+- **Comprehensive Documentation**: Filter guides, calibration workflow
 
 ### 🚧 In Progress
-- Ground truth generation CLI (`generate.py`)
-- Stratified sampling strategies
+- Ground truth generation with pre-filter integration
+- Master datasets (99K articles, Sept 29 - Oct 29, 2025)
 
 ### 📝 Planned
-- Training pipeline (BERT, DeBERTa, T5)
-- Evaluation framework
-- Inference server
+- Training pipeline (Qwen 2.5-7B fine-tuning)
+- Evaluation framework (model vs oracle comparison)
+- Inference server (pre-filter + model deployment)
 
 ## Quick Start
 
@@ -67,68 +68,78 @@ gemini_billing_api_key = AIza_billing_key  # Optional: 150 RPM vs 2 RPM
 
 **Important**: This file is git-ignored for security.
 
-### 3. Run Model Calibration
+### 3. Calibrate Pre-Filter
 
-Compare Claude vs Gemini to choose the best LLM for ground truth:
+Test pre-filter blocking effectiveness (500 articles recommended):
 
 ```bash
-python -m ground_truth.calibrate_models \
-    --prompt prompts/uplifting.md \
-    --source ../content-aggregator/data/content_items_20251022_145619.jsonl \
+python -m ground_truth.calibrate_prefilter \
+    --filter filters/uplifting/v1 \
+    --source datasets/raw/master_dataset_*.jsonl \
+    --sample-size 500 \
+    --output reports/uplifting_v1_prefilter_cal.md
+```
+
+**Output**: Pass rate, block reason distribution, sample blocked articles
+
+### 4. Calibrate Oracle
+
+Compare Flash vs Pro/Sonnet to choose best LLM (100 articles recommended):
+
+```bash
+python -m ground_truth.calibrate_oracle \
+    --filter filters/uplifting/v1 \
+    --source datasets/raw/master_dataset_*.jsonl \
     --sample-size 100 \
-    --output reports/uplifting_calibration.md \
-    --seed 42
+    --models gemini-flash,gemini-pro,claude-sonnet \
+    --output reports/uplifting_v1_oracle_cal.md
 ```
 
-**Output**:
-- Calibration report: `reports/uplifting_calibration.md`
-- Cached labels: `calibrations/uplifting/{claude,gemini}_labels.jsonl`
+**Output**: Agreement rates, score distributions, cost analysis
 
-See [Calibration Guide](docs/guides/calibration.md) for details.
+See [Filter Development Guide](filters/README.md) for complete workflow.
 
-### 4. Generate Ground Truth (Planned)
+### 5. Generate Ground Truth
+
+Label articles with oracle (stops at 2,500 passing articles):
 
 ```bash
-# Coming soon
-python -m ground_truth.generate \
-    --prompt prompts/uplifting.md \
-    --input ../content-aggregator/data/content_items_*.jsonl \
-    --output datasets/uplifting_50k.jsonl \
-    --num-samples 50000 \
-    --llm claude  # or gemini, based on calibration
+python -m ground_truth.batch_labeler \
+    --filter filters/uplifting/v1 \
+    --source datasets/raw/master_dataset_*.jsonl \
+    --target-labeled 2500 \
+    --oracle gemini-flash \
+    --output datasets/labeled/uplifting_v1/
 ```
 
-### 5. Train a Model (Planned)
+**Process**: Stream articles → Pre-filter → Label passing articles → Stop at target
+
+### 6. Train a Model (Planned)
 
 ```bash
 # Coming soon
 python -m training.train \
-    --config training/configs/uplifting_deberta.yaml \
-    --dataset datasets/uplifting_50k.jsonl \
-    --output inference/models/uplifting_v1
+    --filter filters/uplifting/v1 \
+    --dataset datasets/labeled/uplifting_v1/ \
+    --output inference/deployed/uplifting_v1/
 ```
 
-### 6. Evaluate Quality (Planned)
+### 7. Evaluate Quality (Planned)
 
 ```bash
 # Coming soon
-python -m evaluation.evaluate \
-    --model inference/models/uplifting_v1 \
-    --test-set datasets/splits/uplifting_test.jsonl \
-    --oracle claude
+python -m evaluation.evaluate_model \
+    --filter filters/uplifting/v1 \
+    --model inference/deployed/uplifting_v1/ \
+    --test-set datasets/labeled/uplifting_v1/test.jsonl
 ```
 
-### 7. Run Inference (Planned)
+### 8. Run Inference (Planned)
 
 ```bash
-# Coming soon - single prediction
+# Coming soon - deployed filter includes pre-filter + model
 python -m inference.predict \
-    --model inference/models/uplifting_v1 \
-    --text "Community members organize climate action workshop..."
-
-# Batch prediction
-python -m inference.batch_predict \
-    --model inference/models/uplifting_v1 \
+    --filter inference/deployed/uplifting_v1/ \
     --input articles.jsonl \
     --output predictions.jsonl
 ```
@@ -219,45 +230,45 @@ llm-distillery/
 
 ## Available Filters
 
-### 1. Sustainability Impact Filter
-**Dimensions**: Climate impact, technical credibility, economic viability, deployment readiness, systemic impact, justice & equity, innovation quality, evidence strength
+> **See [filters/README.md](filters/README.md) for complete filter development workflow**
 
-**Use Cases**:
-- Climate tech investment intelligence
-- Greenwashing detection
-- Progress tracking for climate solutions
+### 1. Uplifting Content Filter v1.0 ✅
+**Focus**: MEANING not TONE - genuine human and planetary wellbeing
 
-**Model**: `inference/models/sustainability_v1`
+**Pre-filter blocks**: Corporate finance, military buildups (93% pass rate)
 
-### 2. Uplifting Content Filter
-**Dimensions**: Agency, progress, collective benefit, connection, innovation, justice, resilience, wonder
+**Dimensions (8)**: Agency, progress, collective_benefit (gatekeeper), connection, innovation, justice, resilience, wonder
 
-**Use Cases**:
-- Positive news aggregation
-- Solutions journalism
-- Progress indicators
+**Use Cases**: Positive news aggregation, solutions journalism, progress indicators
 
-**Model**: `inference/models/uplifting_v1`
+**Status**: ✅ Implemented, ⏳ Calibration pending
 
-### 3. EU Policy Relevance Filter
-**Dimensions**: Regulatory impact, compliance relevance, timeline urgency, affected sectors
+**Package**: [`filters/uplifting/v1/`](filters/uplifting/v1/)
 
-**Use Cases**:
-- Policy intelligence
-- Compliance tracking
-- Regulatory monitoring
+---
 
-**Model**: `inference/models/eu_policy_v1` *(planned)*
+### 2. Sustainability Impact Filter v1.0 ✅
+**Focus**: DEPLOYED TECHNOLOGY and MEASURED OUTCOMES
 
-### 4. Healthcare AI Readiness Filter
-**Dimensions**: Clinical evidence level, regulatory status, patient safety, adoption readiness
+**Pre-filter blocks**: Greenwashing, vaporware, fossil fuel transition
 
-**Use Cases**:
-- Healthcare AI due diligence
-- FDA clearance tracking
-- Clinical validation assessment
+**Dimensions (8)**: Climate_impact, technical_credibility (gatekeeper), economic_viability, deployment_readiness, systemic_impact, justice_equity, innovation_quality, evidence_strength
 
-**Model**: `inference/models/healthcare_ai_v1` *(planned)*
+**Use Cases**: Climate tech investment, greenwashing detection, progress tracking
+
+**Status**: ✅ Implemented, ⏳ Calibration pending
+
+**Package**: [`filters/sustainability/v1/`](filters/sustainability/v1/)
+
+---
+
+### 3. SEECE Energy Tech Filter v1.0 ⏳
+**Status**: Prompt available, prefilter pending
+
+---
+
+### 4. Future of Education Filter v1.0 ⏳
+**Status**: Prompt available, prefilter pending
 
 ## Cost Analysis
 

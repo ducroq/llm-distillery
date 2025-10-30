@@ -1,0 +1,125 @@
+# Uplifting Content Filter - Version 1.0
+# Battle-tested on 5,000+ articles from NexusMind-Filter
+
+filter:
+  name: uplifting
+  version: "1.0"
+  description: "Rate content for uplifting semantic value based on genuine human and planetary wellbeing"
+  focus: "MEANING not TONE - what is happening for human/planetary wellbeing, not emotional writing style"
+
+prefilter:
+  enabled: true
+  expected_pass_rate: null  # To be determined during calibration
+  description: "Blocks corporate finance, military buildups, and business news without collective benefit"
+
+oracle:
+  recommended: null  # To be determined during calibration
+  candidates:
+    - gemini-flash
+    - gemini-pro
+    - claude-sonnet
+  target_model: "Gemini Flash 1.5 / Claude Haiku"
+
+scoring:
+  dimensions:
+    agency:
+      weight: 0.14
+      description: "People/communities taking effective action toward human/planetary wellbeing"
+      scale: "0-2: None | 3-4: Limited | 5-6: Moderate | 7-8: Strong | 9-10: Transformative"
+
+    progress:
+      weight: 0.19
+      description: "Movement toward human flourishing or planetary health"
+      scale: "0-2: None | 3-4: Minor | 5-6: Moderate | 7-8: Significant | 9-10: Major breakthrough"
+
+    collective_benefit:
+      weight: 0.38
+      description: "Helps many people or broad ecosystems (GATEKEEPER)"
+      scale: "0-2: Elite only | 3-4: Limited group | 5-6: Moderate community | 7-8: Broad community | 9-10: Universal benefit"
+      gatekeeper: true
+      gatekeeper_threshold: 5
+      gatekeeper_max_score: 3
+      gatekeeper_exception:
+        dimension: wonder
+        threshold: 7
+        min_collective_benefit: 3
+
+    connection:
+      weight: 0.10
+      description: "Collaboration, solidarity, mutual aid across groups"
+      scale: "0-2: None | 3-4: Limited | 5-6: Moderate | 7-8: Strong | 9-10: Transformative solidarity"
+
+    innovation:
+      weight: 0.08
+      description: "Novel solutions addressing real human/planetary needs and actually working"
+      scale: "0-2: None/hype | 3-4: Minor | 5-6: Moderate | 7-8: Significant | 9-10: Breakthrough"
+
+    justice:
+      weight: 0.04
+      description: "Wrongs being addressed, accountability pursued, truth documented"
+      scale: "0-2: None | 3-4: Initial action | 5-6: Moderate progress | 7-8: Significant action | 9-10: Major justice achieved"
+
+    resilience:
+      weight: 0.02
+      description: "Recovery after setbacks, adaptation to challenges, persistence through obstacles"
+      scale: "0-2: None | 3-4: Limited | 5-6: Moderate | 7-8: Strong | 9-10: Extraordinary resilience"
+
+    wonder:
+      weight: 0.05
+      description: "Expands human understanding through freely shared knowledge"
+      scale: "0-2: None | 3-4: Limited | 5-6: Moderate | 7-8: Significant | 9-10: Profound wonder"
+
+  tiers:
+    impact:
+      threshold: 7.0
+      description: "High-impact solutions and progress"
+    connection:
+      threshold: 4.0
+      description: "Moderate collective benefit or connection"
+    not_uplifting:
+      threshold: 0.0
+      description: "Low collective benefit"
+
+  content_type_caps:
+    corporate_finance:
+      max_score: 2.0
+      triggers:
+        - "Stock prices, earnings, funding rounds, valuations, M&A, IPO"
+      exceptions:
+        - "worker cooperative"
+        - "public benefit"
+        - "open source"
+        - "affordable access"
+        - "community ownership"
+
+    military_security:
+      max_score: 4.0
+      triggers:
+        - "Military buildup, defense spending, weapons, NATO expansion"
+        - "Security measures, armed forces deployment, border defense"
+      exceptions:
+        - "demilitarization"
+        - "peace processes"
+        - "conflict resolution"
+        - "reconciliation"
+
+    business_news:
+      max_score: 4.0
+      condition: "collective_benefit < 6"
+      triggers:
+        - "Product launches, business expansion, company announcements"
+
+training:
+  target_samples: 2500
+  train_val_split: 0.9
+  quality_threshold: 0.7
+  recommended_model: "Qwen2.5-7B"
+  expected_accuracy: "90-95%"
+
+deployment:
+  inference_time: "20-50ms"
+  cost_per_article: "$0.00"
+  use_cases:
+    - "Positive news aggregation"
+    - "Solutions journalism"
+    - "Progress indicators"
