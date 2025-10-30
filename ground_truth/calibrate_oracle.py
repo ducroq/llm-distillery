@@ -21,6 +21,7 @@ import random
 import argparse
 import sys
 import glob as glob_module
+import importlib.util
 from pathlib import Path
 from typing import Dict, List, Tuple
 from collections import Counter
@@ -32,6 +33,56 @@ if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from .batch_labeler import GenericBatchLabeler
+
+
+def load_filter_package(filter_path: Path) -> Tuple:
+    """
+    Load filter package components.
+
+    Returns:
+        (prefilter_instance, prompt_path, config_dict)
+    """
+    print(f"Loading filter package: {filter_path}")
+
+    # Load prefilter
+    prefilter_module_path = filter_path / "prefilter.py"
+    prefilter = None
+
+    if prefilter_module_path.exists():
+        spec = importlib.util.spec_from_file_location("prefilter", prefilter_module_path)
+        prefilter_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(prefilter_module)
+
+        # Get the prefilter class
+        prefilter_classes = [
+            obj for name, obj in vars(prefilter_module).items()
+            if isinstance(obj, type) and 'PreFilter' in name
+        ]
+
+        if prefilter_classes:
+            prefilter_class = prefilter_classes[0]
+            prefilter = prefilter_class()
+            print(f"  Loaded: {prefilter_class.__name__} v{prefilter.VERSION}")
+
+    # Find prompt file (try compressed first, then regular)
+    prompt_path = filter_path / "prompt-compressed.md"
+    if not prompt_path.exists():
+        prompt_path = filter_path / "prompt.md"
+
+    if not prompt_path.exists():
+        raise FileNotFoundError(f"No prompt file found in {filter_path}")
+
+    print(f"  Prompt: {prompt_path.name}")
+
+    # Load config (for reference)
+    config_path = filter_path / "config.yaml"
+    config_dict = {}
+    if config_path.exists():
+        import yaml
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config_dict = yaml.safe_load(f)
+
+    return prefilter, prompt_path, config_dict
 
 
 def select_calibration_sample(
@@ -246,7 +297,8 @@ def generate_calibration_report(
     gemini_stats: Dict,
     filter_name: str,
     prompt_path: str,
-    output_file: Path
+    output_file: Path,
+    prefilter_stats: Dict = None
 ):
     """Generate markdown calibration report."""
     lines = []
@@ -261,6 +313,34 @@ def generate_calibration_report(
     lines.append("")
     lines.append("---")
     lines.append("")
+
+    # Pre-filter Statistics (if available)
+    if prefilter_stats and prefilter_stats['total_sampled'] > 0:
+        lines.append("## Pre-filter Statistics")
+        lines.append("")
+        lines.append(f"- **Total Articles Sampled**: {prefilter_stats['total_sampled']}")
+        lines.append(f"- **Passed Pre-filter**: {prefilter_stats['passed']} ({prefilter_stats['pass_rate']:.1f}%)")
+        lines.append(f"- **Blocked by Pre-filter**: {prefilter_stats['blocked']} ({100-prefilter_stats['pass_rate']:.1f}%)")
+
+        if prefilter_stats['block_reasons']:
+            lines.append("")
+            lines.append("**Block Reasons**:")
+            lines.append("")
+            for reason, count in prefilter_stats['block_reasons'].most_common():
+                pct = count / prefilter_stats['blocked'] * 100 if prefilter_stats['blocked'] > 0 else 0
+                lines.append(f"- {reason}: {count} ({pct:.1f}%)")
+
+        lines.append("")
+
+        # Cost savings from pre-filter
+        if prefilter_stats['pass_rate'] < 100:
+            api_calls_saved = prefilter_stats['blocked']
+            lines.append(f"**Cost Savings**: Pre-filter blocked {api_calls_saved} articles, saving expensive LLM API calls.")
+            lines.append(f"For ground truth generation (5,000 articles), this would save ~{int(5000 * (100-prefilter_stats['pass_rate'])/100)} API calls.")
+
+        lines.append("")
+        lines.append("---")
+        lines.append("")
 
     # Executive Summary
     lines.append("## Executive Summary")
@@ -417,13 +497,20 @@ def generate_calibration_report(
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Compare multiple LLM models for any semantic filter prompt'
+        description='Compare multiple LLM models for any semantic filter'
     )
-    parser.add_argument(
+
+    # Support both --filter (new) and --prompt (legacy)
+    filter_group = parser.add_mutually_exclusive_group(required=True)
+    filter_group.add_argument(
+        '--filter',
+        help='Path to filter package directory (e.g., filters/uplifting/v1)'
+    )
+    filter_group.add_argument(
         '--prompt',
-        required=True,
-        help='Path to prompt markdown file (e.g., filters/uplifting/v1/prompt-compressed.md)'
+        help='Path to prompt markdown file [DEPRECATED: use --filter instead]'
     )
+
     parser.add_argument(
         '--source',
         required=True,
@@ -460,9 +547,20 @@ def main():
         print("ERROR: Must specify at least 2 models to compare")
         return 1
 
-    # Auto-detect filter name from prompt path
-    prompt_path = Path(args.prompt)
-    filter_name = prompt_path.stem  # e.g., "sustainability" from "sustainability.md"
+    # Load filter package or just prompt
+    prefilter = None
+    prompt_path = None
+
+    if args.filter:
+        filter_path = Path(args.filter)
+        filter_name = filter_path.parent.name  # e.g., "uplifting" from "filters/uplifting/v1"
+        prefilter, prompt_path, config = load_filter_package(filter_path)
+    else:
+        # Legacy --prompt mode
+        prompt_path = Path(args.prompt)
+        filter_name = prompt_path.stem
+        print("WARNING: --prompt is deprecated. Use --filter for pre-filter support.")
+        print()
 
     # Set default output path if not specified
     if args.output:
@@ -475,12 +573,14 @@ def main():
     print("="*70)
     print(f"MODEL CALIBRATION: {filter_name.upper()}")
     print("="*70)
-    print(f"Prompt:      {args.prompt}")
+    print(f"Prompt:      {prompt_path}")
     print(f"Source:      {args.source}")
     print(f"Models:      {', '.join(model_list)}")
     print(f"Sample size: {args.sample_size}")
     print(f"Output:      {output_file}")
     print(f"Random seed: {args.seed}")
+    if prefilter:
+        print(f"Pre-filter:  {prefilter.__class__.__name__} v{prefilter.VERSION}")
     print("="*70)
     print()
 
@@ -491,10 +591,70 @@ def main():
         print("ERROR: No articles available for calibration!")
         return 1
 
+    # Apply pre-filter if available
+    prefilter_stats = {
+        'total_sampled': len(articles),
+        'passed': 0,
+        'blocked': 0,
+        'pass_rate': 0.0,
+        'block_reasons': Counter()
+    }
+
+    if prefilter:
+        print(f"\n{'='*70}")
+        print(f"APPLYING PRE-FILTER: {prefilter.__class__.__name__}")
+        print(f"{'='*70}\n")
+
+        passed_articles = []
+        blocked_articles = []
+
+        for i, article in enumerate(articles, 1):
+            should_label, reason = prefilter.should_label(article)
+
+            if should_label:
+                passed_articles.append(article)
+            else:
+                blocked_articles.append((article, reason))
+                prefilter_stats['block_reasons'][reason] += 1
+
+            if i % 10 == 0:
+                print(f"  Processed {i}/{len(articles)} articles...", end='\r')
+
+        print(f"  Processed {len(articles)}/{len(articles)} articles... DONE")
+        print()
+
+        prefilter_stats['passed'] = len(passed_articles)
+        prefilter_stats['blocked'] = len(blocked_articles)
+        prefilter_stats['pass_rate'] = (len(passed_articles) / len(articles) * 100) if articles else 0
+
+        print(f"Pre-filter Results:")
+        print(f"  Total sampled:  {len(articles)}")
+        print(f"  Passed:         {len(passed_articles)} ({prefilter_stats['pass_rate']:.1f}%)")
+        print(f"  Blocked:        {len(blocked_articles)} ({100-prefilter_stats['pass_rate']:.1f}%)")
+
+        if blocked_articles:
+            print(f"\n  Block reasons:")
+            for reason, count in prefilter_stats['block_reasons'].most_common():
+                pct = count / len(blocked_articles) * 100
+                print(f"    - {reason}: {count} ({pct:.1f}%)")
+
+        # Use only passed articles for labeling
+        articles = passed_articles
+
+        if not articles:
+            print("\nERROR: Pre-filter blocked all articles! No articles to label.")
+            return 1
+
+        print(f"\nProceeding with {len(articles)} passed articles for oracle labeling...")
+    else:
+        print("No pre-filter found - labeling all sampled articles")
+        prefilter_stats['passed'] = len(articles)
+        prefilter_stats['pass_rate'] = 100.0
+
     # Set up cache directory: calibrations/<filter_name>/
     cache_dir = Path('calibrations') / filter_name
     cache_dir.mkdir(parents=True, exist_ok=True)
-    print(f"Cache directory: {cache_dir}\n")
+    print(f"\nCache directory: {cache_dir}\n")
 
     # Label with each model
     labeled_results = {}
@@ -507,7 +667,7 @@ def main():
         }
         provider = provider_map.get(model, model)
 
-        labeled_articles = label_with_provider(articles, args.prompt, provider, filter_name, cache_dir)
+        labeled_articles = label_with_provider(articles, str(prompt_path), provider, filter_name, cache_dir)
 
         if len(labeled_articles) == 0:
             print(f"\nERROR: {model} failed to label articles!")
@@ -540,8 +700,9 @@ def main():
         stats_results[models[0]],
         stats_results[models[1]],
         filter_name,
-        args.prompt,
-        output_file
+        str(prompt_path),
+        output_file,
+        prefilter_stats
     )
 
     print(f"\n{'='*70}")
