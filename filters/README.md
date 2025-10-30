@@ -51,14 +51,31 @@ filters/<filter-name>/v<version>/
 
 ---
 
-### 3. SEECE Energy Tech Filter (v1.0)
+### 3. Investment Risk Filter (v1.0)
+**Purpose**: Identify investment risk signals for defense-first portfolio management.
+
+**Pre-filter blocks**:
+- FOMO/speculation (hot stocks, meme stocks, crypto pumping)
+- Stock picking (unless macro context)
+- Affiliate marketing (broker links, promo codes)
+- Clickbait (sensationalist headlines)
+
+**Dimensions (8)**: macro_risk_severity, credit_market_stress, market_sentiment_extremes, valuation_risk, policy_regulatory_risk, systemic_risk, evidence_quality (gatekeeper), actionability
+
+**Status**: ✅ Implemented, ⏳ Calibration pending
+
+[View details →](investment-risk/v1/README.md)
+
+---
+
+### 4. SEECE Energy Tech Filter (v1.0)
 **Purpose**: Evaluate clean energy and efficiency technologies.
 
 **Status**: ⏳ Pending implementation
 
 ---
 
-### 4. Future of Education Filter (v1.0)
+### 5. Future of Education Filter (v1.0)
 **Purpose**: Assess educational innovations and AI in learning.
 
 **Status**: ⏳ Pending implementation

@@ -26,6 +26,7 @@ Large language models excel at nuanced judgment tasks but are expensive and slow
 - **Filter Architecture**: Versioned filter packages (pre-filter + prompt + config)
 - **Uplifting Filter v1**: 8-dimension framework with rule-based pre-filter (93% pass rate)
 - **Sustainability Filter v1**: 8-dimension framework with greenwashing/vaporware detection
+- **Investment Risk Filter v1**: 8-dimension framework for capital preservation (FOMO/speculation blocking)
 - **Oracle Calibration**: Compare Flash/Pro/Sonnet to select best LLM
 - **Pre-filter Calibration**: Measure blocking effectiveness before ground truth generation
 - **Generic Batch Labeler**: Universal labeling engine supporting filter packages
@@ -262,12 +263,27 @@ llm-distillery/
 
 ---
 
-### 3. SEECE Energy Tech Filter v1.0 ⏳
+### 3. Investment Risk Filter v1.0 ✅
+**Focus**: CAPITAL PRESERVATION and MACRO RISK SIGNALS, not stock picking
+
+**Pre-filter blocks**: FOMO/speculation, stock picking, affiliate marketing, clickbait
+
+**Dimensions (8)**: macro_risk_severity, credit_market_stress, market_sentiment_extremes, valuation_risk, policy_regulatory_risk, systemic_risk, evidence_quality (gatekeeper), actionability
+
+**Use Cases**: Portfolio defense, risk monitoring, opportunity identification, noise filtering
+
+**Status**: ✅ Implemented, ⏳ Calibration pending
+
+**Package**: [`filters/investment-risk/v1/`](filters/investment-risk/v1/)
+
+---
+
+### 4. SEECE Energy Tech Filter v1.0 ⏳
 **Status**: Prompt available, prefilter pending
 
 ---
 
-### 4. Future of Education Filter v1.0 ⏳
+### 5. Future of Education Filter v1.0 ⏳
 **Status**: Prompt available, prefilter pending
 
 ## Cost Analysis
