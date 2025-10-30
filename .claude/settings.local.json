@@ -13,7 +13,11 @@
       "Bash(git push)",
       "Read(//i/Mijn Drive/NexusMind/historical-database/**)",
       "Bash(cat:*)",
-      "Read(//c/local_dev/content-aggregator/**)"
+      "Read(//c/local_dev/content-aggregator/**)",
+      "Bash(for filter in uplifting sustainability investment-risk)",
+      "Bash(do echo \"=== $filter ===\")",
+      "Bash(ls:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

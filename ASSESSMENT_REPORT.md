@@ -153,10 +153,13 @@ LLM Distillery is a **knowledge distillation framework** that:
 
 ## 🚨 Identified Issues
 
-### Issue 1: Directory Structure Transition
-**Problem**: Old `prompts/` directory coexists with new `filters/` architecture
-**Impact**: Potential confusion about which is authoritative
-**Recommendation**: Keep both - they serve different purposes (see below)
+### Issue 1: Directory Structure Transition ✅ RESOLVED
+**Problem**: Old `prompts/` directory coexisted with new `filters/` architecture
+**Resolution**: Consolidated prompts/ INTO filters/ as compressed versions (2025-10-30):
+- All prompts now in filters/*/v1/prompt-compressed.md (single source of truth)
+- Investment-risk has prompt-extended.md (717 lines) for documentation
+- Deleted redundant prompts/ directory
+**Status**: ✅ Resolved - Single source of truth in filters/
 
 ### Issue 2: Missing investment-risk Filter ✅ RESOLVED
 **Problem**: content-aggregator has investment-risk.md, but llm-distillery didn't
@@ -268,26 +271,30 @@ NexusMind-Filter:
 
 ## ✅ Recommended Actions
 
-### 1. Directory Structure: KEEP BOTH `prompts/` AND `filters/`
+### 1. Directory Structure: CONSOLIDATED INTO `filters/` ✅
 
-**Rationale**: They serve different purposes
+**Action Taken**: Merged prompts/ into filters/ (2025-10-30)
 
 ```
-prompts/                    # COMPRESSED prompts for fast LLM labeling
-├── uplifting.md           # Optimized for Gemini Flash batch processing
-├── sustainability.md      # Used for ground truth generation
-└── ...
-
-filters/                   # COMPLETE filter packages for deployment
+filters/                   # Single source of truth
 ├── uplifting/v1/
-│   ├── prompt.md          # Full prompt with examples
-│   ├── prefilter.py       # Rule-based filter
-│   ├── config.yaml        # Weights, thresholds
+│   ├── prompt-compressed.md  # For batch labeling (ALWAYS USED)
+│   ├── prefilter.py          # Rule-based filter
+│   ├── config.yaml           # Weights, thresholds
+│   └── README.md
+├── investment-risk/v1/
+│   ├── prompt-compressed.md  # 227 lines (for batch labeling)
+│   ├── prompt-extended.md    # 717 lines (full documentation)
+│   ├── prefilter.py
+│   ├── config.yaml
 │   └── README.md
 └── ...
 ```
 
-**Action**: Add README to `prompts/` explaining they're compressed versions
+**Benefits**:
+- Single source of truth (no sync issues)
+- Clear naming: prompt-compressed.md = what you use
+- Optional extended versions for documentation
 
 ### 2. Sync investment-risk Filter
 

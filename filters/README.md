@@ -10,11 +10,16 @@ Each filter package contains:
 
 ```
 filters/<filter-name>/v<version>/
-├── prompt.md           # LLM evaluation prompt (STEP 1: pre-classification, STEP 2: scoring)
+├── prompt-compressed.md # Compressed prompt for batch labeling (ALWAYS USED)
+├── prompt-extended.md   # Extended prompt with examples (optional, for documentation)
 ├── prefilter.py        # Fast rule-based filter (blocks obvious low-value content)
 ├── config.yaml         # Weights, thresholds, tier boundaries, deployment specs
 └── README.md           # Filter documentation and calibration status
 ```
+
+**Prompt Versions**:
+- `prompt-compressed.md` - Optimized for batch labeling with Gemini Flash (shorter, less tokens)
+- `prompt-extended.md` - Full version with detailed examples and validation cases (optional)
 
 ---
 

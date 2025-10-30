@@ -188,11 +188,13 @@ python -m inference.predict \
 
 ```
 llm-distillery/
-├── prompts/                    # LLM evaluation prompts
-│   ├── sustainability.md       # Climate tech & impact assessment
-│   ├── uplifting.md           # Positive/uplifting content detection
-│   ├── eu_policy.md           # EU policy relevance
-│   └── healthcare_ai.md       # Healthcare AI readiness
+├── filters/                    # Versioned filter packages (single source of truth)
+│   ├── <filter-name>/v<version>/
+│   │   ├── prompt-compressed.md  # For batch labeling (USED)
+│   │   ├── prompt-extended.md    # Full with examples (optional)
+│   │   ├── prefilter.py          # Rule-based pre-filter
+│   │   ├── config.yaml           # Configuration
+│   │   └── README.md             # Documentation
 │
 ├── ground_truth/              # Ground truth generation
 │   ├── generate.py           # Main CLI for dataset creation
