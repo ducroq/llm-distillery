@@ -40,6 +40,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 import importlib.util
 import glob
+import random
 
 # Import secrets manager
 from .secrets_manager import get_secrets_manager
@@ -992,13 +993,74 @@ class GenericBatchLabeler:
 
         return articles
 
+    def load_all_articles(
+        self,
+        source_files: List[str],
+        pre_filter: Optional[callable] = None
+    ) -> List[Dict]:
+        """
+        Load ALL articles from source files (for random sampling).
+
+        Args:
+            source_files: List of paths to JSONL files with articles
+            pre_filter: Optional function to pre-filter articles
+
+        Returns:
+            List of all unprocessed articles that pass the prefilter
+        """
+        all_articles = []
+        processed_ids = set(self.state['processed'])
+        total_read = 0
+        total_skipped_processed = 0
+        total_skipped_prefilter = 0
+
+        print(f"Loading all articles from {len(source_files)} source file(s)...")
+
+        for source_file in source_files:
+            try:
+                with open(source_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        total_read += 1
+
+                        try:
+                            article = json.loads(line.strip())
+                            article_id = article.get('id')
+
+                            # Skip if already processed
+                            if article_id in processed_ids:
+                                total_skipped_processed += 1
+                                continue
+
+                            # Apply pre-filter if provided
+                            if pre_filter and not pre_filter(article):
+                                total_skipped_prefilter += 1
+                                continue
+
+                            all_articles.append(article)
+                        except:
+                            continue
+            except FileNotFoundError:
+                print(f"Warning: Source file not found: {source_file}")
+                continue
+
+        print(f"\nArticle loading statistics:")
+        print(f"  Total articles read: {total_read}")
+        print(f"  Already processed: {total_skipped_processed}")
+        print(f"  Blocked by prefilter: {total_skipped_prefilter}")
+        print(f"  Available for labeling: {len(all_articles)}")
+        print()
+
+        return all_articles
+
     def run(
         self,
         source_files: List[str],
         max_batches: Optional[int] = None,
         target_count: Optional[int] = None,
         batch_size: int = 50,
-        pre_filter: Optional[callable] = None
+        pre_filter: Optional[callable] = None,
+        random_sample: bool = False,
+        random_seed: int = 42
     ):
         """
         Run batch labeling process.
@@ -1009,6 +1071,8 @@ class GenericBatchLabeler:
             target_count: Target number of labeled articles to produce (None = unlimited)
             batch_size: Articles per batch
             pre_filter: Optional function to pre-filter articles before labeling
+            random_sample: If True, load all articles and sample randomly
+            random_seed: Seed for random number generator (for reproducibility)
         """
         # Store pre_filter for use by _sanitize_article
         self.pre_filter = pre_filter
@@ -1026,45 +1090,93 @@ class GenericBatchLabeler:
         print(f"Batch size: {batch_size}")
         print(f"Max batches: {max_batches or 'unlimited'}")
         print(f"Target count: {target_count or 'unlimited'}")
+        print(f"Sampling mode: {'RANDOM' if random_sample else 'SEQUENTIAL'}")
+        if random_sample:
+            print(f"Random seed: {random_seed}")
         print(f"Already processed: {len(self.state['processed'])} articles")
         print(f"{'='*60}\n")
 
-        batch_num = self.state['batches_completed'] + 1
-        total_processed = 0
-        total_failed = 0
-        batches_this_run = 0
+        # Random sampling mode: Load all articles, shuffle, process in batches
+        if random_sample:
+            # Set random seed for reproducibility
+            random.seed(random_seed)
 
-        while True:
-            # Check if we've hit max batches
-            if max_batches and batches_this_run >= max_batches:
-                print(f"\nReached max batches ({max_batches})")
-                break
+            # Load all articles at once
+            all_articles = self.load_all_articles(source_files, pre_filter)
 
-            # Check if we've hit target count
-            if target_count and self.state['total_labeled'] >= target_count:
-                print(f"\nReached target count ({target_count} labeled articles)")
-                break
+            if not all_articles:
+                print("No articles available for labeling.")
+                return
 
-            # Load next batch
-            articles = self.load_unlabeled_articles(source_files, batch_size, pre_filter)
+            # Shuffle articles
+            random.shuffle(all_articles)
+            print(f"Shuffled {len(all_articles)} articles (seed={random_seed})\n")
 
-            if not articles:
-                print(f"\nDONE - No more unlabeled articles found")
-                break
-
-            # Process batch
-            result = self.process_batch(articles, batch_num)
-            total_processed += result['articles_processed']
-            total_failed += result['articles_failed']
-
-            print(f"\nBatch {batch_num} Summary:")
-            print(f"   Processed: {result['articles_processed']}")
-            print(f"   Failed: {result['articles_failed']}")
+            # Limit to target_count if specified
             if target_count:
-                print(f"   Total labeled so far: {self.state['total_labeled']}/{target_count}")
+                articles_to_process = all_articles[:target_count]
+                print(f"Selected first {len(articles_to_process)} articles for labeling\n")
+            else:
+                articles_to_process = all_articles
 
-            batch_num += 1
-            batches_this_run += 1
+            # Process in batches
+            batch_num = self.state['batches_completed'] + 1
+            total_processed = 0
+            total_failed = 0
+
+            for i in range(0, len(articles_to_process), batch_size):
+                batch = articles_to_process[i:i+batch_size]
+
+                # Process batch
+                result = self.process_batch(batch, batch_num)
+                total_processed += result['articles_processed']
+                total_failed += result['articles_failed']
+
+                print(f"\nBatch {batch_num} Summary:")
+                print(f"   Processed: {result['articles_processed']}")
+                print(f"   Failed: {result['articles_failed']}")
+                print(f"   Total labeled so far: {self.state['total_labeled']}/{len(articles_to_process)}")
+
+                batch_num += 1
+
+        # Sequential mode: Original behavior
+        else:
+            batch_num = self.state['batches_completed'] + 1
+            total_processed = 0
+            total_failed = 0
+            batches_this_run = 0
+
+            while True:
+                # Check if we've hit max batches
+                if max_batches and batches_this_run >= max_batches:
+                    print(f"\nReached max batches ({max_batches})")
+                    break
+
+                # Check if we've hit target count
+                if target_count and self.state['total_labeled'] >= target_count:
+                    print(f"\nReached target count ({target_count} labeled articles)")
+                    break
+
+                # Load next batch
+                articles = self.load_unlabeled_articles(source_files, batch_size, pre_filter)
+
+                if not articles:
+                    print(f"\nDONE - No more unlabeled articles found")
+                    break
+
+                # Process batch
+                result = self.process_batch(articles, batch_num)
+                total_processed += result['articles_processed']
+                total_failed += result['articles_failed']
+
+                print(f"\nBatch {batch_num} Summary:")
+                print(f"   Processed: {result['articles_processed']}")
+                print(f"   Failed: {result['articles_failed']}")
+                if target_count:
+                    print(f"   Total labeled so far: {self.state['total_labeled']}/{target_count}")
+
+                batch_num += 1
+                batches_this_run += 1
 
         # Final summary
         print(f"\n{'='*60}")
@@ -1556,6 +1668,17 @@ if __name__ == '__main__':
         help='Target number of labeled articles to produce (stops when reached)'
     )
     parser.add_argument(
+        '--random-sample',
+        action='store_true',
+        help='Randomly sample articles instead of sequential processing (recommended for training data)'
+    )
+    parser.add_argument(
+        '--seed',
+        type=int,
+        default=42,
+        help='Random seed for reproducibility (default: 42)'
+    )
+    parser.add_argument(
         '--pre-filter',
         choices=['uplifting', 'sustainability', 'seece', 'future-of-education', 'none'],
         default='none',
@@ -1636,5 +1759,7 @@ if __name__ == '__main__':
         max_batches=args.max_batches,
         target_count=args.target_count,
         batch_size=args.batch_size,
-        pre_filter=prefilter
+        pre_filter=prefilter,
+        random_sample=args.random_sample,
+        random_seed=args.seed
     )
