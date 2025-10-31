@@ -519,7 +519,17 @@ class GenericBatchLabeler:
         Recursively sanitize all text fields in an object (dict/list/str).
 
         Removes invalid Unicode characters that cause encoding errors.
+        Uses prefilter's clean_article() if available (single source of truth),
+        otherwise falls back to local implementation.
         """
+        # Try to use prefilter's cleaning method if available
+        if hasattr(self, 'pre_filter') and self.pre_filter:
+            if hasattr(self.pre_filter, 'prefilter_obj'):
+                prefilter_obj = self.pre_filter.prefilter_obj
+                if hasattr(prefilter_obj, 'clean_article'):
+                    return prefilter_obj.clean_article(obj)
+
+        # Fallback: local implementation
         if isinstance(obj, dict):
             return {k: self._sanitize_article(v) for k, v in obj.items()}
         elif isinstance(obj, list):
@@ -987,6 +997,9 @@ class GenericBatchLabeler:
             batch_size: Articles per batch
             pre_filter: Optional function to pre-filter articles before labeling
         """
+        # Store pre_filter for use by _sanitize_article
+        self.pre_filter = pre_filter
+
         print(f"\nLLM Distillery - Batch Labeling")
         print(f"{'='*60}")
         print(f"Filter: {self.filter_name}")
@@ -1539,6 +1552,8 @@ if __name__ == '__main__':
         # Filter packages return (bool, reason) but batch_labeler expects just bool
         if prefilter_obj:
             prefilter = lambda article: prefilter_obj.should_label(article)[0]
+            # Store prefilter object for Unicode cleaning
+            prefilter.prefilter_obj = prefilter_obj
         else:
             prefilter = None
         print()

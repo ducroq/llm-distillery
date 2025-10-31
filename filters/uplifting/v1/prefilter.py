@@ -73,6 +73,50 @@ class UpliftingPreFilterV1:
         self.military_security_regex = [re.compile(p, re.IGNORECASE) for p in self.MILITARY_SECURITY_PATTERNS]
         self.military_security_exceptions_regex = [re.compile(p, re.IGNORECASE) for p in self.MILITARY_SECURITY_EXCEPTIONS]
 
+    @staticmethod
+    def sanitize_unicode(text: str) -> str:
+        """
+        Remove surrogate characters and other invalid Unicode sequences.
+
+        Prevents encoding errors when processing articles scraped from the web.
+        Invalid Unicode is silently dropped using errors='ignore'.
+
+        Args:
+            text: String that may contain invalid Unicode
+
+        Returns:
+            Cleaned string with invalid Unicode removed
+        """
+        if not isinstance(text, str):
+            return str(text)
+        # Encode with errors='ignore' to drop surrogates, then decode
+        return text.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore')
+
+    @staticmethod
+    def clean_article(article: Dict) -> Dict:
+        """
+        Recursively sanitize all text fields in an article.
+
+        Removes invalid Unicode characters that cause encoding errors during
+        processing or storage. Safe to call on already-clean articles.
+
+        Args:
+            article: Article dict with potentially invalid Unicode
+
+        Returns:
+            New dict with all text fields sanitized
+        """
+        def _clean(obj):
+            if isinstance(obj, dict):
+                return {k: _clean(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [_clean(item) for item in obj]
+            elif isinstance(obj, str):
+                return UpliftingPreFilterV1.sanitize_unicode(obj)
+            return obj
+
+        return _clean(article)
+
     def should_label(self, article: Dict) -> Tuple[bool, str]:
         """
         Determine if article should be sent to LLM for labeling.
