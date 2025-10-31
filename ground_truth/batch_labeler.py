@@ -503,6 +503,31 @@ class GenericBatchLabeler:
 
         return compressed
 
+    def _sanitize_unicode(self, text: str) -> str:
+        """
+        Remove surrogate characters and other invalid Unicode sequences.
+
+        Prevents 'surrogates not allowed' errors when sending to LLM APIs.
+        """
+        if not isinstance(text, str):
+            return str(text)
+        # Encode with errors='ignore' to drop surrogates, then decode
+        return text.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore')
+
+    def _sanitize_article(self, obj):
+        """
+        Recursively sanitize all text fields in an object (dict/list/str).
+
+        Removes invalid Unicode characters that cause encoding errors.
+        """
+        if isinstance(obj, dict):
+            return {k: self._sanitize_article(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._sanitize_article(item) for item in obj]
+        elif isinstance(obj, str):
+            return self._sanitize_unicode(obj)
+        return obj
+
     def build_prompt(self, article: Dict) -> str:
         """
         Build prompt by filling in article data with smart content compression.
@@ -517,11 +542,12 @@ class GenericBatchLabeler:
         # Smart compression (targets ~800 words ≈ 3000 tokens)
         compressed_content = self._smart_compress_content(content, max_words=800)
 
+        # Sanitize all text fields to remove invalid Unicode
         return self.prompt_template.format(
-            title=article.get('title', 'N/A'),
-            source=article.get('source', 'N/A'),
-            published_date=article.get('published_date', 'N/A'),
-            text=compressed_content
+            title=self._sanitize_unicode(article.get('title', 'N/A')),
+            source=self._sanitize_unicode(article.get('source', 'N/A')),
+            published_date=self._sanitize_unicode(article.get('published_date', 'N/A')),
+            text=self._sanitize_unicode(compressed_content)
         )
 
     def analyze_article(
@@ -886,7 +912,9 @@ class GenericBatchLabeler:
             output_file = self.output_dir / f'labeled_batch_{batch_num:03d}.jsonl'
             with open(output_file, 'w', encoding='utf-8') as f:
                 for article in results:
-                    f.write(json.dumps(article, ensure_ascii=False, separators=(',', ':')) + '\n')
+                    # Sanitize article to remove invalid Unicode before saving
+                    clean_article = self._sanitize_article(article)
+                    f.write(json.dumps(clean_article, ensure_ascii=False, separators=(',', ':')) + '\n')
 
             print(f"\nSAVED {len(results)} labeled articles to {output_file.name}")
 
