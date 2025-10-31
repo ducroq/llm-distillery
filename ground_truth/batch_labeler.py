@@ -1505,7 +1505,14 @@ if __name__ == '__main__':
         # New filter package mode
         filter_path = Path(args.filter)
         filter_name = filter_path.parent.name  # e.g., "uplifting" from "filters/uplifting/v1"
-        prefilter, prompt_path, config = load_filter_package(filter_path)
+        prefilter_obj, prompt_path, config = load_filter_package(filter_path)
+
+        # Wrap prefilter object to match batch_labeler interface
+        # Filter packages return (bool, reason) but batch_labeler expects just bool
+        if prefilter_obj:
+            prefilter = lambda article: prefilter_obj.should_label(article)[0]
+        else:
+            prefilter = None
         print()
     else:
         # Legacy --prompt mode
