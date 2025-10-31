@@ -34,6 +34,17 @@ if sys.platform == 'win32':
 
 from .batch_labeler import GenericBatchLabeler
 
+# Visualization imports (optional)
+try:
+    import matplotlib
+    matplotlib.use('Agg')  # Non-interactive backend
+    import matplotlib.pyplot as plt
+    import numpy as np
+    VISUALIZATIONS_AVAILABLE = True
+except ImportError:
+    VISUALIZATIONS_AVAILABLE = False
+    print("Warning: matplotlib not available. Skipping visualizations.")
+
 
 def load_filter_package(filter_path: Path) -> Tuple:
     """
@@ -344,6 +355,228 @@ def print_stats_comparison(stats1: Dict, stats2: Dict):
     else:
         print(f"  Distributions differ significantly (tier diff: {tier_diff:.1f}%, score diff: {score_diff:.2f})")
         print(f"  RECOMMENDED: Use Claude for ground truth, or refine your prompt for better Gemini consistency")
+
+
+def calculate_correlation(values1: List[float], values2: List[float]) -> Tuple[float, float]:
+    """
+    Calculate Pearson correlation coefficient and linear regression slope.
+
+    Returns (correlation, slope)
+    """
+    if not values1 or not values2 or len(values1) != len(values2):
+        return 0.0, 0.0
+
+    if VISUALIZATIONS_AVAILABLE:
+        corr = np.corrcoef(values1, values2)[0, 1]
+        # Linear regression: slope
+        if np.std(values1) > 0:
+            slope = np.cov(values1, values2)[0, 1] / np.var(values1)
+        else:
+            slope = 0.0
+        return corr, slope
+    else:
+        # Manual calculation without numpy
+        n = len(values1)
+        mean1 = sum(values1) / n
+        mean2 = sum(values2) / n
+
+        std1 = (sum((x - mean1) ** 2 for x in values1) / n) ** 0.5
+        std2 = (sum((x - mean2) ** 2 for x in values2) / n) ** 0.5
+
+        if std1 == 0 or std2 == 0:
+            return 0.0, 0.0
+
+        covariance = sum((values1[i] - mean1) * (values2[i] - mean2) for i in range(n)) / n
+        corr = covariance / (std1 * std2)
+        slope = covariance / (std1 ** 2) if std1 > 0 else 0.0
+
+        return corr, slope
+
+
+def analyze_correlations(stats1: Dict, stats2: Dict, filter_name: str) -> Dict:
+    """
+    Analyze correlations between two models' dimension scores.
+
+    Returns dict with correlation coefficients and slopes for each dimension.
+    """
+    correlations = {}
+
+    if 'dimensions' not in stats1 or 'dimensions' not in stats2:
+        return correlations
+
+    dims1 = stats1['dimensions']
+    dims2 = stats2['dimensions']
+
+    for dim in dims1.keys():
+        if dim in dims2:
+            values1 = dims1[dim]['values']
+            values2 = dims2[dim]['values']
+
+            # Ensure same length (match by article order)
+            min_len = min(len(values1), len(values2))
+            values1 = values1[:min_len]
+            values2 = values2[:min_len]
+
+            corr, slope = calculate_correlation(values1, values2)
+            correlations[dim] = {
+                'correlation': corr,
+                'slope': slope,
+                'values1': values1,
+                'values2': values2
+            }
+
+    return correlations
+
+
+def generate_correlation_visualizations(
+    correlations: Dict,
+    stats1: Dict,
+    stats2: Dict,
+    output_dir: Path
+) -> List[Path]:
+    """
+    Generate scatter plots for dimension correlations.
+
+    Returns list of generated image paths.
+    """
+    if not VISUALIZATIONS_AVAILABLE:
+        return []
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    image_paths = []
+
+    # Dimension names in order
+    dimensions = ['agency', 'progress', 'collective_benefit', 'connection',
+                  'innovation', 'justice', 'resilience', 'wonder']
+
+    # Create a figure with subplots
+    fig, axes = plt.subplots(3, 3, figsize=(15, 15))
+    axes = axes.flatten()
+
+    for idx, dim in enumerate(dimensions):
+        if dim not in correlations:
+            continue
+
+        ax = axes[idx]
+        corr_data = correlations[dim]
+        values1 = corr_data['values1']
+        values2 = corr_data['values2']
+        corr = corr_data['correlation']
+        slope = corr_data['slope']
+
+        # Scatter plot
+        ax.scatter(values1, values2, alpha=0.5, s=30)
+
+        # Regression line
+        if len(values1) > 0:
+            x_range = np.linspace(min(values1), max(values1), 100)
+            mean1 = np.mean(values1)
+            mean2 = np.mean(values2)
+            y_range = mean2 + slope * (x_range - mean1)
+            ax.plot(x_range, y_range, 'r--', linewidth=2, alpha=0.7)
+
+        # Diagonal reference line (perfect agreement)
+        max_val = max(max(values1) if values1 else 10, max(values2) if values2 else 10)
+        ax.plot([0, max_val], [0, max_val], 'k:', linewidth=1, alpha=0.3, label='y=x')
+
+        ax.set_xlabel(f"{stats1['provider']}", fontsize=10)
+        ax.set_ylabel(f"{stats2['provider']}", fontsize=10)
+        ax.set_title(f"{dim}\nr={corr:.3f}, slope={slope:.3f}", fontsize=11)
+        ax.grid(True, alpha=0.3)
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0, 10)
+
+    # Remove extra subplot
+    if len(dimensions) < len(axes):
+        fig.delaxes(axes[-1])
+
+    plt.tight_layout()
+
+    # Save figure
+    img_path = output_dir / 'dimension_correlations.png'
+    plt.savefig(img_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    image_paths.append(img_path)
+
+    # Create correlation heatmap
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    corr_matrix = []
+    labels = []
+    for dim in dimensions:
+        if dim in correlations:
+            corr_matrix.append(correlations[dim]['correlation'])
+            labels.append(dim)
+
+    if corr_matrix:
+        y_pos = np.arange(len(labels))
+        colors = plt.cm.RdYlGn([(c + 1) / 2 for c in corr_matrix])  # Map -1..1 to 0..1
+
+        bars = ax.barh(y_pos, corr_matrix, color=colors)
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(labels)
+        ax.set_xlabel('Pearson Correlation')
+        ax.set_title(f"Dimension Correlations\n{stats1['provider']} vs {stats2['provider']}")
+        ax.set_xlim(-1, 1)
+        ax.axvline(0, color='black', linewidth=0.8)
+        ax.grid(True, alpha=0.3, axis='x')
+
+        # Add value labels
+        for i, (bar, val) in enumerate(zip(bars, corr_matrix)):
+            ax.text(val + 0.02 if val > 0 else val - 0.02, i, f'{val:.3f}',
+                   va='center', ha='left' if val > 0 else 'right', fontsize=9)
+
+    plt.tight_layout()
+    img_path = output_dir / 'correlation_summary.png'
+    plt.savefig(img_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    image_paths.append(img_path)
+
+    return image_paths
+
+
+def print_correlation_analysis(correlations: Dict, stats1: Dict, stats2: Dict):
+    """Print correlation analysis to console."""
+    if not correlations:
+        return
+
+    print(f"\nCORRELATION ANALYSIS:")
+    print(f"  {'Dimension':<20} {'Correlation':>12} {'Slope':>12} {'Interpretation'}")
+    print(f"  {'-'*20} {'-'*12} {'-'*12} {'-'*30}")
+
+    for dim in ['agency', 'progress', 'collective_benefit', 'connection',
+                'innovation', 'justice', 'resilience', 'wonder']:
+        if dim in correlations:
+            corr = correlations[dim]['correlation']
+            slope = correlations[dim]['slope']
+
+            # Interpretation
+            if corr > 0.9:
+                interp = "Excellent agreement"
+            elif corr > 0.7:
+                interp = "Good agreement"
+            elif corr > 0.5:
+                interp = "Moderate agreement"
+            elif corr > 0.3:
+                interp = "Weak agreement"
+            else:
+                interp = "Poor agreement"
+
+            print(f"  {dim:<20} {corr:12.3f} {slope:12.3f} {interp}")
+
+    # Overall interpretation
+    avg_corr = sum(correlations[d]['correlation'] for d in correlations) / len(correlations)
+    print(f"\n  Average correlation: {avg_corr:.3f}")
+
+    if avg_corr > 0.7:
+        print(f"  → Models show strong agreement on rankings (different scales)")
+        print(f"  → Consider: normalize {stats1['provider']} scores to match {stats2['provider']}'s scale")
+    elif avg_corr > 0.5:
+        print(f"  → Models show moderate agreement")
+        print(f"  → Some semantic differences exist beyond scale")
+    else:
+        print(f"  → Models show weak agreement")
+        print(f"  → Significant semantic disagreement, choose oracle carefully")
 
 
 def generate_calibration_report(
@@ -744,6 +977,30 @@ def main():
     # Print comparison (first two models)
     models = list(model_list)
     print_stats_comparison(stats_results[models[0]], stats_results[models[1]])
+
+    # Correlation analysis
+    correlations = analyze_correlations(stats_results[models[0]], stats_results[models[1]], filter_name)
+    print_correlation_analysis(correlations, stats_results[models[0]], stats_results[models[1]])
+
+    # Generate visualizations
+    if VISUALIZATIONS_AVAILABLE and correlations:
+        print(f"\n{'='*70}")
+        print("GENERATING CORRELATION VISUALIZATIONS")
+        print(f"{'='*70}\n")
+
+        viz_dir = output_file.parent / f"{output_file.stem}_visualizations"
+        image_paths = generate_correlation_visualizations(
+            correlations,
+            stats_results[models[0]],
+            stats_results[models[1]],
+            viz_dir
+        )
+
+        if image_paths:
+            print(f"Generated {len(image_paths)} visualization(s):")
+            for img_path in image_paths:
+                print(f"  - {img_path}")
+            print()
 
     # Generate report
     print(f"\n{'='*70}")
