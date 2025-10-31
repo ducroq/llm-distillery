@@ -230,6 +230,11 @@ def analyze_batch(articles: List[Dict], provider_name: str, filter_name: str) ->
     scores = []
     content_types = []
 
+    # Extract dimension scores
+    dimension_names = ['agency', 'progress', 'collective_benefit', 'connection',
+                       'innovation', 'justice', 'resilience', 'wonder']
+    dimensions_data = {dim: [] for dim in dimension_names}
+
     for analysis in analyses:
         tier, score = extract_tier_and_score(analysis, filter_name)
         tiers.append(tier)
@@ -242,9 +247,26 @@ def analyze_batch(articles: List[Dict], provider_name: str, filter_name: str) ->
             content_type = tuple(content_type) if content_type else 'unknown'
         content_types.append(content_type)
 
+        # Extract dimension scores
+        for dim in dimension_names:
+            dim_value = analysis.get(dim, 0)
+            dimensions_data[dim].append(dim_value)
+
     # Calculate stats
     tier_counts = Counter(tiers)
     tier_pcts = {k: v/len(articles)*100 for k, v in tier_counts.items()}
+
+    # Calculate dimension statistics
+    dimension_stats = {}
+    for dim, values in dimensions_data.items():
+        if values:
+            dimension_stats[dim] = {
+                'mean': sum(values) / len(values),
+                'median': sorted(values)[len(values)//2],
+                'min': min(values),
+                'max': max(values),
+                'values': values  # Keep for correlation analysis
+            }
 
     stats = {
         'provider': provider_name,
@@ -254,7 +276,8 @@ def analyze_batch(articles: List[Dict], provider_name: str, filter_name: str) ->
         'avg_score': sum(scores)/len(scores) if scores else 0,
         'median_score': sorted(scores)[len(scores)//2] if scores else 0,
         'score_range': (min(scores), max(scores)) if scores else (0, 0),
-        'content_type_counts': Counter(content_types)
+        'content_type_counts': Counter(content_types),
+        'dimensions': dimension_stats
     }
 
     return stats
@@ -279,10 +302,25 @@ def print_stats_comparison(stats1: Dict, stats2: Dict):
         print(f"  {tier:<20} {pct1:14.1f}% {pct2:14.1f}% {diff:+14.1f}%")
 
     # Score comparison
-    print(f"\nSCORE STATISTICS:")
+    print(f"\nOVERALL SCORE STATISTICS:")
     print(f"  Average:  {stats1['avg_score']:.2f} vs {stats2['avg_score']:.2f} (diff: {stats2['avg_score']-stats1['avg_score']:+.2f})")
     print(f"  Median:   {stats1['median_score']:.2f} vs {stats2['median_score']:.2f} (diff: {stats2['median_score']-stats1['median_score']:+.2f})")
     print(f"  Range:    {stats1['score_range'][0]:.2f}-{stats1['score_range'][1]:.2f} vs {stats2['score_range'][0]:.2f}-{stats2['score_range'][1]:.2f}")
+
+    # Dimension comparison
+    if 'dimensions' in stats1 and 'dimensions' in stats2:
+        print(f"\nDIMENSION SCORE COMPARISON:")
+        print(f"  {'Dimension':<20} {stats1['provider']:>15} {stats2['provider']:>15} {'Difference':>15}")
+        print(f"  {'-'*20} {'-'*15} {'-'*15} {'-'*15}")
+
+        all_dims = set(stats1['dimensions'].keys()) | set(stats2['dimensions'].keys())
+        for dim in ['agency', 'progress', 'collective_benefit', 'connection',
+                    'innovation', 'justice', 'resilience', 'wonder']:
+            if dim in all_dims:
+                mean1 = stats1['dimensions'][dim]['mean']
+                mean2 = stats2['dimensions'][dim]['mean']
+                diff = mean2 - mean1
+                print(f"  {dim:<20} {mean1:15.2f} {mean2:15.2f} {diff:+15.2f}")
 
     # Cost analysis
     print(f"\nCOST COMPARISON (for 5,000 articles):")
