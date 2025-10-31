@@ -62,10 +62,11 @@ def load_filter_package(filter_path: Path) -> Tuple:
         prefilter_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(prefilter_module)
 
-        # Get the prefilter class
+        # Get the prefilter class (defined in this module, not imported)
         prefilter_classes = [
             obj for name, obj in vars(prefilter_module).items()
             if isinstance(obj, type) and 'PreFilter' in name
+            and obj.__module__ == prefilter_module.__name__  # Exclude imported classes
         ]
 
         if prefilter_classes:
