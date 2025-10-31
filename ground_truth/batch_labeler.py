@@ -39,6 +39,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 import importlib.util
+import glob
 
 # Import secrets manager
 from .secrets_manager import get_secrets_manager
@@ -943,15 +944,15 @@ class GenericBatchLabeler:
 
     def load_unlabeled_articles(
         self,
-        source_file: str,
+        source_files: List[str],
         batch_size: int = 50,
         pre_filter: Optional[callable] = None
     ) -> List[Dict]:
         """
-        Load unlabeled articles from source file.
+        Load unlabeled articles from source files.
 
         Args:
-            source_file: Path to JSONL file with articles
+            source_files: List of paths to JSONL files with articles
             batch_size: Number of articles to load
             pre_filter: Optional function to pre-filter articles
                        Should return True to include article, False to skip
@@ -959,33 +960,43 @@ class GenericBatchLabeler:
         articles = []
         processed_ids = set(self.state['processed'])
 
-        with open(source_file, 'r', encoding='utf-8') as f:
-            for line in f:
-                if len(articles) >= batch_size:
-                    break
+        # Iterate through all source files
+        for source_file in source_files:
+            if len(articles) >= batch_size:
+                break
 
-                try:
-                    article = json.loads(line.strip())
-                    article_id = article.get('id')
+            try:
+                with open(source_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        if len(articles) >= batch_size:
+                            break
 
-                    # Skip if already processed
-                    if article_id in processed_ids:
-                        continue
+                        try:
+                            article = json.loads(line.strip())
+                            article_id = article.get('id')
 
-                    # Apply pre-filter if provided
-                    if pre_filter and not pre_filter(article):
-                        continue
+                            # Skip if already processed
+                            if article_id in processed_ids:
+                                continue
 
-                    articles.append(article)
-                except:
-                    continue
+                            # Apply pre-filter if provided
+                            if pre_filter and not pre_filter(article):
+                                continue
+
+                            articles.append(article)
+                        except:
+                            continue
+            except FileNotFoundError:
+                print(f"Warning: Source file not found: {source_file}")
+                continue
 
         return articles
 
     def run(
         self,
-        source_file: str,
+        source_files: List[str],
         max_batches: Optional[int] = None,
+        target_count: Optional[int] = None,
         batch_size: int = 50,
         pre_filter: Optional[callable] = None
     ):
@@ -993,38 +1004,49 @@ class GenericBatchLabeler:
         Run batch labeling process.
 
         Args:
-            source_file: Path to JSONL file with articles
+            source_files: List of paths to JSONL files with articles
             max_batches: Maximum number of batches to process (None = unlimited)
+            target_count: Target number of labeled articles to produce (None = unlimited)
             batch_size: Articles per batch
             pre_filter: Optional function to pre-filter articles before labeling
         """
         # Store pre_filter for use by _sanitize_article
         self.pre_filter = pre_filter
 
+        # Format source files for display
+        source_display = ', '.join(source_files) if len(source_files) <= 3 else f"{len(source_files)} files"
+
         print(f"\nLLM Distillery - Batch Labeling")
         print(f"{'='*60}")
         print(f"Filter: {self.filter_name}")
         print(f"Prompt: {self.prompt_path}")
         print(f"LLM: {self.llm_provider}")
-        print(f"Source: {source_file}")
+        print(f"Source: {source_display}")
         print(f"Output: {self.output_dir}")
         print(f"Batch size: {batch_size}")
         print(f"Max batches: {max_batches or 'unlimited'}")
+        print(f"Target count: {target_count or 'unlimited'}")
         print(f"Already processed: {len(self.state['processed'])} articles")
         print(f"{'='*60}\n")
 
         batch_num = self.state['batches_completed'] + 1
         total_processed = 0
         total_failed = 0
+        batches_this_run = 0
 
         while True:
             # Check if we've hit max batches
-            if max_batches and (batch_num - self.state['batches_completed']) > max_batches:
+            if max_batches and batches_this_run >= max_batches:
                 print(f"\nReached max batches ({max_batches})")
                 break
 
+            # Check if we've hit target count
+            if target_count and self.state['total_labeled'] >= target_count:
+                print(f"\nReached target count ({target_count} labeled articles)")
+                break
+
             # Load next batch
-            articles = self.load_unlabeled_articles(source_file, batch_size, pre_filter)
+            articles = self.load_unlabeled_articles(source_files, batch_size, pre_filter)
 
             if not articles:
                 print(f"\nDONE - No more unlabeled articles found")
@@ -1038,8 +1060,11 @@ class GenericBatchLabeler:
             print(f"\nBatch {batch_num} Summary:")
             print(f"   Processed: {result['articles_processed']}")
             print(f"   Failed: {result['articles_failed']}")
+            if target_count:
+                print(f"   Total labeled so far: {self.state['total_labeled']}/{target_count}")
 
             batch_num += 1
+            batches_this_run += 1
 
         # Final summary
         print(f"\n{'='*60}")
@@ -1501,7 +1526,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--source',
         required=True,
-        help='Source JSONL file with articles'
+        help='Source JSONL file(s) with articles (supports glob patterns like "data/*.jsonl")'
     )
     parser.add_argument(
         '--output-dir',
@@ -1524,6 +1549,11 @@ if __name__ == '__main__':
         '--max-batches',
         type=int,
         help='Maximum number of batches to process (default: unlimited)'
+    )
+    parser.add_argument(
+        '--target-count',
+        type=int,
+        help='Target number of labeled articles to produce (stops when reached)'
     )
     parser.add_argument(
         '--pre-filter',
@@ -1575,6 +1605,22 @@ if __name__ == '__main__':
         elif args.pre_filter == 'future-of-education':
             prefilter = future_of_education_pre_filter
 
+    # Expand glob patterns in source parameter
+    source_files = glob.glob(args.source)
+    if not source_files:
+        # If glob returns nothing, treat as literal filename
+        source_files = [args.source]
+
+    # Sort files for consistent ordering
+    source_files.sort()
+
+    print(f"Found {len(source_files)} source file(s):")
+    for f in source_files[:5]:  # Show first 5
+        print(f"  - {f}")
+    if len(source_files) > 5:
+        print(f"  ... and {len(source_files) - 5} more")
+    print()
+
     # Create labeler
     labeler = GenericBatchLabeler(
         prompt_path=str(prompt_path),
@@ -1586,8 +1632,9 @@ if __name__ == '__main__':
 
     # Run labeling
     labeler.run(
-        source_file=args.source,
+        source_files=source_files,
         max_batches=args.max_batches,
+        target_count=args.target_count,
         batch_size=args.batch_size,
         pre_filter=prefilter
     )
