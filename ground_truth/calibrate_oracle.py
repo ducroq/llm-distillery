@@ -134,6 +134,21 @@ def label_with_provider(
     print(f"Labeling {len(articles)} articles with {provider.upper()}")
     print(f"{'='*70}\n")
 
+    # Check if cached labels exist
+    if cache_dir:
+        cache_file = cache_dir / f"{provider}_labels.jsonl"
+        if cache_file.exists():
+            print(f"Found cached labels at {cache_file}")
+            print(f"Loading cached results...")
+            labeled_articles = []
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    article = json.loads(line.strip())
+                    labeled_articles.append(article)
+
+            print(f"Loaded {len(labeled_articles)} cached labeled articles")
+            return labeled_articles
+
     labeler = GenericBatchLabeler(
         prompt_path=prompt_path,
         llm_provider=provider,
