@@ -4,14 +4,24 @@ Generic batch labeling using Claude/Gemini API for ground truth generation.
 This is a refactored, prompt-agnostic version that works with ANY semantic filter.
 Migrated from NexusMind-Filter/scripts/batch_label_with_claude.py
 
-Usage:
+Usage (New - Filter Package):
+    python -m ground_truth.batch_labeler \
+        --filter filters/uplifting/v1 \
+        --source ../content-aggregator/data/collected/articles.jsonl \
+        --output-dir datasets/uplifting_gemini_flash_5k \
+        --llm gemini-flash \
+        --batch-size 50 \
+        --max-batches 100
+
+Usage (Legacy - Direct Prompt):
     python -m ground_truth.batch_labeler \
         --prompt prompts/sustainability.md \
         --source ../content-aggregator/data/collected/articles.jsonl \
-        --output datasets/sustainability_5k.jsonl \
+        --output-dir datasets/sustainability_5k \
         --llm claude \
         --batch-size 50 \
-        --max-batches 100
+        --max-batches 100 \
+        --pre-filter sustainability
 """
 
 import json
@@ -28,9 +38,63 @@ from datetime import datetime
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
+import importlib.util
 
 # Import secrets manager
 from .secrets_manager import get_secrets_manager
+
+
+def load_filter_package(filter_path: Path) -> Tuple:
+    """
+    Load filter package components from filters/<name>/v1/ structure.
+
+    Returns:
+        (prefilter_instance, prompt_path, config_dict)
+    """
+    print(f"Loading filter package: {filter_path}")
+
+    # Load prefilter
+    prefilter_module_path = filter_path / "prefilter.py"
+    prefilter = None
+
+    if prefilter_module_path.exists():
+        spec = importlib.util.spec_from_file_location("prefilter", prefilter_module_path)
+        prefilter_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(prefilter_module)
+
+        # Get the prefilter class
+        prefilter_classes = [
+            obj for name, obj in vars(prefilter_module).items()
+            if isinstance(obj, type) and 'PreFilter' in name
+        ]
+
+        if prefilter_classes:
+            prefilter_class = prefilter_classes[0]
+            prefilter = prefilter_class()
+            print(f"  Loaded: {prefilter_class.__name__} v{prefilter.VERSION}")
+
+    # Find prompt file (try compressed first, then regular)
+    prompt_path = filter_path / "prompt-compressed.md"
+    if not prompt_path.exists():
+        prompt_path = filter_path / "prompt.md"
+
+    if not prompt_path.exists():
+        raise FileNotFoundError(f"No prompt file found in {filter_path}")
+
+    print(f"  Prompt: {prompt_path.name}")
+
+    # Load config (for reference)
+    config_path = filter_path / "config.yaml"
+    config_dict = {}
+    if config_path.exists():
+        try:
+            import yaml
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config_dict = yaml.safe_load(f)
+        except ImportError:
+            print("  Warning: PyYAML not installed, skipping config load")
+
+    return prefilter, prompt_path, config_dict
 
 
 class ErrorType(Enum):
@@ -1380,11 +1444,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Generic batch labeling for ground truth generation'
     )
-    parser.add_argument(
-        '--prompt',
-        required=True,
-        help='Path to prompt markdown file (e.g., prompts/sustainability.md)'
+
+    # Support both --filter (new) and --prompt (legacy)
+    filter_group = parser.add_mutually_exclusive_group(required=True)
+    filter_group.add_argument(
+        '--filter',
+        help='Path to filter package directory (e.g., filters/uplifting/v1)'
     )
+    filter_group.add_argument(
+        '--prompt',
+        help='Path to prompt markdown file [DEPRECATED: use --filter instead]'
+    )
+
     parser.add_argument(
         '--source',
         required=True,
@@ -1416,7 +1487,7 @@ if __name__ == '__main__':
         '--pre-filter',
         choices=['uplifting', 'sustainability', 'seece', 'future-of-education', 'none'],
         default='none',
-        help='Pre-filter to apply before labeling'
+        help='[DEPRECATED: use --filter instead] Pre-filter to apply before labeling'
     )
     parser.add_argument(
         '--api-key',
@@ -1425,23 +1496,41 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # Select pre-filter
-    pre_filter_func = None
-    if args.pre_filter == 'uplifting':
-        pre_filter_func = uplifting_pre_filter
-    elif args.pre_filter == 'sustainability':
-        pre_filter_func = sustainability_pre_filter
-    elif args.pre_filter == 'seece':
-        pre_filter_func = seece_pre_filter
-    elif args.pre_filter == 'future-of-education':
-        pre_filter_func = future_of_education_pre_filter
+    # Load filter package or use legacy mode
+    prefilter = None
+    prompt_path = None
+    filter_name = None
+
+    if args.filter:
+        # New filter package mode
+        filter_path = Path(args.filter)
+        filter_name = filter_path.parent.name  # e.g., "uplifting" from "filters/uplifting/v1"
+        prefilter, prompt_path, config = load_filter_package(filter_path)
+        print()
+    else:
+        # Legacy --prompt mode
+        prompt_path = Path(args.prompt)
+        filter_name = prompt_path.stem
+        print("WARNING: --prompt is deprecated. Use --filter for prefilter support.")
+        print()
+
+        # Select pre-filter (legacy mode only)
+        if args.pre_filter == 'uplifting':
+            prefilter = uplifting_pre_filter
+        elif args.pre_filter == 'sustainability':
+            prefilter = sustainability_pre_filter
+        elif args.pre_filter == 'seece':
+            prefilter = seece_pre_filter
+        elif args.pre_filter == 'future-of-education':
+            prefilter = future_of_education_pre_filter
 
     # Create labeler
     labeler = GenericBatchLabeler(
-        prompt_path=args.prompt,
+        prompt_path=str(prompt_path),
         llm_provider=args.llm,
         api_key=args.api_key,
-        output_dir=args.output_dir
+        output_dir=args.output_dir,
+        filter_name=filter_name
     )
 
     # Run labeling
@@ -1449,5 +1538,5 @@ if __name__ == '__main__':
         source_file=args.source,
         max_batches=args.max_batches,
         batch_size=args.batch_size,
-        pre_filter=pre_filter_func
+        pre_filter=prefilter
     )
