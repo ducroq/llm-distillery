@@ -235,8 +235,11 @@ def analyze_batch(articles: List[Dict], provider_name: str, filter_name: str) ->
         tiers.append(tier)
         scores.append(score)
 
-        # Content type if available
+        # Content type if available (handle both string and list)
         content_type = analysis.get('content_type', 'unknown')
+        # Convert list to tuple for hashability, or use string as-is
+        if isinstance(content_type, list):
+            content_type = tuple(content_type) if content_type else 'unknown'
         content_types.append(content_type)
 
     # Calculate stats
