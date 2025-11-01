@@ -2,7 +2,7 @@
 Base PreFilter Class
 
 Provides common functionality for all semantic prefilters:
-- Unicode sanitization (removes surrogates and invalid UTF-8)
+- Comprehensive text cleaning (Unicode, HTML, invisible chars, security)
 - Standard interface for should_label()
 - Shared utilities
 
@@ -10,6 +10,12 @@ All filter prefilters should inherit from this base class.
 """
 
 from typing import Dict, Tuple
+import sys
+from pathlib import Path
+
+# Import text cleaning from ground_truth module
+sys.path.insert(0, str(Path(__file__).parent.parent / 'ground_truth'))
+from text_cleaning import sanitize_text_comprehensive, clean_article as clean_article_comprehensive
 
 
 class BasePreFilter:
@@ -27,8 +33,8 @@ class BasePreFilter:
         """
         Remove surrogate characters and other invalid Unicode sequences.
 
-        Prevents encoding errors when processing articles scraped from the web.
-        Invalid Unicode is silently dropped using errors='ignore'.
+        DEPRECATED: Use sanitize_text_comprehensive() for better cleaning.
+        This method is kept for backward compatibility.
 
         Args:
             text: String that may contain invalid Unicode
@@ -42,29 +48,48 @@ class BasePreFilter:
         return text.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore')
 
     @staticmethod
-    def clean_article(article: Dict) -> Dict:
+    def sanitize_text_comprehensive(text: str) -> str:
         """
-        Recursively sanitize all text fields in an article.
+        Comprehensively clean text for LLM processing.
 
-        Removes invalid Unicode characters that cause encoding errors during
-        processing or storage. Safe to call on already-clean articles.
+        Removes:
+        - Invalid Unicode (surrogates)
+        - HTML entities and tags
+        - Zero-width characters (invisible text)
+        - Bidirectional marks (security issue)
+        - Normalizes whitespace
+
+        This is the RECOMMENDED method for cleaning text.
 
         Args:
-            article: Article dict with potentially invalid Unicode
+            text: String to clean
 
         Returns:
-            New dict with all text fields sanitized
+            Comprehensively cleaned string
         """
-        def _clean(obj):
-            if isinstance(obj, dict):
-                return {k: _clean(v) for k, v in obj.items()}
-            elif isinstance(obj, list):
-                return [_clean(item) for item in obj]
-            elif isinstance(obj, str):
-                return BasePreFilter.sanitize_unicode(obj)
-            return obj
+        return sanitize_text_comprehensive(text)
 
-        return _clean(article)
+    @staticmethod
+    def clean_article(article: Dict) -> Dict:
+        """
+        Recursively clean all text fields in an article.
+
+        Applies comprehensive text cleaning to all strings:
+        - Invalid Unicode removal
+        - HTML cleaning
+        - Invisible character removal
+        - Security (BiDi marks)
+        - Whitespace normalization
+
+        Safe to call on already-clean articles (idempotent).
+
+        Args:
+            article: Article dict with potentially problematic text
+
+        Returns:
+            New dict with all text fields comprehensively cleaned
+        """
+        return clean_article_comprehensive(article)
 
     def should_label(self, article: Dict) -> Tuple[bool, str]:
         """

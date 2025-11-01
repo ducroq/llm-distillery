@@ -45,6 +45,9 @@ import random
 # Import secrets manager
 from .secrets_manager import get_secrets_manager
 
+# Import comprehensive text cleaning
+from .text_cleaning import clean_article as clean_article_comprehensive, sanitize_text_comprehensive
+
 
 def load_filter_package(filter_path: Path) -> Tuple:
     """
@@ -508,22 +511,32 @@ class GenericBatchLabeler:
 
     def _sanitize_unicode(self, text: str) -> str:
         """
-        Remove surrogate characters and other invalid Unicode sequences.
+        Comprehensively clean text for LLM processing.
 
-        Prevents 'surrogates not allowed' errors when sending to LLM APIs.
+        Removes:
+        - Invalid Unicode (surrogates)
+        - HTML entities and tags
+        - Zero-width characters (invisible text)
+        - Bidirectional marks (security issue)
+        - Normalizes whitespace
+
+        Prevents encoding and processing errors when sending to LLM APIs.
         """
-        if not isinstance(text, str):
-            return str(text)
-        # Encode with errors='ignore' to drop surrogates, then decode
-        return text.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore')
+        return sanitize_text_comprehensive(text) if isinstance(text, str) else str(text)
 
     def _sanitize_article(self, obj):
         """
-        Recursively sanitize all text fields in an object (dict/list/str).
+        Recursively clean all text fields in an object (dict/list/str).
 
-        Removes invalid Unicode characters that cause encoding errors.
+        Applies comprehensive cleaning:
+        - Invalid Unicode removal
+        - HTML cleaning
+        - Invisible character removal
+        - Security (BiDi marks)
+        - Whitespace normalization
+
         Uses prefilter's clean_article() if available (single source of truth),
-        otherwise falls back to local implementation.
+        otherwise uses comprehensive cleaning from text_cleaning module.
         """
         # Try to use prefilter's cleaning method if available
         if hasattr(self, 'pre_filter') and self.pre_filter:
@@ -532,14 +545,8 @@ class GenericBatchLabeler:
                 if hasattr(prefilter_obj, 'clean_article'):
                     return prefilter_obj.clean_article(obj)
 
-        # Fallback: local implementation
-        if isinstance(obj, dict):
-            return {k: self._sanitize_article(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [self._sanitize_article(item) for item in obj]
-        elif isinstance(obj, str):
-            return self._sanitize_unicode(obj)
-        return obj
+        # Use comprehensive cleaning from text_cleaning module
+        return clean_article_comprehensive(obj)
 
     def build_prompt(self, article: Dict) -> str:
         """
