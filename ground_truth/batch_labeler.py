@@ -557,12 +557,17 @@ class GenericBatchLabeler:
         - Preserve key information (beginning + ending)
         - Prepare for future small-model compatibility
         """
+        # CRITICAL: Sanitize article FIRST to prevent encoding errors when sending to API
+        # This removes surrogates, HTML, BiDi marks, etc. before any processing
+        article = self._sanitize_article(article)
+
         content = article.get('content', '')
 
         # Smart compression (targets ~800 words ≈ 3000 tokens)
         compressed_content = self._smart_compress_content(content, max_words=800)
 
-        # Sanitize all text fields to remove invalid Unicode
+        # Build prompt with cleaned data
+        # (already sanitized above, but _sanitize_unicode is idempotent so safe to call again)
         return self.prompt_template.format(
             title=self._sanitize_unicode(article.get('title', 'N/A')),
             source=self._sanitize_unicode(article.get('source', 'N/A')),
