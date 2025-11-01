@@ -3,7 +3,8 @@
 SSH Data Sync Tool for LLM Distillery
 
 Syncs datasets and reports between local development machine and remote server
-without bloating git repository.
+without bloating git repository. Uses SCP (SSH copy) for reliable cross-platform
+file transfer.
 
 Setup:
     1. Copy sync_config.example.json to sync_config.json
@@ -67,46 +68,33 @@ class SyncTool:
         # Detect if we're on Windows
         self.is_windows = platform.system() == 'Windows'
 
-    def _build_rsync_cmd(
+    def _build_scp_cmd(
         self,
         source: str,
-        dest: str,
-        dry_run: bool = False,
-        direction: str = "pull"
+        dest: str
     ) -> List[str]:
         """
-        Build rsync command with proper options.
+        Build scp command with proper options.
 
         Args:
-            source: Source path (local or remote)
+            source: Source path (local or remote, e.g., "user@host:/path" or "/local/path")
             dest: Destination path (local or remote)
-            dry_run: If True, only show what would be transferred
-            direction: 'pull' or 'push' for progress messages
+
+        Returns:
+            Command as list of strings
         """
-        cmd = ['rsync', '-avz', '--progress']
+        cmd = ['scp', '-r', '-p']  # Recursive, preserve timestamps
 
-        # Add SSH options
-        # Use default SSH config and known_hosts to match normal ssh behavior
-        ssh_cmd = f"ssh -p {self.remote['port']} -o StrictHostKeyChecking=accept-new"
+        # Add port if not default
+        if self.remote['port'] != 22:
+            cmd.extend(['-P', str(self.remote['port'])])
 
+        # Add SSH key if specified
         if self.ssh_config.get('key_path'):
-            key_path = self.ssh_config['key_path']
-            # Convert Windows path to Cygwin path for rsync
-            if self.is_windows and len(key_path) >= 2 and key_path[1] == ':':
-                drive = key_path[0].lower()
-                path = key_path[2:].replace('\\', '/')
-                key_path = f"/{drive}{path}"
-            ssh_cmd += f" -i {key_path}"
+            cmd.extend(['-i', self.ssh_config['key_path']])
 
-        cmd.extend(['-e', ssh_cmd])
-
-        # Add excludes
-        for pattern in self.sync_config.get('exclude_patterns', []):
-            cmd.extend(['--exclude', pattern])
-
-        # Add dry-run flag
-        if dry_run:
-            cmd.append('--dry-run')
+        # Add compression
+        cmd.append('-C')
 
         # Source and destination
         cmd.extend([source, dest])
@@ -126,10 +114,10 @@ class SyncTool:
 
     def pull_data(self, dry_run: bool = False) -> bool:
         """
-        Pull data FROM server TO local.
+        Pull data FROM server TO local using SCP.
 
         Args:
-            dry_run: If True, only show what would be transferred
+            dry_run: If True, only show what would be synced (doesn't transfer)
 
         Returns:
             True if successful
@@ -139,60 +127,52 @@ class SyncTool:
         print("="*70)
 
         if dry_run:
-            print("DRY RUN MODE - showing what would be transferred\n")
+            print("DRY RUN MODE - no files will be transferred\n")
 
         success = True
 
         for data_dir in self.sync_config['data_dirs']:
-            remote_source = self._get_remote_path(data_dir)
-            local_dest_path = Path.cwd() / data_dir
+            # Remote source (add trailing /* to copy contents)
+            remote_source = self._get_remote_path(data_dir.rstrip('/') + '/*')
 
-            # Convert Windows path to Cygwin-style path for rsync
-            if self.is_windows:
-                # Convert C:\path to /c/path
-                local_dest = str(local_dest_path)
-                if len(local_dest) >= 2 and local_dest[1] == ':':
-                    drive = local_dest[0].lower()
-                    path = local_dest[2:].replace('\\', '/')
-                    local_dest = f"/{drive}{path}"
-            else:
-                local_dest = str(local_dest_path)
+            # Local destination
+            local_dest = Path.cwd() / data_dir
 
             # Ensure local dir exists
-            local_dest_path.parent.mkdir(parents=True, exist_ok=True)
+            local_dest.mkdir(parents=True, exist_ok=True)
 
             print(f"\nSyncing: {data_dir}")
-            print(f"   From: {remote_source}")
-            print(f"   To:   {local_dest}\n")
+            print(f"   From: {self._get_remote_path(data_dir)}")
+            print(f"   To:   {local_dest}")
 
-            cmd = self._build_rsync_cmd(
+            if dry_run:
+                print(f"   Would sync {data_dir}")
+                continue
+
+            # Build and run scp command
+            cmd = self._build_scp_cmd(
                 source=remote_source,
-                dest=local_dest,
-                dry_run=dry_run,
-                direction="pull"
+                dest=str(local_dest)
             )
 
             try:
+                print(f"   Running: {' '.join(cmd[:4])} ...")
+                print(f"   (This may take a while for large datasets...)")
                 result = subprocess.run(
                     cmd,
                     check=True,
-                    capture_output=False,
+                    stderr=subprocess.PIPE,  # Capture only errors, let stdout show progress
                     text=True
                 )
-
-                if dry_run:
-                    print(f"   Would sync {data_dir}")
-                else:
-                    print(f"   Successfully synced {data_dir}")
+                print(f"   Successfully synced {data_dir}")
 
             except subprocess.CalledProcessError as e:
-                print(f"   ERROR: Failed to sync {data_dir}: {e}")
+                print(f"   ERROR: Failed to sync {data_dir}")
+                if e.stderr:
+                    print(f"   {e.stderr.strip()}")
                 success = False
             except FileNotFoundError:
-                print(f"   ERROR: rsync not found. Please install rsync.")
-                if self.is_windows:
-                    print(f"   Windows: Install via Git Bash, WSL, or Cygwin")
-                    print(f"   Or use: choco install rsync (if you have Chocolatey)")
+                print(f"   ERROR: scp not found. Please ensure SSH is installed.")
                 return False
 
         print("\n" + "="*70)
@@ -208,10 +188,10 @@ class SyncTool:
 
     def push_data(self, dry_run: bool = False) -> bool:
         """
-        Push data FROM local TO server.
+        Push data FROM local TO server using SCP.
 
         Args:
-            dry_run: If True, only show what would be transferred
+            dry_run: If True, only show what would be synced (doesn't transfer)
 
         Returns:
             True if successful
@@ -221,7 +201,7 @@ class SyncTool:
         print("="*70)
 
         if dry_run:
-            print("DRY RUN MODE - showing what would be transferred\n")
+            print("DRY RUN MODE - no files will be transferred\n")
 
         # Check if local data exists
         has_data = False
@@ -238,56 +218,50 @@ class SyncTool:
         success = True
 
         for data_dir in self.sync_config['data_dirs']:
-            local_source_path = Path.cwd() / data_dir
-            remote_dest = self._get_remote_path(data_dir)
+            local_source = Path.cwd() / data_dir
 
             # Check if local dir exists
-            if not local_source_path.exists():
+            if not local_source.exists():
                 print(f"\nSkipping {data_dir} (not found locally)")
                 continue
 
-            # Convert Windows path to Cygwin-style path for rsync
-            if self.is_windows:
-                # Convert C:\path to /c/path
-                local_source = str(local_source_path)
-                if len(local_source) >= 2 and local_source[1] == ':':
-                    drive = local_source[0].lower()
-                    path = local_source[2:].replace('\\', '/')
-                    local_source = f"/{drive}{path}"
-            else:
-                local_source = str(local_source_path)
+            # Remote destination
+            remote_dest = self._get_remote_path(data_dir.rstrip('/'))
 
             print(f"\nSyncing: {data_dir}")
             print(f"   From: {local_source}")
-            print(f"   To:   {remote_dest}\n")
+            print(f"   To:   {remote_dest}")
 
-            cmd = self._build_rsync_cmd(
-                source=local_source,
-                dest=remote_dest,
-                dry_run=dry_run,
-                direction="push"
+            if dry_run:
+                print(f"   Would sync {data_dir}")
+                continue
+
+            # Build and run scp command (copy contents with /*)
+            local_source_contents = str(local_source / '*')
+            cmd = self._build_scp_cmd(
+                source=local_source_contents,
+                dest=remote_dest
             )
 
             try:
+                print(f"   Running: {' '.join(cmd[:4])} ...")
+                print(f"   (This may take a while for large datasets...)")
                 result = subprocess.run(
                     cmd,
                     check=True,
-                    capture_output=False,
-                    text=True
+                    stderr=subprocess.PIPE,  # Capture only errors, let stdout show progress
+                    text=True,
+                    shell=self.is_windows  # Need shell on Windows for glob expansion
                 )
-
-                if dry_run:
-                    print(f"   Would sync {data_dir}")
-                else:
-                    print(f"   Successfully synced {data_dir}")
+                print(f"   Successfully synced {data_dir}")
 
             except subprocess.CalledProcessError as e:
-                print(f"   ERROR: Failed to sync {data_dir}: {e}")
+                print(f"   ERROR: Failed to sync {data_dir}")
+                if e.stderr:
+                    print(f"   {e.stderr.strip()}")
                 success = False
             except FileNotFoundError:
-                print(f"   ERROR: rsync not found. Please install rsync.")
-                if self.is_windows:
-                    print(f"   Windows: Install via Git Bash, WSL, or Cygwin")
+                print(f"   ERROR: scp not found. Please ensure SSH is installed.")
                 return False
 
         print("\n" + "="*70)
