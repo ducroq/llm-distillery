@@ -1,19 +1,48 @@
 #!/usr/bin/env python3
 """
-Generic model calibration: Compare Claude vs Gemini on ANY semantic filter prompt.
+Oracle Calibration: Compare LLM models for semantic filters with random sampling.
 
-This script labels a small sample (default 100 articles) with both Claude and Gemini,
-then generates a detailed comparison report to help you decide:
+This script selects a RANDOM sample (default 100 articles) and labels it with
+multiple LLM models, then generates a detailed comparison report to help you decide:
 - Which LLM to use for large-scale labeling (cost vs quality tradeoff)
+- Whether dimension-level judgments align between models
 - Whether tier distributions match expectations
-- Whether the prompt framework rules are being followed correctly
+- How much the prefilter reduces labeling costs
 
-Usage:
-    python -m ground_truth.calibrate_models \
+Features:
+- Random sampling with reproducible seed (--seed)
+- Automatic comprehensive text cleaning (Unicode, HTML, BiDi marks, etc.)
+- Prefilter support (filter packages only)
+- Dimension-level correlation analysis
+- Cost-saving estimates
+
+Usage (Recommended - Filter Package):
+    python -m ground_truth.calibrate_oracle \
+        --filter filters/uplifting/v1 \
+        --source "datasets/raw/master_dataset_2025*.jsonl" \
+        --models gemini-flash,gemini-pro \
+        --sample-size 100 \
+        --seed 42
+
+Usage (Legacy - Direct Prompt):
+    python -m ground_truth.calibrate_oracle \
         --prompt prompts/sustainability.md \
         --source ../content-aggregator/data/collected/articles.jsonl \
-        --sample-size 100 \
-        --output reports/sustainability_calibration.md
+        --models claude,gemini-flash \
+        --sample-size 100
+
+Key Parameters:
+    --filter          : Filter package path (includes prefilter + prompt)
+    --source          : JSONL file(s) - supports glob patterns
+    --models          : Comma-separated list of models to compare
+    --sample-size     : Number of articles to randomly sample (default: 100)
+    --seed            : Random seed for reproducibility (default: 42)
+
+Output:
+    - Markdown report with statistics and comparisons
+    - Dimension-level correlation analysis (if matplotlib available)
+    - Visualization plots (scatter plots, correlation heatmap)
+    - Prefilter efficiency statistics
 """
 
 import json
