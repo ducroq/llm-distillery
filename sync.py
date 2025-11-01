@@ -50,8 +50,8 @@ class SyncTool:
         config_file = Path(config_path)
 
         if not config_file.exists():
-            print(f"❌ Config file not found: {config_path}")
-            print(f"\n📝 Please create {config_path} from sync_config.example.json")
+            print(f"ERROR: Config file not found: {config_path}")
+            print(f"\nPlease create {config_path} from sync_config.example.json")
             print("\nExample config:")
             print("  cp sync_config.example.json sync_config.json")
             print("  # Edit sync_config.json with your server details")
@@ -86,13 +86,19 @@ class SyncTool:
         cmd = ['rsync', '-avz', '--progress']
 
         # Add SSH options
-        ssh_opts = ['-e']
-        ssh_cmd = f"ssh -p {self.remote['port']}"
+        # Use default SSH config and known_hosts to match normal ssh behavior
+        ssh_cmd = f"ssh -p {self.remote['port']} -o StrictHostKeyChecking=accept-new"
 
         if self.ssh_config.get('key_path'):
-            ssh_cmd += f" -i {self.ssh_config['key_path']}"
+            key_path = self.ssh_config['key_path']
+            # Convert Windows path to Cygwin path for rsync
+            if self.is_windows and len(key_path) >= 2 and key_path[1] == ':':
+                drive = key_path[0].lower()
+                path = key_path[2:].replace('\\', '/')
+                key_path = f"/{drive}{path}"
+            ssh_cmd += f" -i {key_path}"
 
-        cmd.append(ssh_cmd)
+        cmd.extend(['-e', ssh_cmd])
 
         # Add excludes
         for pattern in self.sync_config.get('exclude_patterns', []):
@@ -129,22 +135,33 @@ class SyncTool:
             True if successful
         """
         print("="*70)
-        print("📥 PULL DATA FROM SERVER")
+        print("PULL DATA FROM SERVER")
         print("="*70)
 
         if dry_run:
-            print("🔍 DRY RUN MODE - showing what would be transferred\n")
+            print("DRY RUN MODE - showing what would be transferred\n")
 
         success = True
 
         for data_dir in self.sync_config['data_dirs']:
             remote_source = self._get_remote_path(data_dir)
-            local_dest = str(Path.cwd() / data_dir)
+            local_dest_path = Path.cwd() / data_dir
+
+            # Convert Windows path to Cygwin-style path for rsync
+            if self.is_windows:
+                # Convert C:\path to /c/path
+                local_dest = str(local_dest_path)
+                if len(local_dest) >= 2 and local_dest[1] == ':':
+                    drive = local_dest[0].lower()
+                    path = local_dest[2:].replace('\\', '/')
+                    local_dest = f"/{drive}{path}"
+            else:
+                local_dest = str(local_dest_path)
 
             # Ensure local dir exists
-            Path(local_dest).parent.mkdir(parents=True, exist_ok=True)
+            local_dest_path.parent.mkdir(parents=True, exist_ok=True)
 
-            print(f"\n📁 Syncing: {data_dir}")
+            print(f"\nSyncing: {data_dir}")
             print(f"   From: {remote_source}")
             print(f"   To:   {local_dest}\n")
 
@@ -164,27 +181,27 @@ class SyncTool:
                 )
 
                 if dry_run:
-                    print(f"   ✓ Would sync {data_dir}")
+                    print(f"   Would sync {data_dir}")
                 else:
-                    print(f"   ✅ Successfully synced {data_dir}")
+                    print(f"   Successfully synced {data_dir}")
 
             except subprocess.CalledProcessError as e:
-                print(f"   ❌ Failed to sync {data_dir}: {e}")
+                print(f"   ERROR: Failed to sync {data_dir}: {e}")
                 success = False
             except FileNotFoundError:
-                print(f"   ❌ rsync not found. Please install rsync.")
+                print(f"   ERROR: rsync not found. Please install rsync.")
                 if self.is_windows:
-                    print(f"   💡 Windows: Install via Git Bash, WSL, or Cygwin")
-                    print(f"   💡 Or use: choco install rsync (if you have Chocolatey)")
+                    print(f"   Windows: Install via Git Bash, WSL, or Cygwin")
+                    print(f"   Or use: choco install rsync (if you have Chocolatey)")
                 return False
 
         print("\n" + "="*70)
         if dry_run:
-            print("🔍 DRY RUN COMPLETE - no files were transferred")
+            print("DRY RUN COMPLETE - no files were transferred")
         elif success:
-            print("✅ DATA PULL COMPLETE")
+            print("DATA PULL COMPLETE")
         else:
-            print("⚠️  DATA PULL COMPLETED WITH ERRORS")
+            print("WARNING: DATA PULL COMPLETED WITH ERRORS")
         print("="*70 + "\n")
 
         return success
@@ -200,11 +217,11 @@ class SyncTool:
             True if successful
         """
         print("="*70)
-        print("📤 PUSH DATA TO SERVER")
+        print("PUSH DATA TO SERVER")
         print("="*70)
 
         if dry_run:
-            print("🔍 DRY RUN MODE - showing what would be transferred\n")
+            print("DRY RUN MODE - showing what would be transferred\n")
 
         # Check if local data exists
         has_data = False
@@ -215,21 +232,32 @@ class SyncTool:
                 break
 
         if not has_data:
-            print("⚠️  No local data directories found. Nothing to push.")
+            print("WARNING: No local data directories found. Nothing to push.")
             return True
 
         success = True
 
         for data_dir in self.sync_config['data_dirs']:
-            local_source = str(Path.cwd() / data_dir)
+            local_source_path = Path.cwd() / data_dir
             remote_dest = self._get_remote_path(data_dir)
 
             # Check if local dir exists
-            if not Path(local_source).exists():
-                print(f"\n📁 Skipping {data_dir} (not found locally)")
+            if not local_source_path.exists():
+                print(f"\nSkipping {data_dir} (not found locally)")
                 continue
 
-            print(f"\n📁 Syncing: {data_dir}")
+            # Convert Windows path to Cygwin-style path for rsync
+            if self.is_windows:
+                # Convert C:\path to /c/path
+                local_source = str(local_source_path)
+                if len(local_source) >= 2 and local_source[1] == ':':
+                    drive = local_source[0].lower()
+                    path = local_source[2:].replace('\\', '/')
+                    local_source = f"/{drive}{path}"
+            else:
+                local_source = str(local_source_path)
+
+            print(f"\nSyncing: {data_dir}")
             print(f"   From: {local_source}")
             print(f"   To:   {remote_dest}\n")
 
@@ -249,26 +277,26 @@ class SyncTool:
                 )
 
                 if dry_run:
-                    print(f"   ✓ Would sync {data_dir}")
+                    print(f"   Would sync {data_dir}")
                 else:
-                    print(f"   ✅ Successfully synced {data_dir}")
+                    print(f"   Successfully synced {data_dir}")
 
             except subprocess.CalledProcessError as e:
-                print(f"   ❌ Failed to sync {data_dir}: {e}")
+                print(f"   ERROR: Failed to sync {data_dir}: {e}")
                 success = False
             except FileNotFoundError:
-                print(f"   ❌ rsync not found. Please install rsync.")
+                print(f"   ERROR: rsync not found. Please install rsync.")
                 if self.is_windows:
-                    print(f"   💡 Windows: Install via Git Bash, WSL, or Cygwin")
+                    print(f"   Windows: Install via Git Bash, WSL, or Cygwin")
                 return False
 
         print("\n" + "="*70)
         if dry_run:
-            print("🔍 DRY RUN COMPLETE - no files were transferred")
+            print("DRY RUN COMPLETE - no files were transferred")
         elif success:
-            print("✅ DATA PUSH COMPLETE")
+            print("DATA PUSH COMPLETE")
         else:
-            print("⚠️  DATA PUSH COMPLETED WITH ERRORS")
+            print("WARNING: DATA PUSH COMPLETED WITH ERRORS")
         print("="*70 + "\n")
 
         return success
@@ -276,16 +304,16 @@ class SyncTool:
     def status(self) -> bool:
         """Show what would be synced (dry run for both directions)."""
         print("="*70)
-        print("📊 SYNC STATUS")
+        print("SYNC STATUS")
         print("="*70)
         print()
 
-        print("🔍 Checking what would be PULLED from server...\n")
+        print("Checking what would be PULLED from server...\n")
         self.pull_data(dry_run=True)
 
         print("\n" + "-"*70 + "\n")
 
-        print("🔍 Checking what would be PUSHED to server...\n")
+        print("Checking what would be PUSHED to server...\n")
         self.push_data(dry_run=True)
 
         return True
