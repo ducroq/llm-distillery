@@ -1,0 +1,26 @@
+{
+  "remote": {
+    "host": "your-server.example.com",
+    "user": "your-username",
+    "port": 22,
+    "remote_path": "/home/your-username/llm-distillery"
+  },
+  "sync": {
+    "data_dirs": [
+      "datasets/",
+      "reports/"
+    ],
+    "exclude_patterns": [
+      "*.pyc",
+      "__pycache__/",
+      ".git/",
+      "venv/",
+      ".env",
+      "*.log"
+    ]
+  },
+  "ssh": {
+    "key_path": null,
+    "comment": "Optional: path to SSH private key. If null, uses default SSH auth"
+  }
+}
