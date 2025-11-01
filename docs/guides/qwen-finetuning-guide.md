@@ -225,9 +225,153 @@ model_id = "Qwen/Qwen2.5-3B-Instruct"  # Only 6GB
 
 ## Data Preparation
 
-### Ground Truth Generation
+### Step 1: Generate Training Data with LLM Distillery
 
-You're using Gemini Flash to generate ground truth labels. Here's the recommended format:
+**IMPORTANT:** Generate training labels BEFORE fine-tuning. Use the `batch_labeler` to create high-quality training data.
+
+#### Recommended Command (Uplifting Agent)
+
+```bash
+# On your dedicated labeling machine
+cd llm-distillery
+
+python -m ground_truth.batch_labeler \
+  --filter filters/uplifting/v1 \
+  --source "datasets/raw/master_dataset_2025*.jsonl" \
+  --output-dir datasets/uplifting_training_1500 \
+  --llm gemini-flash \
+  --batch-size 50 \
+  --target-count 1500 \
+  --random-sample \
+  --seed 42
+```
+
+**Why These Parameters?**
+
+| Parameter | Value | Reason |
+|-----------|-------|--------|
+| `--filter` | `filters/uplifting/v1` | Uses filter package with prefilter + prompt |
+| `--source` | `"datasets/raw/master_dataset_2025*.jsonl"` | Glob pattern matches all 2025 files |
+| `--llm` | `gemini-flash` | Cost-effective ($0.90/5k vs Claude $45/5k) |
+| `--batch-size` | `50` | Good balance (API efficiency vs memory) |
+| `--target-count` | `1500` | Recommended for Qwen 7B (see below) |
+| `--random-sample` | ✓ | **CRITICAL** for unbiased training data |
+| `--seed` | `42` | Reproducibility (same seed = same articles) |
+
+**Sample Size Recommendations:**
+
+| Training Set Size | Time per Agent | Quality | Use Case |
+|-------------------|----------------|---------|----------|
+| 500 examples | 2-3 hours | Minimum viable | Quick testing |
+| **1,000-2,000 examples** | 3-8 hours | **Recommended** | **Production** |
+| 5,000 examples | 15-20 hours | Maximum tested | Overkill for 7B |
+
+**Why Random Sampling is Critical:**
+
+Without `--random-sample`, articles are processed sequentially:
+- ❌ Temporal bias: First 1,500 may all be from same week
+- ❌ Source bias: May cluster by RSS feed
+- ❌ Topic bias: Similar articles grouped together
+- ❌ Poor training data diversity
+
+With `--random-sample`:
+- ✅ Fair sampling across all time periods
+- ✅ Diverse sources and topics
+- ✅ Representative of full dataset
+- ✅ Better model generalization
+
+**Automatic Data Cleaning:**
+
+All articles are automatically cleaned before labeling:
+- ✅ Unicode sanitization (removes surrogates: `\ud800`)
+- ✅ HTML entity decoding (`&#39;` → `'`, `&nbsp;` → space)
+- ✅ HTML tag removal (`<script>`, `<b>`, etc.)
+- ✅ Zero-width character removal (invisible text: `\u200B`, `\u200C`)
+- ✅ BiDi mark removal (security: prevents text manipulation)
+- ✅ Whitespace normalization
+
+This ensures robust handling regardless of data origin.
+
+**Expected Output:**
+
+```
+Loading all articles from 3 source file(s)...
+
+Article loading statistics:
+  Total articles read: 45,123
+  Already processed: 0
+  Blocked by prefilter: 2,341 (5.2%)
+  Available for labeling: 42,782
+
+Shuffled 42,782 articles (seed=42)
+Selected first 1,500 articles for labeling
+
+Batch 1 Summary:
+   Processed: 50
+   Failed: 0
+   Total labeled so far: 50/1,500
+
+...
+
+Batch 30 Summary:
+   Processed: 50
+   Failed: 1
+   Total labeled so far: 1,500/1,500
+
+Batch Labeling Complete!
+Articles labeled this run: 1,500
+Total articles labeled: 1,500
+Output directory: datasets/uplifting_training_1500/uplifting
+```
+
+**Cost Estimate:**
+- 1,500 articles × $0.00018 per article = **$0.27**
+- 5,000 articles × $0.00018 per article = **$0.90**
+
+**Output Location:**
+- Labels: `datasets/uplifting_training_1500/uplifting/labeled_articles.jsonl`
+- Logs: `datasets/uplifting_training_1500/uplifting/distillation.log`
+- Metrics: `datasets/uplifting_training_1500/uplifting/metrics.jsonl`
+
+### Step 2: Verify Training Data Quality
+
+```bash
+# Count labeled articles
+wc -l datasets/uplifting_training_1500/uplifting/labeled_articles.jsonl
+
+# Check for dimension scores (NOT just tier labels)
+head -2 datasets/uplifting_training_1500/uplifting/labeled_articles.jsonl | python -m json.tool | grep -E '"(agency|progress|collective_benefit|connection|innovation|justice|resilience|wonder)"'
+
+# Review logs for errors
+tail -50 datasets/uplifting_training_1500/uplifting/distillation.log
+```
+
+**Expected dimension scores format:**
+```json
+{
+  "id": "article_123",
+  "title": "Community builds water pipeline in rural Kenya",
+  "text": "Full article text here...",
+  "analysis": {
+    "agency": 9,
+    "progress": 9,
+    "collective_benefit": 10,
+    "connection": 8,
+    "innovation": 7,
+    "justice": 6,
+    "resilience": 8,
+    "wonder": 5,
+    "reasoning": "Community took effective action...",
+    "tier": 3
+  }
+}
+```
+
+**Important:** The 8 dimension scores (agency, progress, etc.) are your training targets, NOT the tier label. Tiers are just post-processing arithmetic.
+
+### Ground Truth Generation (Legacy Reference)
+
+You're using Gemini Flash to generate ground truth labels. Here's the format:
 
 **Input format (from Gemini Flash):**
 ```json
@@ -262,7 +406,11 @@ You're using Gemini Flash to generate ground truth labels. Here's the recommende
 }
 ```
 
-### Data Conversion Script
+### Step 3: Convert to Unsloth Training Format
+
+Now convert the labeled data from batch_labeler to Unsloth's training format.
+
+**Create conversion script:**
 
 ```python
 # create_training_data.py
@@ -270,44 +418,44 @@ import json
 from pathlib import Path
 from typing import Literal
 
-def convert_gemini_to_training_format(
+def convert_to_training_format(
     input_file: str,
-    output_file: str, 
-    agent_type: Literal["uplifting", "sustainability"],
+    output_file: str,
+    filter_name: str,
     system_prompt_file: str
 ):
     """
-    Convert Gemini-labeled data to Unsloth training format
-    
+    Convert batch_labeler output to Unsloth training format.
+
     Args:
-        input_file: Path to JSONL file with Gemini labels
+        input_file: Path to labeled_articles.jsonl from batch_labeler
         output_file: Path for output training data
-        agent_type: Which agent to prepare data for
-        system_prompt_file: Path to markdown file with system prompt
+        filter_name: Filter name (e.g., "uplifting", "sustainability")
+        system_prompt_file: Path to filter's prompt file
     """
-    
-    # Load system prompt from markdown file
+
+    # Load system prompt from filter package
     with open(system_prompt_file, 'r') as f:
         system_prompt = f.read()
-    
-    # Determine which scores to use
-    scores_key = f"{agent_type}_scores"
-    
+
     training_data = []
     skipped = 0
-    
-    print(f"Converting {agent_type} data from {input_file}...")
-    
-    with open(input_file, 'r') as f:
+
+    print(f"Converting {filter_name} data from {input_file}...")
+
+    with open(input_file, 'r', encoding='utf-8') as f:
         for line_num, line in enumerate(f, 1):
             try:
                 item = json.loads(line)
-                
-                # Skip if scores are missing
-                if scores_key not in item:
+
+                # batch_labeler puts analysis results in 'analysis' field
+                if 'analysis' not in item:
+                    print(f"⚠️  Warning: No analysis field on line {line_num}")
                     skipped += 1
                     continue
-                
+
+                analysis = item['analysis']
+
                 # Create training example in chat format
                 example = {
                     "messages": [
@@ -316,17 +464,17 @@ def convert_gemini_to_training_format(
                             "content": system_prompt
                         },
                         {
-                            "role": "user", 
-                            "content": f"ARTICLE:\nTitle: {item.get('title', 'No title')}\nText: {item['text']}"
+                            "role": "user",
+                            "content": f"ARTICLE:\nTitle: {item.get('title', 'No title')}\nText: {item.get('text', item.get('content', ''))}"
                         },
                         {
                             "role": "assistant",
-                            "content": json.dumps(item[scores_key], indent=2)
+                            "content": json.dumps(analysis, indent=2)
                         }
                     ]
                 }
                 training_data.append(example)
-                
+
             except json.JSONDecodeError:
                 print(f"⚠️  Warning: Invalid JSON on line {line_num}")
                 skipped += 1
@@ -335,16 +483,16 @@ def convert_gemini_to_training_format(
                 print(f"⚠️  Warning: Missing key {e} on line {line_num}")
                 skipped += 1
                 continue
-    
+
     # Save as JSONL
-    with open(output_file, 'w') as f:
+    with open(output_file, 'w', encoding='utf-8') as f:
         for example in training_data:
             f.write(json.dumps(example) + '\n')
-    
+
     print(f"✅ Created {len(training_data)} training examples")
     print(f"⚠️  Skipped {skipped} invalid entries")
     print(f"📁 Saved to {output_file}")
-    
+
     return len(training_data)
 
 def split_train_val(
@@ -384,41 +532,44 @@ def split_train_val(
 
 # Usage
 if __name__ == "__main__":
-    # Convert uplifting data
-    convert_gemini_to_training_format(
-        input_file="gemini_labels.jsonl",
+    # Convert uplifting training data from batch_labeler output
+    convert_to_training_format(
+        input_file="datasets/uplifting_training_1500/uplifting/labeled_articles.jsonl",
         output_file="uplifting_full.jsonl",
-        agent_type="uplifting",
-        system_prompt_file="uplifting.md"
+        filter_name="uplifting",
+        system_prompt_file="filters/uplifting/v1/prompt-compressed.md"
     )
-    
-    # Split into train/val
+
+    # Split into train/val (90/10 split)
     split_train_val(
         input_file="uplifting_full.jsonl",
         train_file="uplifting_train.jsonl",
         val_file="uplifting_val.jsonl",
         val_split=0.1
     )
-    
-    # Repeat for sustainability
-    convert_gemini_to_training_format(
-        input_file="gemini_labels.jsonl",
-        output_file="sustainability_full.jsonl",
-        agent_type="sustainability",
-        system_prompt_file="sustainability.md"
-    )
-    
-    split_train_val(
-        input_file="sustainability_full.jsonl",
-        train_file="sustainability_train.jsonl",
-        val_file="sustainability_val.jsonl",
-        val_split=0.1
-    )
+
+    print("\n✅ Training data ready:")
+    print("  - uplifting_train.jsonl (90% of data)")
+    print("  - uplifting_val.jsonl (10% of data)")
 ```
 
-**Run the conversion:**
+**Run the conversion on your fine-tuning machine:**
+
 ```bash
+# Transfer labeled data from labeling machine
+scp labeling-machine:llm-distillery/datasets/uplifting_training_1500/uplifting/labeled_articles.jsonl \
+    /root/qwen-finetuning/
+
+# Convert to training format
 python3 create_training_data.py
+
+# Expected output:
+# Converting uplifting data from datasets/uplifting_training_1500/uplifting/labeled_articles.jsonl...
+# ✅ Created 1,500 training examples
+# ⚠️  Skipped 0 invalid entries
+# 📁 Saved to uplifting_full.jsonl
+# 📊 Train: 1,350 examples
+# 📊 Val: 150 examples
 ```
 
 ### Data Quality Checks
