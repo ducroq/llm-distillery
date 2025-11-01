@@ -225,9 +225,158 @@ model_id = "Qwen/Qwen2.5-3B-Instruct"  # Only 6GB
 
 ## Data Preparation
 
+### Step 0: Oracle Calibration (Recommended First Step)
+
+**IMPORTANT:** Before generating thousands of training labels, calibrate your oracle models to choose the best cost/quality tradeoff.
+
+Oracle calibration compares different LLM models (Gemini Flash, Gemini Pro, Claude, etc.) on a small random sample (typically 100 articles) to help you decide which model to use for large-scale batch labeling.
+
+#### Why Calibrate First?
+
+The choice of oracle model significantly impacts:
+- **Training data quality**: Better oracle → better fine-tuned model
+- **Cost**: Gemini Flash ($0.90/5k) vs Claude Sonnet ($45/5k) = 50× difference
+- **Labeling time**: Flash is faster but may be less accurate on edge cases
+
+**Without calibration:** You might waste money on expensive labels you don't need, or compromise quality with a cheap model that's not good enough.
+
+**With calibration:** You make an informed decision based on actual data from your domain.
+
+#### Recommended Calibration Command
+
+```bash
+cd llm-distillery
+
+python -m ground_truth.calibrate_oracle \
+  --filter filters/uplifting/v1 \
+  --source "datasets/raw/master_dataset_2025*.jsonl" \
+  --models gemini-flash,gemini-pro \
+  --sample-size 100 \
+  --seed 42
+```
+
+**Key Parameters:**
+
+| Parameter | Value | Reason |
+|-----------|-------|--------|
+| `--filter` | `filters/uplifting/v1` | Uses filter package (includes prefilter + prompt) |
+| `--source` | `"datasets/raw/master_dataset_2025*.jsonl"` | Glob pattern for all source files |
+| `--models` | `gemini-flash,gemini-pro` | Compare two models (add `claude-sonnet` if budget allows) |
+| `--sample-size` | `100` | Good balance (reliable stats vs cost) |
+| `--seed` | `42` | Reproducibility (same articles each run) |
+
+**Features (Automatic):**
+- ✅ Random sampling across all source files (no temporal/source bias)
+- ✅ Comprehensive text cleaning (Unicode, HTML, BiDi marks, etc.)
+- ✅ Prefilter efficiency statistics (how many articles blocked)
+- ✅ Dimension-level correlation analysis
+- ✅ Cost-saving estimates
+
+#### Expected Output
+
+```
+Oracle Calibration Report
+=========================
+
+Models Compared: gemini-flash, gemini-pro
+Sample Size: 100 articles (randomly sampled, seed=42)
+
+Prefilter Statistics:
+  Articles read: 100
+  Blocked by prefilter: 8 (8.0%)
+  Sent to LLM: 92 (92.0%)
+  Cost savings: ~$0.14 per 1,000 articles
+
+Dimension-Level Correlation (Pearson r):
+  agency:              0.94 (p < 0.001) - Excellent agreement
+  progress:            0.91 (p < 0.001) - Excellent agreement
+  collective_benefit:  0.89 (p < 0.001) - Good agreement
+  connection:          0.85 (p < 0.001) - Good agreement
+  innovation:          0.82 (p < 0.001) - Good agreement
+  justice:             0.78 (p < 0.01)  - Moderate agreement
+  resilience:          0.93 (p < 0.001) - Excellent agreement
+  wonder:              0.87 (p < 0.001) - Good agreement
+
+Mean Absolute Error (MAE):
+  gemini-flash vs gemini-pro:  0.72 points (averaged across dimensions)
+
+Tier Distribution:
+  Model          Tier 1  Tier 2  Tier 3  Tier 4
+  gemini-flash      12      28      35      17
+  gemini-pro        10      31      33      18
+
+Cost Estimate (for 1,500 articles):
+  gemini-flash:  $0.27
+  gemini-pro:    $2.25
+
+Recommendation:
+  ✅ Use gemini-flash for batch labeling
+  - High correlation (r > 0.85 on most dimensions)
+  - Low MAE (< 1.0 acceptable for training data)
+  - 8.3× cheaper than gemini-pro
+  - Similar tier distributions
+```
+
+#### How to Interpret Results
+
+**Dimension Correlation (Pearson r):**
+- **r > 0.90**: Excellent agreement - models scoring very similarly
+- **r > 0.80**: Good agreement - acceptable for training data
+- **r < 0.80**: Moderate agreement - consider using higher quality model
+- **r < 0.70**: Poor agreement - definitely use higher quality model
+
+**Mean Absolute Error (MAE):**
+- **MAE < 1.0**: Models agree within ~1 point on average - acceptable
+- **MAE < 0.5**: Very close agreement - excellent
+- **MAE > 1.5**: Significant differences - use higher quality model
+
+**Decision Matrix:**
+
+| Correlation | MAE | Recommendation |
+|-------------|-----|----------------|
+| r > 0.85 | < 1.0 | ✅ **Use cheaper model** (Gemini Flash) |
+| r > 0.80 | < 1.5 | ⚠️ **Consider mid-tier** (Gemini Flash for most, Pro for edge cases) |
+| r < 0.80 | > 1.5 | ❌ **Use expensive model** (Gemini Pro or Claude) |
+
+**Special Considerations:**
+- **High-stakes dimensions**: If certain dimensions are critical (e.g., `justice` for ethical filtering), consider using higher quality model even if overall correlation is good
+- **Edge cases**: Look at scatter plots - if expensive model catches important edge cases that cheap model misses, it may be worth the cost
+- **Budget constraints**: Even r=0.75 can work for initial training; you can always re-label later with better model
+
+#### Typical Workflow
+
+```bash
+# Step 0a: Calibrate with cheap vs mid-tier
+python -m ground_truth.calibrate_oracle \
+  --filter filters/uplifting/v1 \
+  --source "datasets/raw/*.jsonl" \
+  --models gemini-flash,gemini-pro \
+  --sample-size 100
+
+# Review results → Gemini Flash looks good (r > 0.85)
+
+# Step 0b: (Optional) Verify Flash against Claude on subset
+python -m ground_truth.calibrate_oracle \
+  --filter filters/uplifting/v1 \
+  --source "datasets/raw/*.jsonl" \
+  --models gemini-flash,claude-sonnet \
+  --sample-size 50
+
+# Review → Flash still good, proceed with Flash
+
+# Step 1: Generate training data with chosen model (see next section)
+```
+
+**Time & Cost:**
+- **Calibration time**: 5-10 minutes for 100 articles (2-3 models)
+- **Calibration cost**: $0.05-0.20 (cheap insurance!)
+- **Potential savings**: Choosing right model can save $100s on batch labeling
+
+---
+
 ### Step 1: Generate Training Data with LLM Distillery
 
-**IMPORTANT:** Generate training labels BEFORE fine-tuning. Use the `batch_labeler` to create high-quality training data.
+**IMPORTANT:** After calibrating your oracle model (Step 0), generate training labels using your chosen model.
 
 #### Recommended Command (Uplifting Agent)
 
