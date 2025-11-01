@@ -11,7 +11,7 @@ This guide explains how to develop locally with Claude Code and run batch jobs o
 
 ## Solution: SSH Sync Tool
 
-The `sync.py` script uses rsync over SSH to efficiently sync data while keeping your git repo clean.
+The `sync.py` script uses SCP (SSH copy) to efficiently sync data between machines while keeping your git repo clean.
 
 ---
 
@@ -79,16 +79,16 @@ nano sync_config.json     # Linux/Mac
 
 **Security Note:** `sync_config.json` is in `.gitignore` - it will NOT be committed to git.
 
-### 3. Install rsync
+### 3. Verify SSH/SCP is installed
 
 **Windows:**
-- Already have Git? rsync is included in Git Bash
-- Or install via Chocolatey: `choco install rsync`
-- Or use WSL (Windows Subsystem for Linux)
+- OpenSSH is included in Windows 10/11 by default
+- Test it: `ssh -V` and `scp` should work in CMD/PowerShell
+- If not installed: Settings → Apps → Optional Features → Add "OpenSSH Client"
 
 **Linux/Mac:**
-- Usually pre-installed
-- If not: `sudo apt install rsync` (Ubuntu) or `brew install rsync` (Mac)
+- SSH/SCP is pre-installed
+- If not: `sudo apt install openssh-client` (Ubuntu) or `brew install openssh` (Mac)
 
 ### 4. Clone Repo on Server
 
@@ -244,29 +244,26 @@ python sync.py full-sync
 
 ## Troubleshooting
 
-### "rsync: command not found"
+### "scp: command not found"
 
 **Windows:**
 ```bash
-# Option 1: Use Git Bash (already has rsync)
-# Open Git Bash and run sync.py from there
+# OpenSSH should be pre-installed on Windows 10/11
+# If not, install it:
+# Settings → Apps → Optional Features → Add "OpenSSH Client"
 
-# Option 2: Install via Chocolatey
-choco install rsync
-
-# Option 3: Use WSL
-wsl
-cd /mnt/c/local_dev/llm-distillery
-python3 sync.py pull
+# Test if it works:
+ssh -V
+scp
 ```
 
 **Linux/Mac:**
 ```bash
 # Ubuntu/Debian
-sudo apt install rsync
+sudo apt install openssh-client
 
 # Mac
-brew install rsync
+brew install openssh
 ```
 
 ### "Permission denied (publickey)"
@@ -283,15 +280,23 @@ ssh-copy-id your-username@your-server.example.com
 # Or manually: copy ~/.ssh/id_ed25519.pub contents to server's ~/.ssh/authorized_keys
 ```
 
-### Sync is very slow
+### Sync appears to be stuck
 
-Large datasets take time. Use `--dry-run` first to see how much data:
+**SCP is silent during transfers** - you won't see progress output, but it IS working. Large datasets take time (100s of MB can take several minutes).
+
+Use `--dry-run` first to check what will be transferred:
 
 ```bash
 python sync.py pull --dry-run
 ```
 
-rsync is incremental - subsequent syncs are much faster.
+The sync will show:
+```
+Running: scp -r -p ...
+(This may take a while for large datasets...)
+```
+
+Then it will be silent while transferring. Wait for "Successfully synced" message.
 
 ### "Config file not found"
 
@@ -315,11 +320,11 @@ notepad sync_config.json
 - Merge conflicts on binary files
 - GitHub has 100 MB file limit
 
-✅ **rsync is designed for file sync:**
-- Incremental transfers (only changed parts)
-- Fast for large files
-- Efficient compression
-- Resume on interruption
+✅ **SCP (SSH copy) is designed for file transfer:**
+- Simple and reliable
+- Works anywhere SSH works
+- Built-in compression
+- Cross-platform (Windows, Linux, Mac)
 
 ### Alternative: Git LFS
 
@@ -339,10 +344,10 @@ git lfs track "datasets/**/*.jsonl"
 
 **Cons:**
 - Requires GitHub LFS quota (paid)
-- Slower than rsync for frequent changes
+- Slower than SCP for frequent changes
 - More complex setup
 
-**Verdict:** rsync is simpler and free for our use case.
+**Verdict:** SCP is simpler and free for our use case.
 
 ---
 
