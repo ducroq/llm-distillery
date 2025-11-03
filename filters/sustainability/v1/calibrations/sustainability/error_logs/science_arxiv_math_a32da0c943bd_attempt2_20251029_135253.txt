@@ -1,0 +1,46 @@
+Article ID: science_arxiv_math_a32da0c943bd
+Attempt: 2
+Error: Invalid \escape: line 34 column 48 (char 1321)
+Timestamp: 2025-10-29T13:52:53.404508
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 1,
+  "technical_credibility": 7,
+  "economic_viability": 1,
+  "deployment_readiness": 1,
+  "systemic_impact": 2,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": false,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This is theoretical research in arithmetic geometry, developing a new framework for quantifying approximate alignment between morphisms. While the research is mathematically rigorous and peer-reviewed, it is at a very early stage with no concrete deployments or measurable outcomes related to sustainability. The application to generalized Howe curves over finite fields is a specific mathematical example, not a real-world deployment.",
+  "key_impact_metrics": [],
+  "technology_tags": ["Arithmetic Geometry", "{\'e}tale Homotopy Theory"],
+  "sdg_alignment": []
+}
+```

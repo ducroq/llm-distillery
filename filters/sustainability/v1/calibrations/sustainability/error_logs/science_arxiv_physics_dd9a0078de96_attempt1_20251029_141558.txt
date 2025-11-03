@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_dd9a0078de96
+Attempt: 1
+Error: Invalid \escape: line 32 column 124 (char 916)
+Timestamp: 2025-10-29T14:15:58.394146
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 2,
+  "deployment_readiness": 3,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": true
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "reasoning": "This research analyzes data from Parker Solar Probe and Solar Orbiter to understand the dissipation of Alfv\'enic fluctuations. While the research itself doesn't directly reduce GHG emissions, understanding energy transfer in the solar wind could potentially inform future technologies related to space-based solar power or space weather prediction, which could indirectly contribute to sustainability. The study uses observational data and theoretical models, lending credibility to the findings.",
+  "key_impact_metrics": ["Alfv\'en Mach number Ma", "Turbulent heating rate Q"],
+  "technology_tags": ["Space weather", "Plasma physics", "Solar wind"],
+  "sdg_alignment": [7]
+}
+```

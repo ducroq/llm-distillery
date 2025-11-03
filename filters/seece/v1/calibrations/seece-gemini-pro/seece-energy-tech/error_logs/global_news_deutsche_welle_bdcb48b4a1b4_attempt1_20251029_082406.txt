@@ -1,0 +1,64 @@
+Article ID: global_news_deutsche_welle_bdcb48b4a1b4
+Attempt: 1
+Error: Expecting ',' delimiter: line 53 column 4 (char 1398)
+Timestamp: 2025-10-29T08:24:06.980695
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "policy_action",
+  "innovation_stage": "scaling",
+  "climate_impact_potential": 4,
+  "technical_credibility": 1,
+  "economic_viability": 2,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 1,
+  "innovation_quality": 1,
+  "evidence_strength": 0,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": false,
+    "has_peer_review": false,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "seece_dimensions": {
+    "dutch_eu_policy_relevance": 5,
+    "industry_collaboration_potential": 1,
+    "educational_value": 2,
+    "applied_research_fit": 0,
+    "regional_impact_potential": 3
+  },
+  "seece_relevance_score": 3.2,
+  "priority_topics": {
+    "hydrogen_energy": false,
+    "grid_integration": false,
+    "mobility_electrification": true,
+    "building_efficiency": false,
+    "industrial_decarbonization": false,
+    "renewable_integration": false
+  },
+  "cross_cutting_topics": {
+    "power_electronics": false,
+    "sector_coupling": false,
+    "energy_data": false,
+    "circular_economy": false
+  },
+  "geographic_context": {
+    "dutch

@@ -23,6 +23,37 @@ class UpliftingPreFilterV1(BasePreFilter):
 
     VERSION = "1.0"
 
+    # Domain Exclusions
+    ACADEMIC_DOMAINS = [
+        'arxiv.org',
+        'biorxiv.org',
+        'eprint.iacr.org',
+        'mdpi.com',
+        'medrxiv.org',
+        'journals.plos.org',
+        'frontiersin.org',
+        'link.aps.org',
+    ]
+
+    VC_STARTUP_DOMAINS = [
+        'sifted.eu',
+        'tech.eu',
+        'techcrunch.com',
+        'crunchbase.com',
+        'producthunt.com',
+        'sequoiacap.com',
+        'blog.ycombinator.com',
+    ]
+
+    DEFENSE_DOMAINS = [
+        'defensenews.com',
+    ]
+
+    CODE_HOSTING_DOMAINS = [
+        'github.com',
+        'gitlab.com',
+    ]
+
     # A) Corporate Finance Indicators
     CORPORATE_FINANCE_PATTERNS = [
         # Stock market
@@ -93,9 +124,28 @@ class UpliftingPreFilterV1(BasePreFilter):
         Returns:
             (should_label, reason)
             - (True, "passed"): Send to LLM
+            - (False, "content_too_short"): Block - content below minimum length
+            - (False, "excluded_domain_*"): Block - academic/VC/defense domain
             - (False, "corporate_finance"): Block - corporate finance without exceptions
             - (False, "military_security"): Block - military buildup without peace context
         """
+        # Check content length first to prevent framework leakage
+        passed, reason = self.check_content_length(article)
+        if not passed:
+            return False, reason
+
+        # Check domain exclusions
+        url = article.get('url', '')
+        if url:
+            if self._is_excluded_domain(url, self.ACADEMIC_DOMAINS):
+                return False, "excluded_domain_academic"
+            if self._is_excluded_domain(url, self.VC_STARTUP_DOMAINS):
+                return False, "excluded_domain_vc_startup"
+            if self._is_excluded_domain(url, self.DEFENSE_DOMAINS):
+                return False, "excluded_domain_defense"
+            if self._is_excluded_domain(url, self.CODE_HOSTING_DOMAINS):
+                return False, "excluded_domain_code_hosting"
+
         title = article.get('title', '')
         text = article.get('text', article.get('content', ''))
         combined_text = f"{title} {text}".lower()
@@ -113,6 +163,11 @@ class UpliftingPreFilterV1(BasePreFilter):
         # Passed all filters
         return True, "passed"
 
+    def _is_excluded_domain(self, url: str, domains: list) -> bool:
+        """Check if URL belongs to an excluded domain"""
+        url_lower = url.lower()
+        return any(domain in url_lower for domain in domains)
+
     def _has_corporate_finance(self, text: str) -> bool:
         """Check if text contains corporate finance indicators"""
         return any(pattern.search(text) for pattern in self.corporate_finance_regex)
@@ -129,6 +184,10 @@ class UpliftingPreFilterV1(BasePreFilter):
         """Return filter statistics"""
         return {
             'version': self.VERSION,
+            'academic_domains': len(self.ACADEMIC_DOMAINS),
+            'vc_startup_domains': len(self.VC_STARTUP_DOMAINS),
+            'defense_domains': len(self.DEFENSE_DOMAINS),
+            'code_hosting_domains': len(self.CODE_HOSTING_DOMAINS),
             'corporate_finance_patterns': len(self.CORPORATE_FINANCE_PATTERNS),
             'corporate_finance_exceptions': len(self.CORPORATE_FINANCE_EXCEPTIONS),
             'military_security_patterns': len(self.MILITARY_SECURITY_PATTERNS),
@@ -142,38 +201,69 @@ def test_prefilter():
     prefilter = UpliftingPreFilterV1()
 
     test_cases = [
+        # Should BLOCK - Content too short
+        {
+            'title': 'Short Article',
+            'text': 'This article is too short and will be blocked by the content length filter.',
+            'expected': (False, 'content_too_short_75chars')
+        },
+
+        # Should BLOCK - Academic Domain (ArXiv)
+        {
+            'title': 'Novel Neural Architecture Achieves State-of-the-Art Performance',
+            'url': 'https://arxiv.org/abs/2401.12345',
+            'text': 'We present a novel neural architecture that achieves state-of-the-art performance on multiple benchmark datasets. Our approach combines attention mechanisms with hierarchical feature extraction to improve model efficiency and accuracy. Experimental results demonstrate significant improvements over baseline methods across various tasks, with particular gains in few-shot learning scenarios and transfer learning applications.',
+            'expected': (False, 'excluded_domain_academic')
+        },
+
+        # Should BLOCK - VC/Startup Domain
+        {
+            'title': 'European Startup Raises €50M Series B',
+            'url': 'https://sifted.eu/articles/startup-funding-series-b',
+            'text': 'The fintech startup announced a €50M Series B funding round led by major European venture capital firms. The company plans to use the capital to expand into new markets and double its engineering team. This brings total funding to €75M since inception. Investors cited strong growth metrics and market opportunity as key factors in their decision to back the company.',
+            'expected': (False, 'excluded_domain_vc_startup')
+        },
+
+        # Should BLOCK - Defense Domain
+        {
+            'title': 'Pentagon Awards $2B Contract for Next-Gen Fighter',
+            'url': 'https://www.defensenews.com/air/2024/fighter-contract',
+            'text': 'The Department of Defense announced a $2 billion contract award for the development of next-generation fighter aircraft. The contract includes provisions for advanced avionics systems, stealth technology, and enhanced weapons capabilities. Defense officials emphasized the importance of maintaining air superiority and technological edge over potential adversaries in future conflicts.',
+            'expected': (False, 'excluded_domain_defense')
+        },
+
         # Should BLOCK - Corporate Finance
         {
             'title': 'Tech Unicorn Raises $500M Series C',
-            'text': 'The startup announced a funding round led by major venture capital firms...',
+            'text': 'The startup announced a major funding round led by venture capital firms, with the company valued at $2 billion after this Series C investment. The funding will be used to expand operations and hire more engineers. Investors are excited about the market cap potential and the company plans to go public within two years through an IPO process.',
             'expected': (False, 'corporate_finance')
         },
 
         # Should PASS - Worker Cooperative
         {
             'title': 'Worker Cooperative Expands Solar Panel Manufacturing',
-            'text': 'The employee-owned company secured funding to expand production...',
+            'text': 'The employee-owned company secured community funding to expand solar panel production capacity by 50%. As a worker cooperative, all employees have voting rights on major decisions and share in the profits. The expansion will create 30 new jobs in the region and help make renewable energy more affordable for local residents through their community ownership model.',
             'expected': (True, 'passed')
         },
 
         # Should BLOCK - Military Buildup
         {
             'title': 'Finland Increases Defense Spending After NATO Accession',
-            'text': 'Military buildup includes new fighter jets and border fortifications...',
+            'text': 'Following its NATO membership, Finland announced a significant military buildup including the purchase of new fighter jets, increased troops deployment along the eastern border, and enhanced border fortifications. The defense budget will increase by 40% over the next three years to fund these military expansion projects and weapons procurement from allied nations.',
             'expected': (False, 'military_security')
         },
 
         # Should PASS - Peace Process
         {
             'title': 'Historic Peace Agreement Signed After 20 Years of Conflict',
-            'text': 'Former combatants agreed to disarmament and truth commission...',
+            'text': 'After two decades of armed conflict, former combatants signed a comprehensive peace agreement that includes provisions for disarmament, the establishment of a truth commission to investigate war crimes, and a detailed reconciliation process. The peace process brings hope to millions of civilians affected by the war and marks a new chapter in the region.',
             'expected': (True, 'passed')
         },
 
         # Should PASS - General Article
         {
             'title': 'Community Garden Project Feeds 500 Families',
-            'text': 'Residents transformed vacant lot into thriving urban farm...',
+            'text': 'Local residents transformed a two-acre vacant lot into a thriving urban farm that now provides fresh vegetables to over 500 families in the neighborhood. The community-led initiative offers free gardening workshops, creates green space in the urban environment, and builds social connections among diverse community members. Volunteers of all ages participate in maintaining the garden throughout the growing season.',
             'expected': (True, 'passed')
         },
     ]

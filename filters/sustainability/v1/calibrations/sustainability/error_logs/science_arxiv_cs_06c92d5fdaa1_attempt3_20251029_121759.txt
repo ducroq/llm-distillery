@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_06c92d5fdaa1
+Attempt: 3
+Error: Invalid \escape: line 32 column 72 (char 864)
+Timestamp: 2025-10-29T12:17:59.926420
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 5,
+  "technical_credibility": 7,
+  "economic_viability": 4,
+  "deployment_readiness": 4,
+  "systemic_impact": 5,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 6,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This research proposes a federated learning framework (\our) to reduce memory usage during model training, potentially enabling wider deployment of AI on resource-constrained devices. The concrete actions include partitioning the global model into blocks and training them sequentially. The paper presents experimental results showing up to 84.2% improvement in model performance, up to 50.4% reduction in peak memory usage, and up to 1.9x acceleration in training, but it is still in the research/prototype phase.",
+  "key_impact_metrics": ["84.2% improvement in model performance", "50.4% reduction in peak memory usage"],
+  "technology_tags": ["Federated Learning", "AI", "Memory Optimization"],
+  "sdg_alignment": [9]
+}
+```

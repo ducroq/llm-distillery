@@ -1,0 +1,46 @@
+Article ID: science_arxiv_math_f6020b8763af
+Attempt: 1
+Error: Invalid \escape: line 32 column 99 (char 891)
+Timestamp: 2025-10-29T13:46:59.349799
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 1,
+  "deployment_readiness": 1,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": false,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents theoretical research on an inverse problem for the Monge-Amp\`ere equation. While the techniques developed could potentially be applied to a wide range of inverse problems for nonlinear equations, there are no concrete actions or measurable outcomes related to sustainability at this stage. The research is at a very early stage and lacks any connection to real-world deployment or economic viability.",
+  "key_impact_metrics": [],
+  "technology_tags": ["mathematical modeling", "inverse problems", "PDEs"],
+  "sdg_alignment": []
+}
+```

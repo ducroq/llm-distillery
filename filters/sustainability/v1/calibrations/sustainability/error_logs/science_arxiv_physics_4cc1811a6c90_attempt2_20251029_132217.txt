@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_4cc1811a6c90
+Attempt: 2
+Error: Invalid \escape: line 33 column 77 (char 1287)
+Timestamp: 2025-10-29T13:22:17.823187
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 6,
+  "economic_viability": 2,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 5,
+  "evidence_strength": 6,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents a mathematical model and numerical solutions for bio-nanofluid flow. While the study identifies the impact of various parameters on the fluid's properties, it remains at the theoretical stage with no concrete deployment or measured outcomes related to sustainability. The research is peer-reviewed, lending some credibility, but lacks economic viability and deployment readiness.",
+  "key_impact_metrics": ["velocity profile increases with higher values of {\lambda} and {\delta}", "temperature profile decreases with higher Prandtl numbers"],
+  "technology_tags": ["bio-nanofluid", "micropolar fluid"],
+  "sdg_alignment": [7, 9]
+}
+```

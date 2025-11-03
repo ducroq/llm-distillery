@@ -1,0 +1,46 @@
+Article ID: science_arxiv_math_3afdda09b62d
+Attempt: 1
+Error: Invalid \escape: line 32 column 95 (char 887)
+Timestamp: 2025-10-29T17:17:31.919341
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 1,
+  "technical_credibility": 7,
+  "economic_viability": 1,
+  "deployment_readiness": 1,
+  "systemic_impact": 1,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": false,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "reasoning": "This is theoretical mathematics research, specifically improving bounds on Tur\'an densities in hypergraphs. It has no direct, immediate impact on sustainability, although it could potentially contribute to optimization algorithms used in sustainability applications in the future. The research is peer-reviewed, increasing its credibility.",
+  "key_impact_metrics": [],
+  "technology_tags": [],
+  "sdg_alignment": []
+}
+```

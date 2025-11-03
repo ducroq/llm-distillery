@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_34555ae82738
+Attempt: 1
+Error: Invalid \escape: line 33 column 28 (char 1255)
+Timestamp: 2025-10-29T10:51:37.401335
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 2,
+  "deployment_readiness": 1,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "reasoning": "This article focuses on the convergence rate of stochastic gradient descent algorithms, which are used in machine learning. While machine learning can be applied to sustainability problems (e.g., optimizing energy consumption), this article is theoretical and does not describe any concrete actions or deployments. The evidence strength is high due to the use of mathematical proofs and the potential for peer review.",
+  "key_impact_metrics": ["$\min_{s\leq t} \|\nabla F(w_s)\|^2 = o(t^{p-1})$", "$F(w_t) - F_* = O(t^{\max(p-1,-2p+1)} \log^2 \frac{t}{\delta})$"],
+  "technology_tags": ["stochastic gradient descent", "machine learning", "optimization"],
+  "sdg_alignment": [9]
+}
+```

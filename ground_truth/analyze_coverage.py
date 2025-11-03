@@ -41,8 +41,14 @@ def analyze_dimensional_coverage(
             article_count += 1
 
             # Extract scores from analysis field
-            if 'analysis' in article:
+            # Support both 'analysis' and 'uplifting_analysis' formats
+            analysis = None
+            if 'uplifting_analysis' in article and 'dimensions' in article['uplifting_analysis']:
+                analysis = article['uplifting_analysis']['dimensions']
+            elif 'analysis' in article:
                 analysis = article['analysis']
+
+            if analysis:
                 for dim in dimensions:
                     if dim in analysis:
                         score = analysis[dim]
@@ -59,7 +65,7 @@ def analyze_dimensional_coverage(
         scores = dimension_scores[dim]
 
         if not scores:
-            print(f"\n⚠️  WARNING: No scores found for dimension '{dim}'")
+            print(f"\nWARNING: No scores found for dimension '{dim}'")
             continue
 
         # Count occurrences of each score
@@ -93,13 +99,13 @@ def analyze_dimensional_coverage(
             count = score_counts.get(score, 0)
             pct = (count / total * 100) if total > 0 else 0
             bar_length = int(pct / 2)  # Scale to 50 chars max
-            bar = "█" * bar_length
+            bar = "#" * bar_length
 
             status = ""
             if count == 0:
-                status = "  ⚠️  MISSING"
+                status = "  [!] MISSING"
             elif count < threshold:
-                status = "  ⚠️  SPARSE"
+                status = "  [!] SPARSE"
 
             print(f"  {score:2d}: {bar:50s} {count:4d} ({pct:5.1f}%){status}")
 
@@ -128,11 +134,11 @@ def analyze_dimensional_coverage(
 
         # Print warnings
         if warnings:
-            print(f"\n⚠️  Coverage Issues:")
+            print(f"\n[!] Coverage Issues:")
             for warning in warnings:
                 print(f"   - {warning}")
         else:
-            print(f"\n✅ Good coverage across full range")
+            print(f"\n[OK] Good coverage across full range")
 
         # Store for report
         coverage_report[dim] = {
@@ -215,7 +221,7 @@ def main():
     recommendations = generate_recommendations(coverage_report)
 
     if not recommendations:
-        print("\n✅ Coverage looks good! No major gaps detected.")
+        print("\n[OK] Coverage looks good! No major gaps detected.")
     else:
         print("\nTo improve training data quality:\n")
         for i, rec in enumerate(recommendations, 1):
@@ -225,7 +231,7 @@ def main():
     if args.output:
         with open(args.output, 'w') as f:
             json.dump(coverage_report, f, indent=2)
-        print(f"\n📁 Detailed report saved to: {args.output}")
+        print(f"\nDetailed report saved to: {args.output}")
 
     print()
 

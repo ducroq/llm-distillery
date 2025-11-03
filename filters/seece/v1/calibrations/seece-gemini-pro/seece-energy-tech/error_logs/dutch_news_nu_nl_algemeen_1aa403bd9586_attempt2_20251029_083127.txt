@@ -1,0 +1,39 @@
+Article ID: dutch_news_nu_nl_algemeen_1aa403bd9586
+Attempt: 2
+Error: Expecting ',' delimiter: line 26 column 4 (char 664)
+Timestamp: 2025-10-29T08:31:27.211900
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "market_signal",
+  "innovation_stage": "scaling",
+  "climate_impact_potential": 4.5,
+  "technical_credibility": 8,
+  "economic_viability": 5,
+  "deployment_readiness": 10,
+  "systemic_impact": 4,
+  "justice_equity": 1,
+  "innovation_quality": 1,
+  "evidence_strength": 9,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": true,
+    "has_customers": true,
+    "has_metrics": true,
+    "has_peer_review": false,
+    "has_deployment": true
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": true,
+    "regulatory_approved": true
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil

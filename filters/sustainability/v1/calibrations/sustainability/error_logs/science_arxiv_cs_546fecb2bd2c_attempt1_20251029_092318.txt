@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_546fecb2bd2c
+Attempt: 1
+Error: Invalid \escape: line 32 column 168 (char 960)
+Timestamp: 2025-10-29T09:23:19.001042
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 3,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper presents a novel algorithm (DDEA) for combinatorial optimization, showing improvements in solving the Maximum Independent Set problem on Erd\H{o}s-R\'enyi graphs compared to existing methods. The improvements are quantified by solution size (3.9% and 7.5% larger on specific datasets) and out-of-distribution performance (11.6% higher quality). However, it is still in the applied research stage with no clear path to deployment or economic viability, and the direct climate impact is theoretical.",
+  "key_impact_metrics": ["3.9% larger solution sizes", "7.5% larger solution sizes"],
+  "technology_tags": ["Denoising Diffusion Models", "Evolutionary Algorithms", "Combinatorial Optimization"],
+  "sdg_alignment": [9]
+}
+```

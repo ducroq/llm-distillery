@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_8bcd69817fa7
+Attempt: 1
+Error: Invalid \escape: line 32 column 210 (char 1003)
+Timestamp: 2025-10-29T15:35:22.787496
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 4,
+  "deployment_readiness": 3,
+  "systemic_impact": 4,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 6,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": false,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "Lingxi is an issue resolution framework for software engineering that leverages procedural knowledge to guide agents in solving repository-level issues. The framework successfully resolves 74.6\% of bugs on the SWE-bench Verified benchmark, outperforming other techniques. While promising, it's still in the applied research stage with no real-world deployment data, limiting its immediate climate impact.",
+  "key_impact_metrics": ["74.6% bug resolution rate", "5.4% to 14.9% outperformance"],
+  "technology_tags": ["Large Language Models", "Software Engineering", "Issue Resolution"],
+  "sdg_alignment": [9]
+}
+```

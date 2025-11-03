@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_6f57acae4758
+Attempt: 3
+Error: Invalid \escape: line 32 column 328 (char 1118)
+Timestamp: 2025-10-29T13:22:10.742325
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents a theoretical formalism for giant Goos-Hänchen shift, which could lead to highly sensitive sensors. The research is at an early stage (basic research) and lacks deployment data, but it presents a theoretical description confirmed numerically, and provides a sensitivity value of $10^{13} {\mu}m/RIU$. While the potential for climate impact is indirect through improved sensing technologies, it is currently theoretical.",
+  "key_impact_metrics": ["Goos-Hanchen sensitivity of $10^{13} {\mu}m/RIU"],
+  "technology_tags": ["Goos-Hanchen shift", "sensors", "surface plasmon resonance", "metasurfaces"],
+  "sdg_alignment": [9]
+}
+```

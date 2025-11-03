@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_dd9a0078de96
+Attempt: 3
+Error: Invalid \escape: line 32 column 124 (char 916)
+Timestamp: 2025-10-29T13:46:20.552374
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 2,
+  "deployment_readiness": 3,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": true
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "reasoning": "This research analyzes data from Parker Solar Probe and Solar Orbiter to understand the dissipation of Alfv\'enic fluctuations. The study quantifies the turbulent heating rate (Q) and damping length (Lambda_d), providing insights into energy transfer in the solar wind. While the research itself doesn't directly reduce GHG emissions, understanding these processes could inform future technologies related to space-based solar power or space weather prediction, indirectly impacting climate-related technologies.",
+  "key_impact_metrics": ["Turbulent heating rate Q", "Damping length Lambda_d"],
+  "technology_tags": ["Space-based solar power", "Space weather prediction"],
+  "sdg_alignment": [7, 9]
+}
+```

@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_34555ae82738
+Attempt: 2
+Error: Invalid \escape: line 33 column 69 (char 1302)
+Timestamp: 2025-10-29T11:37:36.294399
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 2,
+  "deployment_readiness": 1,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper focuses on improving the efficiency of stochastic gradient descent algorithms, which could indirectly improve the energy efficiency of machine learning models used in climate applications. The paper provides mathematical convergence rates for these algorithms, which are measurable outcomes. However, it is basic research with no immediate deployment and the climate impact is indirect and difficult to quantify.",
+  "key_impact_metrics": ["Convergence rate of  $F(w_t) - F_* = O(t^{\max(p-1,-2p+1)} \log^2 \frac{t}{\delta})$"],
+  "technology_tags": ["Stochastic Gradient Descent", "Optimization Algorithms", "Machine Learning"],
+  "sdg_alignment": [9]
+}
+```

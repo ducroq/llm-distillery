@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_4cc1811a6c90
+Attempt: 1
+Error: Invalid \escape: line 33 column 77 (char 1287)
+Timestamp: 2025-10-29T13:03:11.066454
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 6,
+  "economic_viability": 2,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 5,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents a mathematical model and numerical analysis of a bio-nanofluid. While the research is peer-reviewed and presents specific metrics related to the fluid's behavior, it remains at the basic research stage with no clear path to deployment or quantified climate impact. The study's conclusions are based on simulations and comparisons to previous studies, not real-world measurements.",
+  "key_impact_metrics": ["Velocity profile increases with higher values of {\lambda} and {\delta}", "Temperature profile decreases with higher Prandtl numbers"],
+  "technology_tags": ["bio-nanofluid", "micropolar fluid"],
+  "sdg_alignment": [7, 9]
+}
+```

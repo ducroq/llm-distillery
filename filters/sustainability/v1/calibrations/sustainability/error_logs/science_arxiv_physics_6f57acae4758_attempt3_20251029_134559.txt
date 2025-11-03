@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_6f57acae4758
+Attempt: 3
+Error: Invalid \escape: line 32 column 198 (char 988)
+Timestamp: 2025-10-29T13:45:59.584973
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents a theoretical framework and numerical confirmation for enhanced sensor sensitivity using the Goos-H\"anchen shift. While the improved sensitivity of $10^{13} {\mu}m/RIU$ is a significant advancement, it remains at the theoretical stage with no deployed sensors or real-world data. The research is peer-reviewed, lending credibility, but the lack of deployment limits its immediate sustainability impact.",
+  "key_impact_metrics": ["Goos-Hanchen sensitivity of $10^{13} {\mu}m/RIU$", "Improvement of Goos-Hanchen sensitivity by more than one thousand compared to theoretical value"],
+  "technology_tags": ["Goos-Hanchen shift", "Surface plasmon resonance", "Metasurfaces", "Bloch Surface Waves", "Phase change material GST"],
+  "sdg_alignment": [9]
+}
+```

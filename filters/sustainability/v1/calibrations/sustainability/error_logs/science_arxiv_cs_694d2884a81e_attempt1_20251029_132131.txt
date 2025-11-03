@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_694d2884a81e
+Attempt: 1
+Error: Invalid \escape: line 33 column 35 (char 1371)
+Timestamp: 2025-10-29T13:21:31.086641
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 3,
+  "systemic_impact": 4,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper presents a novel framework (SecPE) for generating synthetic text data with differential privacy, aiming to reduce computational complexity and utility loss compared to existing methods. The concrete action is the development of a new algorithm, and the evidence supporting claims is empirical results on benchmark datasets (OpenReview, PubMed, Yelp) showing lower FID and higher downstream task accuracy. The deployment stage is currently at the applied research level, with no indication of real-world deployment.",
+  "key_impact_metrics": ["Lower Fr\'echet Inception Distance (FID)", "Higher downstream task accuracy"],
+  "technology_tags": ["Differential Privacy", "Synthetic Text Generation", "Large Language Models"],
+  "sdg_alignment": [9]
+}
+```

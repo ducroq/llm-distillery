@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_437b34fe4e30
+Attempt: 2
+Error: Invalid \escape: line 33 column 66 (char 1318)
+Timestamp: 2025-10-29T16:35:42.241457
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 1,
+  "technical_credibility": 8,
+  "economic_viability": 1,
+  "deployment_readiness": 1,
+  "systemic_impact": 2,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents theoretical improvements to the simplex method, a linear programming algorithm. While linear programming has broad applications, including optimizing resource allocation in sustainable systems, this research is at a very early stage and has no direct, measurable impact on sustainability currently. The technical credibility is high due to peer-reviewed research, but deployment readiness and economic viability are low.",
+  "key_impact_metrics": ["Smoothed complexity O(σ^{-3/2} d^{13/4}\log^{7/4} n)", "Lower bound Ω(min(σ^{-1/2} d^{-1/2}\log^{-1/4} d,2^d))"],
+  "technology_tags": ["Linear Programming", "Simplex Method", "Optimization"],
+  "sdg_alignment": [9]
+}
+```

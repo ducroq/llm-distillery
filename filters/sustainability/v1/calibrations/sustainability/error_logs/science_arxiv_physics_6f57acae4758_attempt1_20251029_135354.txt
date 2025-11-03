@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_6f57acae4758
+Attempt: 1
+Error: Invalid \escape: line 32 column 386 (char 1176)
+Timestamp: 2025-10-29T13:53:54.429180
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 4,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents a theoretical formalism for enhancing the sensitivity of sensors using the Goos-H\"anchen shift. While it provides a theoretical description and numerical confirmation, it remains at the basic research stage with no deployed technology or real-world data, limiting its immediate sustainability impact. The key metric is a sensitivity of $10^{13} {\mu}m/RIU$, but this is theoretical.",
+  "key_impact_metrics": ["Sensitivity of $10^{13} {\mu}m/RIU$"],
+  "technology_tags": ["Goos-H\"anchen shift", "sensors", "surface plasmon resonance", "metasurfaces"],
+  "sdg_alignment": [9]
+}
+```

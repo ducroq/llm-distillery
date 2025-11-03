@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_3c8b7ef91443
+Attempt: 2
+Error: Invalid \escape: line 34 column 108 (char 1337)
+Timestamp: 2025-10-29T09:26:57.015682
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 6,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 5,
+  "evidence_strength": 5,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": false,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper explores theoretical limits of ISAC technology, focusing on AoA estimation. While potentially enabling more efficient communication and sensing, it's currently at the research stage with no deployed technology or measured outcomes. The impact on climate is indirect, depending on how this technology is used in future applications, such as smart grids or environmental monitoring.",
+  "key_impact_metrics": [],
+  "technology_tags": ["Integrated Sensing and Communication", "Angle of Arrival Estimation", "Bayesian Cram\'er-Rao Bound"],
+  "sdg_alignment": [9]
+}
+```

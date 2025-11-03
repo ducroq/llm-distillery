@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_694d2884a81e
+Attempt: 3
+Error: Invalid \escape: line 32 column 402 (char 1192)
+Timestamp: 2025-10-29T11:14:44.107280
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper presents a novel framework (SecPE) for differentially private synthetic text generation. While the research aims to improve privacy-preserving data generation, it's currently in the basic research stage with no deployed technology or measured real-world outcomes related to climate or sustainability. The paper includes empirical results using benchmarks and metrics like Fr\'echet Inception Distance (FID) and downstream task accuracy, demonstrating improved performance over baselines.",
+  "key_impact_metrics": ["Lower Fr\'echet Inception Distance (FID)", "Higher downstream task accuracy"],
+  "technology_tags": ["Differential Privacy", "Synthetic Data Generation", "Large Language Models"],
+  "sdg_alignment": [9]
+}
+```

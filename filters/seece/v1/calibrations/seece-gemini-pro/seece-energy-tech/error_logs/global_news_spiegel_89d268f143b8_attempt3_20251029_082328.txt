@@ -1,0 +1,55 @@
+Article ID: global_news_spiegel_89d268f143b8
+Attempt: 3
+Error: Expecting ',' delimiter: line 38 column 4 (char 984)
+Timestamp: 2025-10-29T08:23:28.495164
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "technology_deployment",
+  "innovation_stage": "commercial",
+  "climate_impact_potential": 4,
+  "technical_credibility": 2,
+  "economic_viability": 3,
+  "deployment_readiness": 3,
+  "systemic_impact": 4,
+  "justice_equity": 1,
+  "innovation_quality": 1,
+  "evidence_strength": 4,
+  "investment_signals": {
+    "has_funding": true,
+    "has_patents": true,
+    "has_customers": true,
+    "has_metrics": false,
+    "has_peer_review": false,
+    "has_deployment": true
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": true,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "seece_dimensions": {
+    "dutch_eu_policy_relevance": 6,
+    "industry_collaboration_potential": 3,
+    "educational_value": 7,
+    "applied_research_fit": 9,
+    "regional_impact_potential": 7
+  },
+  "seece_relevance_score": 7.5,
+  "priority_topics": {
+    "hydrogen_energy": false,
+    "grid_integration": false,
+    "mobility_electrification": true,
+    "building_efficiency": false,
+    "industrial_decarbonization": false,
+    "renewable_

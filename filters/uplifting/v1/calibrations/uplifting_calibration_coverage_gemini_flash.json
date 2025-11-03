@@ -1,0 +1,243 @@
+{
+  "agency": {
+    "total": 182,
+    "min": 1,
+    "max": 8,
+    "mean": 5.478021978021978,
+    "distribution": {
+      "6": 31,
+      "1": 1,
+      "7": 70,
+      "5": 38,
+      "3": 36,
+      "2": 3,
+      "4": 2,
+      "8": 1
+    },
+    "missing_scores": [
+      9,
+      10
+    ],
+    "sparse_scores": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "warnings": [
+      "Missing scores: [9, 10]",
+      "No examples of score 10 (max is 8)",
+      "Sparse coverage at: [1, 2, 4, 8]",
+      "77% concentrated in middle (4-7)"
+    ]
+  },
+  "progress": {
+    "total": 182,
+    "min": 1,
+    "max": 9,
+    "mean": 5.34065934065934,
+    "distribution": {
+      "5": 35,
+      "1": 2,
+      "8": 4,
+      "7": 64,
+      "4": 12,
+      "6": 23,
+      "3": 38,
+      "2": 3,
+      "9": 1
+    },
+    "missing_scores": [
+      10
+    ],
+    "sparse_scores": [
+      1,
+      2,
+      8,
+      9
+    ],
+    "warnings": [
+      "Missing scores: [10]",
+      "No examples of score 10 (max is 9)",
+      "Sparse coverage at: [1, 2, 8, 9]",
+      "74% concentrated in middle (4-7)"
+    ]
+  },
+  "collective_benefit": {
+    "total": 183,
+    "min": 1,
+    "max": 8,
+    "mean": 6.016393442622951,
+    "distribution": {
+      "6": 32,
+      "1": 2,
+      "7": 62,
+      "5": 26,
+      "8": 31,
+      "2": 2,
+      "3": 21,
+      "4": 7
+    },
+    "missing_scores": [
+      9,
+      10
+    ],
+    "sparse_scores": [
+      1,
+      2,
+      4
+    ],
+    "warnings": [
+      "Missing scores: [9, 10]",
+      "No examples of score 10 (max is 8)",
+      "Sparse coverage at: [1, 2, 4]"
+    ]
+  },
+  "connection": {
+    "total": 171,
+    "min": 1,
+    "max": 7,
+    "mean": 3.9064327485380117,
+    "distribution": {
+      "3": 61,
+      "1": 2,
+      "5": 63,
+      "4": 10,
+      "2": 21,
+      "6": 12,
+      "7": 2
+    },
+    "missing_scores": [
+      8,
+      9,
+      10
+    ],
+    "sparse_scores": [
+      1,
+      7
+    ],
+    "warnings": [
+      "Missing scores: [8, 9, 10]",
+      "No examples of score 10 (max is 7)",
+      "Sparse coverage at: [1, 7]"
+    ]
+  },
+  "innovation": {
+    "total": 177,
+    "min": 1,
+    "max": 9,
+    "mean": 5.15819209039548,
+    "distribution": {
+      "4": 17,
+      "1": 2,
+      "9": 4,
+      "7": 32,
+      "8": 36,
+      "3": 33,
+      "2": 28,
+      "6": 15,
+      "5": 10
+    },
+    "missing_scores": [
+      10
+    ],
+    "sparse_scores": [
+      1,
+      9
+    ],
+    "warnings": [
+      "Missing scores: [10]",
+      "No examples of score 10 (max is 9)",
+      "Sparse coverage at: [1, 9]"
+    ]
+  },
+  "justice": {
+    "total": 147,
+    "min": 1,
+    "max": 7,
+    "mean": 3.401360544217687,
+    "distribution": {
+      "4": 19,
+      "1": 2,
+      "3": 76,
+      "2": 23,
+      "5": 16,
+      "6": 9,
+      "7": 2
+    },
+    "missing_scores": [
+      8,
+      9,
+      10
+    ],
+    "sparse_scores": [
+      1,
+      7
+    ],
+    "warnings": [
+      "Missing scores: [8, 9, 10]",
+      "No examples of score 10 (max is 7)",
+      "Sparse coverage at: [1, 7]"
+    ]
+  },
+  "resilience": {
+    "total": 158,
+    "min": 1,
+    "max": 8,
+    "mean": 4.4113924050632916,
+    "distribution": {
+      "3": 39,
+      "1": 2,
+      "5": 55,
+      "6": 24,
+      "2": 6,
+      "8": 1,
+      "4": 26,
+      "7": 5
+    },
+    "missing_scores": [
+      9,
+      10
+    ],
+    "sparse_scores": [
+      1,
+      2,
+      7,
+      8
+    ],
+    "warnings": [
+      "Missing scores: [9, 10]",
+      "No examples of score 10 (max is 8)",
+      "Sparse coverage at: [1, 2, 7, 8]"
+    ]
+  },
+  "wonder": {
+    "total": 171,
+    "min": 1,
+    "max": 8,
+    "mean": 4.432748538011696,
+    "distribution": {
+      "3": 30,
+      "1": 2,
+      "6": 36,
+      "5": 43,
+      "2": 30,
+      "4": 13,
+      "7": 13,
+      "8": 4
+    },
+    "missing_scores": [
+      9,
+      10
+    ],
+    "sparse_scores": [
+      1,
+      8
+    ],
+    "warnings": [
+      "Missing scores: [9, 10]",
+      "No examples of score 10 (max is 8)",
+      "Sparse coverage at: [1, 8]"
+    ]
+  }
+}

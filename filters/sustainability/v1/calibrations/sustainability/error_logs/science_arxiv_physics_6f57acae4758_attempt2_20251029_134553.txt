@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_6f57acae4758
+Attempt: 2
+Error: Invalid \escape: line 32 column 173 (char 963)
+Timestamp: 2025-10-29T13:45:53.128632
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents a theoretical framework for highly sensitive sensors based on the Goos-Hänchen shift. While the improved sensitivity (up to $10^{13} {\mu}m/RIU$) could lead to better environmental monitoring, it is currently at the theoretical stage with no deployed sensors or real-world data. The article is focused on the theoretical description and numerical confirmation, not on actual deployment or impact measurement.",
+  "key_impact_metrics": ["Goos-Hanchen sensitivity of $10^{13} {\mu}m/RIU$"],
+  "technology_tags": ["Goos-Hanchen shift", "sensors", "surface plasmon resonance", "metasurfaces"],
+  "sdg_alignment": [9]
+}
+```

@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_c129d1e4b213
+Attempt: 1
+Error: Invalid \escape: line 34 column 27 (char 1300)
+Timestamp: 2025-10-29T16:47:27.013870
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 5,
+  "technical_credibility": 7,
+  "economic_viability": 4,
+  "deployment_readiness": 3,
+  "systemic_impact": 4,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 6,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": false,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "The article presents a novel neural network architecture for improved fault diagnosis in electric motors, leading to potentially reduced downtime and energy waste. The research shows improved diagnostic accuracy compared to baseline models, with accuracies up to 99.96%. However, it is still in the research phase, with no deployed units or economic viability data.",
+  "key_impact_metrics": ["Diagnostic accuracies of 99.96%", "Diagnostic accuracies of 98.26%"],
+  "technology_tags": ["Pad\'e Approximant Neural Networks", "Fault Diagnosis"],
+  "sdg_alignment": [7, 9]
+}
+```

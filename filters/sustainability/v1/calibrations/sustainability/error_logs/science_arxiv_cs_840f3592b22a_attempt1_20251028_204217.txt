@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_840f3592b22a
+Attempt: 1
+Error: Invalid \escape: line 32 column 313 (char 1103)
+Timestamp: 2025-10-28T20:42:17.453702
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 6,
+  "technical_credibility": 7,
+  "economic_viability": 5,
+  "deployment_readiness": 3,
+  "systemic_impact": 5,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper presents new algorithms for energy-efficient distributed computing in wireless networks, specifically focusing on minimizing energy consumption in the Radio Network model. The concrete action is the development of algorithms with demonstrably lower energy complexity, quantified by $O(\log n)$ and $O(\log^2n \log \log n)$ for CD and no-CD models respectively. The evidence is supported by theoretical analysis and comparison to existing algorithms, but deployment readiness is low as it's primarily theoretical research.",
+  "key_impact_metrics": ["Energy complexity O(log n)", "Energy complexity O(log^2n log log n)"],
+  "technology_tags": ["Distributed algorithms", "Wireless networks", "Energy efficiency"],
+  "sdg_alignment": [7, 9]
+}
+```

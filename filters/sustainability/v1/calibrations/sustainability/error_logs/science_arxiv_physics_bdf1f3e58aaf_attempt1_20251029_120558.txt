@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_bdf1f3e58aaf
+Attempt: 1
+Error: Invalid \escape: line 32 column 80 (char 871)
+Timestamp: 2025-10-29T12:05:58.489108
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 2,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": false,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper presents theoretical research on ion heating by Alfv\'en waves, providing a formula for the stochastic heating rate Q. While the research is scientifically sound and provides a quantified relationship, it is still in the early stages of development and lacks concrete deployment or economic viability data. The impact on climate is indirect, as it could potentially improve plasma confinement in fusion reactors, but this is highly speculative at this stage.",
+  "key_impact_metrics": ["Q/(\\Omega_i m_i v_A^2) = H(\\alpha) \\tilde{v}^3 \\tilde{B}_w^2 \\tilde{\\omega}_1"],
+  "technology_tags": ["Alfv\'en waves", "Plasma heating", "Fusion energy"],
+  "sdg_alignment": [7]
+}
+```

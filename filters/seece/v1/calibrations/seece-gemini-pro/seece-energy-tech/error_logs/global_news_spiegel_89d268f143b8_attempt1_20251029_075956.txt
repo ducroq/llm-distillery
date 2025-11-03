@@ -1,0 +1,50 @@
+Article ID: global_news_spiegel_89d268f143b8
+Attempt: 1
+Error: Expecting ',' delimiter: line 38 column 4 (char 985)
+Timestamp: 2025-10-29T07:59:56.751727
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "impact_measurement",
+  "innovation_stage": "commercial",
+  "climate_impact_potential": 2.5,
+  "technical_credibility": 2,
+  "economic_viability": 2,
+  "deployment_readiness": 5,
+  "systemic_impact": 2,
+  "justice_equity": 5,
+  "innovation_quality": 2,
+  "evidence_strength": 2,
+  "investment_signals": {
+    "has_funding": true,
+    "has_patents": true,
+    "has_customers": true,
+    "has_metrics": false,
+    "has_peer_review": false,
+    "has_deployment": true
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "seece_dimensions": {
+    "dutch_eu_policy_relevance": 1,
+    "industry_collaboration_potential": 1,
+    "educational_value": 3,
+    "applied_research_fit": 2,
+    "regional_impact_potential": 1
+  },
+  "seece_relevance_score": 2.6,
+  "priority_topics": {
+    "hydrogen_energy": false,

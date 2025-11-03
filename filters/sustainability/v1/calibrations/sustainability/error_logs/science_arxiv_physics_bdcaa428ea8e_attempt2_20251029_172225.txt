@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_bdcaa428ea8e
+Attempt: 2
+Error: Invalid \escape: line 32 column 203 (char 993)
+Timestamp: 2025-10-29T17:22:25.668683
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents research on a novel approach to magnetic field sensing using nitrogen vacancy centers in diamond. While the technology shows promise with sensitivities below 1 nT/$\sqrt{\mathrm{Hz}}$, it is currently in the basic research phase and lacks concrete deployment or quantified climate impact. The technology could potentially be used in various applications, including environmental monitoring, but the link to direct GHG reduction or climate adaptation is currently weak.",
+  "key_impact_metrics": ["sensitivities below 1 nT/$\sqrt{\\mathrm{Hz}}$"],
+  "technology_tags": ["magnetometry", "nitrogen vacancy centers", "magnetic field sensing"],
+  "sdg_alignment": [9]
+}
+```

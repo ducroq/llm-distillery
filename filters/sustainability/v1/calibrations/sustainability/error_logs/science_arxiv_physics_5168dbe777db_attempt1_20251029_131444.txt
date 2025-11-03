@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_5168dbe777db
+Attempt: 1
+Error: Invalid \escape: line 32 column 358 (char 1148)
+Timestamp: 2025-10-29T13:14:44.546882
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 2,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents research on wind-forced breaking waves using direct numerical simulations. While it provides insights into energy transfers and dissipation, it is currently at the basic research stage with no deployed technology or measured outcomes in a real-world setting. The research identifies a wave growth rate scaling with $(u_\ast/c)^2$ and energy dissipation following inertial scaling with wave slope at breaking.",
+  "key_impact_metrics": ["wave growth rate scaling with (u_*/c)^2", "energy dissipation scales as z^-1"],
+  "technology_tags": ["wind energy", "wave energy", "fluid dynamics"],
+  "sdg_alignment": [7]
+}
+```

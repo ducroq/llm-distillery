@@ -1,0 +1,13 @@
+Article ID: global_news_spiegel_89d268f143b8
+Attempt: 1
+Error: Expecting value: line 1 column 1 (char 0)
+Timestamp: 2025-10-29T08:22:14.386139
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "technology_deployment",
+  "innovation_stage": "commercial",
+  "climate_impact_

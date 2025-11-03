@@ -1,0 +1,46 @@
+Article ID: science_arxiv_eess_4734e212e298
+Attempt: 1
+Error: Invalid \escape: line 33 column 31 (char 1344)
+Timestamp: 2025-10-29T14:43:39.761714
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 4,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper presents a theoretical framework and algorithms for coordinated beamforming in networked ISAC systems, focusing on improving localization performance. While it derives a closed-form CRLB and proposes optimization algorithms, it remains at the simulation stage without real-world deployment or quantified environmental impact. The potential climate impact is theoretical, as it could improve the efficiency of wireless communication and sensing, but this is not directly measured or quantified.",
+  "key_impact_metrics": ["Cram\'er-Rao lower bound (CRLB)", "Number of TMTs deployed"],
+  "technology_tags": ["Networked Integrated Sensing and Communication (ISAC)", "Coordinated Beamforming", "Time-of-Arrival (ToA) Localization"],
+  "sdg_alignment": [9]
+}
+```

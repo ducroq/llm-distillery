@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_694d2884a81e
+Attempt: 2
+Error: Invalid \escape: line 32 column 248 (char 1040)
+Timestamp: 2025-10-29T12:25:07.021162
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 3,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper presents a novel framework for differentially private synthetic text generation. It shows improved utility-privacy trade-offs and reduced computational complexity compared to baseline methods, as demonstrated by lower Fr\'echet Inception Distance (FID) and higher downstream task accuracy. However, it is currently in the applied research stage, with no real-world deployment or quantified climate impact.",
+  "key_impact_metrics": ["Lower Fr\'echet Inception Distance (FID)", "Higher downstream task accuracy"],
+  "technology_tags": ["Differentially Private Synthetic Text Generation", "Large Language Models"],
+  "sdg_alignment": [9]
+}
+```

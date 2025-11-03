@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_694d2884a81e
+Attempt: 1
+Error: Invalid \escape: line 33 column 35 (char 1218)
+Timestamp: 2025-10-29T11:41:38.824919
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper proposes a novel framework for differentially private synthetic text generation. The concrete action is the development of the SecPE framework, which is evaluated on benchmark datasets and shows improved performance in terms of FID and downstream task accuracy compared to baseline methods. The research is at a basic research stage, with no deployment mentioned.",
+  "key_impact_metrics": ["Lower Fr\'echet Inception Distance (FID)", "Higher downstream task accuracy"],
+  "technology_tags": ["Differential Privacy", "Synthetic Text Generation", "Large Language Models"],
+  "sdg_alignment": [9]
+}
+```

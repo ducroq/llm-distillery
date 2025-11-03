@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_694d2884a81e
+Attempt: 3
+Error: Invalid \escape: line 33 column 35 (char 1335)
+Timestamp: 2025-10-29T11:55:35.249992
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This paper proposes a novel framework for differentially private synthetic text generation. The concrete action is the development of a new algorithm (SecPE) that improves the utility-privacy trade-off and reduces computational complexity compared to existing methods. Evidence is provided through empirical results on benchmark datasets, showing lower FID and higher downstream task accuracy. However, it is still in the basic research stage, without deployment or clear economic viability.",
+  "key_impact_metrics": ["Lower Fr\'echet Inception Distance (FID)", "Higher downstream task accuracy"],
+  "technology_tags": ["Differential Privacy", "Synthetic Data Generation", "Large Language Models"],
+  "sdg_alignment": [9]
+}
+```

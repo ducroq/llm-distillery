@@ -27,6 +27,7 @@ class BasePreFilter:
     """
 
     VERSION = "0.0"  # Override in subclass
+    MIN_CONTENT_LENGTH = 300  # Minimum content length to prevent framework leakage
 
     @staticmethod
     def sanitize_unicode(text: str) -> str:
@@ -90,6 +91,34 @@ class BasePreFilter:
             New dict with all text fields comprehensively cleaned
         """
         return clean_article_comprehensive(article)
+
+    @staticmethod
+    def check_content_length(article: Dict, min_length: int = None) -> Tuple[bool, str]:
+        """
+        Check if article content meets minimum length requirement.
+
+        Short articles (<300 chars) often cause LLMs to analyze the evaluation
+        framework/prompt instead of the article content itself (framework leakage).
+
+        Args:
+            article: Dict with 'title' and 'text'/'content' keys
+            min_length: Minimum content length in characters (defaults to MIN_CONTENT_LENGTH)
+
+        Returns:
+            (should_label, reason)
+            - (True, "passed"): Content is long enough
+            - (False, "content_too_short"): Content below minimum threshold
+        """
+        if min_length is None:
+            min_length = BasePreFilter.MIN_CONTENT_LENGTH
+
+        content = article.get('text', article.get('content', ''))
+        content_length = len(content)
+
+        if content_length < min_length:
+            return (False, f"content_too_short_{content_length}chars")
+
+        return (True, "passed")
 
     def should_label(self, article: Dict) -> Tuple[bool, str]:
         """

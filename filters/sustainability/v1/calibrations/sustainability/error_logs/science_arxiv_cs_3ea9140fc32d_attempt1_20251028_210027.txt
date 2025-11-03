@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_3ea9140fc32d
+Attempt: 1
+Error: Invalid \escape: line 32 column 300 (char 1093)
+Timestamp: 2025-10-28T21:00:27.840407
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 6,
+  "technical_credibility": 7,
+  "economic_viability": 5,
+  "deployment_readiness": 3,
+  "systemic_impact": 5,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 6,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": false,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "The article describes a novel method (Spotlight Attention) to improve the efficiency of LLM generation, potentially reducing energy consumption. It presents experimental results showing improved retrieval precision and throughput, with hashing retrieval for 512K tokens in under 100$\mu$s on a single A100 GPU. However, it is still in the applied research stage with no deployment data.",
+  "key_impact_metrics": ["5x reduction in hash code length compared to linear hashing", "3x higher throughput than vanilla decoding"],
+  "technology_tags": ["Large Language Models", "Non-linear hashing", "CUDA kernels"],
+  "sdg_alignment": [7, 9]
+}
+```

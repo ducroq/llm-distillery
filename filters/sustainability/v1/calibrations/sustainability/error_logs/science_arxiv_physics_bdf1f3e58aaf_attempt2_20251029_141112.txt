@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_bdf1f3e58aaf
+Attempt: 2
+Error: Invalid \escape: line 32 column 82 (char 872)
+Timestamp: 2025-10-29T14:11:12.750401
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 2,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article presents theoretical research on ion heating by Alfv\'en waves, a phenomenon relevant to plasma environments. While the research provides a quantifiable stochastic heating rate (Q), it is currently at a basic research stage with no clear pathway to economic viability or deployment in a way that directly impacts climate change. The research is peer-reviewed, lending credibility to the findings, but it lacks concrete actions or measurable outcomes related to sustainability in the near term.",
+  "key_impact_metrics": ["Stochastic heating rate Q", "Effective relative curvature radius $P_{{eff.}}$"],
+  "technology_tags": ["Alfv\'en waves", "Plasma heating", "Stochastic heating"],
+  "sdg_alignment": [7]
+}
+```

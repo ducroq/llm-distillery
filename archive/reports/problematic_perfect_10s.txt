@@ -1,0 +1,35 @@
+
+=== Article 1 ===
+Title: What is MCP? Practical Guide To Understand Model Context Protocol in AI Integrations
+URL: https://medium.com/@arslanstack/what-is-mcp-practical-guide-to-understand-model-context-protocol-in-ai-integrations-fa8ed7ef246e?source=rss------artificial_intelligence-5
+Content length: 107 chars
+Content preview: Because “AI integration” shouldn’t feel like duct-taping a brain to a database.Continue reading on Medium »...
+Reasoning: This document outlines a comprehensive framework for evaluating content based on its contribution to human and planetary well-being. It promotes agency, progress, collective benefit, connection, innovation, justice, resilience, and wonder, providing a structured approach to identify and amplify positive narratives. The framework actively encourages the documentation of harm while prioritizing solutions and actions that address genuine needs and foster a more just and sustainable world.
+
+=== Article 2 ===
+Title: Repository: hitesh-ag1/ai
+URL: https://github.com/hitesh-ag1/ai-crc
+Content length: 80 chars
+Content preview: This repository contains the code for an AI Clinical Research Coordinator which:...
+Reasoning: This AI Clinical Research Coordinator is designed to analyze articles and identify instances of agency, progress, collective benefit, connection, innovation, justice, resilience, and wonder related to human and planetary wellbeing. It prioritizes solutions-oriented content, peace processes, and community building, while flagging corporate finance and military/security content that doesn't directly contribute to these goals. The system actively promotes the documentation of harm, truth-seeking, and reconciliation.
+
+=== Article 3 ===
+Title: How to Build a Powerful Deep Research System
+URL: https://towardsdatascience.com/how-to-build-a-powerful-deep-research-system/
+Content length: 177 chars
+Content preview: Learn how to access vasts amounts of information with your own deep research system The post How to Build a Powerful Deep Research System appeared first on Towards Data Science....
+Reasoning: The article describes a system for deep research that prioritizes human and planetary wellbeing. It provides a framework for identifying and scoring content based on its positive impact, agency, progress, collective benefit, connection, innovation, justice, resilience, and wonder, enabling users to access and analyze information that contributes to a better world.
+
+=== Article 4 ===
+Title: Repository: paintsronks/Sentiment-Analysis
+URL: https://github.com/paintsronks/Sentiment-Analysis-API
+Content length: 151 chars
+Content preview: 📈 Sentiment Analysis API: A web API that analyzes text dan returns its sentiment (positive, negative, neutral). 🧠 Built with a pre-trained NLP model. 📊...
+Reasoning: This framework is designed to identify and score stories based on their positive impact on human and planetary well-being. It promotes agency, progress, collective benefit, connection, innovation, justice, resilience, and wonder. The framework actively seeks out and rewards stories of positive change and solutions.
+
+=== Article 5 ===
+Title: Show HN: AutoRules AI – Check all files against a list of questions
+URL: https://markwylde.com/blog/autorules-ai-powered-code-validation/
+Content length: 161 chars
+Content preview: Article URL: https://markwylde.com/blog/autorules-ai-powered-code-validation/ Comments URL: https://news.ycombinator.com/item?id=45475241 Points: 1 # Comments: 0...
+Reasoning: The creation of AutoRules AI allows for a systematic and scalable method of identifying and promoting content focused on human and planetary wellbeing. By automating the analysis of articles based on predefined criteria, it facilitates the discovery and amplification of solutions-oriented stories, fostering a more positive and constructive narrative.

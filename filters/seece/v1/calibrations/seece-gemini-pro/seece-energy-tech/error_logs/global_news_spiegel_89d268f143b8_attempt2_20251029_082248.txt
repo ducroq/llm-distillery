@@ -1,0 +1,45 @@
+Article ID: global_news_spiegel_89d268f143b8
+Attempt: 2
+Error: Expecting ',' delimiter: line 31 column 4 (char 799)
+Timestamp: 2025-10-29T08:22:48.109858
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "technology_deployment",
+  "innovation_stage": "commercial",
+  "climate_impact_potential": 3.5,
+  "technical_credibility": 2.0,
+  "economic_viability": 5.0,
+  "deployment_readiness": 6.0,
+  "systemic_impact": 3.0,
+  "justice_equity": 1.0,
+  "innovation_quality": 1.0,
+  "evidence_strength": 7.0,
+  "investment_signals": {
+    "has_funding": true,
+    "has_patents": true,
+    "has_customers": true,
+    "has_metrics": false,
+    "has_peer_review": false,
+    "has_deployment": true
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": true,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "seece_dimensions": {
+    "dutch_eu_policy_relevance": 4.0,
+    "industry_collaboration_potential": 1.0,
+    "educational_value": 6.0,
+    "applied_research_fit": 2

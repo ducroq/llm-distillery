@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_dd9a0078de96
+Attempt: 3
+Error: Invalid \escape: line 32 column 105 (char 897)
+Timestamp: 2025-10-29T13:14:00.060610
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 2,
+  "deployment_readiness": 3,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": true
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "reasoning": "This research analyzes data from Parker Solar Probe and Solar Orbiter to understand Alfv\'enic fluctuations and energy dissipation in the solar wind. While it doesn't directly address climate change, understanding energy transfer in space weather can indirectly improve models used for predicting solar events that impact Earth's climate and infrastructure. The research provides quantified metrics on fluctuation amplitudes and damping lengths.",
+  "key_impact_metrics": ["Alfv\'en Mach number Ma", "Turbulent heating rate Q"],
+  "technology_tags": ["Space Weather Modeling", "Plasma Physics"],
+  "sdg_alignment": [7, 9]
+}
+```

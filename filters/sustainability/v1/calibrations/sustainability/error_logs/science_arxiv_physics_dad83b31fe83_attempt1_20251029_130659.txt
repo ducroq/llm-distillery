@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_dad83b31fe83
+Attempt: 1
+Error: Invalid \escape: line 32 column 350 (char 1140)
+Timestamp: 2025-10-29T13:06:59.026839
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 3,
+  "technical_credibility": 7,
+  "economic_viability": 2,
+  "deployment_readiness": 2,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article describes a novel platform for studying single-photon emitters using hBN bubbles. While the research shows promise for quantum technologies, it is still in the basic research phase with no clear path to economic viability or deployment at scale. The article quantifies an enhancement of emission by approximately 100-200\%, but the overall climate impact potential is currently limited.",
+  "key_impact_metrics": ["emission enhancement 100-200%"],
+  "technology_tags": ["hBN bubbles", "single-photon emitters", "quantum technologies"],
+  "sdg_alignment": [9]
+}
+```

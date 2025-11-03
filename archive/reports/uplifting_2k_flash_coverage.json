@@ -1,0 +1,239 @@
+{
+  "agency": {
+    "total": 1982,
+    "min": 1,
+    "max": 10,
+    "mean": 5.7038345105953585,
+    "distribution": {
+      "7": 713,
+      "5": 339,
+      "3": 325,
+      "6": 505,
+      "1": 6,
+      "8": 58,
+      "4": 18,
+      "9": 4,
+      "2": 13,
+      "10": 1
+    },
+    "missing_scores": [],
+    "sparse_scores": [
+      1,
+      2,
+      4,
+      8,
+      9,
+      10
+    ],
+    "warnings": [
+      "Sparse coverage at: [1, 2, 4, 8, 9, 10]",
+      "79% concentrated in middle (4-7)"
+    ]
+  },
+  "progress": {
+    "total": 1979,
+    "min": 1,
+    "max": 10,
+    "mean": 5.5654370894391105,
+    "distribution": {
+      "7": 617,
+      "4": 115,
+      "3": 329,
+      "5": 360,
+      "6": 419,
+      "1": 13,
+      "2": 15,
+      "8": 109,
+      "9": 1,
+      "10": 1
+    },
+    "missing_scores": [],
+    "sparse_scores": [
+      1,
+      2,
+      9,
+      10
+    ],
+    "warnings": [
+      "Sparse coverage at: [1, 2, 9, 10]",
+      "76% concentrated in middle (4-7)"
+    ]
+  },
+  "collective_benefit": {
+    "total": 1994,
+    "min": 1,
+    "max": 10,
+    "mean": 6.312437311935807,
+    "distribution": {
+      "8": 294,
+      "5": 265,
+      "6": 331,
+      "3": 141,
+      "7": 874,
+      "4": 48,
+      "1": 11,
+      "9": 16,
+      "2": 13,
+      "10": 1
+    },
+    "missing_scores": [],
+    "sparse_scores": [
+      1,
+      2,
+      4,
+      9,
+      10
+    ],
+    "warnings": [
+      "Sparse coverage at: [1, 2, 4, 9, 10]",
+      "76% concentrated in middle (4-7)"
+    ]
+  },
+  "connection": {
+    "total": 1847,
+    "min": 1,
+    "max": 10,
+    "mean": 4.140768814293449,
+    "distribution": {
+      "6": 84,
+      "3": 606,
+      "4": 128,
+      "5": 831,
+      "2": 137,
+      "1": 11,
+      "9": 6,
+      "7": 34,
+      "8": 9,
+      "10": 1
+    },
+    "missing_scores": [],
+    "sparse_scores": [
+      1,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "warnings": [
+      "Sparse coverage at: [1, 6, 7, 8, 9, 10]"
+    ]
+  },
+  "innovation": {
+    "total": 1896,
+    "min": 1,
+    "max": 10,
+    "mean": 5.564873417721519,
+    "distribution": {
+      "8": 396,
+      "3": 361,
+      "7": 402,
+      "2": 148,
+      "4": 154,
+      "6": 214,
+      "5": 155,
+      "1": 10,
+      "9": 55,
+      "10": 1
+    },
+    "missing_scores": [],
+    "sparse_scores": [
+      1,
+      9,
+      10
+    ],
+    "warnings": [
+      "Sparse coverage at: [1, 9, 10]"
+    ]
+  },
+  "justice": {
+    "total": 1589,
+    "min": 1,
+    "max": 10,
+    "mean": 3.5487728130899936,
+    "distribution": {
+      "6": 102,
+      "4": 167,
+      "3": 899,
+      "2": 170,
+      "5": 187,
+      "1": 12,
+      "7": 43,
+      "8": 8,
+      "10": 1
+    },
+    "missing_scores": [
+      9
+    ],
+    "sparse_scores": [
+      1,
+      7,
+      8,
+      10
+    ],
+    "warnings": [
+      "Missing scores: [9]",
+      "Sparse coverage at: [1, 7, 8, 10]"
+    ]
+  },
+  "resilience": {
+    "total": 1692,
+    "min": 1,
+    "max": 10,
+    "mean": 4.508274231678487,
+    "distribution": {
+      "3": 306,
+      "6": 200,
+      "5": 661,
+      "4": 357,
+      "1": 12,
+      "7": 72,
+      "2": 69,
+      "8": 13,
+      "10": 1,
+      "9": 1
+    },
+    "missing_scores": [],
+    "sparse_scores": [
+      1,
+      2,
+      7,
+      8,
+      9,
+      10
+    ],
+    "warnings": [
+      "Sparse coverage at: [1, 2, 7, 8, 9, 10]",
+      "76% concentrated in middle (4-7)"
+    ]
+  },
+  "wonder": {
+    "total": 1861,
+    "min": 1,
+    "max": 10,
+    "mean": 4.754970445996776,
+    "distribution": {
+      "6": 462,
+      "2": 182,
+      "3": 382,
+      "5": 470,
+      "7": 241,
+      "4": 95,
+      "1": 12,
+      "8": 16,
+      "10": 1
+    },
+    "missing_scores": [
+      9
+    ],
+    "sparse_scores": [
+      1,
+      8,
+      10
+    ],
+    "warnings": [
+      "Missing scores: [9]",
+      "Sparse coverage at: [1, 8, 10]"
+    ]
+  }
+}

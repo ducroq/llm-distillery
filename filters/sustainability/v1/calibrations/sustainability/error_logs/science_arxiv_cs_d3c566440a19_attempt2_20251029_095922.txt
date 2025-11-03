@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_d3c566440a19
+Attempt: 2
+Error: Invalid \escape: line 33 column 28 (char 1251)
+Timestamp: 2025-10-29T09:59:22.908416
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "basic_research",
+  "climate_impact_potential": 1,
+  "technical_credibility": 7,
+  "economic_viability": 1,
+  "deployment_readiness": 1,
+  "systemic_impact": 2,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": false,
+    "fossil_transition": false
+  },
+  "reasoning": "This research focuses on the quantum security of key-alternating ciphers, a theoretical area. While improved security could indirectly support more efficient and secure data handling for climate-related technologies, there are no concrete actions or measurable outcomes related to sustainability at this stage. The research is at a basic research level with theoretical security bounds and algorithm improvements.",
+  "key_impact_metrics": ["$\Omega(2^{\frac{tn}{2t+1}})$ oracle queries", "$O(2^{\alpha n})$ queries with $\\alpha = \\frac{t(t+1)}{(t+1)^2 + 1}$"],
+  "technology_tags": ["quantum cryptography", "block ciphers", "key-alternating ciphers"],
+  "sdg_alignment": [9]
+}
+```

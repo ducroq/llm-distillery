@@ -1,0 +1,46 @@
+Article ID: science_arxiv_physics_1283d1a1024b
+Attempt: 3
+Error: Invalid \escape: line 33 column 46 (char 1367)
+Timestamp: 2025-10-29T10:54:55.283344
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 1,
+  "technical_credibility": 8,
+  "economic_viability": 1,
+  "deployment_readiness": 2,
+  "systemic_impact": 2,
+  "justice_equity": 3,
+  "innovation_quality": 7,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This article describes the design and characterization of a low-noise environment for measuring the electron's electric dipole moment. While the research itself doesn't directly address climate change, the design principles and characterization techniques could potentially be applied to precision measurements in other fields, including those related to sustainable technologies. The article presents measured noise levels and shielding factors, providing concrete data, but it is still in the research phase.",
+  "key_impact_metrics": ["Noise below 40 fT/$\sqrt{{\\rm Hz}}$ at 1 Hz", "Background magnetic field below 3 pT"],
+  "technology_tags": ["Mu-metal shielding", "Atomic magnetometers", "Vacuum chamber design"],
+  "sdg_alignment": []
+}
+```

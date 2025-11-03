@@ -1,0 +1,46 @@
+Article ID: science_arxiv_cs_694d2884a81e
+Attempt: 1
+Error: Invalid \escape: line 33 column 35 (char 1386)
+Timestamp: 2025-10-29T12:48:17.756370
+
+============================================================
+Full Response:
+============================================================
+```json
+{
+  "content_type": "breakthrough_research",
+  "innovation_stage": "applied_research",
+  "climate_impact_potential": 2,
+  "technical_credibility": 7,
+  "economic_viability": 3,
+  "deployment_readiness": 3,
+  "systemic_impact": 3,
+  "justice_equity": 3,
+  "innovation_quality": 6,
+  "evidence_strength": 7,
+  "investment_signals": {
+    "has_funding": false,
+    "has_patents": false,
+    "has_customers": false,
+    "has_metrics": true,
+    "has_peer_review": true,
+    "has_deployment": false
+  },
+  "verification_indicators": {
+    "owid_indicator": false,
+    "ipcc_alignment": false,
+    "iea_data": false,
+    "third_party_verified": false,
+    "regulatory_approved": false
+  },
+  "flags": {
+    "greenwashing_risk": false,
+    "vaporware_risk": true,
+    "fossil_transition": false
+  },
+  "reasoning": "This research focuses on improving privacy-preserving synthetic text generation using a novel framework called SecPE. While it aims to reduce computational complexity and utility loss compared to existing methods, it is still in the applied research phase with no deployed units or real-world data on its impact on reducing energy consumption or other environmental factors. The concrete action is the development and testing of the SecPE framework, and the evidence supporting its claims comes from empirical results on benchmark datasets.",
+  "key_impact_metrics": ["Lower Fr\'echet Inception Distance (FID)", "Higher downstream task accuracy"],
+  "technology_tags": ["Differentially Private Synthetic Text Generation", "Secret-Protected Evolution (SecPE)"],
+  "sdg_alignment": [9]
+}
+```
