@@ -39,9 +39,6 @@ secrets.ini
 *_key
 *_secret
 
-# Sync configuration (contains server details)
-sync_config.json
-
 # IDE
 .vscode/
 .idea/
