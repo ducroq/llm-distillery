@@ -1,6 +1,6 @@
 # Remote Server Sync Guide
 
-This guide explains how to develop locally with Claude Code and run batch jobs on a remote server.
+This guide explains how to develop locally with Claude Code and run batch jobs on a remote server using FreeFileSync.
 
 ## Problem
 
@@ -9,15 +9,29 @@ This guide explains how to develop locally with Claude Code and run batch jobs o
 - Data is too large to commit to git (datasets can be 100s of MB)
 - You need to sync code and data between machines
 
-## Solution: SSH Sync Tool
+## Solution: FreeFileSync + Git
 
-The `sync.py` script uses SCP (SSH copy) to efficiently sync data between machines while keeping your git repo clean.
+**FreeFileSync** handles large data files (datasets/, reports/) via SFTP, while **git** handles code.
+
+**Why FreeFileSync?**
+- GUI interface with preview before sync
+- Mirror mode: automatically deletes remote files that don't exist locally
+- SFTP support with password or SSH key auth
+- Save sync configurations for reuse
+- Cross-platform (Windows, Mac, Linux)
+- Free and open-source
 
 ---
 
 ## Setup (One-Time)
 
-### 1. Configure SSH Access
+### 1. Install FreeFileSync
+
+Download from: https://freefilesync.org/download.php
+
+Install on your local Windows machine.
+
+### 2. Configure SSH Access
 
 Ensure you can SSH into your server:
 
@@ -25,72 +39,9 @@ Ensure you can SSH into your server:
 ssh your-username@your-server.example.com
 ```
 
-If you need key-based auth:
+Test that your password works or SSH key is set up correctly.
 
-```bash
-# Generate SSH key if you don't have one
-ssh-keygen -t ed25519 -C "your-email@example.com"
-
-# Copy public key to server
-ssh-copy-id your-username@your-server.example.com
-```
-
-### 2. Create Sync Configuration
-
-```bash
-# Copy example config
-cp sync_config.example.json sync_config.json
-
-# Edit with your server details
-notepad sync_config.json  # Windows
-nano sync_config.json     # Linux/Mac
-```
-
-**Example config:**
-
-```json
-{
-  "remote": {
-    "host": "llm-distiller.example.com",
-    "user": "jeroen",
-    "port": 22,
-    "remote_path": "/home/jeroen/llm-distillery"
-  },
-  "sync": {
-    "data_dirs": [
-      "datasets/",
-      "reports/"
-    ],
-    "exclude_patterns": [
-      "*.pyc",
-      "__pycache__/",
-      ".git/",
-      "venv/",
-      ".env",
-      "*.log"
-    ]
-  },
-  "ssh": {
-    "key_path": null,
-    "comment": "Optional: path to SSH private key"
-  }
-}
-```
-
-**Security Note:** `sync_config.json` is in `.gitignore` - it will NOT be committed to git.
-
-### 3. Verify SSH/SCP is installed
-
-**Windows:**
-- OpenSSH is included in Windows 10/11 by default
-- Test it: `ssh -V` and `scp` should work in CMD/PowerShell
-- If not installed: Settings → Apps → Optional Features → Add "OpenSSH Client"
-
-**Linux/Mac:**
-- SSH/SCP is pre-installed
-- If not: `sudo apt install openssh-client` (Ubuntu) or `brew install openssh` (Mac)
-
-### 4. Clone Repo on Server
+### 3. Clone Repo on Server
 
 ```bash
 # SSH into server
@@ -111,6 +62,55 @@ mkdir -p datasets/raw
 mkdir -p reports
 ```
 
+### 4. Configure FreeFileSync SFTP Connection
+
+1. **Open FreeFileSync**
+
+2. **Click folder browse button** (📁) on either left or right panel
+
+3. **Select SFTP** from the dropdown at top
+
+4. **Click "Manage Connections"** or add new connection
+
+5. **Enter connection details:**
+   ```
+   Connection Name: llm-distiller
+   Server: your-server.example.com
+   Port: 22
+   Username: your-username
+   Authentication: Password (or Private Key File if you have one)
+   ```
+
+6. **Test the connection** - Click "Connect" to verify
+
+7. **Save the connection profile**
+
+### 5. Set Up Sync Pairs
+
+Create two sync configurations (datasets and reports):
+
+#### Datasets Sync
+
+**Left (Local):**
+`C:\local_dev\llm-distillery\datasets`
+
+**Right (Remote):**
+`sftp://your-username@your-server:/home/your-username/llm-distillery/datasets`
+
+**Sync direction:** Mirror → (local to remote)
+
+#### Reports Sync
+
+**Left (Local):**
+`C:\local_dev\llm-distillery\reports`
+
+**Right (Remote):**
+`sftp://your-username@your-server:/home/your-username/llm-distillery/reports`
+
+**Sync direction:** Mirror → (local to remote)
+
+**Save as batch job:** File → Save as Batch Job → `llm-distillery-sync.ffs_batch`
+
 ---
 
 ## Common Workflows
@@ -118,21 +118,26 @@ mkdir -p reports
 ### Starting a Development Session
 
 ```bash
-# Get latest code and data
-python sync.py pull-code  # Pull code from git
-python sync.py pull       # Pull data from server
+# 1. Pull latest code from git
+git pull
 
-# Now develop with Claude Code...
+# 2. Open FreeFileSync
+# 3. Load your saved batch job (llm-distillery-sync.ffs_batch)
+# 4. Click "Compare" to see differences
+# 5. Switch direction to ← (remote to local) if you want to pull data FROM server
+# 6. Click "Synchronize" to execute
 ```
 
 ### Deploying Code Changes
 
 ```bash
-# Push code changes
-python sync.py push-code  # git push
+# 1. Push code changes via git
+git add .
+git commit -m "Your commit message"
+git push
 
-# SSH to server and pull
-ssh your-username@your-server.example.com
+# 2. SSH to server and pull
+ssh your-username@your-server
 cd llm-distillery
 git pull
 ```
@@ -140,14 +145,15 @@ git pull
 ### Running Batch Job on Server
 
 ```bash
-# 1. Push latest code
-python sync.py push-code
+# 1. Push latest code via git
+git push
 
 # 2. SSH to server
-ssh your-username@your-server.example.com
+ssh your-username@your-server
 
-# 3. Navigate and run
+# 3. Navigate and pull code
 cd llm-distillery
+git pull
 source venv/bin/activate
 
 # 4. Run batch labeler
@@ -170,142 +176,129 @@ tmux new -s labeling
 ### Retrieving Results
 
 ```bash
-# Pull data from server to local
-python sync.py pull
+# 1. Open FreeFileSync
+# 2. Load your saved batch job
+# 3. Click "Compare"
+# 4. Switch direction to ← (remote to local) to pull FROM server
+# 5. Preview changes (should show new files in reports/)
+# 6. Click "Synchronize"
 
-# Now analyze locally with Claude Code
+# 7. Now analyze locally with Claude Code
 python -m ground_truth.analyze_coverage \
   --labeled-file datasets/uplifting_training_1500/uplifting/labeled_articles.jsonl
 ```
 
-### Full Sync
-
-```bash
-# Do everything: pull code, push code, pull data
-python sync.py full-sync
-```
-
 ---
 
-## Sync Commands Reference
+## FreeFileSync Configuration
 
-### Data Sync
+### Sync Directions
 
-```bash
-# Pull data FROM server TO local
-python sync.py pull
+FreeFileSync offers several sync modes:
 
-# Push data FROM local TO server
-python sync.py push
+- **Mirror →** (Recommended): Local becomes master, remote mirrors it exactly
+  - New files on local → copied to remote
+  - Deleted files on local → deleted from remote
+  - **Use this for:** Pushing local changes to server
 
-# Check what would be synced (dry run)
-python sync.py status
-python sync.py pull --dry-run
-python sync.py push --dry-run
-```
+- **Mirror ←**: Remote becomes master, local mirrors it exactly
+  - **Use this for:** Pulling server results to local
 
-### Code Sync
+- **Update →**: Copy new/updated files local → remote, don't delete
+  - **Use this for:** One-way updates without cleanup
 
-```bash
-# Pull code from git
-python sync.py pull-code
+- **Two-way**: Sync both directions
+  - **Caution:** Can create conflicts
 
-# Push code to git
-python sync.py push-code
-```
+### Recommended Settings
 
-### Combined
+1. **File Permissions:** Preserve
+2. **Symbolic Links:** Skip
+3. **Error Handling:** Show popup
+4. **Filters:** None needed (datasets and reports should all be synced)
 
-```bash
-# Full sync: pull code, push code, pull data
-python sync.py full-sync
-```
+### Save Your Configuration
+
+**Menu: File → Save as Batch Job**
+
+Saves a `.ffs_batch` file you can double-click to run the sync quickly.
 
 ---
 
 ## What Gets Synced?
 
-**Synced directories** (configured in `sync_config.json`):
+**Synced via FreeFileSync:**
 - ✅ `datasets/` - Raw data, labeled data, training data
 - ✅ `reports/` - Calibration reports, analysis results
 
-**NOT synced** (stays in git):
+**Synced via git:**
 - ✅ Python code (`ground_truth/`, `filters/`, etc.)
-- ✅ Configuration files (`.gitignore`, `README.md`)
+- ✅ Configuration files (except sensitive ones)
 - ✅ Documentation (`docs/`)
 
-**Explicitly excluded** (in both git and rsync):
+**NOT synced (gitignored):**
 - ❌ Virtual environments (`venv/`, `env/`)
 - ❌ Compiled Python (`__pycache__/`, `*.pyc`)
 - ❌ Secrets (`.env`, API keys)
 - ❌ Log files (`*.log`)
+- ❌ Cache directories
 
 ---
 
 ## Troubleshooting
 
-### "scp: command not found"
+### "LIBSSH2_ERROR_AUTHENTICATION_FAILED"
 
-**Windows:**
-```bash
-# OpenSSH should be pre-installed on Windows 10/11
-# If not, install it:
-# Settings → Apps → Optional Features → Add "OpenSSH Client"
+Your SSH authentication failed. Options:
 
-# Test if it works:
-ssh -V
-scp
-```
+**Option 1: Use password authentication (simplest)**
+1. In FreeFileSync connection settings
+2. Authentication: Password
+3. Enter your server password
 
-**Linux/Mac:**
-```bash
-# Ubuntu/Debian
-sudo apt install openssh-client
+**Option 2: Fix SSH key authentication**
 
-# Mac
-brew install openssh
-```
+If you want to use SSH keys instead of password:
 
-### "Permission denied (publickey)"
+1. Ensure public key is on server:
+   ```bash
+   cat ~/.ssh/id_ed25519.pub
+   # Copy this and add to server's ~/.ssh/authorized_keys
+   ```
 
-Your SSH keys aren't set up:
+2. Convert key format if needed:
+   ```bash
+   # FreeFileSync uses libssh2 which can be picky
+   # Try converting to PEM format:
+   ssh-keygen -p -f ~/.ssh/id_ed25519 -m PEM
+   ```
 
-```bash
-# Generate key if you don't have one
-ssh-keygen -t ed25519
+3. Or use PuTTY key format (.ppk):
+   - Download PuTTYgen
+   - Load your private key
+   - Save as .ppk format
+   - Use .ppk file in FreeFileSync
 
-# Copy to server
-ssh-copy-id your-username@your-server.example.com
+### "Connection timed out"
 
-# Or manually: copy ~/.ssh/id_ed25519.pub contents to server's ~/.ssh/authorized_keys
-```
+- Check server hostname/IP is correct
+- Check port (usually 22)
+- Ensure server allows SSH connections
+- Check firewall settings
 
-### Sync appears to be stuck
+### Sync is very slow
 
-**SCP is silent during transfers** - you won't see progress output, but it IS working. Large datasets take time (100s of MB can take several minutes).
+- Large datasets take time (normal behavior)
+- Check your internet connection
+- Consider compressing large files before syncing
 
-Use `--dry-run` first to check what will be transferred:
-
-```bash
-python sync.py pull --dry-run
-```
-
-The sync will show:
-```
-Running: scp -r -p ...
-(This may take a while for large datasets...)
-```
-
-Then it will be silent while transferring. Wait for "Successfully synced" message.
-
-### "Config file not found"
+### "Permission denied" on server
 
 ```bash
-# Create config from example
-cp sync_config.example.json sync_config.json
-
-# Edit with your server details
-notepad sync_config.json
+# SSH to server and fix permissions
+ssh your-username@your-server
+cd llm-distillery
+chmod -R u+w datasets reports
 ```
 
 ---
@@ -320,34 +313,27 @@ notepad sync_config.json
 - Merge conflicts on binary files
 - GitHub has 100 MB file limit
 
-✅ **SCP (SSH copy) is designed for file transfer:**
-- Simple and reliable
+✅ **SFTP (via FreeFileSync) is designed for file transfer:**
+- Visual diff before syncing
+- Mirror mode: automatic cleanup of old files
+- Cross-platform
 - Works anywhere SSH works
-- Built-in compression
-- Cross-platform (Windows, Linux, Mac)
+- Free and open-source
 
-### Alternative: Git LFS
+### Why FreeFileSync instead of rsync/scp?
 
-Git Large File Storage (LFS) is another option:
+**FreeFileSync advantages:**
+- ✅ GUI with preview before sync
+- ✅ Easy to see what will change
+- ✅ Mirror mode deletes old files automatically
+- ✅ Save configurations
+- ✅ Works on Windows without WSL
 
-```bash
-# Install git-lfs
-git lfs install
-
-# Track large files
-git lfs track "datasets/**/*.jsonl"
-```
-
-**Pros:**
-- Integrated with git
-- Version control for data
-
-**Cons:**
-- Requires GitHub LFS quota (paid)
-- Slower than SCP for frequent changes
-- More complex setup
-
-**Verdict:** SCP is simpler and free for our use case.
+**Command-line tools (rsync/scp):**
+- ❌ No preview
+- ❌ Silent operation
+- ❌ Must remember complex commands
+- ❌ Windows compatibility issues
 
 ---
 
@@ -359,36 +345,34 @@ git lfs track "datasets/**/*.jsonl"
 ┌─────────────────┐         ┌──────────────────┐
 │  Local (Win)    │         │  Server (Linux)  │
 │  - Claude Code  │──git──→│  - batch_labeler │
-│  - Development  │←─rsync──│  - Heavy compute │
+│  - Development  │←─SFTP───│  - Heavy compute │
 │  - Analysis     │         │  - Data storage  │
 └─────────────────┘         └──────────────────┘
 ```
 
-### 2. Commit Often, Sync Less
+### 2. Preview Before Sync
 
-- **Code changes**: Commit and push frequently
+Always click "Compare" before "Synchronize" to see:
+- What will be copied
+- What will be deleted
+- What will be updated
+
+FreeFileSync shows a clear visual diff.
+
+### 3. Use Batch Jobs
+
+Save your sync configuration as a batch job:
+1. Configure both datasets/ and reports/ sync pairs
+2. File → Save as Batch Job
+3. Name it: `llm-distillery-sync.ffs_batch`
+4. Double-click to run sync anytime
+
+### 4. Commit Code Often, Sync Data Less
+
+- **Code changes**: Commit and push frequently via git
 - **Data sync**: Only when needed (start/end of work session)
 
-### 3. Use Descriptive Commit Messages
-
-```bash
-# Good
-git commit -m "Add random sampling to batch_labeler"
-
-# Bad
-git commit -m "fix"
-```
-
-### 4. Check Status Before Sync
-
-```bash
-# See what would be synced
-python sync.py status
-
-# Then decide: pull or push?
-```
-
-### 5. Use tmux for Long Jobs
+### 5. Use tmux for Long Jobs on Server
 
 ```bash
 # On server
@@ -410,13 +394,16 @@ tmux attach -t labeling
 ### Scenario: Run calibration on server, analyze locally
 
 ```bash
-# 1. LOCAL: Push latest code
-python sync.py push-code
+# 1. LOCAL: Push latest code via git
+git add .
+git commit -m "Update calibration parameters"
+git push
 
 # 2. SSH to server
-ssh jeroen@llm-distiller.example.com
+ssh your-username@your-server
 cd llm-distillery
 git pull
+source venv/bin/activate
 
 # 3. Run calibration (on server)
 python -m ground_truth.calibrate_oracle \
@@ -431,8 +418,11 @@ python -m ground_truth.calibrate_oracle \
 # 4. Exit SSH
 exit
 
-# 5. LOCAL: Pull results
-python sync.py pull
+# 5. LOCAL: Open FreeFileSync
+#    - Load saved batch job
+#    - Switch reports/ sync to ← (pull FROM server)
+#    - Click "Compare"
+#    - Click "Synchronize"
 
 # 6. LOCAL: Analyze with Claude Code
 # reports/uplifting_calibration.md now available locally
@@ -442,56 +432,37 @@ python sync.py pull
 
 ## Security Considerations
 
-### What NOT to commit:
+### What NOT to commit to git:
 
-- ❌ `sync_config.json` (contains server hostnames/usernames)
-- ❌ SSH private keys (`.pem`, `*.key`)
+- ❌ Passwords or server credentials
+- ❌ SSH private keys
 - ❌ API keys (`.env`, `secrets.ini`)
 - ❌ Labeled data (may contain sensitive content)
 
 ### What's safe to commit:
 
-- ✅ `sync_config.example.json` (template without real details)
 - ✅ All Python code
 - ✅ Filter configurations
 - ✅ Documentation
+- ✅ `.gitignore` and config templates
 
-### SSH Key Security:
+### FreeFileSync Security:
 
-```bash
-# Set correct permissions on private key
-chmod 600 ~/.ssh/id_ed25519
-
-# Use passphrase-protected keys
-ssh-keygen -t ed25519 -C "your-email@example.com"
-# (enter passphrase when prompted)
-```
+- Passwords are stored encrypted in FreeFileSync config
+- SSH keys stay on your local machine
+- SFTP connections are encrypted
 
 ---
 
 ## FAQ
 
-### Q: Can I sync TO server?
+### Q: Can I sync FROM server to local?
 
-**A:** Yes! `python sync.py push` syncs data from local to server. Useful for:
-- Uploading new raw datasets
-- Sharing analysis results with server
+**A:** Yes! Change the sync direction to ← (mirror left) in FreeFileSync. This makes your local machine mirror the server.
 
-### Q: What if I forget to pull before editing?
+### Q: What if I forget which direction I'm syncing?
 
-**A:** Git will warn about conflicts. Commit or stash your changes:
-
-```bash
-# Option 1: Commit first
-git add .
-git commit -m "WIP: local changes"
-git pull
-
-# Option 2: Stash
-git stash
-git pull
-git stash pop
-```
+**A:** Always click "Compare" first! FreeFileSync will show you exactly what will happen before you click "Synchronize".
 
 ### Q: Can multiple people use the same server?
 
@@ -500,9 +471,17 @@ git stash pop
 2. Clone repo to their own home directory
 3. Use separate `output_dir` for batch jobs
 
-### Q: Sync is stuck. How do I cancel?
+### Q: What happens if I lose my FreeFileSync config?
 
-**A:** Press `Ctrl+C`. rsync will stop cleanly (no corruption).
+**A:** Your `.ffs_batch` files are saved locally. Back them up! If lost, you can recreate the connection settings manually (takes 5 minutes).
+
+### Q: How do I sync both directions?
+
+**A:** Don't! Use:
+- Mirror → for pushing local changes to server
+- Mirror ← for pulling server results to local
+
+Two-way sync can create conflicts.
 
 ---
 
@@ -510,23 +489,21 @@ git stash pop
 
 **Development Workflow:**
 
-1. 📥 `python sync.py pull-code` - Get latest code
+1. 📥 `git pull` - Get latest code
 2. 🔨 Develop locally with Claude Code
-3. 📤 `python sync.py push-code` - Push code changes
-4. 🖥️  SSH to server, `git pull`, run batch jobs
-5. 📥 `python sync.py pull` - Pull results
+3. 📤 `git push` - Push code changes
+4. 🖥️ SSH to server, `git pull`, run batch jobs
+5. 📥 FreeFileSync (←) - Pull results from server
 6. 📊 Analyze locally with Claude Code
 7. Repeat!
 
-**Key Commands:**
+**Key Tools:**
 
 ```bash
-python sync.py pull         # Get data from server
-python sync.py push         # Send data to server
-python sync.py pull-code    # Get code from git
-python sync.py push-code    # Send code to git
-python sync.py status       # Check sync status
-python sync.py full-sync    # Do everything
+git pull            # Get code from repo
+git push            # Send code to repo
+FreeFileSync (→)    # Push data TO server
+FreeFileSync (←)    # Pull data FROM server
 ```
 
 ---
