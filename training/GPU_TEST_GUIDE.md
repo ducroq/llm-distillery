@@ -83,18 +83,23 @@ head -n 10 datasets/uplifting_ground_truth_v1_splits/val.jsonl > datasets/test_s
 ### 3.2 Run Test Training
 
 ```bash
-# For 16GB GPU, use small batch size and shorter sequences
+# For 16GB GPU, use smaller model (0.5B fits comfortably)
 python -m training.train \
     --filter filters/uplifting/v1 \
     --data-dir datasets/test_subset \
     --output-dir training/test_output \
-    --model-name Qwen/Qwen2.5-1.5B \
+    --model-name Qwen/Qwen2.5-0.5B \
     --epochs 1 \
-    --batch-size 1 \
-    --max-length 256
+    --batch-size 2 \
+    --max-length 384
 ```
 
-**Note**: The training script now uses FP16 (half precision) and gradient checkpointing to reduce memory usage.
+**Note**: The training script uses gradient checkpointing to reduce memory usage.
+
+**Model sizing for 16GB GPU:**
+- Qwen 2.5-0.5B: ~4-5GB (recommended for 16GB GPU) ✓
+- Qwen 2.5-1.5B: ~12-14GB (needs 20GB+)
+- Qwen 2.5-7B: ~28GB+ (needs 40GB+ GPU)
 
 **Expected behavior:**
 - Model downloads (~3GB for 1.5B model)
@@ -124,18 +129,25 @@ cat training/test_output/training_metadata.json
 Once the test works, run full training:
 
 ```bash
-# For 16GB GPU - use smaller model or reduce batch size
+# For 16GB GPU - use 0.5B model (fits comfortably)
 python -m training.train \
     --filter filters/uplifting/v1 \
     --data-dir datasets/uplifting_ground_truth_v1_splits \
     --output-dir inference/deployed/uplifting_v1 \
-    --model-name Qwen/Qwen2.5-1.5B \
+    --model-name Qwen/Qwen2.5-0.5B \
     --epochs 3 \
-    --batch-size 2 \
-    --max-length 384 \
+    --batch-size 4 \
+    --max-length 512 \
     --learning-rate 2e-5
 
-# For 24GB+ GPU - can use larger model
+# For 24GB GPU - can use 1.5B model
+# python -m training.train \
+#     --model-name Qwen/Qwen2.5-1.5B \
+#     --batch-size 4 \
+#     --max-length 512 \
+#     ... (other args same)
+
+# For 40GB+ GPU - can use 7B model
 # python -m training.train \
 #     --model-name Qwen/Qwen2.5-7B \
 #     --batch-size 4 \
@@ -143,17 +155,20 @@ python -m training.train \
 #     ... (other args same)
 ```
 
-**Training time estimate:**
-- 1.5B model with 6,172 samples @ batch_size=2
-  - RTX 4090 (16GB): ~3-5 hours
-- 7B model with 6,172 samples @ batch_size=4
-  - RTX 4090 (24GB): ~4-6 hours
-  - A100 (40GB): ~2-3 hours
+**Training time estimate (6,172 samples, 3 epochs):**
+- 0.5B model @ batch_size=4
+  - RTX 4090 (16GB): ~2-3 hours
+- 1.5B model @ batch_size=4
+  - RTX 4090 (24GB): ~3-4 hours
+- 7B model @ batch_size=4
+  - A100 (40GB): ~4-6 hours
 
-**Memory usage with optimizations (FP16 + gradient checkpointing):**
-- 1.5B model: ~6-8GB GPU memory (fits 16GB easily)
-- 7B model: ~18-22GB GPU memory (needs 24GB+ GPU)
-- If OOM, reduce `--batch-size` or `--max-length`
+**Memory usage with gradient checkpointing (FP32):**
+- 0.5B model: ~4-5GB (fits 16GB easily) ✓
+- 1.5B model: ~12-14GB (needs 20GB+)
+- 7B model: ~28GB+ (needs 40GB+)
+
+**Note**: FP32 training is used for stability (FP16 causes NaN issues)
 
 ## Monitoring Training
 
