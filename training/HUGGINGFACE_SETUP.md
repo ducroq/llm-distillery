@@ -23,58 +23,38 @@ Go to https://huggingface.co/join and create a free account.
 pip install huggingface_hub
 ```
 
-### 4. Login
+### 4. Login and Verify Username
 
 ```bash
+# Login with your token
 hf auth login
 # Paste your token when prompted
-# Press Y when asked "Add token as git credential?"
-```
 
-**Note**: The old command `huggingface-cli login` still works but is deprecated.
-
-**Optional: Set git credential helper** (recommended to avoid re-authentication):
-```bash
+# Set git credential helper (recommended)
 git config --global credential.helper store
-```
 
-### 5. Verify Your Username
-
-Check your Hugging Face username (you'll need this for upload):
-
-```bash
+# Check your username
 hf whoami
+# Use this username in the upload command below
 ```
-
-This shows your username (e.g., `jeergrvgreg`). Use this in the repo name when uploading.
 
 ## Uploading a Model
 
 After training completes, upload with one command:
 
 ```bash
-# Use YOUR Hugging Face username (check with 'hf whoami')
 python -m training.upload_to_huggingface \
     --filter filters/uplifting/v1 \
     --repo-name YOUR_USERNAME/uplifting-filter-v1 \
     --private
 ```
 
-**Important:** Replace `YOUR_USERNAME` with your actual Hugging Face username from `hf whoami`.
+Replace `YOUR_USERNAME` with your username from `hf whoami`.
 
 **Arguments:**
 - `--filter`: Path to filter directory containing trained model
-- `--repo-name`: `username/model-name` format (use YOUR username, not someone else's)
+- `--repo-name`: `username/model-name` format
 - `--private`: Keeps model private (remove flag to make public)
-
-**Example:**
-```bash
-# If your username is 'jeergrvgreg'
-python -m training.upload_to_huggingface \
-    --filter filters/uplifting/v1 \
-    --repo-name jeergrvgreg/uplifting-filter-v1 \
-    --private
-```
 
 ### Example: Full Training + Upload Workflow
 
@@ -189,23 +169,16 @@ huggingface-cli download your-username/your-model
 
 ## Troubleshooting
 
-### "Error: huggingface_hub not installed"
+### Missing dependency
 
 ```bash
 pip install huggingface_hub
 ```
 
-### "Error: Hugging Face token required"
+### Authentication alternatives
 
-You need to authenticate first:
-```bash
-hf auth login
-# Paste your token when prompted
-```
+The script automatically uses tokens saved by `hf auth login`. You can also:
 
-The script automatically uses tokens saved by `hf auth login`.
-
-Alternative methods:
 ```bash
 # Set environment variable
 export HF_TOKEN="hf_your_token_here"
@@ -213,22 +186,6 @@ export HF_TOKEN="hf_your_token_here"
 # Or pass token directly
 python -m training.upload_to_huggingface --token "hf_your_token_here" ...
 ```
-
-### "403 Forbidden: You don't have the rights to create a model under the namespace"
-
-**Problem:** You're using the wrong username in the repo name.
-
-**Solution:** Check your username and use it:
-```bash
-hf whoami  # Shows your username
-python -m training.upload_to_huggingface \
-    --repo-name YOUR_USERNAME/model-name \  # Use YOUR username
-    ...
-```
-
-### "Error: Repository already exists"
-
-The script handles this automatically with `exist_ok=True`. It will update the existing repo.
 
 ### Upload is slow
 
