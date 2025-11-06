@@ -202,15 +202,79 @@ Validation:
   Model saved to: filters/uplifting/v1/model
 ```
 
-## Next Steps
+## Post-Training Workflow
 
-After training:
+After training completes, follow these steps:
 
-1. **Evaluate model**: Compare predictions to oracle on test set
-2. **Deploy model**: Use trained model for batch inference
-3. **Monitor performance**: Track accuracy over time
+### 1. Generate Visualizations
+
+```bash
+python -m training.plot_learning_curves \
+    --history filters/uplifting/v1/training_history.json
+```
+
+**Output:** `reports/uplifting_v1_plots/`
+- `overall_metrics.png` - MAE/RMSE curves
+- `per_dimension_mae.png` - Per-dimension learning
+- `loss_curves.png` - Training/validation loss
+- `training_summary.txt` - Final metrics table
+
+### 2. Generate Training Report (Optional)
+
+```bash
+python -m training.generate_training_report \
+    --filter filters/uplifting/v1 \
+    --history filters/uplifting/v1/training_history.json \
+    --metadata filters/uplifting/v1/training_metadata.json
+```
+
+**Output:** `reports/uplifting_v1_training_report.docx`
+- Professional Word document with embedded plots
+- Executive summary, methodology, results, conclusions
+
+### 3. Upload to Hugging Face (Optional)
+
+```bash
+python -m training.upload_to_huggingface \
+    --filter filters/uplifting/v1 \
+    --repo-name your-username/uplifting-filter-v1 \
+    --private
+```
+
+See `HUGGINGFACE_SETUP.md` for detailed instructions.
+
+### 4. Evaluate on Test Set
+
+```bash
+# TODO: Add evaluation script
+python -m evaluation.evaluate \
+    --filter filters/uplifting/v1 \
+    --test-data datasets/uplifting_ground_truth_v1_splits/test.jsonl
+```
 
 See `evaluation/README.md` for evaluation workflow.
+
+### Quick Post-Training Commands
+
+```bash
+# After training finishes, run these in sequence:
+
+# 1. Generate plots
+python -m training.plot_learning_curves \
+    --history filters/uplifting/v1/training_history.json
+
+# 2. Generate report (optional)
+python -m training.generate_training_report \
+    --filter filters/uplifting/v1 \
+    --history filters/uplifting/v1/training_history.json \
+    --metadata filters/uplifting/v1/training_metadata.json
+
+# 3. Upload to Hugging Face (optional)
+python -m training.upload_to_huggingface \
+    --filter filters/uplifting/v1 \
+    --repo-name username/uplifting-filter-v1 \
+    --private
+```
 
 ## Troubleshooting
 

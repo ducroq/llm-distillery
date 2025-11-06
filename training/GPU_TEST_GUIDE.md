@@ -191,7 +191,7 @@ Validation metrics:
   RMSE: 1.234
 
 ✓ New best validation MAE: 0.945
-  Model saved to: inference/deployed/uplifting_v1/model
+  Model saved to: filters/uplifting/v1/model
 ```
 
 ### With nvidia-smi
@@ -199,6 +199,40 @@ Validation metrics:
 # In another terminal
 watch -n 1 nvidia-smi
 ```
+
+## Step 5: Post-Training Analysis
+
+After training completes, generate visualizations and reports:
+
+### 5.1 Generate Plots
+
+```bash
+python -m training.plot_learning_curves \
+    --history filters/uplifting/v1/training_history.json
+```
+
+**Output:** `reports/uplifting_v1_plots/`
+- Learning curves, per-dimension metrics, loss curves
+
+### 5.2 Generate Report (Optional)
+
+```bash
+python -m training.generate_training_report \
+    --filter filters/uplifting/v1 \
+    --history filters/uplifting/v1/training_history.json \
+    --metadata filters/uplifting/v1/training_metadata.json
+```
+
+**Output:** `reports/uplifting_v1_training_report.docx`
+
+### 5.3 Transfer Results to Local Machine
+
+```bash
+# On local machine, pull reports from GPU machine
+scp -r user@gpu-machine:/path/to/llm-distillery/reports/uplifting_v1_* .
+```
+
+Or use the sync tool (see `remote-sync-guide.md`).
 
 ## Troubleshooting
 
