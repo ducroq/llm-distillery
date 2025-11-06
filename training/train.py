@@ -345,6 +345,11 @@ def main():
     print(f"\nLoading tokenizer: {args.model_name}")
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
 
+    # Set padding token if not set (required for batch processing)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+        print(f"  Set pad_token to eos_token: {tokenizer.eos_token}")
+
     # Load datasets
     print(f"\nLoading datasets from {args.data_dir}")
     train_dataset = FilterDataset(
