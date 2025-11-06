@@ -89,17 +89,24 @@ class QwenFilterModel(torch.nn.Module):
     multiple continuous scores (one per dimension).
     """
 
-    def __init__(self, model_name: str, num_dimensions: int, use_gradient_checkpointing: bool = True):
+    def __init__(self, model_name: str, num_dimensions: int, use_gradient_checkpointing: bool = True, use_fp16: bool = False):
         super().__init__()
 
         # Load base Qwen model (we'll use the sequence classification variant)
         # Note: AutoModelForSequenceClassification expects num_labels, but we'll
         # use it for regression by setting num_labels = num_dimensions
+        load_kwargs = {
+            "num_labels": num_dimensions,
+            "problem_type": "regression",
+        }
+
+        # Only use FP16 if explicitly requested (can cause NaN issues)
+        if use_fp16:
+            load_kwargs["torch_dtype"] = torch.float16
+
         self.base_model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
-            num_labels=num_dimensions,
-            problem_type="regression",
-            torch_dtype=torch.float16,  # Use FP16 to save memory
+            **load_kwargs
         )
 
         # Enable gradient checkpointing to save memory
@@ -107,6 +114,7 @@ class QwenFilterModel(torch.nn.Module):
             self.base_model.gradient_checkpointing_enable()
 
         self.num_dimensions = num_dimensions
+        self.use_fp16 = use_fp16
 
     def forward(self, input_ids, attention_mask, labels=None):
         outputs = self.base_model(
@@ -170,14 +178,10 @@ def train_epoch(
 
     progress = tqdm(dataloader, desc="Training")
     for batch in progress:
-        # Move to device and convert to appropriate dtype
+        # Move to device
         input_ids = batch["input_ids"].to(device)
         attention_mask = batch["attention_mask"].to(device)
         labels = batch["labels"].to(device)
-
-        # Convert labels to FP16 if model is using FP16
-        if next(model.parameters()).dtype == torch.float16:
-            labels = labels.half()
 
         # Forward pass
         outputs = model(
@@ -206,8 +210,8 @@ def train_epoch(
 
         # Track metrics
         total_loss += loss.item()
-        all_predictions.append(predictions.detach().cpu().float())  # Convert back to FP32 for metrics
-        all_labels.append(labels.detach().cpu().float())
+        all_predictions.append(predictions.detach().cpu())
+        all_labels.append(labels.detach().cpu())
 
         progress.set_postfix({"loss": loss.item()})
 
@@ -236,10 +240,6 @@ def evaluate(model, dataloader, device, dimension_names: List[str]):
             attention_mask = batch["attention_mask"].to(device)
             labels = batch["labels"].to(device)
 
-            # Convert labels to FP16 if model is using FP16
-            if next(model.parameters()).dtype == torch.float16:
-                labels = labels.half()
-
             # Forward pass
             outputs = model(
                 input_ids=input_ids,
@@ -252,8 +252,8 @@ def evaluate(model, dataloader, device, dimension_names: List[str]):
 
             # Track metrics
             total_loss += loss.item()
-            all_predictions.append(predictions.cpu().float())  # Convert back to FP32 for metrics
-            all_labels.append(labels.cpu().float())
+            all_predictions.append(predictions.cpu())
+            all_labels.append(labels.cpu())
 
     # Compute metrics
     avg_loss = total_loss / len(dataloader)
@@ -375,7 +375,8 @@ def main():
 
     # Load model
     print(f"\nInitializing model: {args.model_name}")
-    model = QwenFilterModel(args.model_name, num_dimensions, use_gradient_checkpointing=True)
+    # Use FP32 by default for stability (FP16 causes NaN issues)
+    model = QwenFilterModel(args.model_name, num_dimensions, use_gradient_checkpointing=True, use_fp16=False)
     model.to(device)
 
     # Clear CUDA cache before training
