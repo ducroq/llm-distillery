@@ -382,6 +382,12 @@ def main():
     print(f"\nInitializing model: {args.model_name}")
     # Use FP32 by default for stability (FP16 causes NaN issues)
     model = QwenFilterModel(args.model_name, num_dimensions, use_gradient_checkpointing=True, use_fp16=False)
+
+    # Set pad_token_id in model config to match tokenizer
+    if model.base_model.config.pad_token_id is None and tokenizer.pad_token_id is not None:
+        model.base_model.config.pad_token_id = tokenizer.pad_token_id
+        print(f"  Set model pad_token_id to {tokenizer.pad_token_id}")
+
     model.to(device)
 
     # Clear CUDA cache before training
