@@ -163,7 +163,7 @@ If you use this model, please cite:
 
 ```bibtex
 @misc{{{filter_config['filter']['name']}_filter_v{filter_config['filter']['version']},
-  title={{{{filter_config['filter']['name'].title()} Content Filter}}}},
+  title={{{filter_config['filter']['name'].title()} Content Filter}},
   author={{Your Name}},
   year={{2025}},
   url={{https://huggingface.co/{repo_name}}}
