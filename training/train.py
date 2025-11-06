@@ -321,6 +321,12 @@ def main():
         default=500,
         help="Number of warmup steps (default: 500)",
     )
+    parser.add_argument(
+        "--resume-from",
+        type=Path,
+        default=None,
+        help="Path to checkpoint directory to resume training from (e.g., inference/deployed/uplifting_v1)",
+    )
 
     args = parser.parse_args()
 
@@ -378,10 +384,36 @@ def main():
         shuffle=False,
     )
 
-    # Load model
-    print(f"\nInitializing model: {args.model_name}")
-    # Use FP32 by default for stability (FP16 causes NaN issues)
-    model = QwenFilterModel(args.model_name, num_dimensions, use_gradient_checkpointing=True, use_fp16=False)
+    # Load or initialize model
+    start_epoch = 0
+    if args.resume_from:
+        print(f"\nResuming from checkpoint: {args.resume_from}")
+
+        # Load model from checkpoint
+        checkpoint_model_path = args.resume_from / "model"
+        if not checkpoint_model_path.exists():
+            raise ValueError(f"Checkpoint model not found at {checkpoint_model_path}")
+
+        model = QwenFilterModel(str(checkpoint_model_path), num_dimensions, use_gradient_checkpointing=True, use_fp16=False)
+        print(f"  Loaded model from checkpoint")
+
+        # Load training history to determine start epoch
+        history_path = args.resume_from / "training_history.json"
+        if history_path.exists():
+            with open(history_path, "r", encoding="utf-8") as f:
+                training_history = json.load(f)
+            start_epoch = training_history[-1]["epoch"]
+            best_val_mae = training_history[-1]["val"]["mae"]
+            print(f"  Resuming from epoch {start_epoch} (best val MAE: {best_val_mae:.4f})")
+        else:
+            training_history = []
+            print(f"  Warning: No training history found, starting fresh")
+    else:
+        print(f"\nInitializing model: {args.model_name}")
+        # Use FP32 by default for stability (FP16 causes NaN issues)
+        model = QwenFilterModel(args.model_name, num_dimensions, use_gradient_checkpointing=True, use_fp16=False)
+        training_history = []
+        best_val_mae = float("inf")
 
     # Set pad_token_id in model config to match tokenizer
     if model.base_model.config.pad_token_id is None and tokenizer.pad_token_id is not None:
@@ -412,13 +444,12 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Training loop
-    print(f"\nStarting training for {args.epochs} epochs")
-    best_val_mae = float("inf")
-    training_history = []
+    total_epochs = start_epoch + args.epochs
+    print(f"\nStarting training from epoch {start_epoch + 1} to {total_epochs}")
 
-    for epoch in range(args.epochs):
+    for epoch in range(start_epoch, total_epochs):
         print(f"\n{'='*60}")
-        print(f"Epoch {epoch + 1}/{args.epochs}")
+        print(f"Epoch {epoch + 1}/{total_epochs}")
         print(f"{'='*60}")
 
         # Train
