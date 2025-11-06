@@ -170,10 +170,14 @@ def train_epoch(
 
     progress = tqdm(dataloader, desc="Training")
     for batch in progress:
-        # Move to device
+        # Move to device and convert to appropriate dtype
         input_ids = batch["input_ids"].to(device)
         attention_mask = batch["attention_mask"].to(device)
         labels = batch["labels"].to(device)
+
+        # Convert labels to FP16 if model is using FP16
+        if next(model.parameters()).dtype == torch.float16:
+            labels = labels.half()
 
         # Forward pass
         outputs = model(
@@ -222,6 +226,10 @@ def evaluate(model, dataloader, device, dimension_names: List[str]):
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             labels = batch["labels"].to(device)
+
+            # Convert labels to FP16 if model is using FP16
+            if next(model.parameters()).dtype == torch.float16:
+                labels = labels.half()
 
             # Forward pass
             outputs = model(
