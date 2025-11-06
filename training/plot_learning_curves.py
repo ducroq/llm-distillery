@@ -166,7 +166,13 @@ def main():
         "--output-dir",
         type=Path,
         default=None,
-        help="Output directory for plots (default: same as history file)",
+        help="Output directory for plots (default: reports/{filter_name}_plots/)",
+    )
+    parser.add_argument(
+        "--filter-name",
+        type=str,
+        default=None,
+        help="Filter name for output directory (extracted from history path if not provided)",
     )
 
     args = parser.parse_args()
@@ -189,8 +195,25 @@ def main():
     print(f"Found {len(history)} epochs")
     print(f"Dimensions: {dimension_names}")
 
+    # Extract filter name from path if not provided
+    filter_name = args.filter_name
+    if filter_name is None:
+        # Try to extract from path (e.g., filters/uplifting/v1/training_history.json -> uplifting_v1)
+        path_parts = args.history.parts
+        if "filters" in path_parts:
+            idx = path_parts.index("filters")
+            if len(path_parts) > idx + 2:
+                filter_name = f"{path_parts[idx+1]}_{path_parts[idx+2]}"
+
+        if filter_name is None:
+            filter_name = "training"
+
     # Set output directory
-    output_dir = args.output_dir or args.history.parent
+    if args.output_dir is None:
+        output_dir = Path("reports") / f"{filter_name}_plots"
+    else:
+        output_dir = args.output_dir
+
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"\nGenerating plots in {output_dir}")

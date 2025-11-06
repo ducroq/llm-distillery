@@ -53,10 +53,14 @@ secrets.ini
 
 # Model checkpoints (large files)
 inference/models/*/
+filters/*/model/
 *.pt
 *.pth
 *.onnx
 *.safetensors
+*.bin
+# But track model metadata
+!filters/*/training_*.json
 
 # Datasets (large files - track metadata only)
 datasets/
@@ -81,6 +85,9 @@ calibrations/*/
 reports/*.md
 reports/*.json
 reports/*.html
+reports/*.docx
+reports/*.pdf
+reports/*/
 !reports/README.md
 
 # Experiment logs

@@ -396,14 +396,14 @@ def main():
     parser.add_argument(
         "--plots-dir",
         type=Path,
-        required=True,
-        help="Directory containing plot images",
+        default=None,
+        help="Directory containing plot images (default: reports/{filter_name}_plots/)",
     )
     parser.add_argument(
         "--output",
         type=Path,
-        required=True,
-        help="Output path for Word document",
+        default=None,
+        help="Output path for Word document (default: reports/{filter_name}_training_report.docx)",
     )
 
     args = parser.parse_args()
@@ -422,8 +422,20 @@ def main():
 
     dimension_names = metadata['dimension_names']
     filter_name = config['filter']['name']
+    filter_version = config['filter']['version']
+
+    # Set default paths if not provided
+    filter_label = f"{filter_name}_v{filter_version}"
+
+    if args.plots_dir is None:
+        args.plots_dir = Path("reports") / f"{filter_label}_plots"
+
+    if args.output is None:
+        args.output = Path("reports") / f"{filter_label}_training_report.docx"
 
     print(f"Generating report for {filter_name} filter...")
+    print(f"  Plots directory: {args.plots_dir}")
+    print(f"  Output: {args.output}")
 
     # Create document
     doc = Document()

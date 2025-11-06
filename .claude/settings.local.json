@@ -68,7 +68,9 @@
       "Bash(then mv reports/uplifting_calibration_with_correlations_visualizations archive/reports/)",
       "Bash(if [ -d \"reports/uplifting_gemini_flash_vs_pro_visualizations\" ])",
       "Bash(then mv reports/uplifting_gemini_flash_vs_pro_visualizations archive/reports/)",
-      "Bash(do echo '=== $dir ===')"
+      "Bash(do echo '=== $dir ===')",
+      "Bash(dir:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

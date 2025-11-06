@@ -84,10 +84,11 @@ head -n 10 datasets/uplifting_ground_truth_v1_splits/val.jsonl > datasets/test_s
 
 ```bash
 # For 16GB GPU, use smaller model (0.5B fits comfortably)
+# Note: --output-dir is optional, defaults to filter directory
 python -m training.train \
     --filter filters/uplifting/v1 \
     --data-dir datasets/test_subset \
-    --output-dir training/test_output \
+    --output-dir test_training_run \
     --model-name Qwen/Qwen2.5-0.5B \
     --epochs 1 \
     --batch-size 2 \
@@ -102,11 +103,11 @@ python -m training.train \
 - Qwen 2.5-7B: ~28GB+ (needs 40GB+ GPU)
 
 **Expected behavior:**
-- Model downloads (~3GB for 1.5B model)
+- Model downloads (~1GB for 0.5B model)
 - Training starts and shows progress bar
 - Completes in ~2-5 minutes
 - Shows validation metrics at end
-- Saves model to `training/test_output/`
+- Saves model to `test_training_run/model/`
 
 **What to check:**
 - ✓ No CUDA out of memory errors
@@ -117,10 +118,10 @@ python -m training.train \
 ### 3.3 Check Output
 
 ```bash
-ls training/test_output/model/
+ls test_training_run/model/
 # Should show: config.json, model.safetensors, tokenizer files
 
-cat training/test_output/training_metadata.json
+cat test_training_run/training_metadata.json
 # Should show: training config, metrics, model info
 ```
 
@@ -130,29 +131,31 @@ Once the test works, run full training:
 
 ```bash
 # For 16GB GPU - use 0.5B model (fits comfortably)
+# Model will save to filters/uplifting/v1/model/ by default
 python -m training.train \
     --filter filters/uplifting/v1 \
     --data-dir datasets/uplifting_ground_truth_v1_splits \
-    --output-dir inference/deployed/uplifting_v1 \
     --model-name Qwen/Qwen2.5-0.5B \
-    --epochs 3 \
+    --epochs 10 \
     --batch-size 4 \
     --max-length 512 \
     --learning-rate 2e-5
 
 # For 24GB GPU - can use 1.5B model
 # python -m training.train \
+#     --filter filters/uplifting/v1 \
+#     --data-dir datasets/uplifting_ground_truth_v1_splits \
 #     --model-name Qwen/Qwen2.5-1.5B \
 #     --batch-size 4 \
-#     --max-length 512 \
-#     ... (other args same)
+#     --epochs 10
 
-# For 40GB+ GPU - can use 7B model
+# For 40GB+ GPU - can use 7B model (original config)
 # python -m training.train \
+#     --filter filters/uplifting/v1 \
+#     --data-dir datasets/uplifting_ground_truth_v1_splits \
 #     --model-name Qwen/Qwen2.5-7B \
 #     --batch-size 4 \
-#     --max-length 512 \
-#     ... (other args same)
+#     --epochs 10
 ```
 
 **Training time estimate (6,172 samples, 3 epochs):**

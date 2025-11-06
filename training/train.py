@@ -282,8 +282,8 @@ def main():
     parser.add_argument(
         "--output-dir",
         type=Path,
-        required=True,
-        help="Output directory for trained model",
+        default=None,
+        help="Output directory for trained model (default: saves to filter directory)",
     )
     parser.add_argument(
         "--model-name",
@@ -325,7 +325,7 @@ def main():
         "--resume-from",
         type=Path,
         default=None,
-        help="Path to checkpoint directory to resume training from (e.g., inference/deployed/uplifting_v1)",
+        help="Path to checkpoint directory to resume training from (e.g., filters/uplifting/v1)",
     )
 
     args = parser.parse_args()
@@ -342,6 +342,11 @@ def main():
 
     print(f"Filter: {filter_name}")
     print(f"Dimensions ({num_dimensions}): {dimension_names}")
+
+    # Set output directory (default: save to filter directory)
+    if args.output_dir is None:
+        args.output_dir = args.filter
+        print(f"Output directory: {args.output_dir} (filter directory)")
 
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

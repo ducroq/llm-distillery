@@ -154,16 +154,31 @@ For limited hardware:
 
 ## Output Structure
 
-After training, the output directory contains:
+Training saves directly to the filter directory:
 
 ```
-inference/deployed/uplifting_v1/
-├── model/                          # Trained model checkpoint
+filters/uplifting/v1/
+├── config.yaml                    # Filter configuration
+├── prefilter.yaml                 # Pre-filter rules
+├── README.md                      # Filter documentation
+├── model/                         # Trained model checkpoint
 │   ├── config.json
 │   ├── pytorch_model.bin
 │   └── tokenizer files
 ├── training_history.json          # Metrics per epoch
 └── training_metadata.json         # Training configuration
+```
+
+Reports and visualizations are saved separately:
+
+```
+reports/
+├── uplifting_v1_training_report.docx
+└── uplifting_v1_plots/
+    ├── overall_metrics.png
+    ├── per_dimension_mae.png
+    ├── loss_curves.png
+    └── training_summary.txt
 ```
 
 ## Monitoring Training
@@ -184,7 +199,7 @@ Validation:
   RMSE: 1.234
 
 ✓ New best validation MAE: 0.945
-  Model saved to: inference/deployed/uplifting_v1/model
+  Model saved to: filters/uplifting/v1/model
 ```
 
 ## Next Steps
