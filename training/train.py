@@ -189,16 +189,25 @@ def train_epoch(
         loss = outputs.loss
         predictions = outputs.logits
 
+        # Check for NaN
+        if torch.isnan(loss):
+            print(f"\n[WARNING] NaN loss detected at step {len(all_predictions)}, skipping batch")
+            continue
+
         # Backward pass
         optimizer.zero_grad()
         loss.backward()
+
+        # Clip gradients to prevent explosion with FP16
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
         optimizer.step()
         scheduler.step()
 
         # Track metrics
         total_loss += loss.item()
-        all_predictions.append(predictions.detach().cpu())
-        all_labels.append(labels.detach().cpu())
+        all_predictions.append(predictions.detach().cpu().float())  # Convert back to FP32 for metrics
+        all_labels.append(labels.detach().cpu().float())
 
         progress.set_postfix({"loss": loss.item()})
 
@@ -243,8 +252,8 @@ def evaluate(model, dataloader, device, dimension_names: List[str]):
 
             # Track metrics
             total_loss += loss.item()
-            all_predictions.append(predictions.cpu())
-            all_labels.append(labels.cpu())
+            all_predictions.append(predictions.cpu().float())  # Convert back to FP32 for metrics
+            all_labels.append(labels.cpu().float())
 
     # Compute metrics
     avg_loss = total_loss / len(dataloader)
@@ -386,6 +395,9 @@ def main():
         num_warmup_steps=args.warmup_steps,
         num_training_steps=total_steps,
     )
+
+    # Create output directory
+    args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Training loop
     print(f"\nStarting training for {args.epochs} epochs")
