@@ -89,7 +89,7 @@ class QwenFilterModel(torch.nn.Module):
     multiple continuous scores (one per dimension).
     """
 
-    def __init__(self, model_name: str, num_dimensions: int):
+    def __init__(self, model_name: str, num_dimensions: int, use_gradient_checkpointing: bool = True):
         super().__init__()
 
         # Load base Qwen model (we'll use the sequence classification variant)
@@ -99,7 +99,12 @@ class QwenFilterModel(torch.nn.Module):
             model_name,
             num_labels=num_dimensions,
             problem_type="regression",
+            torch_dtype=torch.float16,  # Use FP16 to save memory
         )
+
+        # Enable gradient checkpointing to save memory
+        if use_gradient_checkpointing:
+            self.base_model.gradient_checkpointing_enable()
 
         self.num_dimensions = num_dimensions
 
@@ -353,8 +358,12 @@ def main():
 
     # Load model
     print(f"\nInitializing model: {args.model_name}")
-    model = QwenFilterModel(args.model_name, num_dimensions)
+    model = QwenFilterModel(args.model_name, num_dimensions, use_gradient_checkpointing=True)
     model.to(device)
+
+    # Clear CUDA cache before training
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
 
     # Count parameters
     num_params = sum(p.numel() for p in model.parameters())

@@ -83,15 +83,18 @@ head -n 10 datasets/uplifting_ground_truth_v1_splits/val.jsonl > datasets/test_s
 ### 3.2 Run Test Training
 
 ```bash
+# For 16GB GPU, use small batch size and shorter sequences
 python -m training.train \
     --filter filters/uplifting/v1 \
     --data-dir datasets/test_subset \
     --output-dir training/test_output \
     --model-name Qwen/Qwen2.5-1.5B \
     --epochs 1 \
-    --batch-size 4 \
-    --max-length 512
+    --batch-size 1 \
+    --max-length 256
 ```
+
+**Note**: The training script now uses FP16 (half precision) and gradient checkpointing to reduce memory usage.
 
 **Expected behavior:**
 - Model downloads (~3GB for 1.5B model)
@@ -121,27 +124,36 @@ cat training/test_output/training_metadata.json
 Once the test works, run full training:
 
 ```bash
+# For 16GB GPU - use smaller model or reduce batch size
 python -m training.train \
     --filter filters/uplifting/v1 \
     --data-dir datasets/uplifting_ground_truth_v1_splits \
     --output-dir inference/deployed/uplifting_v1 \
-    --model-name Qwen/Qwen2.5-7B \
+    --model-name Qwen/Qwen2.5-1.5B \
     --epochs 3 \
-    --batch-size 8 \
+    --batch-size 2 \
+    --max-length 384 \
     --learning-rate 2e-5
+
+# For 24GB+ GPU - can use larger model
+# python -m training.train \
+#     --model-name Qwen/Qwen2.5-7B \
+#     --batch-size 4 \
+#     --max-length 512 \
+#     ... (other args same)
 ```
 
 **Training time estimate:**
-- 7B model with 6,172 samples
-- 3 epochs
-- Batch size 8
-- RTX 4090: ~2-4 hours
-- A100: ~1-2 hours
+- 1.5B model with 6,172 samples @ batch_size=2
+  - RTX 4090 (16GB): ~3-5 hours
+- 7B model with 6,172 samples @ batch_size=4
+  - RTX 4090 (24GB): ~4-6 hours
+  - A100 (40GB): ~2-3 hours
 
-**Memory usage:**
-- 7B model: ~14GB GPU memory
-- With batch size 8: ~16-20GB total
-- If OOM, reduce to `--batch-size 4`
+**Memory usage with optimizations (FP16 + gradient checkpointing):**
+- 1.5B model: ~6-8GB GPU memory (fits 16GB easily)
+- 7B model: ~18-22GB GPU memory (needs 24GB+ GPU)
+- If OOM, reduce `--batch-size` or `--max-length`
 
 ## Monitoring Training
 
