@@ -32,13 +32,13 @@ Large language models excel at nuanced judgment tasks but are expensive and slow
 - **Generic Batch Labeler**: Universal labeling engine supporting filter packages
 - **Secrets Management**: Secure API key handling (env vars + secrets.ini)
 - **Comprehensive Documentation**: Filter guides, calibration workflow
+- **Training Pipeline**: Qwen 2.5-7B fine-tuning with multi-dimensional regression
+- **Ground Truth Dataset**: 7,715 labeled articles for uplifting filter v1
 
 ### 🚧 In Progress
-- Ground truth generation with pre-filter integration
-- Master datasets (99K articles, Sept 29 - Oct 29, 2025)
+- Master datasets expansion (targeting 99K articles)
 
 ### 📝 Planned
-- Training pipeline (Qwen 2.5-7B fine-tuning)
 - Evaluation framework (model vs oracle comparison)
 - Inference server (pre-filter + model deployment)
 
@@ -115,15 +115,36 @@ python -m ground_truth.batch_labeler \
 
 **Process**: Stream articles → Pre-filter → Label passing articles → Stop at target
 
-### 6. Train a Model (Planned)
+### 6. Train a Model
+
+**Step 6a: Prepare Dataset**
+
+Split labeled data into train/val/test:
 
 ```bash
-# Coming soon
+python -m training.prepare_dataset \
+    --filter filters/uplifting/v1 \
+    --dataset datasets/uplifting_ground_truth_v1/labeled_articles.jsonl \
+    --output-dir datasets/uplifting_ground_truth_v1_splits
+```
+
+**Step 6b: Train Qwen 2.5 Model**
+
+Fine-tune on prepared dataset:
+
+```bash
 python -m training.train \
     --filter filters/uplifting/v1 \
-    --dataset datasets/labeled/uplifting_v1/ \
-    --output inference/deployed/uplifting_v1/
+    --data-dir datasets/uplifting_ground_truth_v1_splits \
+    --output-dir inference/deployed/uplifting_v1 \
+    --model-name Qwen/Qwen2.5-7B \
+    --epochs 3 \
+    --batch-size 8
 ```
+
+**Requirements**: 16GB+ GPU (RTX 4090, A100), ~2-4 hours training time
+
+See [training/README.md](training/README.md) for details.
 
 ### 7. Evaluate Quality (Planned)
 
