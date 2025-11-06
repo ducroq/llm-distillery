@@ -253,13 +253,11 @@ def main():
     # Get token
     import os
     token = args.token or os.environ.get("HF_TOKEN")
+
+    # If no token provided, let HfApi auto-detect from saved login
+    # (HfApi will check ~/.cache/huggingface/token automatically)
     if not token:
-        print("\nError: Hugging Face token required")
-        print("Either:")
-        print("  1. Set HF_TOKEN environment variable")
-        print("  2. Pass --token argument")
-        print("  3. Run 'huggingface-cli login' first")
-        return
+        token = None  # HfApi will use saved token from 'hf auth login'
 
     # Create repository
     print(f"\nCreating repository {args.repo_name}...")
