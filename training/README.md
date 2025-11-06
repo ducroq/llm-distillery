@@ -269,12 +269,14 @@ python -m training.generate_training_report \
     --history filters/uplifting/v1/training_history.json \
     --metadata filters/uplifting/v1/training_metadata.json
 
-# 3. Upload to Hugging Face (optional)
+# 3. Upload to Hugging Face (optional, use YOUR username)
 python -m training.upload_to_huggingface \
     --filter filters/uplifting/v1 \
-    --repo-name username/uplifting-filter-v1 \
+    --repo-name YOUR_USERNAME/uplifting-filter-v1 \
     --private
 ```
+
+**Note:** Replace `YOUR_USERNAME` with your Hugging Face username (check with `hf whoami`).
 
 ## Troubleshooting
 
