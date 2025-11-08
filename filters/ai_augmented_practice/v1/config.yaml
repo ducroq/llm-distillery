@@ -1,0 +1,176 @@
+# AI-Augmented Practice Filter - Version 1.0
+# Focus: EMPIRICAL reports of how GenAI/LLMs change cognitive work practices
+
+filter:
+  name: ai_augmented_practice
+  version: "1.0"
+  description: "Rate articles on empirical evidence of AI-augmented cognitive work transformation"
+  focus: "Real workflow integration, not hype or speculation"
+  purpose: "Learn from practitioners: what works, what fails, how to adapt"
+
+prefilter:
+  enabled: true
+  description: "Blocks AI hype, model benchmarks, funding news. Passes empirical workflow reports."
+
+oracle:
+  recommended: null
+  candidates: [gemini-flash, gemini-pro, claude-sonnet]
+
+scoring:
+  dimensions:
+    workflow_integration_depth:
+      weight: 0.20
+      description: "How deeply is AI integrated into actual work processes?"
+      scale: |
+        0-2: Toy example, demo, no real usage
+        3-4: Occasional experimental use, not core workflow
+        5-6: Regular use for specific tasks, manual handoffs
+        7-8: Core workflow redesigned around AI capabilities
+        9-10: End-to-end transformation, institutional adoption
+      evidence:
+        high: ["redesigned process", "30% of work now AI-assisted", "rewrote SOP", "entire team adopted"]
+        low: ["tried it once", "might be useful", "considering adoption"]
+
+    empirical_evidence_quality:
+      weight: 0.18
+      description: "Strength of evidence for claims about AI impact"
+      scale: |
+        0-2: Pure speculation, no data
+        3-4: Personal anecdote, single use case
+        5-6: Multiple practitioners, informal survey
+        7-8: Controlled comparison, metrics, A/B test
+        9-10: Longitudinal study, published research, rigorous methodology
+      requirements:
+        - "Before/after data"
+        - "Specific metrics (time saved, error rate, output quality)"
+        - "Sample size for surveys/studies"
+
+    trust_verification_patterns:
+      weight: 0.15
+      description: "How do practitioners validate AI output?"
+      scale: |
+        0-2: Blind acceptance, no verification mentioned
+        3-4: Ad-hoc checking, informal validation
+        5-6: Systematic spot-checking, domain expert review
+        7-8: Formal validation protocol, automated tests
+        9-10: Rigorous verification framework, documented edge cases
+      indicators:
+        high_trust:
+          - "Human expert reviews all outputs"
+          - "Automated test suite for AI suggestions"
+          - "Documented failure modes"
+        low_trust:
+          - "Just use it"
+          - "Seems to work"
+          - "No verification needed"
+
+    cognitive_task_specificity:
+      weight: 0.12
+      description: "How specific is the cognitive task described?"
+      scale: |
+        0-2: Generic "AI assistant", no specific task
+        3-4: Broad category (writing, coding, research)
+        5-6: Specific task (code review, meeting notes, literature synthesis)
+        7-8: Precise workflow step with clear inputs/outputs
+        9-10: Detailed task decomposition, measurable success criteria
+      examples:
+        - "Generic 'productivity tool' → 2"
+        - "Code review for type safety bugs → 7"
+        - "Extract action items from meeting transcripts → 6"
+
+    failure_mode_documentation:
+      weight: 0.12
+      description: "Are failure cases, limitations, edge cases documented?"
+      scale: |
+        0-2: No failures mentioned, uncritical cheerleading
+        3-4: Vague "doesn't always work"
+        5-6: Some specific failure examples
+        7-8: Systematic failure pattern analysis
+        9-10: Comprehensive failure taxonomy, mitigation strategies
+      critical_for_learning:
+        - "Silent failures (wrong but plausible answers)"
+        - "Hallucinations caught in production"
+        - "Edge cases where AI fails"
+        - "When to NOT use AI"
+
+    human_ai_division_of_labor:
+      weight: 0.10
+      description: "Clear articulation of what humans vs AI do"
+      scale: |
+        0-2: No clarity, AI does "everything"
+        3-4: Vague "AI helps"
+        5-6: Some task division described
+        7-8: Explicit allocation (AI generates, human reviews/edits)
+        9-10: Sophisticated workflow with clear handoffs, feedback loops
+      markers:
+        - "AI drafts, human refines"
+        - "Human frames problem, AI executes, human validates"
+        - "AI handles routine cases, human escalates edge cases"
+
+    skill_evolution:
+      weight: 0.08
+      description: "What new skills emerged? What skills changed?"
+      scale: |
+        0-2: No discussion of skill changes
+        3-4: Vague "need to learn prompting"
+        5-6: Specific new skills identified
+        7-8: Detailed skill transformation analysis
+        9-10: Training programs, skill gap analysis, hiring changes
+      examples:
+        - "Prompt engineering became critical skill → 7"
+        - "Less time on boilerplate, more on architecture → 8"
+        - "Evaluation of AI output is new bottleneck → 7"
+
+    organizational_dynamics:
+      weight: 0.05
+      description: "How do teams/orgs adapt to AI-augmented workers?"
+      scale: |
+        0-2: Individual use only, no org context
+        3-4: Team awareness, informal sharing
+        5-6: Team coordination patterns emerging
+        7-8: Org-wide policies, workflow standards
+        9-10: Institutional transformation, new roles/processes
+      indicators:
+        - "Created 'AI output reviewer' role"
+        - "Team developed shared prompt library"
+        - "Changed code review process for AI-assisted PRs"
+
+  tiers:
+    transformative_practice:
+      threshold: 8.0
+      description: "Deep workflow integration with rigorous evidence"
+      use: "High-value learning - detailed case studies"
+
+    validated_adoption:
+      threshold: 6.0
+      description: "Real usage with empirical validation"
+      use: "Solid evidence of what works"
+
+    emerging_practice:
+      threshold: 4.0
+      description: "Early adoption with some evidence"
+      use: "Interesting signals, needs more validation"
+
+    speculation:
+      threshold: 0.0
+      description: "Hype, speculation, or no real usage"
+      use: "Block - no actionable intelligence"
+
+  gatekeeper_rules:
+    empirical_evidence_quality:
+      threshold: 4.0
+      max_overall_if_below: 3.9
+      reasoning: "Must have real evidence, not just speculation"
+
+training:
+  target_samples: 2000
+  train_val_split: 0.9
+  recommended_model: "Qwen2.5-7B"
+  expected_accuracy: "88-92%"
+
+deployment:
+  use_cases:
+    - "Personal learning feed (track cognitive work transformation)"
+    - "Identify proven AI-augmented workflows to adopt"
+    - "Learn from others' failure modes"
+    - "Newsletter: 'AI-Augmented Practice Weekly'"
