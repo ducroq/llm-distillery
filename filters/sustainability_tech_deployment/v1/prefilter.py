@@ -94,53 +94,26 @@ class TechDeploymentPreFilterV1(BasePreFilter):
         return (True, "passed")
 
     def _is_sustainability_related(self, text_lower: str) -> bool:
-        """Check if article is about climate/sustainability/clean energy at all"""
+        """Check if article is about climate/sustainability/clean energy (PERMISSIVE)"""
 
-        # Climate keywords
-        climate_patterns = [
-            r'\bclimate\b',
-            r'\bgreenhouse gas\b',
-            r'\b(carbon|co2|methane) (emissions?|capture|storage)\b',
-            r'\bglobal warming\b',
-            r'\bparis agreement\b',
-            r'\bnet-?zero\b',
-            r'\bdecarboni[sz]ation\b',
+        # Single keyword mentions - very broad to capture tangential content
+        keywords = [
+            'climate', 'carbon', 'emission', 'greenhouse', 'warming',
+            'renewable', 'solar', 'wind', 'geothermal', 'hydro', 'nuclear',
+            'battery', 'electric vehicle', ' ev ', 'bev', 'phev',
+            'fossil fuel', 'coal', 'oil', 'gas',
+            'sustainability', 'sustainable', 'green energy', 'clean energy',
+            'net-zero', 'net zero', 'carbon neutral', 'decarboniz',
+            'energy storage', 'grid storage', 'hydrogen',
+            'heat pump', 'energy efficiency',
+            'circular economy', 'recycl', 'waste reduction',
+            'ecosystem', 'biodiversity', 'conservation', 'reforestation',
+            'pollution', 'air quality', 'water quality',
+            'paris agreement', 'cop27', 'cop28', 'unfccc',
         ]
 
-        # Energy transition keywords
-        energy_patterns = [
-            r'\b(renewable|clean) energy\b',
-            r'\b(solar|wind|geothermal|hydro)(power)?\b',
-            r'\bphotovoltaic\b',
-            r'\b(offshore|onshore) wind\b',
-            r'\benergy storage\b',
-            r'\bbattery (storage|technology)\b',
-            r'\b(electric|ev|bev) (vehicle|car|bus|truck)s?\b',
-            r'\b(fossil fuel|coal|oil|gas) (phaseout|transition|replacement)\b',
-            r'\benergy transition\b',
-            r'\bgrid (modernization|storage|flexibility)\b',
-        ]
-
-        # Sustainability/ESG keywords
-        sustainability_patterns = [
-            r'\bsustainab(le|ility)\b',
-            r'\b(esg|environmental social governance)\b',
-            r'\bgreen(house)? (tech|technology|solution)\b',
-            r'\bcircular economy\b',
-            r'\bcarbon (neutral|negative|footprint|offset)\b',
-        ]
-
-        # Nature/conservation keywords (for tech deployment filter)
-        nature_patterns = [
-            r'\becosystem restoration\b',
-            r'\bbiodiversity\b',
-            r'\breforestation\b',
-            r'\b(ocean|coral) restoration\b',
-        ]
-
-        all_patterns = climate_patterns + energy_patterns + sustainability_patterns + nature_patterns
-
-        return any(re.search(pattern, text_lower) for pattern in all_patterns)
+        # Very permissive - just needs ONE keyword mention
+        return any(kw in text_lower for kw in keywords)
 
     def _has_deployment_evidence(self, text_lower: str) -> bool:
         """Check if article has evidence of actual deployment"""

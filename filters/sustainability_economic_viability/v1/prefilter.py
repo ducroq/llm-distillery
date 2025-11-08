@@ -59,14 +59,14 @@ class EconomicViabilityPreFilterV1(BasePreFilter):
         return (True, "passed")
 
     def _is_sustainability_related(self, text_lower: str) -> bool:
-        """Check if article is about climate/sustainability at all"""
-        patterns = [
-            r'\bclimate\b', r'\b(renewable|clean) energy\b', r'\b(solar|wind|geothermal|hydro)\b',
-            r'\b(electric|ev) (vehicle|car)\b', r'\bcarbon (emissions?|capture|neutral)\b',
-            r'\bnet-?zero\b', r'\bsustainab(le|ility)\b', r'\b(fossil fuel|coal|oil|gas).{0,30}\b(transition|phaseout)\b',
-            r'\benergy transition\b', r'\bgreen (tech|energy|hydrogen)\b', r'\becosystem\b', r'\bbiodiversity\b',
+        """Check if article is about climate/sustainability (PERMISSIVE)"""
+        keywords = [
+            'climate', 'carbon', 'emission', 'greenhouse', 'renewable', 'solar', 'wind',
+            'electric vehicle', ' ev ', 'battery', 'fossil fuel', 'coal', 'oil', 'gas',
+            'sustainability', 'sustainable', 'green energy', 'clean energy', 'net-zero',
+            'energy transition', 'hydrogen', 'heat pump', 'circular economy', 'recycl',
         ]
-        return any(re.search(pattern, text_lower) for pattern in patterns)
+        return any(kw in text_lower for kw in keywords)
 
     def _has_economic_data(self, text_lower: str) -> bool:
         """Check if article has economic/cost data"""

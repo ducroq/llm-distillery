@@ -46,15 +46,14 @@ class PolicyEffectivenessPreFilterV1(BasePreFilter):
         return (True, "passed")
 
     def _is_sustainability_related(self, text_lower: str) -> bool:
-        """Check if article is about climate/sustainability policy"""
-        patterns = [
-            r'\bclimate\b', r'\bcarbon (tax|pricing|emissions?)\b', r'\benergy transition\b',
-            r'\brenewable\b', r'\b(solar|wind) (subsidy|mandate|policy)\b', r'\bnet-?zero\b',
-            r'\bemissions? (reduction|target|standard)\b', r'\bgreen (deal|new deal)\b',
-            r'\bparis agreement\b', r'\b(fossil fuel|coal).{0,30}\b(ban|phaseout|tax)\b',
-            r'\bev (mandate|subsidy|incentive)\b', r'\benergy efficiency\b', r'\bclimate policy\b',
+        """Check if article is about climate/sustainability policy (PERMISSIVE)"""
+        keywords = [
+            'climate', 'carbon', 'emission', 'renewable', 'solar', 'wind', 'fossil fuel',
+            'coal', 'oil', 'gas', 'sustainability', 'green deal', 'paris agreement',
+            'net-zero', 'energy transition', 'ev ', 'electric vehicle', 'subsidy',
+            'carbon tax', 'carbon pricing', 'energy efficiency', 'climate policy',
         ]
-        return any(re.search(pattern, text_lower) for pattern in patterns)
+        return any(kw in text_lower for kw in keywords)
 
     def _has_outcome_data(self, text_lower: str) -> bool:
         patterns = [

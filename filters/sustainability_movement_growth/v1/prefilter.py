@@ -39,18 +39,14 @@ class MovementGrowthPreFilterV1(BasePreFilter):
         return (True, "passed")
 
     def _is_sustainability_related(self, text_lower: str) -> bool:
-        """Check if article is about climate movement/activism/behavior change"""
-        patterns = [
-            r'\bclimate (strike|protest|march|rally|movement|activism)\b',
-            r'\b(greta|thunberg|extinction rebellion|fridays for future)\b',
-            r'\bdivestment\b.{0,50}\b(fossil|coal|oil)\b',
-            r'\b(climate|sustainability|green) (movement|activism|campaign)\b',
-            r'\bev (sales|adoption|market share)\b', r'\bplant-?based (adoption|sales|market)\b',
-            r'\b(solar|renewable).{0,30}\badoption\b', r'\bcarbon (footprint|neutral|offset)\b',
-            r'\bconsumer (behavior|choice).{0,30}\b(climate|sustainability)\b',
-            r'\bclimate (action|policy).{0,30}\bvot(e|ing)\b', r'\byouth (climate|activism)\b',
+        """Check if article is about climate movement/activism/behavior change (PERMISSIVE)"""
+        keywords = [
+            'climate', 'sustainability', 'divestment', 'fossil fuel', 'coal', 'oil',
+            'ev ', 'electric vehicle', 'plant-based', 'solar', 'renewable', 'carbon',
+            'greta', 'thunberg', 'extinction rebellion', 'protest', 'activism',
+            'movement', 'strike', 'march', 'rally', 'campaign', 'green',
         ]
-        return any(re.search(pattern, text_lower) for pattern in patterns)
+        return any(kw in text_lower for kw in keywords)
 
     def _has_growth_signals(self, text_lower: str) -> bool:
         """Check for growth/acceleration indicators"""

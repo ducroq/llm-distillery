@@ -34,15 +34,14 @@ class NatureRecoveryPreFilterV1(BasePreFilter):
         return (True, "passed")
 
     def _is_sustainability_related(self, text_lower: str) -> bool:
-        """Check if article is about nature/ecosystem/environmental issues"""
-        patterns = [
-            r'\b(ecosystem|biodiversity|habitat)\b', r'\b(deforestation|reforestation|afforestation)\b',
-            r'\b(coral|reef) (restoration|recovery|bleaching)\b', r'\b(ocean|marine) (ecosystem|conservation|restoration)\b',
-            r'\bwildlife (conservation|recovery|population)\b', r'\b(species|extinction)\b',
-            r'\b(pollution|air quality|water quality)\b', r'\benvironmental (restoration|recovery|degradation)\b',
-            r'\bclimate\b', r'\bcarbon (sequestration|sink)\b', r'\b(wetland|mangrove|peatland)\b',
+        """Check if article is about nature/ecosystem/environmental issues (PERMISSIVE)"""
+        keywords = [
+            'ecosystem', 'biodiversity', 'habitat', 'deforestation', 'reforestation',
+            'coral', 'reef', 'ocean', 'marine', 'wildlife', 'species', 'extinction',
+            'pollution', 'air quality', 'water quality', 'environment', 'climate',
+            'carbon', 'wetland', 'mangrove', 'conservation', 'restoration', 'recovery',
         ]
-        return any(re.search(pattern, text_lower) for pattern in patterns)
+        return any(kw in text_lower for kw in keywords)
 
     def _get_combined_text(self, article: Dict) -> str:
         return ' '.join([article.get('title',''), article.get('description',''), article.get('content','')[:2000]])
