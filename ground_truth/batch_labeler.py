@@ -473,6 +473,82 @@ class GenericBatchLabeler:
 
         return analysis
 
+    def _post_process_sustainability(self, analysis: Dict) -> Dict:
+        """
+        Post-process sustainability filter analysis to calculate overall score and tier.
+        Reads dimension weights and tiers from config.yaml.
+        """
+        # Load config if not already loaded
+        if not hasattr(self, '_config'):
+            config_path = Path(self.prompt_path).parent / "config.yaml"
+            if config_path.exists():
+                import yaml
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    self._config = yaml.safe_load(f)
+            else:
+                # Fallback: return analysis as-is
+                return analysis
+
+        # Extract dimension weights from config
+        scoring = self._config.get('scoring', {})
+        dimensions_config = scoring.get('dimensions', {})
+
+        weights = {}
+        for dim_name, dim_config in dimensions_config.items():
+            weights[dim_name] = dim_config.get('weight', 0)
+
+        # Extract dimension scores from LLM response
+        dimensions = {}
+        for dim_name in weights.keys():
+            if dim_name in analysis:
+                # Handle both flat scores and {"score": X, "reasoning": Y} format
+                dim_value = analysis[dim_name]
+                if isinstance(dim_value, dict):
+                    dimensions[dim_name] = dim_value.get('score', 0)
+                else:
+                    dimensions[dim_name] = dim_value
+            else:
+                dimensions[dim_name] = 0
+
+        # Calculate weighted score
+        overall_score = sum(dimensions[dim] * weights[dim] for dim in dimensions)
+
+        # Apply gatekeeper rules if present
+        gatekeeper_rules = scoring.get('gatekeeper_rules', {})
+        max_score = 10.0
+
+        for dim_name, rule in gatekeeper_rules.items():
+            threshold = rule.get('threshold', 0)
+            max_if_below = rule.get('max_overall_if_below', 10)
+            if dimensions.get(dim_name, 0) < threshold:
+                max_score = min(max_score, max_if_below)
+
+        # Apply cap
+        final_score = min(overall_score, max_score)
+
+        # Determine tier based on config thresholds
+        tiers_config = scoring.get('tiers', {})
+        tier = "unknown"
+
+        # Sort tiers by threshold (descending) to check highest first
+        sorted_tiers = sorted(
+            tiers_config.items(),
+            key=lambda x: x[1].get('threshold', 0),
+            reverse=True
+        )
+
+        for tier_name, tier_config in sorted_tiers:
+            if final_score >= tier_config.get('threshold', 0):
+                tier = tier_name
+                break
+
+        # Add calculated fields to analysis
+        analysis['dimensions'] = dimensions
+        analysis['overall_score'] = round(final_score, 2)
+        analysis['tier'] = tier
+
+        return analysis
+
     def _smart_compress_content(self, content: str, max_words: int = 800) -> str:
         """
         Intelligently compress long articles while preserving key information.
@@ -736,6 +812,8 @@ class GenericBatchLabeler:
                 # Filter-specific post-processing
                 if self.filter_name == 'uplifting':
                     analysis = self._post_process_uplifting(analysis)
+                elif self.filter_name.startswith('sustainability_'):
+                    analysis = self._post_process_sustainability(analysis)
 
                 # Add metadata
                 analysis['analyzed_at'] = datetime.utcnow().isoformat() + 'Z'

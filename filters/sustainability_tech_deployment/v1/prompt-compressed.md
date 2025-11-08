@@ -1,12 +1,21 @@
 # Climate Technology Deployment Scoring
 
-Rate this article on **8 dimensions** (0-10 scale). Focus: DEPLOYED climate tech, not lab prototypes or vaporware.
+**Purpose**: Rate deployed climate technology for maturity, performance, and scale.
 
-## Article
+**Version**: 1.0
 
-**Title**: {title}
+**Focus**: DEPLOYED tech with measurable impact, not lab prototypes or vaporware.
 
-**Content**: {content}
+---
+
+## PROMPT TEMPLATE
+
+```
+Rate this article on 8 dimensions (0-10 scale). Focus: DEPLOYED climate tech, not lab prototypes or vaporware.
+
+ARTICLE:
+Title: {title}
+Text: {text}
 
 ---
 
@@ -132,21 +141,22 @@ Verified emissions avoided / energy generated
 
 ## Output Format (JSON)
 
-```json
-{
-  "deployment_maturity": {"score": X, "reasoning": "Brief justification"},
-  "technology_performance": {"score": X, "reasoning": "..."},
-  "cost_trajectory": {"score": X, "reasoning": "..."},
-  "scale_of_deployment": {"score": X, "reasoning": "..."},
-  "market_penetration": {"score": X, "reasoning": "..."},
-  "technology_readiness": {"score": X, "reasoning": "..."},
-  "supply_chain_maturity": {"score": X, "reasoning": "..."},
-  "proof_of_impact": {"score": X, "reasoning": "..."},
-  "overall_assessment": "1-2 sentence summary of technology maturity and deployment",
-  "primary_technology": "solar | wind | batteries | EVs | heat_pumps | hydrogen | other",
-  "deployment_stage": "mass_deployment | commercial_proven | early_commercial | pilot | lab",
-  "confidence": "HIGH | MEDIUM | LOW"
-}
-```
+{{
+  "deployment_maturity": {{"score": <0-10>, "reasoning": "Brief justification"}},
+  "technology_performance": {{"score": <0-10>, "reasoning": "..."}},
+  "cost_trajectory": {{"score": <0-10>, "reasoning": "..."}},
+  "scale_of_deployment": {{"score": <0-10>, "reasoning": "..."}},
+  "market_penetration": {{"score": <0-10>, "reasoning": "..."}},
+  "technology_readiness": {{"score": <0-10>, "reasoning": "..."}},
+  "supply_chain_maturity": {{"score": <0-10>, "reasoning": "..."}},
+  "proof_of_impact": {{"score": <0-10>, "reasoning": "..."}},
+  "overall_assessment": "<1-2 sentence summary>",
+  "primary_technology": "solar|wind|batteries|EVs|heat_pumps|hydrogen|other",
+  "deployment_stage": "mass_deployment|commercial_proven|early_commercial|pilot|lab",
+  "confidence": "HIGH|MEDIUM|LOW"
+}}
 
 **Be strict**: Most tech news is vaporware. Score low unless there's clear deployment evidence.
+
+DO NOT include any text outside the JSON object.
+```
