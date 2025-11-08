@@ -27,6 +27,12 @@ Large language models excel at nuanced judgment tasks but are expensive and slow
 - **Uplifting Filter v1**: 8-dimension framework with rule-based pre-filter (93% pass rate)
 - **Sustainability Filter v1**: 8-dimension framework with greenwashing/vaporware detection
 - **Investment Risk Filter v1**: 8-dimension framework for capital preservation (FOMO/speculation blocking)
+- **5-Pillar Sustainability Framework**: Multi-filter oracle for training specialized models
+  - **Tech Deployment** (8 dimensions): Deployed tech vs vaporware, scaling evidence
+  - **Economic Viability** (8 dimensions): Cost competitiveness, profitability, jobs
+  - **Policy Effectiveness** (8 dimensions): Outcomes, replicability, durability
+  - **Nature Recovery** (8 dimensions): Ecosystem health, pollution reduction
+  - **Movement Growth** (8 dimensions): Social momentum, behavior change
 - **Oracle Calibration**: Compare Flash/Pro/Sonnet to select best LLM
 - **Pre-filter Calibration**: Measure blocking effectiveness before ground truth generation
 - **Generic Batch Labeler**: Universal labeling engine supporting filter packages

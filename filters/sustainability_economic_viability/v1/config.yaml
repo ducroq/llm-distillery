@@ -1,0 +1,202 @@
+# Sustainability Pillar 2: Economics Favor Action - Version 1.0
+# Focus: COST COMPETITIVENESS and ECONOMIC VIABILITY
+
+filter:
+  name: sustainability_economic_viability
+  version: "1.0"
+  description: "Rate climate solutions for economic competitiveness vs fossil fuels"
+  pillar: "Pillar 2: Economics Favor Climate Action (it's not sacrifice anymore)"
+  purpose: "Prove that green is economically rational, not expensive sacrifice"
+
+prefilter:
+  enabled: true
+  expected_pass_rate: null  # To be determined during calibration
+  description: "Blocks pure advocacy/opinions without economic data"
+
+  block_patterns:
+    no_economics:
+      - "moral imperative", "we must act" (without economic analysis)
+      - "save the planet" (without cost data)
+      - Pure policy advocacy without economic impact analysis
+
+    subsidy_dependent:
+      - Articles ONLY about subsidies with no path to competitiveness
+      - "Only viable with massive subsidies" (without innovation trajectory)
+
+  pass_patterns:
+    economic_data:
+      - "LCOE", "levelized cost", "$/MWh", "$/kg"
+      - "cost-competitive", "price parity", "cheaper than"
+      - "ROI", "payback period", "NPV"
+      - Job creation numbers, investment flows
+
+oracle:
+  recommended: null  # To be determined during calibration
+  candidates:
+    - gemini-flash
+    - gemini-pro
+    - claude-sonnet
+  target_model: "Gemini Flash 1.5"
+
+scoring:
+  dimensions:
+    cost_competitiveness:
+      weight: 0.25
+      description: "LCOE/unit cost vs fossil fuel alternatives"
+      scale: |
+        0-2: >5x fossil costs, no path to competitiveness
+        3-4: 2-5x fossil costs, needs major subsidies
+        5-6: Approaching parity, declining costs, modest subsidies
+        7-8: Cost-competitive (parity), subsidy-independent
+        9-10: Cheaper than fossil, disrupting incumbents
+      requirements:
+        - "Specific cost data (LCOE, $/unit)"
+        - "Comparison to fossil baseline"
+        - "Geographic context (costs vary by region)"
+
+    profitability:
+      weight: 0.20
+      description: "Are green companies making money? Financial health"
+      scale: |
+        0-2: Massive losses, bankruptcy risk, no revenue
+        3-4: Unprofitable, cash burn, dependent on funding rounds
+        5-6: Path to profitability, positive unit economics
+        7-8: Profitable, positive margins, sustainable business
+        9-10: Highly profitable, outperforming fossil competitors
+      indicators:
+        high_profitability:
+          - "Operating margin >15%"
+          - "Profitable for X consecutive quarters"
+          - "Revenue growth >30% YoY"
+        low_profitability:
+          - "Cash burn rate", "runway", "needs funding"
+          - "Losses widen", "unprofitable"
+
+    job_creation:
+      weight: 0.15
+      description: "Green jobs created vs fossil jobs displaced"
+      scale: |
+        0-2: Net job losses, automation with no replacement
+        3-4: Some green jobs but fewer than fossil displaced
+        5-6: Net neutral (green jobs ≈ fossil jobs lost)
+        7-8: Net positive (more green jobs than fossil displaced)
+        9-10: Massive job creation, quality jobs, wage premium
+      requirements:
+        - "Number of jobs created (direct + indirect)"
+        - "Wage comparison to fossil jobs"
+        - "Geographic distribution (just transition?)"
+
+    stranded_assets:
+      weight: 0.15
+      description: "Fossil infrastructure becoming uneconomical"
+      scale: |
+        0-2: Fossil assets increasing in value
+        3-4: Fossil stable, no stranding yet
+        5-6: Some early retirements, writedowns beginning
+        7-8: Significant stranding (coal plants closing early)
+        9-10: Widespread asset stranding, fossil uneconomical
+      examples:
+        - "Coal plants retired early due to renewable competition → 8"
+        - "Oil reserves written down as uneconomic → 9"
+        - "Gas peaker plants replaced by batteries → 7"
+
+    investment_flows:
+      weight: 0.10
+      description: "Capital moving to green tech"
+      scale: |
+        0-2: Divestment from green, capital fleeing
+        3-4: Limited investment, niche venture funding
+        5-6: Growing investment, corporate R&D increasing
+        7-8: Major investment ($10B+ annually in sector)
+        9-10: Investment dominates (green > fossil in new capital)
+      examples:
+        - "EV investment >$300B in 2024 → 10"
+        - "Renewable energy investment >$500B/year → 9"
+        - "Climate tech VC $50B/year → 8"
+
+    payback_period:
+      weight: 0.08
+      description: "ROI timeline for green investments"
+      scale: |
+        0-2: >20 years or never pays back
+        3-4: 10-20 year payback
+        5-6: 5-10 year payback
+        7-8: 2-5 year payback
+        9-10: <2 year payback
+      examples:
+        - "Rooftop solar: 6-8 year payback → 6"
+        - "Heat pump: 5 year payback vs gas furnace → 7"
+        - "LED bulbs: 1 year payback → 10"
+
+    subsidy_dependence:
+      weight: 0.04
+      description: "Does it need subsidies to compete?"
+      scale: |
+        0-2: 100% subsidy-dependent, unviable without support
+        3-4: Heavy subsidies needed (>50% of economics)
+        5-6: Modest subsidies (~20-30%), approaching independence
+        7-8: Minimal subsidies (<10%), nearly competitive
+        9-10: Zero subsidies needed, profitable standalone
+      note: "Lower dependence = higher score"
+
+    economic_multiplier:
+      weight: 0.03
+      description: "Broader economic benefits beyond direct costs"
+      scale: |
+        0-2: Negative externalities, economic drag
+        3-4: Neutral, no broader benefits
+        5-6: Some co-benefits (health, energy security)
+        7-8: Significant multiplier effects
+        9-10: Transformative economic benefits
+      examples:
+        - "Energy independence (reduced oil imports) → 7"
+        - "Healthcare savings from air quality → 8"
+        - "Grid resilience and reliability → 6"
+
+  tiers:
+    economically_superior:
+      threshold: 8.0
+      description: "Green is cheaper than fossil, no subsidies needed"
+      newsletter_use: "Lead stories - Economics favor action"
+
+    competitive:
+      threshold: 6.5
+      description: "Cost-competitive, approaching or at parity"
+      newsletter_use: "Supporting stories - Economic case strengthening"
+
+    approaching_parity:
+      threshold: 5.0
+      description: "Costs declining, modest subsidies, path visible"
+      newsletter_use: "Emerging economics - trending toward viability"
+
+    subsidy_dependent:
+      threshold: 3.0
+      description: "Needs major subsidies, unclear path to competitiveness"
+      newsletter_use: "Filter out - not economically compelling yet"
+
+    economically_unviable:
+      threshold: 0.0
+      description: "Expensive, no path to competitiveness"
+      newsletter_use: "Block - pure advocacy without economics"
+
+  gatekeeper_rules:
+    cost_competitiveness:
+      threshold: 5.0
+      max_overall_if_below: 4.9
+      reasoning: "Must be approaching parity to support 'economics favor' narrative"
+
+training:
+  target_samples: 2500
+  train_val_split: 0.9
+  quality_threshold: 0.75
+  recommended_model: "Qwen2.5-7B"
+  expected_accuracy: "90-94%"
+
+deployment:
+  inference_time: "20-50ms"
+  cost_per_article: "$0.00"
+  use_cases:
+    - "Investment analysis (green tech profitability)"
+    - "Policy analysis (subsidy phase-out readiness)"
+    - "'Economics Favor Action' newsletter"
+    - "Just transition planning (job impacts)"

@@ -1,0 +1,205 @@
+# Sustainability Pillar 3: Policy Works - Version 1.0
+# Focus: PROVEN POLICY BLUEPRINTS with MEASURABLE OUTCOMES
+
+filter:
+  name: sustainability_policy_effectiveness
+  version: "1.0"
+  description: "Rate climate policies for outcomes, replicability, and durability"
+  pillar: "Pillar 3: Policy Works (when done right)"
+  purpose: "Prove that smart policy drives change - show blueprints others can copy"
+
+prefilter:
+  enabled: true
+  expected_pass_rate: null  # To be determined during calibration
+  description: "Blocks policy announcements without outcomes, pure advocacy"
+
+  block_patterns:
+    no_outcomes:
+      - Policy announced but no implementation data
+      - "Plans to introduce policy" (future-only)
+      - Net-zero pledges without interim targets or enforcement
+
+    pure_advocacy:
+      - "Should pass policy" (advocacy without examples)
+      - Opinion pieces about what policy "ought to do"
+
+  pass_patterns:
+    has_outcomes:
+      - "Emissions fell X% after policy"
+      - "Renewable deployment grew Y% following policy"
+      - Before/after data showing measurable change
+
+    replicability:
+      - "X countries adopting similar policy"
+      - "Blueprint being copied by..."
+      - Policy details (tax rates, standards, mechanisms)
+
+oracle:
+  recommended: null
+  candidates:
+    - gemini-flash
+    - gemini-pro
+    - claude-sonnet
+
+scoring:
+  dimensions:
+    policy_outcomes:
+      weight: 0.30
+      description: "Did deployment/emissions measurably change after policy?"
+      scale: |
+        0-2: No outcomes data, policy not yet implemented
+        3-4: Announced but no measurable impact yet
+        5-6: Some positive outcomes, modest impact
+        7-8: Clear measurable impact (emissions fell, deployment grew)
+        9-10: Transformative impact with strong causal link to policy
+      requirements:
+        - "Before/after data (emissions, deployment, behavior)"
+        - "Time series showing change"
+        - "Attribution to policy (not just correlation)"
+      examples:
+        - "Norway EV sales 5% → 90% after tax policy → 10"
+        - "Germany renewables 10% → 50% post-FIT → 9"
+
+    replicability:
+      weight: 0.25
+      description: "Can other jurisdictions copy this blueprint?"
+      scale: |
+        0-2: Impossible to replicate (unique circumstances only)
+        3-4: Very context-dependent, hard to transfer
+        5-6: Some transferability, requires adaptation
+        7-8: Highly replicable, proven in multiple contexts
+        9-10: Global blueprint, dozens copying
+      indicators:
+        high_replicability:
+          - "X countries adopting similar policy"
+          - "Clear mechanism (feed-in tariff, carbon tax, mandate)"
+          - "Works across different political systems"
+        low_replicability:
+          - "Only works due to unique geography/culture"
+          - "Requires authoritarian control"
+          - "No details on how to implement"
+
+    political_durability:
+      weight: 0.15
+      description: "Will this survive government change? Institutionalized?"
+      scale: |
+        0-2: Executive order, easily reversed, partisan
+        3-4: Single-party legislation, vulnerable
+        5-6: Bipartisan support, some institutional backing
+        7-8: Institutionalized, bipartisan, hard to reverse
+        9-10: Constitutional, multi-decade track record
+      examples:
+        - "Norway EV policy: 30+ years, all parties support → 9"
+        - "US Clean Power Plan: executive order, reversed → 2"
+
+    speed_of_impact:
+      weight: 0.10
+      description: "How fast did policy deliver results?"
+      scale: |
+        0-2: >10 years, no results yet
+        3-4: 5-10 years to see impact
+        5-6: 3-5 years
+        7-8: 1-3 years (rapid deployment response)
+        9-10: <1 year (immediate behavior change)
+      examples:
+        - "Denmark wind auctions: deployment within 2 years → 8"
+        - "Carbon tax: emissions fell within 1 year → 9"
+
+    equity_impact:
+      weight: 0.08
+      description: "Who benefits? Who pays? Just transition?"
+      scale: |
+        0-2: Regressive, harms vulnerable populations
+        3-4: Neutral, no equity considerations
+        5-6: Some equity provisions (rebates, worker support)
+        7-8: Equity-centered, benefits low-income disproportionately
+        9-10: Reparative, addresses historical injustice
+      indicators:
+        - "Revenue recycling (carbon tax → rebates)"
+        - "Just transition provisions (fossil worker retraining)"
+        - "Low-income benefits (reduced energy burden)"
+
+    enforcement_mechanisms:
+      weight: 0.07
+      description: "Are there teeth? Penalties? Monitoring?"
+      scale: |
+        0-2: Voluntary, no penalties, no monitoring
+        3-4: Weak enforcement, rarely penalized
+        5-6: Moderate enforcement, some accountability
+        7-8: Strong enforcement, automatic penalties
+        9-10: Market-based enforcement (price signal automatic)
+      examples:
+        - "EU ETS: automatic penalties for non-compliance → 8"
+        - "Corporate pledges: voluntary, no enforcement → 1"
+
+    unintended_consequences:
+      weight: 0.03
+      description: "Negative side effects minimized?"
+      scale: |
+        0-2: Major negative consequences (economic damage, unfairness)
+        3-4: Some significant downsides
+        5-6: Minor trade-offs, manageable
+        7-8: Minimal downsides, well-designed
+        9-10: Net positive across all dimensions
+      examples:
+        - "Feed-in tariff: higher electricity prices (manageable) → 7"
+        - "Diesel subsidy removal: protests, rollback → 3"
+
+    policy_spreading:
+      weight: 0.02
+      description: "Are others adopting? Network effect?"
+      scale: |
+        0-2: No one copying, failed experiment
+        3-4: Limited interest, no adoption yet
+        5-6: 2-5 jurisdictions considering/adopting
+        7-8: 5-15 jurisdictions adopted
+        9-10: >15 jurisdictions, global standard emerging
+      examples:
+        - "Feed-in tariffs: adopted by 50+ countries → 10"
+        - "Norway EV tax policy: 15+ countries copying → 9"
+
+  tiers:
+    proven_blueprint:
+      threshold: 8.0
+      description: "Strong outcomes, highly replicable, spreading globally"
+      newsletter_use: "Lead stories - Policy works, here's the blueprint"
+
+    effective_policy:
+      threshold: 6.5
+      description: "Clear positive outcomes, replicable with adaptation"
+      newsletter_use: "Supporting stories - Policy driving change"
+
+    promising:
+      threshold: 5.0
+      description: "Some outcomes, transferability unclear"
+      newsletter_use: "Emerging policy - watch for replication"
+
+    announced:
+      threshold: 3.0
+      description: "Policy announced but no outcomes yet"
+      newsletter_use: "Filter out - come back when there's outcome data"
+
+    ineffective:
+      threshold: 0.0
+      description: "Failed policy, no outcomes, or pure advocacy"
+      newsletter_use: "Block - no evidence policy works"
+
+  gatekeeper_rules:
+    policy_outcomes:
+      threshold: 5.0
+      max_overall_if_below: 4.9
+      reasoning: "Must have measurable outcomes to support 'policy works'"
+
+training:
+  target_samples: 2500
+  train_val_split: 0.9
+  quality_threshold: 0.75
+  recommended_model: "Qwen2.5-7B"
+  expected_accuracy: "91-95%"
+
+deployment:
+  use_cases:
+    - "Policy blueprint identification (what works?)"
+    - "Cross-country policy comparison"
+    - "'Policy Works' newsletter curation"
+    - "Advocate for proven policies (with evidence)"
