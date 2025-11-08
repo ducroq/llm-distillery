@@ -34,6 +34,10 @@ class EconomicViabilityPreFilterV1(BasePreFilter):
         text = self._get_combined_text(article)
         text_lower = text.lower()
 
+        # BLOCK: Not climate/sustainability related at all
+        if not self._is_sustainability_related(text_lower):
+            return (False, "not_sustainability_topic")
+
         # BLOCK: Pure advocacy without economic data
         advocacy_patterns = [
             r'\b(moral imperative|ethical duty|must act now)\b(?!.{0,200}\b(cost|economic|investment)\b)',
@@ -53,6 +57,16 @@ class EconomicViabilityPreFilterV1(BasePreFilter):
 
         # PASS: Has economic data
         return (True, "passed")
+
+    def _is_sustainability_related(self, text_lower: str) -> bool:
+        """Check if article is about climate/sustainability at all"""
+        patterns = [
+            r'\bclimate\b', r'\b(renewable|clean) energy\b', r'\b(solar|wind|geothermal|hydro)\b',
+            r'\b(electric|ev) (vehicle|car)\b', r'\bcarbon (emissions?|capture|neutral)\b',
+            r'\bnet-?zero\b', r'\bsustainab(le|ility)\b', r'\b(fossil fuel|coal|oil|gas).{0,30}\b(transition|phaseout)\b',
+            r'\benergy transition\b', r'\bgreen (tech|energy|hydrogen)\b', r'\becosystem\b', r'\bbiodiversity\b',
+        ]
+        return any(re.search(pattern, text_lower) for pattern in patterns)
 
     def _has_economic_data(self, text_lower: str) -> bool:
         """Check if article has economic/cost data"""

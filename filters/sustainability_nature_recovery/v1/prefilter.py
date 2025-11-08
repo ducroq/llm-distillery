@@ -22,12 +22,27 @@ class NatureRecoveryPreFilterV1(BasePreFilter):
         """
         text_lower = self._get_combined_text(article).lower()
 
+        # BLOCK: Not climate/sustainability/nature related
+        if not self._is_sustainability_related(text_lower):
+            return (False, "not_sustainability_topic")
+
         # Block: Pure disaster/decline news
         if re.search(r'\b(extinction|collapse|dying|destroyed)\b', text_lower):
             if not re.search(r'\b(recovery|restored|improving|rebounding)\b', text_lower):
                 return (False, "disaster_no_recovery")
 
         return (True, "passed")
+
+    def _is_sustainability_related(self, text_lower: str) -> bool:
+        """Check if article is about nature/ecosystem/environmental issues"""
+        patterns = [
+            r'\b(ecosystem|biodiversity|habitat)\b', r'\b(deforestation|reforestation|afforestation)\b',
+            r'\b(coral|reef) (restoration|recovery|bleaching)\b', r'\b(ocean|marine) (ecosystem|conservation|restoration)\b',
+            r'\bwildlife (conservation|recovery|population)\b', r'\b(species|extinction)\b',
+            r'\b(pollution|air quality|water quality)\b', r'\benvironmental (restoration|recovery|degradation)\b',
+            r'\bclimate\b', r'\bcarbon (sequestration|sink)\b', r'\b(wetland|mangrove|peatland)\b',
+        ]
+        return any(re.search(pattern, text_lower) for pattern in patterns)
 
     def _get_combined_text(self, article: Dict) -> str:
         return ' '.join([article.get('title',''), article.get('description',''), article.get('content','')[:2000]])

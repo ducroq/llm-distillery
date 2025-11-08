@@ -29,6 +29,10 @@ class PolicyEffectivenessPreFilterV1(BasePreFilter):
         """
         text_lower = self._get_combined_text(article).lower()
 
+        # BLOCK: Not climate/sustainability related
+        if not self._is_sustainability_related(text_lower):
+            return (False, "not_sustainability_topic")
+
         # Block: Future-only policy announcements
         if re.search(r'\b(plans? to introduce|will implement|proposes?)\b', text_lower):
             if not self._has_outcome_data(text_lower):
@@ -40,6 +44,17 @@ class PolicyEffectivenessPreFilterV1(BasePreFilter):
                 return (False, "pure_advocacy")
 
         return (True, "passed")
+
+    def _is_sustainability_related(self, text_lower: str) -> bool:
+        """Check if article is about climate/sustainability policy"""
+        patterns = [
+            r'\bclimate\b', r'\bcarbon (tax|pricing|emissions?)\b', r'\benergy transition\b',
+            r'\brenewable\b', r'\b(solar|wind) (subsidy|mandate|policy)\b', r'\bnet-?zero\b',
+            r'\bemissions? (reduction|target|standard)\b', r'\bgreen (deal|new deal)\b',
+            r'\bparis agreement\b', r'\b(fossil fuel|coal).{0,30}\b(ban|phaseout|tax)\b',
+            r'\bev (mandate|subsidy|incentive)\b', r'\benergy efficiency\b', r'\bclimate policy\b',
+        ]
+        return any(re.search(pattern, text_lower) for pattern in patterns)
 
     def _has_outcome_data(self, text_lower: str) -> bool:
         patterns = [
