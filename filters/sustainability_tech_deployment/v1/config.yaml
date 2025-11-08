@@ -13,31 +13,20 @@ prefilter:
   expected_pass_rate: null  # To be determined during calibration
   description: "Blocks vaporware, prototypes without deployment, and pure R&D announcements"
 
-  block_patterns:
-    vaporware:
-      - "concept", "theoretical", "could potentially"
-      - "breakthrough announced" (without deployment)
-      - "prototype unveiled", "demo", "proof-of-concept"
+  block_keywords:
+    - vaporware
+    - prototype
+    - concept
+    - plans_to_deploy
+    - lab_only
+    - future_only
 
-    future_only:
-      - "plans to", "will deploy", "aiming for"
-      - "committed to build by 2030"
-      - No deployment timeline or "TBD"
-
-    lab_only:
-      - "laboratory results", "bench-scale"
-      - "research published", "study shows" (without commercialization)
-
-  pass_patterns:
-    deployed:
-      - "operational", "online", "generating", "producing"
-      - "deployed", "installed", "commissioned"
-      - "X MW/GW", "Y tons CO2", "Z units sold"
-
-    scaling:
-      - "market share", "YoY growth", "capacity factor"
-      - "production volume", "sales figures"
-      - "cost declined", "LCOE", "price parity"
+  pass_keywords:
+    - operational
+    - deployed
+    - generating
+    - market_share
+    - cost_declined
 
 oracle:
   recommended: null  # To be determined during calibration

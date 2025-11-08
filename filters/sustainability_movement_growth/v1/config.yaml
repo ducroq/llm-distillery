@@ -2,7 +2,7 @@
 # Focus: SOCIAL MOMENTUM and BEHAVIOR CHANGE
 
 filter:
-  name: sustainability_movement_growth"
+  name: sustainability_movement_growth
   version: "1.0"
   description: "Rate climate movement growth, institutional action, behavior change"
   pillar: "Pillar 5: People Are Acting (movement is growing)"

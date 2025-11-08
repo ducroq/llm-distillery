@@ -10,26 +10,36 @@ from typing import Dict, Optional
 from filters.base_prefilter import BasePreFilter
 
 
-class PolicyEffectivenessPreFilter(BasePreFilter):
+class PolicyEffectivenessPreFilterV1(BasePreFilter):
+    VERSION = "1.0"
+
     def __init__(self):
         super().__init__()
         self.filter_name = "sustainability_policy_effectiveness"
         self.version = "1.0"
 
-    def should_block(self, article: Dict) -> tuple[bool, Optional[str]]:
+    def should_label(self, article: Dict) -> tuple[bool, str]:
+        """
+        Determine if article should be sent to LLM for labeling.
+
+        Returns:
+            (should_label, reason)
+            - (True, "passed"): Send to LLM
+            - (False, reason): Block from LLM
+        """
         text_lower = self._get_combined_text(article).lower()
 
         # Block: Future-only policy announcements
         if re.search(r'\b(plans? to introduce|will implement|proposes?)\b', text_lower):
             if not self._has_outcome_data(text_lower):
-                return (True, "policy_announcement_no_outcomes")
+                return (False, "policy_announcement_no_outcomes")
 
         # Block: Pure advocacy
         if re.search(r'\b(should|must|ought to) (pass|implement|adopt)\b', text_lower):
             if not self._has_outcome_data(text_lower):
-                return (True, "pure_advocacy")
+                return (False, "pure_advocacy")
 
-        return (False, None)
+        return (True, "passed")
 
     def _has_outcome_data(self, text_lower: str) -> bool:
         patterns = [

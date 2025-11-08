@@ -12,20 +12,24 @@ from typing import Dict, List, Optional
 from filters.base_prefilter import BasePreFilter
 
 
-class EconomicViabilityPreFilter(BasePreFilter):
+class EconomicViabilityPreFilterV1(BasePreFilter):
     """Pre-filter for economic analysis of climate solutions"""
+
+    VERSION = "1.0"
 
     def __init__(self):
         super().__init__()
         self.filter_name = "sustainability_economic_viability"
         self.version = "1.0"
 
-    def should_block(self, article: Dict) -> tuple[bool, Optional[str]]:
+    def should_label(self, article: Dict) -> tuple[bool, str]:
         """
-        Determine if article should be blocked before LLM scoring.
+        Determine if article should be sent to LLM for labeling.
 
         Returns:
-            (should_block, reason)
+            (should_label, reason)
+            - (True, "passed"): Send to LLM
+            - (False, reason): Block from LLM
         """
         text = self._get_combined_text(article)
         text_lower = text.lower()
@@ -41,14 +45,14 @@ class EconomicViabilityPreFilter(BasePreFilter):
             if re.search(pattern, text_lower):
                 # Check if there's economic data to override
                 if not self._has_economic_data(text_lower):
-                    return (True, "pure_advocacy_no_economics")
+                    return (False, "pure_advocacy_no_economics")
 
         # BLOCK: Opinion pieces without data
         if self._is_pure_opinion(text_lower):
-            return (True, "opinion_without_data")
+            return (False, "opinion_without_data")
 
         # PASS: Has economic data
-        return (False, None)
+        return (True, "passed")
 
     def _has_economic_data(self, text_lower: str) -> bool:
         """Check if article has economic/cost data"""

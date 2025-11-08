@@ -13,26 +13,17 @@ prefilter:
   expected_pass_rate: null  # To be determined during calibration
   description: "Blocks policy announcements without outcomes, pure advocacy"
 
-  block_patterns:
-    no_outcomes:
-      - Policy announced but no implementation data
-      - "Plans to introduce policy" (future-only)
-      - Net-zero pledges without interim targets or enforcement
+  block_keywords:
+    - no_outcomes
+    - policy_announced_only
+    - pure_advocacy
+    - future_only
 
-    pure_advocacy:
-      - "Should pass policy" (advocacy without examples)
-      - Opinion pieces about what policy "ought to do"
-
-  pass_patterns:
-    has_outcomes:
-      - "Emissions fell X% after policy"
-      - "Renewable deployment grew Y% following policy"
-      - Before/after data showing measurable change
-
-    replicability:
-      - "X countries adopting similar policy"
-      - "Blueprint being copied by..."
-      - Policy details (tax rates, standards, mechanisms)
+  pass_keywords:
+    - emissions_fell
+    - deployment_grew
+    - countries_adopting
+    - measurable_outcomes
 
 oracle:
   recommended: null

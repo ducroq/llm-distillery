@@ -13,22 +13,17 @@ prefilter:
   expected_pass_rate: null  # To be determined during calibration
   description: "Blocks pure advocacy/opinions without economic data"
 
-  block_patterns:
-    no_economics:
-      - "moral imperative", "we must act" (without economic analysis)
-      - "save the planet" (without cost data)
-      - Pure policy advocacy without economic impact analysis
+  block_keywords:
+    - pure_advocacy
+    - no_economic_data
+    - subsidy_only
 
-    subsidy_dependent:
-      - Articles ONLY about subsidies with no path to competitiveness
-      - "Only viable with massive subsidies" (without innovation trajectory)
-
-  pass_patterns:
-    economic_data:
-      - "LCOE", "levelized cost", "$/MWh", "$/kg"
-      - "cost-competitive", "price parity", "cheaper than"
-      - "ROI", "payback period", "NPV"
-      - Job creation numbers, investment flows
+  pass_keywords:
+    - lcoe
+    - cost_competitive
+    - profitability
+    - investment
+    - job_creation
 
 oracle:
   recommended: null  # To be determined during calibration
@@ -69,8 +64,11 @@ scoring:
           - "Profitable for X consecutive quarters"
           - "Revenue growth >30% YoY"
         low_profitability:
-          - "Cash burn rate", "runway", "needs funding"
-          - "Losses widen", "unprofitable"
+          - "Cash burn rate"
+          - "runway"
+          - "needs funding"
+          - "Losses widen"
+          - "unprofitable"
 
     job_creation:
       weight: 0.15

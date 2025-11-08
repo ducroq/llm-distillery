@@ -12,20 +12,24 @@ from typing import Dict, List, Optional
 from filters.base_prefilter import BasePreFilter
 
 
-class TechDeploymentPreFilter(BasePreFilter):
+class TechDeploymentPreFilterV1(BasePreFilter):
     """Pre-filter for deployed climate technology (blocks vaporware)"""
+
+    VERSION = "1.0"
 
     def __init__(self):
         super().__init__()
         self.filter_name = "sustainability_tech_deployment"
         self.version = "1.0"
 
-    def should_block(self, article: Dict) -> tuple[bool, Optional[str]]:
+    def should_label(self, article: Dict) -> tuple[bool, str]:
         """
-        Determine if article should be blocked before LLM scoring.
+        Determine if article should be sent to LLM for labeling.
 
         Returns:
-            (should_block, reason)
+            (should_label, reason)
+            - (True, "passed"): Send to LLM
+            - (False, reason): Block from LLM
         """
         text = self._get_combined_text(article)
         text_lower = text.lower()
@@ -43,7 +47,7 @@ class TechDeploymentPreFilter(BasePreFilter):
             if re.search(pattern, text_lower):
                 # Check if there's deployment data to override
                 if not self._has_deployment_evidence(text_lower):
-                    return (True, "vaporware_announcement")
+                    return (False, "vaporware_announcement")
 
         # BLOCK: Future-only (no current deployment)
         future_only_patterns = [
@@ -57,7 +61,7 @@ class TechDeploymentPreFilter(BasePreFilter):
             if re.search(pattern, text_lower):
                 # Check if there's ALSO current deployment
                 if not self._has_deployment_evidence(text_lower):
-                    return (True, "future_only_no_deployment")
+                    return (False, "future_only_no_deployment")
 
         # BLOCK: Lab/research only
         lab_only_patterns = [
@@ -72,18 +76,18 @@ class TechDeploymentPreFilter(BasePreFilter):
             if re.search(pattern, text_lower):
                 # Allow if there's commercial/deployment language
                 if not self._has_deployment_evidence(text_lower):
-                    return (True, "lab_only_no_commercialization")
+                    return (False, "lab_only_no_commercialization")
 
         # BLOCK: Pure R&D announcements
         if self._is_pure_research(text_lower):
-            return (True, "pure_research_no_deployment")
+            return (False, "pure_research_no_deployment")
 
         # BLOCK: Token scale (negligible deployment)
         if self._is_token_scale(text_lower):
-            return (True, "token_scale_negligible")
+            return (False, "token_scale_negligible")
 
         # PASS: Has deployment evidence
-        return (False, None)
+        return (True, "passed")
 
     def _has_deployment_evidence(self, text_lower: str) -> bool:
         """Check if article has evidence of actual deployment"""
