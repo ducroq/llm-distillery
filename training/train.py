@@ -288,8 +288,8 @@ def main():
     parser.add_argument(
         "--model-name",
         type=str,
-        default="Qwen/Qwen2.5-7B",
-        help="Qwen model name (default: Qwen/Qwen2.5-7B)",
+        default="Qwen/Qwen2.5-7B-Instruct",
+        help="Qwen model name (default: Qwen/Qwen2.5-7B-Instruct)",
     )
     parser.add_argument(
         "--epochs",

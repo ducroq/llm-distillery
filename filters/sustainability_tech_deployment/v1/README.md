@@ -398,5 +398,12 @@ Articles can score high on multiple pillars. For example:
 
 ---
 
-**Status**: Version 1.0 - Ready for calibration and training data generation
-**Next Steps**: Pre-filter calibration → Oracle calibration → Ground truth labeling → Model training
+**Status**: Version 1.0 - Training data ready (4,146 labels, stratified splits prepared)
+
+**Training Data**:
+- Labeled dataset: `datasets/labeled/sustainability_tech_deployment/all_labels.jsonl` (4,146 articles)
+- Training splits: `datasets/training/sustainability_tech_deployment/` (4,328 train / 413 val / 417 test)
+- Model output format: Score arrays only (see `docs/decisions/2025-11-09-model-output-format.md`)
+- Class imbalance mitigation: Stratified splits + 20% oversampling (see `docs/decisions/2025-11-09-class-imbalance-strategy.md`)
+
+**Next Steps**: Train Qwen2.5-7B-Instruct on prepared data → Evaluate on validation set → Deploy for inference
