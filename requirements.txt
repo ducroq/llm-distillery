@@ -26,3 +26,4 @@ ruff>=0.1.6
 mypy>=1.7.0
 ipython>=8.17.0
 jupyter>=1.0.0
+peft
