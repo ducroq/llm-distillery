@@ -17,6 +17,7 @@ fastapi>=0.104.0
 uvicorn>=0.24.0
 python-multipart>=0.0.6
 safetensors>=0.4.0
+bitsandbytes>=0.41.0  # For 8-bit model quantization
 
 # Development dependencies
 pytest>=7.4.0

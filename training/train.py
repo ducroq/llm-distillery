@@ -17,6 +17,7 @@ from tqdm import tqdm
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
+    BitsAndBytesConfig,
     get_linear_schedule_with_warmup,
 )
 from peft import LoraConfig, get_peft_model, TaskType
@@ -101,12 +102,21 @@ class QwenFilterModel(torch.nn.Module):
             "problem_type": "regression",
         }
 
+        # Configure 8-bit quantization to reduce GPU memory (15GB -> 4GB)
+        quantization_config = BitsAndBytesConfig(
+            load_in_8bit=True,
+            llm_int8_threshold=6.0,
+        )
+        
         # Only use FP16 if explicitly requested (can cause NaN issues)
-        if use_fp16:
+        # Note: With 8-bit quantization, torch_dtype is managed by quantization_config
+        if use_fp16 and not True:  # Disabled when using quantization
             load_kwargs["torch_dtype"] = torch.float16
 
         self.base_model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
+            quantization_config=quantization_config,
+            device_map="auto",  # Automatically handle device placement for quantized model
             **load_kwargs
         )
 
