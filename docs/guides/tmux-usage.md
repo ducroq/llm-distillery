@@ -22,14 +22,22 @@ cd /path/to/llm-distillery
 # Activate your virtual environment
 source venv/bin/activate
 
-# Run your command (example: batch labeling)
+# Example 1: Batch labeling (oracle ground truth generation)
 python -m ground_truth.batch_labeler \
-    --prompt prompts/uplifting.md \
-    --source datasets/raw/master_dataset.jsonl \
-    --llm gemini \
-    --pre-filter uplifting \
-    --batch-size 50 \
-    --output-dir datasets
+    --filter filters/sustainability_tech_deployment/v1 \
+    --source "datasets/raw/*.jsonl" \
+    --llm gemini-flash \
+    --target-count 2000 \
+    --random-sample \
+    --output-dir ground_truth/labeled/tech_deployment
+
+# Example 2: Model training (long-running, GPU-intensive)
+python -m training.train \
+    --filter filters/sustainability_tech_deployment/v1 \
+    --data-dir datasets/training/sustainability_tech_deployment \
+    --epochs 3 \
+    --batch-size 8 \
+    --learning-rate 2e-5
 ```
 
   <!-- 1. Uplifting:
