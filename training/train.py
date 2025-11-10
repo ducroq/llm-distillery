@@ -19,6 +19,7 @@ from transformers import (
     AutoTokenizer,
     get_linear_schedule_with_warmup,
 )
+from peft import LoraConfig, get_peft_model, TaskType
 
 
 class FilterDataset(Dataset):
@@ -112,6 +113,28 @@ class QwenFilterModel(torch.nn.Module):
         # Enable gradient checkpointing to save memory
         if use_gradient_checkpointing:
             self.base_model.gradient_checkpointing_enable()
+
+        # Apply LoRA for memory-efficient training
+        lora_config = LoraConfig(
+            r=16,  # LoRA rank
+            lora_alpha=32,  # LoRA scaling factor
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            lora_dropout=0.05,
+            bias="none",
+            task_type=TaskType.SEQ_CLS,
+        )
+        
+        # Freeze base model parameters
+        for param in self.base_model.parameters():
+            param.requires_grad = False
+        
+        # Apply LoRA
+        self.base_model = get_peft_model(self.base_model, lora_config)
+        
+        # Print trainable parameters
+        trainable_params = sum(p.numel() for p in self.base_model.parameters() if p.requires_grad)
+        all_params = sum(p.numel() for p in self.base_model.parameters())
+        print(f"  LoRA applied: {trainable_params:,} / {all_params:,} parameters ({100 * trainable_params / all_params:.2f}% trainable)")
 
         self.num_dimensions = num_dimensions
         self.use_fp16 = use_fp16
