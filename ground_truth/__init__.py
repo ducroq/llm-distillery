@@ -1,12 +1,5 @@
 """Ground truth dataset generation using LLM oracles."""
 
-from .generate import GroundTruthGenerator
-from .llm_evaluators import ClaudeEvaluator, GeminiEvaluator
-from .samplers import StratifiedSampler
+# Minimal __init__.py - individual modules import what they need directly
 
-__all__ = [
-    "GroundTruthGenerator",
-    "ClaudeEvaluator",
-    "GeminiEvaluator",
-    "StratifiedSampler",
-]
+__all__ = []
