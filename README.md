@@ -9,9 +9,9 @@ LLM Distillery is a framework for distilling knowledge from large foundation mod
 Large language models excel at nuanced judgment tasks but are expensive and slow for production use. This framework:
 
 1. **Generates ground truth datasets** using Gemini Flash as labeling oracle
-2. **Fine-tunes Qwen 2.5 agents** (7B parameters) specialized per semantic dimension
+2. **Fine-tunes Qwen2.5-7B-Instruct** (see [model decision](docs/decisions/2025-11-08-local-model-selection.md))
 3. **Validates quality** by comparing model predictions to ground truth
-4. **Deploys locally** for fast, cost-effective batch inference
+4. **Deploys locally** for fast, cost-effective batch inference (150x faster than oracle)
 
 ### Use Cases
 

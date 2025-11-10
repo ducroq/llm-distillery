@@ -40,6 +40,12 @@
   - Options: More epochs, adjust learning rate, different oversampling ratio
   - Decision: Depends on how close we get and diminishing returns
 
+- [ ] **When to implement remaining filters?**
+  - Context: 3 filters have legacy docs (education-integration, investment-risk, prompt-compression)
+  - Status: Placeholder filter packages exist in `filters/` but not prioritized
+  - Question: Should these be implemented after 6 sustainability filters complete?
+  - Impact: Documentation exists but may be outdated; filters may need redesign
+
 ## Resolved
 
 - [x] **Can we achieve balanced tier distribution from current corpus?** - 2025-11-09 - NO, but handled via oversampling + class weighting
