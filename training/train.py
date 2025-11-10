@@ -91,7 +91,7 @@ class QwenFilterModel(torch.nn.Module):
     multiple continuous scores (one per dimension).
     """
 
-    def __init__(self, model_name: str, num_dimensions: int, use_gradient_checkpointing: bool = True, use_fp16: bool = False):
+    def __init__(self, model_name: str, num_dimensions: int, use_gradient_checkpointing: bool = True, use_fp16: bool = False, use_quantization: bool = False):
         super().__init__()
 
         # Load base Qwen model (we'll use the sequence classification variant)
@@ -102,21 +102,23 @@ class QwenFilterModel(torch.nn.Module):
             "problem_type": "regression",
         }
 
-        # Configure 8-bit quantization to reduce GPU memory (15GB -> 4GB)
-        quantization_config = BitsAndBytesConfig(
-            load_in_8bit=True,
-            llm_int8_threshold=6.0,
-        )
+        # Optional: Configure 8-bit quantization for large models (7B+) on 16GB GPU
+        # Reduces memory: 15GB -> 4GB, but adds complexity
+        # Default: False for 1.5B model (fits in memory without quantization)
+        if use_quantization:
+            quantization_config = BitsAndBytesConfig(
+                load_in_8bit=True,
+                llm_int8_threshold=6.0,
+            )
+            load_kwargs["quantization_config"] = quantization_config
+            load_kwargs["device_map"] = "auto"
         
         # Only use FP16 if explicitly requested (can cause NaN issues)
-        # Note: With 8-bit quantization, torch_dtype is managed by quantization_config
-        if use_fp16 and not True:  # Disabled when using quantization
+        if use_fp16:
             load_kwargs["torch_dtype"] = torch.float16
 
         self.base_model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
-            quantization_config=quantization_config,
-            device_map="auto",  # Automatically handle device placement for quantized model
             **load_kwargs
         )
 
@@ -321,8 +323,8 @@ def main():
     parser.add_argument(
         "--model-name",
         type=str,
-        default="Qwen/Qwen2.5-7B-Instruct",
-        help="Qwen model name (default: Qwen/Qwen2.5-7B-Instruct)",
+        default="Qwen/Qwen2.5-1.5B",
+        help="Qwen model name (default: Qwen/Qwen2.5-1.5B, use 1.5B for 16GB GPU)",
     )
     parser.add_argument(
         "--epochs",
