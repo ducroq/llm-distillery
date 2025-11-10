@@ -122,3 +122,14 @@ temp/
 cache/
 nul
 
+
+# Sandbox/Experimental - NOT committed (safe space for prototyping)
+sandbox/              # General experimentation, prototypes
+scratch/              # Quick tests, temporary work
+playground/           # Testing new ideas, playing with code
+experiments/local/    # Local experiments (experiments/ root is tracked)
+notebooks/exploratory/  # Messy exploratory Jupyter notebooks
+*.bak
+*.old
+*_backup.*
+*_test.*
