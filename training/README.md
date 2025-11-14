@@ -4,10 +4,12 @@ This directory contains the training pipeline for fine-tuning Qwen 2.5 models on
 
 ## Overview
 
-The training pipeline consists of two main steps:
+The training pipeline consists of four main steps:
 
-1. **Dataset Preparation**: Split labeled ground truth into train/val/test sets
-2. **Model Training**: Fine-tune Qwen 2.5 for multi-dimensional regression
+1. **⭐ Oracle Prompt Calibration** (CRITICAL - before batch labeling): Validate oracle prompt on small sample
+2. **Batch Labeling**: Create ground truth dataset using validated oracle
+3. **Dataset Preparation**: Split labeled ground truth into train/val/test sets
+4. **Model Training**: Fine-tune Qwen 2.5 for multi-dimensional regression
 
 ## Quick Start
 
@@ -19,21 +21,149 @@ Install required dependencies:
 pip install torch transformers datasets pyyaml tqdm
 ```
 
-### Step 1: Prepare Dataset
+### Step 0: Calibrate Oracle Prompt ⭐ REQUIRED BEFORE LABELING
 
-Split your labeled ground truth data:
+**CRITICAL:** Always calibrate your oracle prompt before batch labeling to avoid wasting money on mis-labeled data.
+
+**Why calibrate?** In the sustainability_tech_deployment filter, we discovered after $8 of labeling that the oracle was broken - scoring AWS IAM tutorials and toothbrushes as "mass-deployed climate tech" (10.0 scores). Calibration on 50 articles ($0.05) would have caught this before batch labeling 8,162 articles.
+
+**Process:**
+
+1. **Create calibration sample (50-100 articles):**
+   ```bash
+   # Stratified sample: 20 on-topic, 20 off-topic, 10 edge cases
+   python scripts/create_calibration_sample.py \
+       --input articles_corpus.jsonl \
+       --output calibration_sample.jsonl \
+       --n-positive 20 \
+       --n-negative 20 \
+       --n-edge 10
+   ```
+
+2. **Label calibration sample:**
+   ```bash
+   python scripts/label_batch.py \
+       --filter filters/{filter_name}/v1 \
+       --input calibration_sample.jsonl \
+       --output calibration_labeled.jsonl
+   ```
+   **Cost:** ~$0.05 (50 articles × $0.001)
+
+3. **Run Prompt Calibration Agent:**
+   ```
+   Task: "Calibrate the {filter_name} oracle prompt using the
+   Prompt Calibration Agent from docs/agents/templates/prompt-calibration-agent.md.
+
+   Calibration sample: calibration_labeled.jsonl
+   Filter path: filters/{filter_name}/v1
+
+   Generate calibration report with PASS/REVIEW/FAIL decision."
+   ```
+
+4. **Review calibration report:**
+   ```bash
+   cat filters/{filter_name}/v1/calibration_report.md
+   ```
+
+   **Decision matrix:**
+   - ✅ **PASS** → Proceed to batch labeling (Step 1)
+   - ⚠️ **REVIEW** → Fix minor issues, re-calibrate ($0.05)
+   - ❌ **FAIL** → Major prompt revision needed, re-calibrate
+
+5. **Iterate until PASS:**
+   - Update prompt based on calibration findings
+   - Re-label same 50 articles (another $0.05)
+   - Review again
+   - Typical iterations: 2-3 rounds ($0.10-0.15 total)
+
+6. **⭐ Validate on Fresh Sample (CRITICAL - prevents overfitting):**
+   ```bash
+   # Create validation sample with DIFFERENT random seed
+   python scripts/create_calibration_sample.py \
+       --input articles_corpus.jsonl \
+       --output validation_sample.jsonl \
+       --n-positive 20 \
+       --n-negative 20 \
+       --n-edge 10 \
+       --random-seed 2025  # Different seed = different articles
+
+   # Label validation sample
+   python -m ground_truth.batch_labeler \
+       --filter filters/{filter_name}/v1 \
+       --source validation_sample.jsonl \
+       --output-dir validation_labeled \
+       --llm gemini-flash \
+       --batch-size 50 \
+       --max-batches 1
+
+   # Run calibration analysis on validation sample
+   Task: "Run Prompt Calibration Agent on validation sample to verify
+   prompt improvements generalize to new articles."
+   ```
+
+   **Cost:** ~$0.05 (50 articles × $0.001)
+
+   **Why validate?**
+   - Ensures prompt fixes didn't overfit to calibration sample
+   - Validates improvements generalize to unseen data
+   - Like train/test split in ML - calibration = train, validation = test
+
+   **Decision matrix:**
+   - ✅ **Validation metrics ≈ Calibration metrics** → Proceed to batch labeling
+   - ⚠️ **Validation worse than calibration** → Overfitting detected, revise prompt
+   - ❌ **Validation fails targets** → Major issues, start over
+
+**ROI:** Spend $0.20 + 2 hours to save $8-16 + days of rework
+
+**See:**
+- `docs/decisions/2025-11-13-prompt-calibration-before-batch-labeling.md` for full rationale
+- `docs/decisions/2025-11-14-calibration-validation-split.md` for train/test split pattern
+
+---
+
+### Step 1: Batch Label Dataset (after calibration AND validation PASS)
+
+**Only proceed after Step 0 calibration and validation pass!**
 
 ```bash
-python -m training.prepare_dataset \
+python scripts/label_batch.py \
+    --filter filters/{filter_name}/v1 \
+    --input articles_to_label.jsonl \
+    --output datasets/labeled/{filter_name}/labeled_articles.jsonl
+```
+
+**Cost:** ~$8 for 8,000 articles
+**Confidence:** High (oracle validated on calibration sample)
+
+---
+
+### Step 2: Prepare Dataset
+
+Split your labeled ground truth data using the generic preparation script:
+
+```bash
+# For uplifting filter
+python scripts/prepare_training_data.py \
     --filter filters/uplifting/v1 \
-    --dataset datasets/uplifting_ground_truth_v1/labeled_articles.jsonl \
-    --output-dir datasets/uplifting_ground_truth_v1_splits \
+    --input datasets/labeled/uplifting/labeled_articles.jsonl \
+    --output-dir datasets/training/uplifting \
+    --train-ratio 0.8 \
+    --val-ratio 0.1 \
+    --test-ratio 0.1
+
+# For tech deployment filter
+python scripts/prepare_training_data.py \
+    --filter filters/sustainability_tech_deployment/v1 \
+    --input datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl \
+    --output-dir datasets/training/sustainability_tech_deployment \
     --train-ratio 0.8 \
     --val-ratio 0.1 \
     --test-ratio 0.1
 ```
 
-**Output**: `train.jsonl`, `val.jsonl`, `test.jsonl`, `split_metadata.json`
+**Key Feature**: The script automatically reads filter configuration (dimensions, tier boundaries) from `config.yaml`, making it work for any filter without code changes.
+
+**Output**: `train.jsonl`, `val.jsonl`, `test.jsonl` with stratified splits maintaining tier proportions
 
 ### Step 2: Train Model
 
@@ -42,15 +172,15 @@ Train Qwen 2.5 on the prepared dataset:
 ```bash
 python -m training.train \
     --filter filters/uplifting/v1 \
-    --data-dir datasets/uplifting_ground_truth_v1_splits \
-    --output-dir inference/deployed/uplifting_v1 \
+    --data-dir datasets/training/uplifting \
+    --output-dir filters/uplifting/v1 \
     --model-name Qwen/Qwen2.5-7B \
     --epochs 3 \
     --batch-size 8 \
     --learning-rate 2e-5
 ```
 
-**Output**: Trained model, training history, metadata
+**Output**: Trained model, training history, metadata saved to filter directory
 
 ## Model Architecture
 
@@ -204,9 +334,88 @@ Validation:
 
 ## Post-Training Workflow
 
-After training completes, follow these steps:
+After training completes, follow these steps to evaluate and deploy your model.
 
-### 1. Generate Visualizations
+### Step 1: Copy Training Results (From Remote GPU)
+
+If training on remote GPU machine:
+
+```bash
+# From local machine
+scp user@remote:/path/to/llm-distillery/filters/{filter_name}/v1/training_*.json \
+    filters/{filter_name}/v1/
+```
+
+### Step 2: Review Training Metrics
+
+Quick sanity check before full evaluation:
+
+```bash
+# Check final validation MAE
+cat filters/{filter_name}/v1/training_metadata.json | grep best_val_mae
+
+# Review training progression
+cat filters/{filter_name}/v1/training_history.json
+```
+
+**Quick decision:**
+- ✅ Val MAE < 1.0 → Proceed to Step 3
+- ⚠️ Val MAE 1.0-1.5 → Proceed to Step 3, but may need more training
+- ❌ Val MAE > 1.5 → Consider retraining before full evaluation
+
+### Step 3: Run Model Evaluation Agent ⭐ CRITICAL
+
+Systematically evaluate model for production readiness:
+
+```
+Task: "Evaluate the trained {filter_name} model using the Model Evaluation Agent
+criteria from docs/agents/templates/model-evaluation-agent.md.
+
+Model location: filters/{filter_name}/v1
+Test data: datasets/training/{filter_name}/test.jsonl
+
+Run test evaluation and generate production readiness report."
+```
+
+**Agent will:**
+- Run test set evaluation (`scripts/evaluate_model.py`)
+- Analyze training progression, overfitting, convergence
+- Check per-dimension performance
+- Generate report: `filters/{filter_name}/v1/model_evaluation.md`
+- Recommend: ✅ DEPLOY / ⚠️ REVIEW / ❌ FAIL
+
+**Expected duration:** 15-30 minutes (includes test inference + analysis)
+
+### Step 4: Review Production Readiness Report
+
+```bash
+cat filters/{filter_name}/v1/model_evaluation.md
+```
+
+**Decision matrix:**
+- ✅ **DEPLOY** → Model is production ready (test MAE < 1.0, no overfitting)
+  - Proceed to Step 5 (deployment)
+- ⚠️ **REVIEW** → Model is borderline (test MAE 1.0-1.2)
+  - Discuss trade-offs: Deploy for filtering vs retrain for precision
+- ❌ **FAIL** → Model needs retraining (test MAE > 1.2 or severe issues)
+  - Review recommendations in report (more epochs, larger model, more data)
+
+### Step 5: Deploy to Production (If Report Says DEPLOY)
+
+```bash
+# Copy model to production server
+scp -r filters/{filter_name}/v1/model/ production-server:/models/
+
+# Or commit to repository for version control
+git add filters/{filter_name}/v1/
+git commit -m "Add trained {filter_name} model v1 (test MAE: X.XX)"
+```
+
+---
+
+## Optional: Additional Analysis & Reporting
+
+### Generate Visualizations (Optional)
 
 ```bash
 python -m training.plot_learning_curves \
@@ -219,7 +428,7 @@ python -m training.plot_learning_curves \
 - `loss_curves.png` - Training/validation loss
 - `training_summary.txt` - Final metrics table
 
-### 2. Generate Training Report (Optional)
+### Generate Training Report (Optional)
 
 ```bash
 python -m training.generate_training_report \
@@ -232,7 +441,7 @@ python -m training.generate_training_report \
 - Professional Word document with embedded plots
 - Executive summary, methodology, results, conclusions
 
-### 3. Upload to Hugging Face (Optional)
+### Upload to Hugging Face (Optional)
 
 ```bash
 python -m training.upload_to_huggingface \
@@ -242,17 +451,6 @@ python -m training.upload_to_huggingface \
 ```
 
 See `HUGGINGFACE_SETUP.md` for detailed instructions.
-
-### 4. Evaluate on Test Set
-
-```bash
-# TODO: Add evaluation script
-python -m evaluation.evaluate \
-    --filter filters/uplifting/v1 \
-    --test-data datasets/uplifting_ground_truth_v1_splits/test.jsonl
-```
-
-See `evaluation/README.md` for evaluation workflow.
 
 ### Quick Post-Training Commands
 
