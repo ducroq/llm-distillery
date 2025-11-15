@@ -28,7 +28,7 @@ Use `docs/agents/templates/ADR-TEMPLATE.md` as the starting point for new ADRs.
 
 Adopt "scoring" terminology instead of "labeling" to accurately reflect dimensional regression. We produce continuous scores (0-10 per dimension), not discrete classification labels.
 
-**Impact:** Renamed `batch_labeler.py` → `batch_scorer.py`, `datasets/labeled/` → `datasets/scored/`, `--target-labeled` → `--target-scored`. Aligns terminology with regression task architecture.
+**Impact:** Renamed `batch_scorer.py` → `batch_scorer.py`, `datasets/scored/` → `datasets/scored/`, `--target-scored` → `--target-scored`. Aligns terminology with regression task architecture.
 
 ### 2025-11-14: Inline Filters for Fast Models
 **File:** `2025-11-14-inline-filters-for-fast-models.md`
@@ -44,10 +44,10 @@ Apply train/test split pattern to prompt engineering. Use calibration sample to 
 
 **Impact:** Prompt calibration now includes mandatory validation step. Catches cases where prompt fixes work on calibration sample but don't generalize.
 
-### 2025-11-13: Prompt Calibration Before Batch Labeling
+### 2025-11-13: Prompt Calibration Before Batch Scoring
 **File:** `2025-11-13-prompt-calibration-before-batch-labeling.md` (v1.2)
 
-Mandatory calibration step before batch labeling. Test oracle prompt on 50-100 article sample, identify systematic errors, fix prompt, validate, then proceed to batch labeling.
+Mandatory calibration step before batch scoring. Test oracle prompt on 50-100 article sample, identify systematic errors, fix prompt, validate, then proceed to batch scoring.
 
 **Impact:** Prevents wasting $8-16 on mis-labeled datasets. Spent $0.047 on uplifting calibration to save $8+. Now at v1.2 with inline filters pattern.
 

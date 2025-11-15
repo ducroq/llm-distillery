@@ -75,6 +75,6 @@ Train models on multi-dimensional regression (8 scores per article, 0-10 range) 
 ## References
 
 - `docs/agents/templates/dimensional-regression-qa-agent.md` - QA template
-- `datasets/labeled/uplifting/README.md` - Training Data Format section
-- `datasets/labeled/sustainability_tech_deployment/README.md` - Training Data Format section
+- `datasets/scored/uplifting/README.md` - Training Data Format section
+- `datasets/scored/sustainability_tech_deployment/README.md` - Training Data Format section
 - `scripts/prepare_training_data.py` - Generic preparation script

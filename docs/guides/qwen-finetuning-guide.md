@@ -138,7 +138,7 @@ Before training, you need prepared training data:
 
 ### Data Format
 
-**Oracle labels** (from `batch_labeler`):
+**Oracle labels** (from `batch_scorer`):
 ```json
 {
   "id": "article-123",
@@ -174,7 +174,7 @@ Before training, you need prepared training data:
 
 **Generate oracle labels:**
 ```bash
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
     --filter filters/sustainability_tech_deployment/v1 \
     --source "datasets/raw/*.jsonl" \
     --llm gemini-flash \
@@ -186,7 +186,7 @@ python -m ground_truth.batch_labeler \
 **Prepare training data:**
 ```bash
 python scripts/prepare_training_data_tech_deployment.py \
-    --input datasets/labeled/sustainability_tech_deployment/all_labels.jsonl \
+    --input datasets/scored/sustainability_tech_deployment/all_labels.jsonl \
     --output-dir datasets/training/sustainability_tech_deployment \
     --train-ratio 0.8 \
     --val-ratio 0.1 \

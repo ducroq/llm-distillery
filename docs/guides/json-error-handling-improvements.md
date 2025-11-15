@@ -4,7 +4,7 @@ This document describes the improvements made to the batch labeler to reduce and
 
 ## Summary of Changes
 
-All improvements were made to `ground_truth/batch_labeler.py` to make the JSON parsing more robust and resilient.
+All improvements were made to `ground_truth/batch_scorer.py` to make the JSON parsing more robust and resilient.
 
 ## 1. Robust JSON Extraction (NEW)
 
@@ -73,7 +73,7 @@ This catches common LLM mistakes and repairs them before parsing.
 - Allows LLM to complete full JSON structure
 - Especially important for complex filters like sustainability with nested objects
 
-**Files affected:** `batch_labeler.py:339`, `batch_labeler.py:351`, `batch_labeler.py:361`
+**Files affected:** `batch_scorer.py:339`, `batch_scorer.py:351`, `batch_scorer.py:361`
 
 ## 5. Enhanced Error Logging (NEW)
 
@@ -141,7 +141,7 @@ system="You are an expert analyst. You respond only with valid JSON following th
 The improvements are **automatic** and **backward compatible**. Just run your existing commands:
 
 ```bash
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
     --prompt prompts/uplifting.md \
     --source datasets/raw/master_dataset.jsonl \
     --llm gemini \
@@ -224,7 +224,7 @@ To test the improvements:
 
 1. **Run a small batch:**
    ```bash
-   python -m ground_truth.batch_labeler \
+   python -m ground_truth.batch_scorer \
        --prompt prompts/uplifting.md \
        --source datasets/raw/master_dataset.jsonl \
        --llm gemini \
@@ -256,10 +256,10 @@ For persistent failures, check the error logs to diagnose the root cause.
 
 ### Files Modified
 
-- `ground_truth/batch_labeler.py:17-20` - Added `re` import
-- `ground_truth/batch_labeler.py:44-97` - Added helper functions
-- `ground_truth/batch_labeler.py:302-468` - Refactored `analyze_article()` method
-- `ground_truth/batch_labeler.py:452-468` - Added `_log_failed_response()` method
+- `ground_truth/batch_scorer.py:17-20` - Added `re` import
+- `ground_truth/batch_scorer.py:44-97` - Added helper functions
+- `ground_truth/batch_scorer.py:302-468` - Refactored `analyze_article()` method
+- `ground_truth/batch_scorer.py:452-468` - Added `_log_failed_response()` method
 
 ### No Breaking Changes
 
@@ -303,6 +303,6 @@ All existing functionality preserved:
 
 ## References
 
-- Main implementation: `ground_truth/batch_labeler.py:302-468`
-- Helper functions: `ground_truth/batch_labeler.py:44-97`
+- Main implementation: `ground_truth/batch_scorer.py:302-468`
+- Helper functions: `ground_truth/batch_scorer.py:44-97`
 - Error logs: `datasets/{filter_name}/error_logs/`

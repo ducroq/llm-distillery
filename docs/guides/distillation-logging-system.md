@@ -345,11 +345,11 @@ Run small batches with different settings and compare metrics:
 
 ```bash
 # Test 1: Current settings
-python -m ground_truth.batch_labeler ... --batch-size 50 --max-batches 2
+python -m ground_truth.batch_scorer ... --batch-size 50 --max-batches 2
 
 # Test 2: Increased timeout
 # (edit code to change timeout_seconds=90)
-python -m ground_truth.batch_labeler ... --batch-size 50 --max-batches 2
+python -m ground_truth.batch_scorer ... --batch-size 50 --max-batches 2
 
 # Compare metrics.jsonl from both runs
 ```
@@ -474,10 +474,10 @@ with open('metrics.jsonl', 'r') as f:
 
 ## Related Files
 
-- Implementation: `ground_truth/batch_labeler.py:112-688`
-- Error types: `ground_truth/batch_labeler.py:34-41`
-- Metrics logging: `ground_truth/batch_labeler.py:544-649`
-- Summary generation: `ground_truth/batch_labeler.py:651-688`
+- Implementation: `ground_truth/batch_scorer.py:112-688`
+- Error types: `ground_truth/batch_scorer.py:34-41`
+- Metrics logging: `ground_truth/batch_scorer.py:544-649`
+- Summary generation: `ground_truth/batch_scorer.py:651-688`
 
 ## See Also
 

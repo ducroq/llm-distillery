@@ -49,7 +49,7 @@ Template for Architecture Decision Records. Copy this when documenting significa
 **Example:** Validates 8 dimensional scores are present, valid (0-10), with good range coverage
 
 ### oracle-calibration-agent.md
-**Purpose:** Validate oracle performance before large-scale batch labeling
+**Purpose:** Validate oracle performance before large-scale batch scoring
 **When:** Before labeling thousands of articles, after prompt changes, periodic quality checks
 **Output:** Calibration report with Ready/Review/Block recommendation
 **Oracle:** Uses Gemini Pro for calibration (accurate), Gemini Flash for production (cheap)

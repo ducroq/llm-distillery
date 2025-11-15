@@ -186,9 +186,9 @@ datasets/training/sample_val.jsonl     (250 articles)
 
 ## Step 2: Label with Gemini Flash
 
-### Understanding batch_labeler.py
+### Understanding batch_scorer.py
 
-The `batch_labeler.py` script:
+The `batch_scorer.py` script:
 - Loads articles from your sample
 - Sends them to Gemini Flash API
 - Uses your prompt (e.g., `prompts/uplifting.md`)
@@ -201,7 +201,7 @@ The `batch_labeler.py` script:
 **For Uplifting Filter:**
 
 ```bash
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/uplifting/v1 \
   --source datasets/training/sample_train.jsonl \
   --output-dir datasets/uplifting \
@@ -214,12 +214,12 @@ python -m ground_truth.batch_labeler \
 1. Loads pre-filter from `filters/uplifting/v1/prefilter.py`
 2. Blocks articles matching rage/outrage/decline patterns (~5%)
 3. Labels remaining articles with Gemini Flash
-4. Saves to `datasets/uplifting/labeled_batch_*.jsonl`
+4. Saves to `datasets/uplifting/scored_batch_*.jsonl`
 
 **For Sustainability Filter (same articles, different filter package):**
 
 ```bash
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/sustainability/v1 \
   --source datasets/training/sample_train.jsonl \
   --output-dir datasets/sustainability \
@@ -245,7 +245,7 @@ Processing batch 1 (50 articles)
      SUCCESS
   ...
 
-SAVED 50 labeled articles to labeled_batch_001.jsonl
+SAVED 50 labeled articles to scored_batch_001.jsonl
 
 Processing batch 2 (50 articles)
 ...
@@ -260,7 +260,7 @@ The batch labeler saves progress automatically. If interrupted:
 
 ```bash
 # Just run the same command again
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/uplifting/v1 \
   --source datasets/training/sample_train.jsonl \
   --output-dir datasets/uplifting \
@@ -276,10 +276,10 @@ It will skip already-labeled articles (tracked in `.labeled_ids.json`).
 
 ```bash
 # Check how many labeled so far
-wc -l datasets/labeled/uplifting/labeled_batch_*.jsonl
+wc -l datasets/scored/uplifting/scored_batch_*.jsonl
 
 # Watch session summary
-watch -n 10 cat datasets/labeled/uplifting/session_summary.json
+watch -n 10 cat datasets/scored/uplifting/session_summary.json
 ```
 
 ---
@@ -304,7 +304,7 @@ def validate_labeled_data(labeled_dir, filter_type):
     error_count = 0
 
     # Load all labeled batches
-    for batch_file in sorted(labeled_dir.glob("labeled_batch_*.jsonl")):
+    for batch_file in sorted(labeled_dir.glob("scored_batch_*.jsonl")):
         with open(batch_file, 'r', encoding='utf-8') as f:
             for line in f:
                 try:
@@ -362,7 +362,7 @@ if __name__ == '__main__':
     import sys
     if len(sys.argv) < 3:
         print("Usage: python validate_labels.py <labeled_dir> <filter_type>")
-        print("Example: python validate_labels.py datasets/labeled/uplifting uplifting")
+        print("Example: python validate_labels.py datasets/scored/uplifting uplifting")
         sys.exit(1)
 
     validate_labeled_data(sys.argv[1], sys.argv[2])
@@ -371,14 +371,14 @@ if __name__ == '__main__':
 **Run validation:**
 
 ```bash
-python validate_labels.py datasets/labeled/uplifting uplifting
+python validate_labels.py datasets/scored/uplifting uplifting
 ```
 
 ### Check Labeling Statistics
 
 ```bash
 # View session summary
-cat datasets/labeled/uplifting/session_summary.json
+cat datasets/scored/uplifting/session_summary.json
 ```
 
 **Example output:**
@@ -435,7 +435,7 @@ def convert_labels_to_training_format(
     Convert Gemini-labeled data to Qwen training format.
 
     Args:
-        labeled_dir: Directory with labeled_batch_*.jsonl files
+        labeled_dir: Directory with scored_batch_*.jsonl files
         system_prompt_file: Path to markdown file with system prompt (e.g., prompts/uplifting.md)
         output_file: Where to save training data
         filter_type: 'uplifting', 'sustainability', etc.
@@ -454,7 +454,7 @@ def convert_labels_to_training_format(
     print(f"  Output: {output_file}")
 
     # Load all labeled articles
-    for batch_file in sorted(labeled_dir.glob("labeled_batch_*.jsonl")):
+    for batch_file in sorted(labeled_dir.glob("scored_batch_*.jsonl")):
         with open(batch_file, 'r', encoding='utf-8') as f:
             for line in f:
                 try:
@@ -510,7 +510,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 5:
         print("Usage: python convert_to_training_format.py <labeled_dir> <prompt_file> <output_file> <filter_type>")
-        print("Example: python convert_to_training_format.py datasets/labeled/uplifting prompts/uplifting.md datasets/qwen_training/uplifting_train.jsonl uplifting")
+        print("Example: python convert_to_training_format.py datasets/scored/uplifting prompts/uplifting.md datasets/qwen_training/uplifting_train.jsonl uplifting")
         sys.exit(1)
 
     convert_labels_to_training_format(
@@ -527,7 +527,7 @@ if __name__ == '__main__':
 
 ```bash
 python convert_to_training_format.py \
-  datasets/labeled/uplifting \
+  datasets/scored/uplifting \
   prompts/uplifting.md \
   datasets/qwen_training/uplifting_train.jsonl \
   uplifting
@@ -537,7 +537,7 @@ python convert_to_training_format.py \
 
 ```bash
 # Label validation set
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/uplifting/v1 \
   --source datasets/training/sample_val.jsonl \
   --output-dir datasets/uplifting_val \
@@ -637,14 +637,14 @@ python -m ground_truth.calibrate_oracle \
 python create_sample.py
 
 # 2. Label training set (with pre-filter)
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/uplifting/v1 \
   --source datasets/training/sample_train.jsonl \
   --output-dir datasets/uplifting \
   --llm gemini-flash
 
 # 3. Label validation set (with pre-filter)
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/uplifting/v1 \
   --source datasets/training/sample_val.jsonl \
   --output-dir datasets/uplifting_val \
@@ -676,13 +676,13 @@ You can label the SAME sample with different filter packages:
 
 ```bash
 # Same sample, different filters (with pre-filtering)
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/uplifting/v1 \
   --source datasets/training/sample_train.jsonl \
   --output-dir datasets/uplifting \
   --llm gemini-flash
 
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/sustainability/v1 \
   --source datasets/training/sample_train.jsonl \
   --output-dir datasets/sustainability \
@@ -709,14 +709,14 @@ llm-distillery/
 │   │
 │   ├── labeled/
 │   │   ├── uplifting/
-│   │   │   ├── labeled_batch_001.jsonl
-│   │   │   ├── labeled_batch_002.jsonl
+│   │   │   ├── scored_batch_001.jsonl
+│   │   │   ├── scored_batch_002.jsonl
 │   │   │   ├── ...
 │   │   │   ├── session_summary.json
 │   │   │   └── .labeled_ids.json
 │   │   │
 │   │   ├── uplifting_val/
-│   │   │   └── labeled_batch_001.jsonl
+│   │   │   └── scored_batch_001.jsonl
 │   │   │
 │   │   └── sustainability/
 │   │       └── ...
@@ -733,7 +733,7 @@ llm-distillery/
 │   └── seece.md
 │
 └── ground_truth/
-    ├── batch_labeler.py
+    ├── batch_scorer.py
     └── secrets_manager.py
 ```
 
@@ -752,7 +752,7 @@ gemini_api_key = YOUR_KEY_HERE
 
 ### Issue: "429 Resource exhausted"
 
-**Solution:** Rate limiting kicked in. The batch_labeler handles this automatically with:
+**Solution:** Rate limiting kicked in. The batch_scorer handles this automatically with:
 - Exponential backoff (1s → 2s → 4s)
 - 0.5s wait between requests
 - 3 retry attempts
@@ -761,9 +761,9 @@ Just let it run - it will recover.
 
 ### Issue: "JSON parse errors"
 
-The batch_labeler has built-in JSON repair. Check:
+The batch_scorer has built-in JSON repair. Check:
 ```bash
-cat datasets/labeled/uplifting/session_summary.json
+cat datasets/scored/uplifting/session_summary.json
 ```
 
 If error rate > 5%, check `error_logs/` directory for details.
@@ -772,7 +772,7 @@ If error rate > 5%, check `error_logs/` directory for details.
 
 Reduce batch size:
 ```bash
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --batch-size 25 \  # Instead of 50
   ...
 ```
@@ -823,7 +823,7 @@ After completing ground truth generation:
 
 ## Resources
 
-- **batch_labeler.py**: Core labeling script
+- **batch_scorer.py**: Core labeling script
 - **qwen-finetuning-guide.md**: Next step after labeling
 - **prompts/**: Prompt templates for each filter
 

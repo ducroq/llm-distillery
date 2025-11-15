@@ -286,8 +286,8 @@ See docs/SESSION_STATE.md for details."
 - See: `docs/decisions/2025-11-12-dimensional-regression-training.md`
 
 **3. Ground Truth Datasets**
-- Location: `datasets/labeled/{filter_name}/labeled_articles.jsonl`
-- Oracle: Google Gemini Flash (cost-effective batch labeling)
+- Location: `datasets/scored/{filter_name}/labeled_articles.jsonl`
+- Oracle: Google Gemini Flash (cost-effective batch scoring)
 - Validation: Dimensional regression QA criteria
 
 **4. Training Pipeline**
@@ -353,14 +353,14 @@ llm-distillery/
 ```bash
 python scripts/prepare_training_data.py \
     --filter filters/{filter_name}/v1 \
-    --input datasets/labeled/{filter_name}/labeled_articles.jsonl \
+    --input datasets/scored/{filter_name}/labeled_articles.jsonl \
     --output-dir datasets/training/{filter_name}
 ```
 
 **Task: Validate dataset**
 ```
 Use Task tool with subagent_type: "general-purpose"
-Prompt: "Audit the {filter_name} dataset at datasets/labeled/{filter_name}/labeled_articles.jsonl
+Prompt: "Audit the {filter_name} dataset at datasets/scored/{filter_name}/labeled_articles.jsonl
 for dimensional regression training. Expected dimensions: 8.
 Use dimensional regression QA criteria from docs/agents/templates/dimensional-regression-qa-agent.md"
 ```

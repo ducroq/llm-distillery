@@ -25,7 +25,7 @@ Additionally, very long articles create several problems:
 
 **Implement smart content compression at ~800 words (≈3,000 tokens) for BOTH oracle and student**
 
-This compression is applied in `ground_truth/batch_labeler.py`:
+This compression is applied in `ground_truth/batch_scorer.py`:
 
 ```python
 def _smart_compress_content(self, content: str, max_words: int = 800) -> str:
@@ -114,7 +114,7 @@ def _smart_compress_content(self, content: str, max_words: int = 800) -> str:
 ## Implementation Details
 
 ### Location
-- Primary: `ground_truth/batch_labeler.py:_smart_compress_content()`
+- Primary: `ground_truth/batch_scorer.py:_smart_compress_content()`
 - Also used in: NexusMind-Filter uplifting filter (6,000 char limit)
 
 ### Compression Algorithm
@@ -158,7 +158,7 @@ Truncated content is:
 
 ## References
 
-- Implementation: `ground_truth/batch_labeler.py:642-643`
+- Implementation: `ground_truth/batch_scorer.py:642-643`
 - NexusMind-Filter precedent: `src/filters/uplifting_filter.py:138-139` (6,000 char limit)
 - Discussion: Session 2025-11-09 (user questioned truncation strategy)
 

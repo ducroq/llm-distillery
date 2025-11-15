@@ -47,7 +47,7 @@ Complete guides for generating ground truth datasets and training specialized se
 1. Read: [Creating New Filters](creating_new_filters.md)
 2. Read: [Prompt Engineering Guide](prompt_engineering.md)
 3. Follow: [Best Practices](ground_truth_best_practices.md)
-4. Run: `python -m ground_truth.batch_labeler --prompt prompts/your_filter.md`
+4. Run: `python -m ground_truth.batch_scorer --prompt prompts/your_filter.md`
 
 **Optimize my labeling costs**
 1. Read: [Cost Optimization](cost_optimization.md)

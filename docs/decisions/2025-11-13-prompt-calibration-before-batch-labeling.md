@@ -1,4 +1,4 @@
-# Prompt Calibration Required Before Batch Labeling
+# Prompt Calibration Required Before Batch Scoring
 
 **Date:** 2025-11-13
 **Status:** Accepted
@@ -30,7 +30,7 @@ While generating example outputs for the sustainability_tech_deployment filter, 
 
 ## Decision
 
-**Add mandatory PROMPT CALIBRATION step before batch labeling.**
+**Add mandatory PROMPT CALIBRATION step before batch scoring.**
 
 **Workflow change:**
 
@@ -42,7 +42,7 @@ NEW (correct):
 1. Write prompt → 2. Calibrate (50 articles + review) → 3. Batch label → 4. Train
 ```
 
-**Calibration must pass before batch labeling starts.**
+**Calibration must pass before batch scoring starts.**
 
 ## Rationale
 
@@ -90,7 +90,7 @@ Examples:
 
 **Red flag threshold:** If >20% of off-topic articles score >5.0 → Prompt is broken
 
-**Fix before batch labeling:**
+**Fix before batch scoring:**
 ```markdown
 **SCOPE: Climate & Sustainability Technology ONLY**
 
@@ -100,7 +100,7 @@ Examples:
 - Generic hardware
 ```
 
-**Re-test → Pass → Proceed to batch labeling**
+**Re-test → Pass → Proceed to batch scoring**
 
 ### Why This Step Is Critical
 
@@ -138,7 +138,7 @@ calibration_sample = {
 - Need coverage of score ranges and topics
 - Edge cases reveal prompt ambiguities
 
-**Source:** Sample from unlabeled article corpus before batch labeling
+**Source:** Sample from unlabeled article corpus before batch scoring
 
 ### Step 2: Label Calibration Sample
 
@@ -211,7 +211,7 @@ assert on_topic_low_scores < 20%    # <10 out of 50
 
 **Typical iterations:** 2-3 rounds ($0.10-0.15 total)
 
-### Step 6: Proceed to Batch Labeling
+### Step 6: Proceed to Batch Scoring
 
 **Only after calibration passes:**
 ```bash
@@ -270,7 +270,7 @@ Install dependencies...
 Install dependencies...
 
 ### Step 1: Calibrate Oracle Prompt ⭐ CRITICAL
-Before batch labeling, validate the oracle prompt on a small sample.
+Before batch scoring, validate the oracle prompt on a small sample.
 
 See: docs/workflows/prompt-calibration.md
 
@@ -281,7 +281,7 @@ See: docs/workflows/prompt-calibration.md
 
 ### Positive
 
-- ✅ **Catches prompt errors early** - Before expensive batch labeling
+- ✅ **Catches prompt errors early** - Before expensive batch scoring
 - ✅ **Saves money** - $0.15 calibration vs $8-16 re-labeling
 - ✅ **Saves time** - Hours of review vs days of re-processing
 - ✅ **Higher quality ground truth** - Validated oracle before batch run
@@ -291,7 +291,7 @@ See: docs/workflows/prompt-calibration.md
 ### Negative
 
 - ⚠️ **Extra upfront work** - 3 hours for calibration
-- ⚠️ **Delays batch labeling** - Can't start until calibration passes
+- ⚠️ **Delays batch scoring** - Can't start until calibration passes
 - ⚠️ **New workflow step** - Team must learn calibration process
 
 ### Mitigation
@@ -314,7 +314,7 @@ See: docs/workflows/prompt-calibration.md
 
 **Pros:**
 - No upfront calibration work
-- Faster to start batch labeling
+- Faster to start batch scoring
 
 **Cons:**
 - ❌ Wastes money (double labeling cost)
@@ -339,7 +339,7 @@ See: docs/workflows/prompt-calibration.md
 
 **Decision:** Rejected as primary approach, but useful for final validation
 
-### Alternative 3: Continuous Calibration During Batch Labeling
+### Alternative 3: Continuous Calibration During Batch Scoring
 
 **Approach:** Label in batches of 500, review each batch, adjust prompt mid-run
 
@@ -357,7 +357,7 @@ See: docs/workflows/prompt-calibration.md
 ## Success Metrics
 
 **Prompt calibration is successful if:**
-- ✅ Catches all major prompt issues before batch labeling
+- ✅ Catches all major prompt issues before batch scoring
 - ✅ Final batch-labeled dataset has <5% mis-labeled articles
 - ✅ No need to re-label full dataset
 - ✅ Model training succeeds on first attempt
@@ -382,7 +382,7 @@ See: docs/workflows/prompt-calibration.md
 
 **Failure mode:**
 - Assumed prompt was correct
-- No validation before batch labeling
+- No validation before batch scoring
 - Discovered error too late to easily fix
 
 **Cost:**
@@ -428,7 +428,7 @@ See: docs/workflows/prompt-calibration.md
 
 ## References
 
-- Mis-labeled dataset: `datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl`
+- Mis-labeled dataset: `datasets/scored/sustainability_tech_deployment/labeled_articles.jsonl`
 - Fixed prompt: `filters/sustainability_tech_deployment/v1/prompt-compressed.md` (updated 2025-11-13)
 - Example outputs showing problem: `filters/sustainability_tech_deployment/v1/examples.md`
 - Related: Inter-rater agreement in ML labeling best practices

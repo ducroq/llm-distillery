@@ -157,7 +157,7 @@ git pull
 source venv/bin/activate
 
 # 4. Run batch labeler
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/uplifting/v1 \
   --source "datasets/raw/master_dataset_2025*.jsonl" \
   --output-dir datasets/uplifting_training_1500 \
@@ -344,7 +344,7 @@ chmod -R u+w datasets reports
 ```
 ┌─────────────────┐         ┌──────────────────┐
 │  Local (Win)    │         │  Server (Linux)  │
-│  - Claude Code  │──git──→│  - batch_labeler │
+│  - Claude Code  │──git──→│  - batch_scorer │
 │  - Development  │←─SFTP───│  - Heavy compute │
 │  - Analysis     │         │  - Data storage  │
 └─────────────────┘         └──────────────────┘
@@ -379,7 +379,7 @@ Save your sync configuration as a batch job:
 tmux new -s labeling
 
 # Run long job
-python -m ground_truth.batch_labeler ...
+python -m ground_truth.batch_scorer ...
 
 # Detach: Ctrl+B, then D
 

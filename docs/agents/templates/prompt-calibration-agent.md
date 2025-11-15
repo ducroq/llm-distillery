@@ -1,8 +1,8 @@
 # Prompt Calibration Agent Template v1.0
 
-**Purpose:** Validate oracle prompt quality before expensive batch labeling by systematically reviewing a calibration sample.
+**Purpose:** Validate oracle prompt quality before expensive batch scoring by systematically reviewing a calibration sample.
 
-**When to use:** After writing initial oracle prompt, before batch labeling full dataset.
+**When to use:** After writing initial oracle prompt, before batch scoring full dataset.
 
 **Expected duration:** 5-10 minutes (reviewing 50 calibration labels)
 
@@ -10,7 +10,7 @@
 
 ## Agent Task Description
 
-You are validating an oracle prompt to ensure it correctly scores articles before we invest in batch labeling thousands of articles. Use the criteria below to generate a comprehensive calibration report.
+You are validating an oracle prompt to ensure it correctly scores articles before we invest in batch scoring thousands of articles. Use the criteria below to generate a comprehensive calibration report.
 
 **Input artifacts:**
 - Oracle prompt: `filters/{filter_name}/v1/prompt-compressed.md`
@@ -291,12 +291,12 @@ Recommendation: PROCEED TO BATCH LABELING
 
 The prompt correctly distinguishes in-scope from out-of-scope content
 and produces reasonable dimensional scores. Minor edge case issues do not
-warrant blocking batch labeling.
+warrant blocking batch scoring.
 
 Next steps:
 1. Review 2 edge case articles manually
 2. Consider adding edge case examples to prompt
-3. Proceed with batch labeling of full dataset
+3. Proceed with batch scoring of full dataset
 ```
 
 ### ⚠️ REVIEW (Borderline - Fix Minor Issues)
@@ -377,7 +377,7 @@ DO NOT PROCEED TO BATCH LABELING until this passes calibration.
 
 Estimated fix time: 1-2 hours (major prompt revision)
 Re-calibration cost: $0.05
-Savings vs batch labeling broken prompt: $8-16 + days of rework
+Savings vs batch scoring broken prompt: $8-16 + days of rework
 ```
 
 ---
@@ -608,7 +608,7 @@ docs/agents/templates/prompt-calibration-agent.md.
 Calibration sample location: calibration_labeled.jsonl (50 articles)
 Filter path: filters/{filter_name}/v1
 
-Generate calibration report and determine if prompt is ready for batch labeling."
+Generate calibration report and determine if prompt is ready for batch scoring."
 ```
 
 **Expected Agent Workflow:**

@@ -219,7 +219,7 @@ Per-dimension histograms showing count in each 1-point range (0-1, 1-2, ..., 9-1
 ### For Uplifting Dataset
 ```bash
 # Use general-purpose agent with this template
-Task: "Audit the uplifting dataset at datasets/labeled/uplifting/labeled_articles.jsonl
+Task: "Audit the uplifting dataset at datasets/scored/uplifting/labeled_articles.jsonl
 for dimensional regression training. Expected dimensions: 8 (agency, progress,
 collective_benefit, connection, innovation, justice, resilience, wonder).
 Use the dimensional regression QA criteria from
@@ -229,7 +229,7 @@ docs/guides/dimensional-regression-qa-agent.md"
 ### For Tech Deployment Dataset
 ```bash
 Task: "Audit the tech deployment dataset at
-datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl
+datasets/scored/sustainability_tech_deployment/labeled_articles.jsonl
 for dimensional regression training. Expected dimensions: 8
 (deployment_maturity, technology_performance, cost_trajectory,
 scale_of_deployment, market_penetration, technology_readiness,

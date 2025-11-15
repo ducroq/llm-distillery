@@ -32,7 +32,7 @@ Create a single generic script `scripts/prepare_training_data.py` that works for
 ```bash
 python scripts/prepare_training_data.py \
     --filter filters/{filter_name}/v1 \
-    --input datasets/labeled/{filter_name}/labeled_articles.jsonl \
+    --input datasets/scored/{filter_name}/labeled_articles.jsonl \
     --output-dir datasets/training/{filter_name}
 ```
 

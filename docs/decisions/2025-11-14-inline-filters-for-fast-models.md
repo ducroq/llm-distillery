@@ -259,7 +259,7 @@ N. **[Dimension Name]**: [Question about human/planetary wellbeing]
 
 **Cons:**
 - 3x cost ($0.003 vs $0.001 per article)
-- Adds $16 to batch labeling cost (8,000 articles)
+- Adds $16 to batch scoring cost (8,000 articles)
 - Doesn't solve underlying prompt design issue
 
 **Decision:** Try restructuring first, switch model only if restructuring fails
@@ -338,7 +338,7 @@ N. **[Dimension Name]**: [Question about human/planetary wellbeing]
 5. **Test with small calibration sample**
    - 10-20 articles to validate structure
    - Check oracle reasoning to see if filters are applied
-   - Iterate before batch labeling
+   - Iterate before batch scoring
 
 ---
 
@@ -368,7 +368,7 @@ Add new option:
 
 ## Related Decisions
 
-- [2025-11-13: Prompt Calibration Before Batch Labeling](2025-11-13-prompt-calibration-before-batch-labeling.md) - Why calibration is mandatory
+- [2025-11-13: Prompt Calibration Before Batch Scoring](2025-11-13-prompt-calibration-before-batch-labeling.md) - Why calibration is mandatory
 - [2025-11-14: Calibration/Validation Split](2025-11-14-calibration-validation-split.md) - How to validate prompt fixes generalize
 - [2025-11-13: Content Caps in Oracle](2025-11-13-content-caps-in-oracle-not-postfilter.md) - Why oracle must understand scope
 

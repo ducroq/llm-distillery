@@ -19,7 +19,7 @@ During calibration of the sustainability_tech_deployment oracle prompt, we disco
 
 **Risk without validation:**
 - Prompt fixes might work perfectly on the 27 calibration articles
-- But fail on new, unseen articles in the batch labeling run
+- But fail on new, unseen articles in the batch scoring run
 - Only discovered after spending $8 on 8,000 mis-labeled articles
 
 ## Decision
@@ -68,7 +68,7 @@ NEW (safe):
 2. Test on DIFFERENT 50 articles (fresh sample)
 3. If validation metrics ≈ calibration metrics → Fixes generalized ✅
 4. If validation metrics < calibration metrics → Overfitting detected ❌
-5. Confidence before batch labeling
+5. Confidence before batch scoring
 
 ### Real-World Validation Results
 
@@ -112,7 +112,7 @@ Minor differences:
 
 2. **Label validation sample:**
    ```bash
-   python -m ground_truth.batch_labeler \
+   python -m ground_truth.batch_scorer \
        --filter filters/{filter_name}/v1 \
        --source validation_sample.jsonl \
        --output-dir validation_labeled \
@@ -137,7 +137,7 @@ Minor differences:
 
 | Calibration | Validation | Decision |
 |-------------|------------|----------|
-| PASS (80% on-topic) | PASS (80%+ on-topic) | ✅ Proceed to batch labeling |
+| PASS (80% on-topic) | PASS (80%+ on-topic) | ✅ Proceed to batch scoring |
 | PASS (80% on-topic) | FAIL (60% on-topic) | ❌ Overfitting - revise prompt |
 | REVIEW (70% on-topic) | PASS (75% on-topic) | ✅ Good enough - proceed |
 | REVIEW (70% on-topic) | FAIL (50% on-topic) | ❌ Major issues - start over |
@@ -151,7 +151,7 @@ Minor differences:
 - ✅ **Prevents overfitting** - Catches prompt fixes that only work on calibration sample
 - ✅ **Validates generalization** - Confirms improvements work on new articles
 - ✅ **Increases confidence** - Test on 100+ articles total (calibration + validation) before $8 batch run
-- ✅ **Early detection** - Finds issues before expensive batch labeling
+- ✅ **Early detection** - Finds issues before expensive batch scoring
 - ✅ **Documented validation** - Reports prove prompt quality on independent test set
 
 ### Negative
@@ -175,12 +175,12 @@ Minor differences:
 
 ## Alternatives Considered
 
-### Alternative 1: Skip Validation, Monitor Batch Labeling
+### Alternative 1: Skip Validation, Monitor Batch Scoring
 
-**Approach:** Proceed directly to batch labeling, manually review first 100 articles
+**Approach:** Proceed directly to batch scoring, manually review first 100 articles
 
 **Pros:**
-- Faster to start batch labeling
+- Faster to start batch scoring
 - Catches issues early in batch run
 
 **Cons:**
@@ -227,7 +227,7 @@ Minor differences:
 - ✅ Catches overfitting (validation metrics significantly worse than calibration)
 - ✅ Confirms generalization (validation metrics ≈ calibration metrics)
 - ✅ No need to re-label full batch dataset due to systematic issues
-- ✅ Validation cost < 1% of batch labeling cost ($0.05 vs $8)
+- ✅ Validation cost < 1% of batch scoring cost ($0.05 vs $8)
 
 **Red flags:**
 - ❌ Validation always passes even when calibration barely passes
@@ -264,7 +264,7 @@ Minor differences:
 
 **Scenario 1: Prompt improvements were overfitted**
 1. Calibration shows 80% on-topic recognition → PASS
-2. Proceed directly to batch labeling (8,162 articles, $8)
+2. Proceed directly to batch scoring (8,162 articles, $8)
 3. After 500 articles, discover prompt still under-scores new deployment types
 4. Already spent $0.50, need to re-label everything
 5. **Cost: $8 wasted + days of rework**
@@ -272,7 +272,7 @@ Minor differences:
 **Scenario 2: With validation (what we actually did)**
 1. Calibration shows 80% on-topic recognition → PASS
 2. Validation shows 100% on-topic recognition → PASS (generalized!)
-3. Proceed to batch labeling with confidence
+3. Proceed to batch scoring with confidence
 4. **Cost: $0.05 extra for validation**
 
 **ROI:** $0.05 prevented potential $8 loss
@@ -300,8 +300,8 @@ Minor differences:
 
 Every filter will benefit from validation:
 1. sustainability_tech_deployment - validated ✅
-2. uplifting - needs validation before batch labeling
-3. investment_risk - needs validation before batch labeling
+2. uplifting - needs validation before batch scoring
+3. investment_risk - needs validation before batch scoring
 
 **Validation is not optional.** It's a mandatory quality gate to prevent overfitting.
 

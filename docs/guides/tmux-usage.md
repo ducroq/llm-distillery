@@ -23,7 +23,7 @@ cd /path/to/llm-distillery
 source venv/bin/activate
 
 # Example 1: Batch labeling (oracle ground truth generation)
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
     --filter filters/sustainability_tech_deployment/v1 \
     --source "datasets/raw/*.jsonl" \
     --llm gemini-flash \
@@ -41,7 +41,7 @@ python -m training.train \
 ```
 
   <!-- 1. Uplifting:
-  python -m ground_truth.batch_labeler \
+  python -m ground_truth.batch_scorer \
       --prompt prompts/uplifting.md \
       --source datasets/raw/master_dataset.jsonl \
       --llm gemini-flash \
@@ -50,7 +50,7 @@ python -m training.train \
       --output-dir datasets
 
   2. Sustainability:
-  python -m ground_truth.batch_labeler \
+  python -m ground_truth.batch_scorer \
       --prompt prompts/sustainability.md \
       --source datasets/raw/master_dataset.jsonl \
       --llm gemini \
@@ -59,7 +59,7 @@ python -m training.train \
       --output-dir datasets
 
   3. SEECE:
-  python -m ground_truth.batch_labeler \
+  python -m ground_truth.batch_scorer \
       --prompt prompts/seece-energy-tech.md \
       --source datasets/raw/master_dataset.jsonl \
       --llm gemini \

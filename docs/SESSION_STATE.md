@@ -8,14 +8,14 @@ Ground truth datasets finalized and validated for both filters. Training data pr
 ### Ground Truth Datasets ✅
 
 **Uplifting Filter:**
-- **Location:** `datasets/labeled/uplifting/labeled_articles.jsonl`
+- **Location:** `datasets/scored/uplifting/labeled_articles.jsonl`
 - **Total articles:** 7,715
 - **Status:** Validated with dimensional regression QA (PASSED)
 - **Report:** `reports/uplifting_dimensional_regression_qa.md`
 - **Dimensions:** 8 (agency, progress, collective_benefit, connection, innovation, justice, resilience, wonder)
 
 **Tech Deployment Filter:**
-- **Location:** `datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl`
+- **Location:** `datasets/scored/sustainability_tech_deployment/labeled_articles.jsonl`
 - **Total articles:** 8,162 (consolidated from multiple batches)
 - **Status:** Validated with dimensional regression QA (PASSED)
 - **Report:** `reports/sustainability_tech_deployment_dimensional_regression_qa.md`
@@ -44,7 +44,7 @@ Ground truth datasets finalized and validated for both filters. Training data pr
 ```bash
 python scripts/prepare_training_data.py \
     --filter filters/{filter_name}/v1 \
-    --input datasets/labeled/{filter_name}/labeled_articles.jsonl \
+    --input datasets/scored/{filter_name}/labeled_articles.jsonl \
     --output-dir datasets/training/{filter_name} \
     --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
 ```
@@ -62,8 +62,8 @@ python scripts/prepare_training_data.py \
 - Smart quotes, em dashes, etc. are valid typographic characters (not errors)
 
 ### 3. Documentation Updates
-- Updated `datasets/labeled/uplifting/README.md` with training data format section
-- Updated `datasets/labeled/sustainability_tech_deployment/README.md` with training data format
+- Updated `datasets/scored/uplifting/README.md` with training data format section
+- Updated `datasets/scored/sustainability_tech_deployment/README.md` with training data format
 - Clarified tier labels are metadata only (training uses dimensional scores)
 - Updated `training/README.md` with generic script usage
 
@@ -149,7 +149,7 @@ Loss: MSE(predicted_scores, ground_truth_scores)
 
 ### Oracle Calibration Agent (v1.1)
 
-**Purpose:** Validate oracle performance before large-scale batch labeling
+**Purpose:** Validate oracle performance before large-scale batch scoring
 
 **Template:** `docs/agents/templates/oracle-calibration-agent.md`
 
@@ -174,14 +174,14 @@ Loss: MSE(predicted_scores, ground_truth_scores)
 
 ```bash
 # Dataset QA
-Task: "Audit the uplifting dataset at datasets/labeled/uplifting/labeled_articles.jsonl
+Task: "Audit the uplifting dataset at datasets/scored/uplifting/labeled_articles.jsonl
 for dimensional regression training. Expected dimensions: 8 (agency, progress,
 collective_benefit, connection, innovation, justice, resilience, wonder).
 Use the dimensional regression QA criteria from
 docs/agents/templates/dimensional-regression-qa-agent.md"
 
 # Oracle Calibration
-Task: "Calibrate the oracle for uplifting filter before batch labeling.
+Task: "Calibrate the oracle for uplifting filter before batch scoring.
 Sample 200 articles from unlabeled corpus, label with Gemini Pro,
 analyze results. Use calibration criteria from
 docs/agents/templates/oracle-calibration-agent.md"
@@ -213,7 +213,7 @@ filters/{filter_name}/v1/
    ```bash
    python scripts/prepare_training_data.py \
        --filter filters/sustainability_tech_deployment/v1 \
-       --input datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl \
+       --input datasets/scored/sustainability_tech_deployment/labeled_articles.jsonl \
        --output-dir datasets/training/sustainability_tech_deployment
    ```
 
@@ -289,8 +289,8 @@ None currently. All major issues resolved.
 - `scripts/consolidate_corpus.py` - Batch file archival (moved to sandbox)
 
 **Updated:**
-- `datasets/labeled/uplifting/README.md` - Training data format section
-- `datasets/labeled/sustainability_tech_deployment/README.md` - Training data format section
+- `datasets/scored/uplifting/README.md` - Training data format section
+- `datasets/scored/sustainability_tech_deployment/README.md` - Training data format section
 - `training/README.md` - Generic script usage, updated paths
 - `docs/agents/AI_AUGMENTED_WORKFLOW.md` - Updated paths and structure
 - `docs/agents/agent-operations.md` - Added ADR protocol, automated docs, progressive context loading
@@ -324,10 +324,10 @@ To resume this work:
 
 2. **Verify ground truth datasets:**
    ```bash
-   wc -l datasets/labeled/uplifting/labeled_articles.jsonl
+   wc -l datasets/scored/uplifting/labeled_articles.jsonl
    # Should show: 7715
 
-   wc -l datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl
+   wc -l datasets/scored/sustainability_tech_deployment/labeled_articles.jsonl
    # Should show: 8162
    ```
 
@@ -341,7 +341,7 @@ To resume this work:
    ```bash
    python scripts/prepare_training_data.py \
        --filter filters/sustainability_tech_deployment/v1 \
-       --input datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl \
+       --input datasets/scored/sustainability_tech_deployment/labeled_articles.jsonl \
        --output-dir datasets/training/sustainability_tech_deployment
    ```
 

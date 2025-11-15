@@ -237,7 +237,7 @@ Stage 2: Selective reasoning (top articles only)
 
 - Training results: `filters/sustainability_tech_deployment/v1/training_metadata.json`
 - Test evaluation: `filters/sustainability_tech_deployment/v1/test_evaluation.json`
-- Oracle labeling format: `datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl`
+- Oracle labeling format: `datasets/scored/sustainability_tech_deployment/labeled_articles.jsonl`
 - Related: `docs/decisions/2025-11-12-dimensional-regression-training.md`
 
 ## Discussion

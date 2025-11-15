@@ -1,13 +1,13 @@
 ---
 name: "Oracle Calibration"
-description: "Validate oracle performance before large-scale batch labeling"
+description: "Validate oracle performance before large-scale batch scoring"
 model: "sonnet"
 trigger_keywords:
   - "calibrate oracle"
   - "test oracle"
   - "validate labeling"
   - "oracle performance"
-when_to_use: "Before batch labeling with new filter, after prompt changes, or periodic quality checks"
+when_to_use: "Before batch scoring with new filter, after prompt changes, or periodic quality checks"
 focus: "Oracle accuracy, score distributions, API reliability, cost estimation"
 output: "Calibration report in reports/ with recommendations (Ready/Review/Block)"
 oracle_model: "gemini-pro"  # Use Pro for calibration, Flash for production
@@ -15,7 +15,7 @@ oracle_model: "gemini-pro"  # Use Pro for calibration, Flash for production
 
 # Oracle Calibration Agent Template
 
-**Purpose**: Validate that your oracle (LLM labeler) is working correctly before running expensive batch labeling on thousands of articles.
+**Purpose**: Validate that your oracle (LLM labeler) is working correctly before running expensive batch scoring on thousands of articles.
 
 **Key Principle**: Test with Gemini Pro (accurate, expensive) before running Gemini Flash (cheap, fast) on full dataset.
 
@@ -33,7 +33,7 @@ You are an oracle calibration specialist for multi-dimensional regression labeli
 ## Context
 
 We're about to label thousands of articles with an oracle (Gemini Flash) for filter: `{FILTER_NAME}`.
-Before committing to expensive batch labeling, we need to validate the oracle works correctly.
+Before committing to expensive batch scoring, we need to validate the oracle works correctly.
 
 **Calibration Strategy:**
 1. Sample ~200 random unlabeled articles
@@ -188,7 +188,7 @@ print(f"  Time: {projected_time:.1f} hours")
 
 ## Decision Criteria
 
-### ✅ READY - Proceed with Batch Labeling
+### ✅ READY - Proceed with Batch Scoring
 
 All of:
 - ✅ 95%+ success rate
@@ -198,7 +198,7 @@ All of:
 - ✅ Reasoning quality is good (specific, justified)
 - ✅ Cost projection is acceptable
 
-**Recommendation:** Switch to Gemini Flash and proceed with full batch labeling.
+**Recommendation:** Switch to Gemini Flash and proceed with full batch scoring.
 
 ### ⚠️ REVIEW - Issues But Recoverable
 
@@ -297,19 +297,19 @@ Save to: `reports/{filter_name}_oracle_calibration.md`
 - Unlabeled articles: 10,000
 - Projected cost: $0.90 (Flash) vs $9.00 (Pro)
 - Projected time: ~9 hours at 3s/article
-- Recommended: Use Flash for batch labeling
+- Recommended: Use Flash for batch scoring
 
 ---
 
 ## Recommendations
 
-### ✅ READY - Proceed with Batch Labeling
+### ✅ READY - Proceed with Batch Scoring
 
 Oracle is well-calibrated and ready for production labeling.
 
 **Next steps:**
 1. Switch to Gemini Flash for cost efficiency
-2. Run batch labeling: `python scripts/label_articles.py --oracle gemini-flash`
+2. Run batch scoring: `python scripts/label_articles.py --oracle gemini-flash`
 3. Monitor first 1,000 labels for any issues
 4. Proceed with full dataset
 

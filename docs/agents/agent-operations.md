@@ -65,7 +65,7 @@ Include:
 
 Example for uplifting filter:
 ```
-Task: "Audit the uplifting dataset at datasets/labeled/uplifting/labeled_articles.jsonl
+Task: "Audit the uplifting dataset at datasets/scored/uplifting/labeled_articles.jsonl
 for dimensional regression training. Expected dimensions: 8 (agency, progress,
 collective_benefit, connection, innovation, justice, resilience, wonder).
 Use the dimensional regression QA criteria from
@@ -75,7 +75,7 @@ docs/guides/dimensional-regression-qa-agent.md"
 Example for tech deployment filter:
 ```
 Task: "Audit the tech deployment dataset at
-datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl
+datasets/scored/sustainability_tech_deployment/labeled_articles.jsonl
 for dimensional regression training. Expected dimensions: 8
 (deployment_maturity, technology_performance, cost_trajectory,
 scale_of_deployment, market_penetration, technology_readiness,
@@ -168,7 +168,7 @@ Agent generates a report in `reports/{filter}_dimensional_regression_qa.md`
 
 ✅ PASSED - Dataset ready for dimensional regression training
 
-Dataset: datasets/labeled/uplifting/labeled_articles.jsonl
+Dataset: datasets/scored/uplifting/labeled_articles.jsonl
 Total articles: 7,715
 Dimensions: 8
 Critical checks: 4/4 PASSED
@@ -198,10 +198,10 @@ Critical checks: 4/4 PASSED
 ## Oracle Calibration Agent Workflow
 
 ### Purpose
-Validate that your oracle (LLM labeler) is working correctly before running expensive batch labeling on thousands of articles.
+Validate that your oracle (LLM labeler) is working correctly before running expensive batch scoring on thousands of articles.
 
 ### When to Use
-- Before batch labeling with a new filter
+- Before batch scoring with a new filter
 - After changing the oracle prompt
 - After modifying scoring dimensions or tier boundaries
 - Periodic quality checks (quarterly)
@@ -217,7 +217,7 @@ Validate that your oracle (LLM labeler) is working correctly before running expe
 
 **Example for new filter:**
 ```
-Task: "Calibrate the oracle for the uplifting filter before batch labeling.
+Task: "Calibrate the oracle for the uplifting filter before batch scoring.
 Sample 200 articles from datasets/raw/unlabeled_articles.jsonl.
 Use Gemini Pro for calibration (accurate validation before using Flash for production).
 Filter directory: filters/uplifting/v1
@@ -264,7 +264,7 @@ Focus on: Has reasoning quality improved? Are tier distributions more accurate?"
 ## Executive Summary
 Oracle is well-calibrated. Score distributions show healthy variance (std dev 1.5-2.1),
 full range coverage across all dimensions, and reasoning quality is high.
-Ready for batch labeling with Gemini Flash.
+Ready for batch scoring with Gemini Flash.
 
 ## Key Findings
 - Success rate: 199/200 (99.5%)
@@ -275,19 +275,19 @@ Ready for batch labeling with Gemini Flash.
 - Projected time: ~8 hours
 
 ## Recommendation
-✅ Switch to Gemini Flash and proceed with full batch labeling.
+✅ Switch to Gemini Flash and proceed with full batch scoring.
 ```
 
 ### Decision Criteria
 
-**✅ READY - Proceed with Batch Labeling**
+**✅ READY - Proceed with Batch Scoring**
 - 95%+ success rate
 - All dimensions valid (0-10)
 - Healthy variance (std dev > 1.0)
 - Range coverage (5+ out of 10 ranges per dimension)
 - Reasoning quality good
 
-→ **Action**: Switch to Gemini Flash, run batch labeling
+→ **Action**: Switch to Gemini Flash, run batch scoring
 
 **⚠️ REVIEW - Fixable Issues**
 - Success rate 90-95%
@@ -321,7 +321,7 @@ Ready for batch labeling with Gemini Flash.
 
 **Good:**
 ```
-Task: "Audit the uplifting dataset at datasets/labeled/uplifting/labeled_articles.jsonl
+Task: "Audit the uplifting dataset at datasets/scored/uplifting/labeled_articles.jsonl
 for dimensional regression training. Expected dimensions: 8 (agency, progress,
 collective_benefit, connection, innovation, justice, resilience, wonder).
 Use the dimensional regression QA criteria from
@@ -365,12 +365,12 @@ Give the agent necessary context:
 ### Example 1: Dataset QA After Labeling
 
 ```
-# User completes batch labeling
+# User completes batch scoring
 # User consolidates labels into labeled_articles.jsonl
 
 # User invokes agent:
 Task: "Audit the tech deployment dataset at
-datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl
+datasets/scored/sustainability_tech_deployment/labeled_articles.jsonl
 for dimensional regression training. Expected dimensions: 8.
 Use dimensional regression QA criteria."
 
@@ -613,8 +613,8 @@ Train models on multi-dimensional regression (8 scores per article, 0-10 range) 
 ## References
 
 - `docs/guides/dimensional-regression-qa-agent.md`
-- `datasets/labeled/uplifting/README.md` - Training Data Format section
-- `datasets/labeled/sustainability_tech_deployment/README.md` - Training Data Format section
+- `datasets/scored/uplifting/README.md` - Training Data Format section
+- `datasets/scored/sustainability_tech_deployment/README.md` - Training Data Format section
 ```
 
 ### Maintaining ADRs

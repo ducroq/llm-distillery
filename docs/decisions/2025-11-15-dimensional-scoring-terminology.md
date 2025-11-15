@@ -26,11 +26,11 @@ We produce ground truth training data for dimensional regression models (continu
 | Labeler | Scorer |
 | Label | Score |
 | Ground truth labels | Ground truth scores |
-| `batch_labeler.py` | `batch_scorer.py` |
-| `datasets/labeled/` | `datasets/scored/` |
-| `--target-labeled` | `--target-scored` |
+| `batch_scorer.py` | `batch_scorer.py` |
+| `datasets/scored/` | `datasets/scored/` |
+| `--target-scored` | `--target-scored` |
 | `.labeled_ids.json` | `.scored_ids.json` |
-| `labeled_batch_001.jsonl` | `scored_batch_001.jsonl` |
+| `scored_batch_001.jsonl` | `scored_batch_001.jsonl` |
 
 ## Rationale
 
@@ -64,28 +64,31 @@ We produce ground truth training data for dimensional regression models (continu
 - ⚠️ Must update all documentation
 
 ### Migration required:
-1. ✅ Rename `ground_truth/batch_labeler.py` → `batch_scorer.py`
+1. ✅ Rename `ground_truth/batch_scorer.py` → `batch_scorer.py`
 2. ✅ Update all internal variable/function names
 3. ⏳ Update README documentation
-4. ⏳ Migrate existing `datasets/labeled/` → `datasets/scored/`
+4. ⏳ Migrate existing `datasets/scored/` → `datasets/scored/`
 5. ⏳ Update training scripts to use new paths
 6. ⏳ Update any external documentation/tutorials
 
 ## Implementation
 
 **Phase 1 (Completed):**
-- ✅ Renamed `batch_labeler.py` → `batch_scorer.py`
-- ✅ Updated class: `GenericBatchLabeler` → `GenericBatchScorer`
+- ✅ Renamed `batch_scorer.py` → `batch_scorer.py`
+- ✅ Updated class: `GenericBatchScorer` → `GenericBatchScorer`
 - ✅ Updated all internal terminology
-- ✅ Updated CLI arguments: `--target-labeled` → `--target-scored`
+- ✅ Updated CLI arguments: `--target-scored` → `--target-scored`
 - ✅ Updated state files: `.labeled_ids.json` → `.scored_ids.json`
-- ✅ Updated batch filenames: `labeled_batch_` → `scored_batch_`
+- ✅ Updated batch filenames: `scored_batch_` → `scored_batch_`
 
-**Phase 2 (Pending):**
-- ⏳ Update README.md and training documentation
-- ⏳ Migrate existing `datasets/labeled/` directories
-- ⏳ Update training scripts (`prepare_training_data.py`, `train_model.py`)
-- ⏳ Update any external integrations
+**Phase 2 (Completed - 2025-11-15):**
+- ✅ Updated all documentation (39 markdown files)
+- ✅ Updated all references to datasets/labeled/ → datasets/scored/
+- ✅ Updated all terminology: labeling→scoring, labeled→scored, labeler→scorer
+- ✅ Renamed BATCH_LABELING_READY.md → BATCH_SCORING_READY.md
+- ✅ Updated training documentation and all agent templates
+
+**Note:** Actual directory migration (datasets/labeled/ → datasets/scored/) should be done per-filter when needed.
 
 ## Example usage
 

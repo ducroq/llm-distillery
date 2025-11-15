@@ -1,7 +1,7 @@
-# Batch Labeling Ready - Production Filters
+# Batch Scoring Ready - Production Filters
 
 **Date:** 2025-11-14
-**Status:** ✅ Ready for production batch labeling and training
+**Status:** ✅ Ready for production batch scoring and training
 
 ---
 
@@ -77,7 +77,7 @@ All filters have been calibrated and validated with the inline filters pattern.
 
 ---
 
-## Batch Labeling Commands
+## Batch Scoring Commands
 
 ### Dataset Info
 - **Source:** `datasets/raw/historical_dataset_19690101_20251108.jsonl`
@@ -88,33 +88,33 @@ All filters have been calibrated and validated with the inline filters pattern.
 ### 1. Label with Uplifting Filter v4
 
 ```bash
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/uplifting/v4 \
   --source datasets/raw/historical_dataset_19690101_20251108.jsonl \
-  --output-dir datasets/labeled/uplifting_v4 \
+  --output-dir datasets/scored/uplifting_v4 \
   --llm gemini-flash \
   --batch-size 50 \
   --max-batches unlimited
 ```
 
 **Expected output:**
-- `datasets/labeled/uplifting_v4/uplifting/labeled_batch_*.jsonl`
+- `datasets/scored/uplifting_v4/uplifting/scored_batch_*.jsonl`
 - Each article will have `uplifting_analysis` field with dimensional scores + signal_tier
 
 ### 2. Label with Investment-Risk Filter v2
 
 ```bash
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/investment-risk/v2 \
   --source datasets/raw/historical_dataset_19690101_20251108.jsonl \
-  --output-dir datasets/labeled/investment_risk_v2 \
+  --output-dir datasets/scored/investment_risk_v2 \
   --llm gemini-flash \
   --batch-size 50 \
   --max-batches unlimited
 ```
 
 **Expected output:**
-- `datasets/labeled/investment_risk_v2/investment-risk/labeled_batch_*.jsonl`
+- `datasets/scored/investment_risk_v2/investment-risk/scored_batch_*.jsonl`
 - Each article will have `investment-risk_analysis` field with:
   - Signal tier: RED, YELLOW, GREEN, BLUE, NOISE
   - Dimensional scores (macro_risk_severity, credit_market_stress, etc.)
@@ -123,17 +123,17 @@ python -m ground_truth.batch_labeler \
 ### 3. Label with Sustainability Tech Deployment Filter v2
 
 ```bash
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/sustainability_tech_deployment/v2 \
   --source datasets/raw/historical_dataset_19690101_20251108.jsonl \
-  --output-dir datasets/labeled/sustainability_tech_v2 \
+  --output-dir datasets/scored/sustainability_tech_v2 \
   --llm gemini-flash \
   --batch-size 50 \
   --max-batches unlimited
 ```
 
 **Expected output:**
-- `datasets/labeled/sustainability_tech_v2/sustainability_tech_deployment/labeled_batch_*.jsonl`
+- `datasets/scored/sustainability_tech_v2/sustainability_tech_deployment/scored_batch_*.jsonl`
 - Each article will have `sustainability_tech_deployment_analysis` field with:
   - overall_score (0-10)
   - Dimensional scores (deployment_maturity, technology_performance, etc.)
@@ -147,28 +147,28 @@ To maximize throughput and minimize total processing time, run all 3 filters in 
 
 ```bash
 # Terminal 1: Uplifting
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/uplifting/v4 \
   --source datasets/raw/historical_dataset_19690101_20251108.jsonl \
-  --output-dir datasets/labeled/uplifting_v4 \
+  --output-dir datasets/scored/uplifting_v4 \
   --llm gemini-flash \
   --batch-size 50 \
   --max-batches unlimited
 
 # Terminal 2: Investment-Risk
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/investment-risk/v2 \
   --source datasets/raw/historical_dataset_19690101_20251108.jsonl \
-  --output-dir datasets/labeled/investment_risk_v2 \
+  --output-dir datasets/scored/investment_risk_v2 \
   --llm gemini-flash \
   --batch-size 50 \
   --max-batches unlimited
 
 # Terminal 3: Sustainability Tech
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
   --filter filters/sustainability_tech_deployment/v2 \
   --source datasets/raw/historical_dataset_19690101_20251108.jsonl \
-  --output-dir datasets/labeled/sustainability_tech_v2 \
+  --output-dir datasets/scored/sustainability_tech_v2 \
   --llm gemini-flash \
   --batch-size 50 \
   --max-batches unlimited
@@ -188,25 +188,25 @@ Each batch labeler creates:
 **Check progress:**
 ```bash
 # View latest session summary
-cat datasets/labeled/uplifting_v4/uplifting/session_summary.json
+cat datasets/scored/uplifting_v4/uplifting/session_summary.json
 
 # Count labeled articles
-wc -l datasets/labeled/uplifting_v4/uplifting/labeled_batch_*.jsonl
+wc -l datasets/scored/uplifting_v4/uplifting/scored_batch_*.jsonl
 
 # Check for errors
-grep "FAILED" datasets/labeled/uplifting_v4/uplifting/distillation.log
+grep "FAILED" datasets/scored/uplifting_v4/uplifting/distillation.log
 ```
 
 ---
 
 ## Training Data Preparation
 
-After batch labeling completes, prepare training data with:
+After batch scoring completes, prepare training data with:
 
 ```bash
 python scripts/prepare_training_data.py \
   --filter uplifting \
-  --labeled-dir datasets/labeled/uplifting_v4/uplifting \
+  --labeled-dir datasets/scored/uplifting_v4/uplifting \
   --output-dir training/uplifting
 ```
 
@@ -221,7 +221,7 @@ Repeat for each filter.
 
 ## Expected Timeline
 
-**Batch Labeling (on different machine with good API limits):**
+**Batch Scoring (on different machine with good API limits):**
 - Uplifting: 4-6 hours
 - Investment-Risk: 4-6 hours
 - Sustainability Tech: 4-6 hours
@@ -246,7 +246,7 @@ Repeat for each filter.
 # Sample 100 random articles from each filter
 python -c "
 import json, random
-articles = [json.loads(line) for line in open('datasets/labeled/uplifting_v4/uplifting/labeled_batch_001.jsonl')]
+articles = [json.loads(line) for line in open('datasets/scored/uplifting_v4/uplifting/scored_batch_001.jsonl')]
 sample = random.sample(articles, min(100, len(articles)))
 for a in sample:
     print(f\"{a['title'][:60]}: {a['uplifting_analysis']['signal_tier']}\")
@@ -294,8 +294,8 @@ for a in sample:
 - ✅ 3 filters calibrated and validated
 - ✅ Inline filters pattern proven across 3 domains
 - ✅ False positive rates acceptable (0-37% depending on filter)
-- ✅ Ready for batch labeling 47,967 articles
+- ✅ Ready for batch scoring 47,967 articles
 - ✅ Estimated cost: $24-36 total ($8-12 per filter)
 - ✅ Estimated time: 4-6 hours (parallel) or 12-18 hours (sequential)
 
-**You are ready to proceed with batch labeling on your training machine!**
+**You are ready to proceed with batch scoring on your training machine!**

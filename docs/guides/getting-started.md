@@ -87,7 +87,7 @@ See: [`ground-truth-generation.md`](ground-truth-generation.md) for details
 
 ```bash
 # Label 2,000-4,000 articles with oracle LLM
-python -m ground_truth.batch_labeler \
+python -m ground_truth.batch_scorer \
     --filter filters/sustainability_tech_deployment/v1 \
     --source "datasets/raw/*.jsonl" \
     --llm gemini-flash \
@@ -116,7 +116,7 @@ python -m ground_truth.batch_labeler \
 # Create train/val/test splits (80/10/10)
 # Applies minority class oversampling to training set
 python scripts/prepare_training_data_tech_deployment.py \
-    --input datasets/labeled/sustainability_tech_deployment/all_labels.jsonl \
+    --input datasets/scored/sustainability_tech_deployment/all_labels.jsonl \
     --output-dir datasets/training/sustainability_tech_deployment \
     --train-ratio 0.8 \
     --val-ratio 0.1 \
@@ -211,7 +211,7 @@ llm-distillery/
 │       └── README.md                # Filter documentation
 │
 ├── ground_truth/                    # Oracle labeling tools
-│   ├── batch_labeler.py            # Main labeling script
+│   ├── batch_scorer.py            # Main labeling script
 │   └── calibrate_oracle.py         # Oracle comparison tool
 │
 ├── datasets/
@@ -234,7 +234,7 @@ llm-distillery/
 ### First Filter (Sustainability Tech Deployment)
 1. ✅ Create filter package → `filters/sustainability_tech_deployment/v1/`
 2. ✅ Calibrate oracle → Gemini Flash selected
-3. ✅ Generate 4,146 oracle labels → `datasets/labeled/`
+3. ✅ Generate 4,146 oracle labels → `datasets/scored/`
 4. ✅ Prepare training data → `datasets/training/` (4,328/413/417)
 5. 🔄 **Train model** (in progress on GPU)
 6. ⏭️ Evaluate model
