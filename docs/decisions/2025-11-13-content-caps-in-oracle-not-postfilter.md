@@ -376,7 +376,7 @@ if "business" in tags and len(entities.monetary) > 0:
 ## Implementation Checklist
 
 - [x] Decision documented (this ADR)
-- [x] Post-filter stays simple (already implemented in scripts/postfilter.py)
+- [x] Post-filter stays simple (already implemented in filters/{filter_name}/v1/postfilter.py)
 - [ ] Update uplifting oracle prompt with content_type_caps
 - [ ] Update sustainability_tech_deployment oracle prompt (if has content caps)
 - [ ] Test oracle enforcement with labeled dataset
@@ -384,7 +384,7 @@ if "business" in tags and len(entities.monetary) > 0:
 
 ## References
 
-- Post-filter implementation: `scripts/postfilter.py`
+- Post-filter implementation: `filters/{filter_name}/v1/postfilter.py`
 - Post-filter architecture: `docs/decisions/2025-11-13-post-filter-architecture.md`
 - Article metadata schema: `docs/article-metadata-schema.md`
 - Oracle prompts: `filters/*/v1/prompt-compressed.md`

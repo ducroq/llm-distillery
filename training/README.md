@@ -143,7 +143,7 @@ Split your labeled ground truth data using the generic preparation script:
 
 ```bash
 # For uplifting filter
-python scripts/prepare_training_data.py \
+python training/prepare_data.py \
     --filter filters/uplifting/v1 \
     --input datasets/labeled/uplifting/labeled_articles.jsonl \
     --output-dir datasets/training/uplifting \
@@ -152,7 +152,7 @@ python scripts/prepare_training_data.py \
     --test-ratio 0.1
 
 # For tech deployment filter
-python scripts/prepare_training_data.py \
+python training/prepare_data.py \
     --filter filters/sustainability_tech_deployment/v1 \
     --input datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl \
     --output-dir datasets/training/sustainability_tech_deployment \

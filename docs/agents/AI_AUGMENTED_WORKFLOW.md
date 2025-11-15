@@ -20,7 +20,7 @@
 - Human: "Create a generic training script"
 - AI: Creates script, offers to update docs
 - Human: "Yes"
-- AI: Updates training/README.md, SESSION_STATE.md, creates ADR
+- AI: Updates training/README.md, docs/SESSION_STATE.md, creates ADR
 
 ### 2. Single Source of Truth
 
@@ -40,7 +40,7 @@
 **Why:** AI context windows are limited. Loading entire codebases wastes tokens and time. Progressive disclosure (broad → specific) gets answers faster with relevant context only.
 
 **In practice:**
-- Start: Read SESSION_STATE.md (2k tokens)
+- Start: Read docs/SESSION_STATE.md (2k tokens)
 - Navigate: Find relevant component (1k tokens)
 - Detail: Read specific code section (5k tokens)
 - Total: 8k tokens vs 50k+ for full codebase dump
@@ -87,7 +87,7 @@
 
 **1. Read Core Context (Required)**
 ```
-Read: SESSION_STATE.md
+Read: docs/SESSION_STATE.md
 Purpose: Understand current status, recent accomplishments, next steps
 ```
 
@@ -108,14 +108,14 @@ Purpose: Understand recent architectural decisions
 **4. Orient the User**
 ```
 Provide concise summary:
-- Where we left off (from SESSION_STATE.md)
+- Where we left off (from docs/SESSION_STATE.md)
 - Current status of key components
 - Suggested next steps (from "Next Steps" section)
 ```
 
 **Example:**
 ```
-"Welcome back! Based on SESSION_STATE.md:
+"Welcome back! Based on docs/SESSION_STATE.md:
 
 Current Status:
 - Ground truth datasets validated (7,715 uplifting, 8,162 tech deployment)
@@ -163,7 +163,7 @@ After completing significant work:
 → Offer to update docs:
 ```
 "I've completed [task]. Should I update the documentation?
-- SESSION_STATE.md (add to accomplishments)
+- docs/SESSION_STATE.md (add to accomplishments)
 - training/README.md (update usage examples)
 - Create ADR if applicable"
 ```
@@ -171,7 +171,7 @@ After completing significant work:
 **3. Use Progressive Context Loading**
 
 When answering questions:
-1. Start broad (SESSION_STATE.md, README files)
+1. Start broad (docs/SESSION_STATE.md, README files)
 2. Navigate to relevant area (directory structure, component docs)
 3. Load specific context (relevant code sections only)
 4. Synthesize answer with file:line references
@@ -210,7 +210,7 @@ When you notice:
 
 **1. Offer Final Documentation Update**
 ```
-"Before you go, should I update SESSION_STATE.md with today's progress?
+"Before you go, should I update docs/SESSION_STATE.md with today's progress?
 - Add accomplishments
 - Update current status
 - Refresh next steps"
@@ -235,7 +235,7 @@ When you notice:
 🚧 In Progress: [list partial work]
 📋 Next: [list next steps]
 
-See SESSION_STATE.md for details."
+See docs/SESSION_STATE.md for details."
 ```
 
 ---
@@ -246,7 +246,7 @@ See SESSION_STATE.md for details."
 
 - ✅ Use progressive context loading (aim for 10-20k tokens)
 - ✅ Offer to document significant decisions as ADRs
-- ✅ Update SESSION_STATE.md at session end
+- ✅ Update docs/SESSION_STATE.md at session end
 - ✅ Move experiments to sandbox/ (git-ignored)
 - ✅ Reference specific file:line locations when helpful
 - ✅ Verify commands before running destructive operations
@@ -332,13 +332,13 @@ llm-distillery/
 ├── sandbox/                       # Git-ignored experiments
 │   └── README.md
 ├── reports/                       # Agent outputs
-└── SESSION_STATE.md               # Current status (START HERE)
+└── docs/SESSION_STATE.md               # Current status (START HERE)
 ```
 
 ### Important Files
 
 **Always read first:**
-- `SESSION_STATE.md` - Current status, accomplishments, next steps
+- `docs/SESSION_STATE.md` - Current status, accomplishments, next steps
 
 **Reference as needed:**
 - `docs/agents/agent-operations.md` - Agent operational guide
@@ -371,7 +371,7 @@ Use dimensional regression QA criteria from docs/agents/templates/dimensional-re
 2. Fill in: Context, Decision, Consequences, Alternatives
 3. Save as: docs/decisions/YYYY-MM-DD-title.md
 4. Update docs/decisions/README.md with active ADR
-5. Update SESSION_STATE.md to reference ADR
+5. Update docs/SESSION_STATE.md to reference ADR
 ```
 
 **Task: Create agent template**
@@ -409,7 +409,7 @@ You're doing this right when:
 - ✅ Context loads are fast and focused (<30 seconds)
 - ✅ Significant decisions are captured as ADRs
 - ✅ Experiments happen freely in sandbox/
-- ✅ SESSION_STATE.md accurately reflects reality
+- ✅ docs/SESSION_STATE.md accurately reflects reality
 - ✅ New filters require zero code changes (config-driven)
 - ✅ User can resume after weeks away with clear context
 
@@ -422,8 +422,8 @@ You're doing this right when:
 - ❌ **Context overload:** Reading entire codebase for simple questions
 - ❌ **Git pollution:** Committing experiments instead of using sandbox
 - ❌ **Undocumented decisions:** Making significant choices without ADRs
-- ❌ **Stale state:** SESSION_STATE.md not reflecting current reality
-- ❌ **Assuming context:** Not reading SESSION_STATE.md at session start
+- ❌ **Stale state:** docs/SESSION_STATE.md not reflecting current reality
+- ❌ **Assuming context:** Not reading docs/SESSION_STATE.md at session start
 
 ---
 
@@ -444,6 +444,6 @@ You're doing this right when:
 - `docs/agents/templates/dimensional-regression-qa-agent.md` - Dataset QA template
 - `docs/agents/templates/ADR-TEMPLATE.md` - Architecture decision record template
 - `docs/decisions/` - Architecture Decision Records
-- `SESSION_STATE.md` - Current project status (read this first!)
+- `docs/SESSION_STATE.md` - Current project status (read this first!)
 - `sandbox/README.md` - Experimentation guidelines
 - `C:\local_dev\AI_AUGMENTED_SOLO_DEV_FRAMEWORK.md` - Original framework inspiration

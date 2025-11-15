@@ -9,7 +9,7 @@ This script:
 5. Exports in JSONL format for Qwen training
 
 Usage:
-    python scripts/prepare_training_data.py \
+    python training/prepare_data.py \
         --filter filters/uplifting/v1 \
         --input datasets/labeled/uplifting/labeled_articles.jsonl \
         --output-dir datasets/training/uplifting \

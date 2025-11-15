@@ -77,7 +77,7 @@ output: "What it produces"
 
 **At session start:**
 1. Read `AI_AUGMENTED_WORKFLOW.md` - Get the operating system
-2. Read project's `SESSION_STATE.md` - Understand current status
+2. Read project's `docs/SESSION_STATE.md` - Understand current status
 3. Orient the user
 
 **During work:**
@@ -86,7 +86,7 @@ output: "What it produces"
 - Reference `agent-operations.md` for detailed workflows
 
 **At session end:**
-- Update project's `SESSION_STATE.md`
+- Update project's `docs/SESSION_STATE.md`
 - Suggest commit message
 - Summarize progress
 
@@ -99,7 +99,7 @@ output: "What it produces"
    - Directory structure
    - Important files
    - Common tasks
-3. Create project's `SESSION_STATE.md`
+3. Create project's `docs/SESSION_STATE.md`
 4. AI assistants now know how to work!
 
 **What to customize:**

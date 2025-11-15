@@ -61,7 +61,7 @@ Classification Result
 
 **Usage:**
 ```python
-from scripts.postfilter import PostFilter
+from filters.{filter_name}.v1.postfilter import PostFilter
 
 # Initialize with filter path
 pf = PostFilter("filters/sustainability_tech_deployment/v1")

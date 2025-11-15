@@ -505,7 +505,7 @@ Create an ADR when making significant decisions that:
 1. Recognize the decision (architectural choice, trade-off, pattern establishment)
 2. Offer to create ADR: "This seems like a significant decision. Should I create an ADR documenting it?"
 3. If approved, create ADR in `docs/decisions/YYYY-MM-DD-title.md`
-4. Update `SESSION_STATE.md` to reference the new ADR
+4. Update `docs/SESSION_STATE.md` to reference the new ADR
 
 **ADR Template:**
 ```markdown
@@ -644,14 +644,14 @@ After making significant code changes or completing tasks, proactively offer to 
 **What to offer:**
 ```
 "I've completed [task]. Should I update the documentation?
-- SESSION_STATE.md (current status, resolved issues)
+- docs/SESSION_STATE.md (current status, resolved issues)
 - training/README.md (if training workflow changed)
 - [Component docs] (if interfaces changed)"
 ```
 
 ### What Gets Updated Automatically
 
-**1. SESSION_STATE.md**
+**1. docs/SESSION_STATE.md**
 - Update "Current Status" section with latest progress
 - Add to "Key Accomplishments This Session"
 - Move completed issues to "Resolved Issues"
@@ -681,7 +681,7 @@ When training pipeline changes:
 
 After completing work, verify:
 
-- [ ] **SESSION_STATE.md** - Current status reflects reality
+- [ ] **docs/SESSION_STATE.md** - Current status reflects reality
 - [ ] **Component docs** - Interfaces documented
 - [ ] **ADRs** - Significant decisions recorded
 - [ ] **README files** - User-facing docs updated
@@ -693,7 +693,7 @@ After completing work, verify:
 Assistant: "I've created the generic prepare_training_data.py script and removed
 the old filter-specific scripts. Should I update the documentation?
 - training/README.md (update command examples)
-- SESSION_STATE.md (add to accomplishments)
+- docs/SESSION_STATE.md (add to accomplishments)
 - Create ADR for generic script approach?"
 
 User: "Yes, update all of those."
@@ -710,7 +710,7 @@ Assistant proceeds to update all three documents.
 ### How to Load Context
 
 **1. Start Broad (Always)**
-- Read `SESSION_STATE.md` - Current project status
+- Read `docs/SESSION_STATE.md` - Current project status
 - Read `docs/PROJECT_OVERVIEW.md` (if exists) - High-level understanding
 - Scan `docs/ARCHITECTURE.md` (if exists) - System structure
 
@@ -741,7 +741,7 @@ Read all training code
 
 **Good approach (progressive disclosure):**
 ```
-1. Read SESSION_STATE.md → See training data section
+1. Read docs/SESSION_STATE.md → See training data section
 2. Read training/README.md → Get overview
 3. Read scripts/prepare_training_data.py:1-100 → Understand main logic
 4. Synthesize answer with references
@@ -797,7 +797,7 @@ Load additional context when:
 - Provide example output in template
 
 ### Documentation gets stale
-- Set reminders to review SESSION_STATE.md weekly
+- Set reminders to review docs/SESSION_STATE.md weekly
 - After completing major milestones, update all relevant docs
 - When creating new components, immediately document them
 - Use ADRs to capture decision context while fresh

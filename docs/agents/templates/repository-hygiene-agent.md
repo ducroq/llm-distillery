@@ -33,7 +33,7 @@ You are auditing the repository for hygiene issues that violate the AI-Augmented
 1. Find untracked files outside sandbox/
 2. Identify scripts without corresponding documentation
 3. Flag hardcoded values that should be in config files
-4. Check SESSION_STATE.md currency (is it current?)
+4. Check docs/SESSION_STATE.md currency (is it current?)
 5. Identify stale documentation or outdated references
 6. Generate hygiene report with actionable recommendations
 
@@ -92,8 +92,8 @@ CRITICAL: Hardcoded configuration
 - Reason: Single source of truth principle violated
 ```
 
-#### 3. Stale SESSION_STATE.md
-**Check:** SESSION_STATE.md matches actual repository state
+#### 3. Stale docs/SESSION_STATE.md
+**Check:** docs/SESSION_STATE.md matches actual repository state
 
 **How to check:**
 - Compare "Current Status" against actual files
@@ -101,16 +101,16 @@ CRITICAL: Hardcoded configuration
 - Verify "Next Steps" are still relevant
 
 **Red flags:**
-- ❌ SESSION_STATE.md not updated in >2 weeks
+- ❌ docs/SESSION_STATE.md not updated in >2 weeks
 - ❌ "Current Status" doesn't match git status
 - ❌ "Next Steps" reference completed work
 
 **Recommendation format:**
 ```
-CRITICAL: SESSION_STATE.md is stale
+CRITICAL: docs/SESSION_STATE.md is stale
 - Last updated: 2025-11-01 (14 days ago)
 - Action: Update current status, accomplishments, next steps
-- Reason: SESSION_STATE.md is primary session recovery document
+- Reason: docs/SESSION_STATE.md is primary session recovery document
 ```
 
 ### IMPORTANT (Medium Priority - Fix Soon)
@@ -275,7 +275,7 @@ For each finding:
 | Priority | Issue | Effort | Impact |
 |----------|-------|--------|--------|
 | 1 | Move experimental scripts to sandbox | 10 min | High |
-| 2 | Update SESSION_STATE.md | 15 min | High |
+| 2 | Update docs/SESSION_STATE.md | 15 min | High |
 | 3 | Document new production script | 20 min | Medium |
 | 4 | Fix stale doc references | 5 min | Medium |
 | 5 | Create missing ADR | 30 min | Medium |
@@ -288,7 +288,7 @@ For each finding:
 **✅ HEALTHY**
 - No critical issues
 - 0-1 important issues
-- SESSION_STATE.md current (<7 days)
+- docs/SESSION_STATE.md current (<7 days)
 - All production scripts documented
 - No sandbox violations
 
@@ -356,7 +356,7 @@ This agent enforces the principles from `docs/agents/AI_AUGMENTED_WORKFLOW.md`:
 
 1. **Sandbox for experiments** - Catches workflow violations
 2. **Single source of truth** - Flags hardcoded config values
-3. **Effortless documentation** - Ensures SESSION_STATE.md stays current
+3. **Effortless documentation** - Ensures docs/SESSION_STATE.md stays current
 4. **Architecture Decision Records** - Reminds to document decisions
 
 **Prevention > Cure:** Regular hygiene checks prevent the repository from becoming unmaintainable.
