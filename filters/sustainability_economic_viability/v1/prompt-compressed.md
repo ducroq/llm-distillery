@@ -1,12 +1,23 @@
 # Climate Economics Scoring
 
+**Purpose**: Evaluate economic competitiveness of climate solutions vs fossil fuels
+**Version**: 1.0
+**Target**: Gemini Flash 1.5 / Fast models
+
+**Focus**: Cost competitiveness, profitability, job creation, and economic viability of green technologies
+
+---
+
+## PROMPT TEMPLATE
+
+```
 Rate this article on **8 dimensions** (0-10 scale). Focus: Economic competitiveness of green vs fossil fuels.
 
 ## Article
 
 **Title**: {title}
 
-**Content**: {content}
+**Content**: {text}
 
 ---
 
@@ -135,20 +146,25 @@ Broader economic benefits beyond direct costs
 ## Output Format (JSON)
 
 ```json
-{
-  "cost_competitiveness": {"score": X, "reasoning": "Brief justification with data"},
-  "profitability": {"score": X, "reasoning": "..."},
-  "job_creation": {"score": X, "reasoning": "..."},
-  "stranded_assets": {"score": X, "reasoning": "..."},
-  "investment_flows": {"score": X, "reasoning": "..."},
-  "payback_period": {"score": X, "reasoning": "..."},
-  "subsidy_dependence": {"score": X, "reasoning": "..."},
-  "economic_multiplier": {"score": X, "reasoning": "..."},
+{{
+  "cost_competitiveness": {{"score": X, "reasoning": "Brief justification with data"}},
+  "profitability": {{"score": X, "reasoning": "..."}},
+  "job_creation": {{"score": X, "reasoning": "..."}},
+  "stranded_assets": {{"score": X, "reasoning": "..."}},
+  "investment_flows": {{"score": X, "reasoning": "..."}},
+  "payback_period": {{"score": X, "reasoning": "..."}},
+  "subsidy_dependence": {{"score": X, "reasoning": "..."}},
+  "economic_multiplier": {{"score": X, "reasoning": "..."}},
   "overall_assessment": "1-2 sentence economic summary",
   "primary_sector": "solar | wind | EVs | batteries | hydrogen | heat_pumps | other",
   "economic_stage": "superior | competitive | approaching_parity | subsidy_dependent | unviable",
   "confidence": "HIGH | MEDIUM | LOW"
-}
+}}
 ```
 
 **Be data-driven**: Require specific cost/financial data, not just claims or advocacy.
+
+DO NOT include any text outside the JSON object.
+```
+
+---

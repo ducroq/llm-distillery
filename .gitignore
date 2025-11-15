@@ -125,11 +125,16 @@ nul
 
 
 # Sandbox/Experimental - NOT committed (safe space for prototyping)
-sandbox/              # General experimentation, prototypes
-scratch/              # Quick tests, temporary work
-playground/           # Testing new ideas, playing with code
-experiments/local/    # Local experiments (experiments/ root is tracked)
-notebooks/exploratory/  # Messy exploratory Jupyter notebooks
+# General experimentation, prototypes
+sandbox/
+# Quick tests, temporary work
+scratch/
+# Testing new ideas, playing with code
+playground/
+# Local experiments (experiments/ root is tracked)
+experiments/local/
+# Messy exploratory Jupyter notebooks
+notebooks/exploratory/
 *.bak
 *.old
 *_backup.*

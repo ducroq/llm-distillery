@@ -74,7 +74,9 @@
       "Bash(analysis_output.txt)",
       "Bash(find:*)",
       "Bash(whois:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(tee:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

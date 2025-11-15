@@ -1,8 +1,10 @@
 """
-Sustainability Policy Effectiveness Pre-Filter v1.0
+Sustainability Policy Effectiveness Pre-Filter v2.0
 
-Blocks policy announcements without outcomes, pure advocacy.
-Passes policies with measurable before/after data.
+Blocks non-sustainability content, non-policy content, and announcements without outcomes.
+Passes government policies with measurable before/after data.
+
+v2.0 adds policy keyword check to reduce false positives from academic papers.
 """
 
 import re
@@ -10,13 +12,13 @@ from typing import Dict, Optional
 from filters.base_prefilter import BasePreFilter
 
 
-class PolicyEffectivenessPreFilterV1(BasePreFilter):
-    VERSION = "1.0"
+class PolicyEffectivenessPreFilterV2(BasePreFilter):
+    VERSION = "2.0"
 
     def __init__(self):
         super().__init__()
         self.filter_name = "sustainability_policy_effectiveness"
-        self.version = "1.0"
+        self.version = "2.0"
 
     def should_label(self, article: Dict) -> tuple[bool, str]:
         """
