@@ -1273,7 +1273,7 @@ if __name__ == '__main__':
     scorer.run(
         source_files=source_files,
         max_batches=args.max_batches,
-        target_count=args.target_count,
+        target_count=args.target_scored,
         batch_size=args.batch_size,
         pre_filter=prefilter,
         random_sample=args.random_sample,
