@@ -434,8 +434,44 @@ def main():
         if not checkpoint_model_path.exists():
             raise ValueError(f"Checkpoint model not found at {checkpoint_model_path}")
 
-        model = QwenFilterModel(str(checkpoint_model_path), num_dimensions, use_gradient_checkpointing=True, use_fp16=False)
-        print(f"  Loaded model from checkpoint")
+        # Load metadata to get base model name
+        metadata_path = args.resume_from / "training_metadata.json"
+        if not metadata_path.exists():
+            raise ValueError(f"training_metadata.json not found at {args.resume_from}")
+
+        with open(metadata_path, "r", encoding="utf-8") as f:
+            metadata = json.load(f)
+            base_model_name = metadata["model_name"]
+
+        print(f"  Base model: {base_model_name}")
+
+        # Load base model
+        base_model = AutoModelForSequenceClassification.from_pretrained(
+            base_model_name,
+            num_labels=num_dimensions,
+            problem_type="regression"
+        )
+
+        # Load PEFT adapter (already trained LoRA weights)
+        from peft import PeftModel
+        model_with_adapter = PeftModel.from_pretrained(base_model, checkpoint_model_path)
+
+        # Wrap in simple container to match interface
+        class ResumedModel(torch.nn.Module):
+            def __init__(self, peft_model):
+                super().__init__()
+                self.base_model = peft_model
+                self.num_dimensions = num_dimensions
+                self.use_fp16 = False
+
+            def forward(self, input_ids, attention_mask, labels=None):
+                return self.base_model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+
+            def parameters(self):
+                return self.base_model.parameters()
+
+        model = ResumedModel(model_with_adapter)
+        print(f"  Loaded PEFT model from checkpoint (no double LoRA)")
 
         # Load training history to determine start epoch
         history_path = args.resume_from / "training_history.json"
@@ -571,6 +607,15 @@ def main():
         json.dump(metadata, f, indent=2)
 
     print(f"Training metadata saved to: {metadata_path}")
+
+    # Print next steps reminder
+    print(f"\n{'='*60}")
+    print(f"NEXT STEPS:")
+    print(f"{'='*60}")
+    print(f"1. Review training results in {args.output_dir}/")
+    print(f"2. Run Model Evaluation Agent (see training/README.md)")
+    print(f"3. Review report: {args.output_dir}/model_evaluation.md")
+    print(f"{'='*60}\n")
 
 
 if __name__ == "__main__":

@@ -6,12 +6,78 @@
 
 **Focus**: DEPLOYED tech with measurable impact, not lab prototypes or vaporware.
 
+**Oracle Output**: Dimensional scores only (0-10 per dimension). Tier classification (if needed) is applied post-processing, not by the oracle.
+
 ---
 
 ## PROMPT TEMPLATE
 
 ```
-Rate this article on 8 dimensions (0-10 scale). Focus: DEPLOYED climate tech, not lab prototypes or vaporware.
+Rate this article on 8 dimensions (0-10 scale). Focus: DEPLOYED climate/sustainability tech, not lab prototypes or vaporware.
+
+**SCOPE: Climate & Sustainability Technology ONLY**
+
+**IN SCOPE (score normally):**
+- Renewable energy (solar, wind, hydro, geothermal)
+- Energy storage (batteries, pumped hydro, thermal)
+- Electric vehicles and charging infrastructure
+- Heat pumps and efficient HVAC
+- Green hydrogen production and fuel cells
+- Carbon capture and removal
+- Sustainable agriculture tech
+- Circular economy / recycling tech
+- Grid modernization for renewables
+- Industrial decarbonization tech
+- Water treatment and conservation
+- Sustainable materials and construction
+
+**OUT OF SCOPE (score 0-2 on ALL dimensions):**
+- Generic IT infrastructure (cloud, databases, APIs)
+- Programming languages and frameworks
+- Operating system features
+- Office productivity software
+- Generic hardware (not climate-specific)
+- Social media platforms
+- Gaming and entertainment tech
+- General healthcare tech (unless climate/sustainability related)
+- Energy for AI/data centers (even if renewable/nuclear) - focus must be on climate/decarbonization goals, not just "powering tech"
+
+**When in doubt:** If article doesn't mention climate, energy, sustainability, emissions, or environmental impact → OUT OF SCOPE
+
+---
+
+## Scoring Calibration
+
+**Deployment Stage → Overall Score Mapping:**
+
+- **mass_deployment** (GW-scale, years operational) → 7-10
+- **commercial_proven** (multi-site, revenue-generating) → 6-8
+- **early_commercial** (first deployments, limited scale) → 5-6 ← CRITICAL
+- **pilot** (test installations, not revenue) → 3-4
+- **lab** (prototype, no deployment) → 1-2
+
+**Important:** If article describes REAL DEPLOYMENT (not just plans), minimum score is 5.0, even if specific performance data is missing.
+
+---
+
+## Scoring Philosophy
+
+**Evidence hierarchy** (from strongest to weakest):
+1. **Deployment evidence** (X MW deployed, Y units installed, $Z investment) → Score based on this
+2. **Performance data** (efficiency, capacity factor, cost trends) → Nice to have, but not required for basic scoring
+3. **Detailed metrics** (LCOE, degradation rates, supply chain) → Only for scores 8+
+
+**Rule:** If article provides deployment evidence (#1), score normally even if #2 and #3 are missing. Do NOT penalize for "lack of specific data" if deployment scale is clear.
+
+**Negative News Handling:**
+Score the TECHNOLOGY MATURITY, not the news sentiment.
+
+Examples:
+- "Solar company goes bankrupt" → Score the deployed solar tech (7-8), not the business failure
+- "EV factory layoffs" → Score the EV technology maturity (6-8), not the workforce reduction
+- "Battery recall announced" → Score the deployment scale, note issues in performance dimension
+
+Negative news often indicates DEPLOYED tech facing real-world challenges, which confirms it's past the lab stage.
 
 ARTICLE:
 Title: {title}
@@ -156,7 +222,7 @@ Verified emissions avoided / energy generated
   "confidence": "HIGH|MEDIUM|LOW"
 }}
 
-**Be strict**: Most tech news is vaporware. Score low unless there's clear deployment evidence.
+**Be balanced**: Most tech news is vaporware (score 1-4), but real deployments exist. If article shows deployment evidence (MW deployed, units installed, investment amount), score 5+. Don't penalize for missing detailed metrics if deployment scale is clear.
 
 DO NOT include any text outside the JSON object.
 ```

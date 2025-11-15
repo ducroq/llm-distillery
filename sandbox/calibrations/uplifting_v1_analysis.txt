@@ -1,0 +1,153 @@
+================================================================================
+UPLIFTING FILTER CALIBRATION ANALYSIS
+================================================================================
+
+Total articles: 11
+Sample size: SMALL (target: 50, actual: 11)
+
+================================================================================
+CRITICAL METRIC 1: OFF-TOPIC REJECTION RATE
+================================================================================
+
+Off-topic articles identified: 5
+Scored >= 5.0 (FALSE POSITIVES): 4
+Scored >= 7.0 (SEVERE FALSE POSITIVES): 0
+
+False positive rate: 80.0% (target: <10%)
+Severe false positive rate: 0.0% (target: <5%)
+
+FAIL: >20% false positive rate
+
+--- FALSE POSITIVE EXAMPLES ---
+
+Web Developer Travis McCracken on API Gateway Design with Rust and Go
+  Score: 6.57 | Tier: connection
+  Expected: off_topic_corporate
+  Oracle reasoning: The article highlights a web developer's experience using Rust and Go to build scalable and high-performance APIs. This involves creating solutions fo...
+
+Closing in on $1 Billion – How Gurhan Kiziloz’s Nexus Is Quietly Rewriting the R
+  Score: 5.04 | Tier: connection
+  Expected: off_topic_corporate
+  Oracle reasoning: The article describes a gaming company, Nexus, potentially "rewriting the rules of gaming." This suggests innovation in the industry and potentially a...
+
+SNAP payments slashed to 50% as federal shutdown stretches into its second month
+  Score: 6.40 | Tier: connection
+  Expected: doom_framed
+  Oracle reasoning: Despite the reduction in SNAP benefits, there is agency demonstrated by federal judges ruling in favor of extending funding, the Trump administration ...
+
+What to do when productivity becomes a trap
+  Score: 6.64 | Tier: connection
+  Expected: doom_framed
+  Oracle reasoning: Leaders and teams are taking action to address burnout and ineffectiveness caused by unbounded productivity. They are setting boundaries, prioritizing...
+
+================================================================================
+CRITICAL METRIC 2: ON-TOPIC RECOGNITION RATE
+================================================================================
+
+On-topic articles identified: 3
+Scored < 5.0 (FALSE NEGATIVES): 0
+Scored >= 7.0 (correctly recognized): 2
+
+False negative rate: 0.0% (target: <20%)
+PASS: <20% false negative rate
+
+================================================================================
+CRITICAL METRIC 3: DIMENSIONAL CONSISTENCY
+================================================================================
+
+Average dimensional variance: 1.64 (target: >1.0)
+Articles with variance < 0.5: 0 (0.0%)
+PASS: Good dimensional differentiation
+
+================================================================================
+SCORE DISTRIBUTION
+================================================================================
+0-2: 0 articles
+3-4: 2 articles
+5-6: 7 articles
+7-8: 2 articles
+9-10: 0 articles
+
+--- TIER DISTRIBUTION ---
+connection: 8 articles
+impact: 1 articles
+not_uplifting: 2 articles
+
+================================================================================
+DETAILED ARTICLE ANALYSIS
+================================================================================
+
+1. Web Developer Travis McCracken on API Gateway Design with Rust and Go
+   Overall: 6.57 | Tier: connection | Type: solutions_story
+   Expected: off_topic_corporate | Variance: 2.00
+   Dimensions: agency=7, progress=7, collective=7, connection=5
+   Reasoning: The article highlights a web developer's experience using Rust and Go to build scalable and high-performance APIs. This involves creating solutions fo...
+
+2. Economic survival pressure vs capability scaling
+   Overall: 6.27 | Tier: connection | Type: solutions_story
+   Expected: neutral | Variance: 1.12
+   Dimensions: agency=7, progress=6, collective=7, connection=5
+   Reasoning: The article proposes a novel approach to AI development that could lead to beneficial outcomes. By creating AI agents with economic constraints, the s...
+
+3. Salmon's comeback pits nature against Trump administration
+   Overall: 7.52 | Tier: connection | Type: environmental
+   Expected: uplifting | Variance: 0.86
+   Dimensions: agency=8, progress=8, collective=8, connection=6
+   Reasoning: Migrating salmon have returned to the headwaters of the Klamath River for the first time in a century, indicating the success of the dam removal proje...
+
+4. New in that
+   Overall: 5.07 | Tier: connection | Type: community_building
+   Expected: neutral | Variance: 1.12
+   Dimensions: agency=5, progress=5, collective=6, connection=5
+   Reasoning: The individual is taking action to learn new skills in programming, which can lead to improved livelihood and contribute to the tech community. They a...
+
+5. The 5 best Mint alternatives to replace the budgeting app that shut down
+   Overall: 6.00 | Tier: connection | Type: solutions_story|business_news
+   Expected: uplifting | Variance: 2.12
+   Dimensions: agency=7, progress=6, collective=7, connection=4
+   Reasoning: The article highlights the agency of a user seeking alternatives to a discontinued budgeting app and sharing their findings. This leads to progress in...
+
+6. Closing in on $1 Billion – How Gurhan Kiziloz’s Nexus Is Quietly Rewriting the R
+   Overall: 5.04 | Tier: connection | Type: business_news
+   Expected: off_topic_corporate | Variance: 1.93
+   Dimensions: agency=5, progress=5, collective=6, connection=3
+   Reasoning: The article describes a gaming company, Nexus, potentially "rewriting the rules of gaming." This suggests innovation in the industry and potentially a...
+
+7. Astranis unveils Vanguard for secure beyond-line
+   Overall: 4.55 | Tier: not_uplifting | Type: business_news|military_security
+   Expected: neutral | Variance: 1.12
+   Dimensions: agency=5, progress=4, collective=5, connection=3
+   Reasoning: The article describes a new satellite service designed to improve communication during disaster relief efforts. This could lead to faster response tim...
+
+8. SNAP payments slashed to 50% as federal shutdown stretches into its second month
+   Overall: 6.40 | Tier: connection | Type: solutions_story
+   Expected: doom_framed | Variance: 2.12
+   Dimensions: agency=7, progress=6, collective=7, connection=7
+   Reasoning: Despite the reduction in SNAP benefits, there is agency demonstrated by federal judges ruling in favor of extending funding, the Trump administration ...
+
+9. What to do when productivity becomes a trap
+   Overall: 6.64 | Tier: connection | Type: solutions_story|business_news
+   Expected: doom_framed | Variance: 0.79
+   Dimensions: agency=7, progress=7, collective=7, connection=6
+   Reasoning: Leaders and teams are taking action to address burnout and ineffectiveness caused by unbounded productivity. They are setting boundaries, prioritizing...
+
+10. Will Our Cities Run Dry? | The Water Warriors Blueprint
+   Overall: 8.47 | Tier: impact | Type: solutions_story
+   Expected: uplifting | Variance: 1.14
+   Dimensions: agency=9, progress=8, collective=9, connection=8
+   Reasoning: The article highlights various community-led initiatives and innovative solutions addressing India's water crisis. These include sponge roads, check d...
+
+11. Boeing faces its first civil trial for deadly Ethiopia crash
+   Overall: 4.99 | Tier: not_uplifting | Type: justice
+   Expected: doom_framed | Variance: 3.70
+   Dimensions: agency=6, progress=5, collective=6, connection=3
+   Reasoning: The families of the victims are pursuing justice through the court system, holding Boeing accountable for the crash. Boeing has accepted responsibilit...
+
+================================================================================
+SUMMARY
+================================================================================
+
+SAMPLE SIZE WARNING: Only 11 articles (target: 50)
+Results may not be statistically reliable.
+
+Recommendation: Increase sample size before making PASS/FAIL decision.

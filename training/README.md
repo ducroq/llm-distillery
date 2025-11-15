@@ -32,7 +32,7 @@ pip install torch transformers datasets pyyaml tqdm
 1. **Create calibration sample (50-100 articles):**
    ```bash
    # Stratified sample: 20 on-topic, 20 off-topic, 10 edge cases
-   python scripts/create_calibration_sample.py \
+   python sandbox/analysis_scripts/create_calibration_sample.py \
        --input articles_corpus.jsonl \
        --output calibration_sample.jsonl \
        --n-positive 20 \
@@ -79,7 +79,7 @@ pip install torch transformers datasets pyyaml tqdm
 6. **⭐ Validate on Fresh Sample (CRITICAL - prevents overfitting):**
    ```bash
    # Create validation sample with DIFFERENT random seed
-   python scripts/create_calibration_sample.py \
+   python sandbox/analysis_scripts/create_calibration_sample.py \
        --input articles_corpus.jsonl \
        --output validation_sample.jsonl \
        --n-positive 20 \
@@ -378,7 +378,7 @@ Run test evaluation and generate production readiness report."
 ```
 
 **Agent will:**
-- Run test set evaluation (`scripts/evaluate_model.py`)
+- Run test set evaluation (`sandbox/analysis_scripts/evaluate_model.py`)
 - Analyze training progression, overfitting, convergence
 - Check per-dimension performance
 - Generate report: `filters/{filter_name}/v1/model_evaluation.md`

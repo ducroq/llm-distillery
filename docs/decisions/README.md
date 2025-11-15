@@ -23,6 +23,13 @@ Use `docs/agents/templates/ADR-TEMPLATE.md` as the starting point for new ADRs.
 
 ## Active ADRs
 
+### 2025-11-15: Dimensional Scoring Terminology
+**File:** `2025-11-15-dimensional-scoring-terminology.md`
+
+Adopt "scoring" terminology instead of "labeling" to accurately reflect dimensional regression. We produce continuous scores (0-10 per dimension), not discrete classification labels.
+
+**Impact:** Renamed `batch_labeler.py` → `batch_scorer.py`, `datasets/labeled/` → `datasets/scored/`, `--target-labeled` → `--target-scored`. Aligns terminology with regression task architecture.
+
 ### 2025-11-14: Inline Filters for Fast Models
 **File:** `2025-11-14-inline-filters-for-fast-models.md`
 

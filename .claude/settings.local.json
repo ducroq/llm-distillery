@@ -70,7 +70,11 @@
       "Bash(then mv reports/uplifting_gemini_flash_vs_pro_visualizations archive/reports/)",
       "Bash(do echo '=== $dir ===')",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(analysis_output.txt)",
+      "Bash(find:*)",
+      "Bash(whois:*)",
+      "Bash(git mv:*)"
     ],
     "deny": [],
     "ask": []

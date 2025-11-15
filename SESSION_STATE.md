@@ -1,233 +1,403 @@
-# Session State - 2025-11-11
+# Session State - 2025-11-13
 
 ## Summary
-Completed batch labeling of 3,000 new articles for sustainability tech deployment filter. Ready to retrain model with expanded dataset.
+Ground truth datasets finalized and validated for both filters. Training data prepared using new generic preparation script. Oracle labeling simplified - tier classification removed from oracle output (dimensional scores only). Agent templates updated to focus purely on dimensional score quality. Ready for model training.
 
 ## Current Status
 
-### Labeled Data Inventory
-- **New labels (this session):** 4,017 articles
-  - Location: `datasets/labeled/sustainability_tech_deployment/`
-  - Files: `labeled_batch_001.jsonl` through `labeled_batch_085.jsonl`
-  - Consolidated: `datasets/labeled/sustainability_tech_deployment/all_labels.jsonl` (4,017 lines)
+### Ground Truth Datasets ✅
 
-- **Previous labels (on GPU machine):** ~4,145 articles
-  - Used for original training run (Val MAE 1.31)
-  - NOT present on this machine
-  - Location on GPU machine: TBD (needs to be located)
+**Uplifting Filter:**
+- **Location:** `datasets/labeled/uplifting/labeled_articles.jsonl`
+- **Total articles:** 7,715
+- **Status:** Validated with dimensional regression QA (PASSED)
+- **Report:** `reports/uplifting_dimensional_regression_qa.md`
+- **Dimensions:** 8 (agency, progress, collective_benefit, connection, innovation, justice, resilience, wonder)
 
-- **Total tracked in state:** 8,162 article IDs
-  - State file: `datasets/labeled/sustainability_tech_deployment/.labeled_ids.json`
-  - This tracks ALL processed articles across both sessions
+**Tech Deployment Filter:**
+- **Location:** `datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl`
+- **Total articles:** 8,162 (consolidated from multiple batches)
+- **Status:** Validated with dimensional regression QA (PASSED)
+- **Report:** `reports/sustainability_tech_deployment_dimensional_regression_qa.md`
+- **Dimensions:** 8 (deployment_maturity, technology_performance, cost_trajectory, scale_of_deployment, market_penetration, technology_readiness, supply_chain_maturity, proof_of_impact)
 
-### Training Results (Previous Run)
-- **Model:** Qwen 2.5-1.5B with LoRA
-- **Training data:** 4,328 examples
-- **Validation MAE:** 1.31 (target: <1.5)
-- **Best epoch:** 3
-- **Location:** `filters/sustainability_tech_deployment/v1/`
-- **Plots:** `reports/sustainability_tech_deployment_v1_plots/loss_curves.png`
+### Training Data ✅
 
-## Critical Issues to Address
+**Uplifting:**
+- **Location:** `datasets/training/uplifting/`
+- **Files:** `train.jsonl`, `val.jsonl`, `test.jsonl`
+- **Status:** Prepared with generic script (2025-11-12)
 
-### 1. Unicode Character Warning
-**Problem:** VSCode reports "ambiguous unicode characters" in JSONL files
-- Affects: Both sustainability_tech_deployment AND uplifting project
-- Source: Articles contain special characters, quotes, em-dashes, non-ASCII symbols
-- Impact: May cause encoding issues during training or inference
+**Tech Deployment:**
+- **Location:** `datasets/training/sustainability_tech_deployment/`
+- **Status:** Ready for preparation with generic script
 
-**Recommended Fix (BEFORE TRAINING):**
-```python
-# Create a preprocessing script to sanitize unicode
-import json
-import unicodedata
+### Training Data Preparation Script ✅
 
-def clean_unicode(text):
-    """Remove or normalize problematic unicode characters."""
-    # Normalize to NFKC (compatibility decomposition + canonical composition)
-    text = unicodedata.normalize('NFKC', text)
-    # Remove zero-width characters, control characters
-    text = ''.join(c for c in text if unicodedata.category(c) not in ['Cc', 'Cf', 'Cs'])
-    # Replace smart quotes with regular quotes
-    replacements = {
-        '\u2018': "'", '\u2019': "'",  # Single quotes
-        '\u201c': '"', '\u201d': '"',  # Double quotes
-        '\u2013': '-', '\u2014': '-',  # En/em dashes
-        '\u2026': '...',               # Ellipsis
-    }
-    for old, new in replacements.items():
-        text = text.replace(old, new)
-    return text
+**Generic Script Created:** `scripts/prepare_training_data.py`
+- Works for ANY filter by reading `config.yaml`
+- Automatically extracts dimensions, tier boundaries, analysis field names
+- Eliminates code duplication across filters
+- Replaces old filter-specific scripts (removed)
 
-def sanitize_jsonl(input_file, output_file):
-    """Clean unicode in all text fields."""
-    with open(input_file, 'r', encoding='utf-8') as f_in, \
-         open(output_file, 'w', encoding='utf-8') as f_out:
-        for line in f_in:
-            item = json.loads(line)
-            # Clean text fields
-            for field in ['title', 'content', 'description']:
-                if field in item and item[field]:
-                    item[field] = clean_unicode(item[field])
-            f_out.write(json.dumps(item, ensure_ascii=False) + '\n')
-
-# Run on all_labels.jsonl before training
-sanitize_jsonl(
-    'datasets/labeled/sustainability_tech_deployment/all_labels.jsonl',
-    'datasets/labeled/sustainability_tech_deployment/all_labels_clean.jsonl'
-)
+**Usage:**
+```bash
+python scripts/prepare_training_data.py \
+    --filter filters/{filter_name}/v1 \
+    --input datasets/labeled/{filter_name}/labeled_articles.jsonl \
+    --output-dir datasets/training/{filter_name} \
+    --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
 ```
 
-### 2. Missing Original Training Data
-**Problem:** 4,145 labels from original training run are not on this machine
+## Key Accomplishments This Session
 
-**Action Required:**
-1. SSH to GPU machine (jeroen@llm-distiller)
-2. Locate original label files:
-   - Check: `datasets/labeled/sustainability_tech_deployment/`
-   - Check: `ground_truth/labeled/tech_deployment/`
-   - Check: Training metadata for data path used
-3. Copy to this machine
-4. Merge with new 4,017 labels
-5. Total training dataset: ~8,162 articles (nearly 2x original)
+### 1. Data Consolidation
+- Merged tech deployment labels (4,145 + 4,017 → 8,162 unique articles)
+- Archived 86 redundant batch files to `archive/`
+- Established single source of truth: `labeled_articles.jsonl`
+
+### 2. Unicode Handling
+- Investigated unicode character warnings
+- Confirmed `filters/base_prefilter.py` already handles comprehensively
+- Smart quotes, em dashes, etc. are valid typographic characters (not errors)
+
+### 3. Documentation Updates
+- Updated `datasets/labeled/uplifting/README.md` with training data format section
+- Updated `datasets/labeled/sustainability_tech_deployment/README.md` with training data format
+- Clarified tier labels are metadata only (training uses dimensional scores)
+- Updated `training/README.md` with generic script usage
+
+### 4. Agent Workflow Established
+- Created `docs/guides/dimensional-regression-qa-agent.md` template
+- Focus: Dimensional score quality (not tier classification)
+- Critical checks: completeness, validity, range coverage, data integrity
+- Validated both datasets (PASSED)
+
+### 5. Generic Training Script
+- Created `scripts/prepare_training_data.py`
+- Removed old filter-specific scripts
+- Single maintainable script for all filters
+
+### 6. Documentation Restructuring
+- Created `docs/agents/` for AI assistant documentation (portable!)
+- Separated agent docs (reusable) from human guides (project-specific)
+- Archived 20+ outdated documentation files
+- Updated all cross-references to new paths
+- Clear structure: agents/ for AI, guides/ for humans, decisions/ for ADRs
+
+### 7. Oracle Labeling Simplification
+- **Decision:** Oracle should NOT generate tier classifications (2025-11-13)
+- Oracle produces only: dimensional scores (0-10) + reasoning
+- Tier assignment moves to post-processing if needed (computed from dimensional scores)
+- Updated both agent templates to remove tier validation
+- Created ADR: `docs/decisions/2025-11-13-remove-tier-classification-from-oracle.md`
+- **Result:** Simpler prompts, no tier errors, flexibility to change thresholds
+
+## Training Methodology
+
+### Multi-Dimensional Regression (NOT Classification)
+
+**Training Inputs:**
+- `title` - Article title
+- `content` - Article text
+
+**Training Targets:**
+- 8 dimension scores (0-10 scale) as array: `[7, 8, 6, 5, 7, 4, 6, 5]`
+- Model predicts each dimension independently
+
+**Model Architecture:**
+```
+Input: [title + content] → Qwen 2.5 → Regression Head → Output: [8 dimension scores]
+Loss: MSE(predicted_scores, ground_truth_scores)
+```
+
+**Metadata Fields (NOT used in training):**
+- `tier` - Classification label (informational only)
+- `overall_score` - Weighted or holistic score (informational only)
+- `reasoning` - LLM explanation (human interpretability)
+
+**Important:** Tier labels may not perfectly align with config thresholds. This is expected and does NOT affect training quality.
+
+## Agent Workflow
+
+### Dimensional Regression QA Agent (v1.1)
+
+**Purpose:** Validate ground truth datasets for multi-dimensional regression training
+
+**Template:** `docs/agents/templates/dimensional-regression-qa-agent.md`
+
+**Critical Checks:**
+1. Dimension completeness - All 8 dimensions present
+2. Score validity - All scores in 0-10 range
+3. Range coverage - Full spectrum per dimension
+4. Data integrity - No duplicates, parse errors, missing fields
+
+**Quality Checks (report but don't block):**
+- Variance analysis (std dev per dimension)
+- Score distribution (clustering, skew)
+- Cross-dimension correlation (informational)
+
+**Informational Only (don't flag):**
+- Tier labels (legacy field if present, not validated)
+- Overall scores (computable from dimensions)
+- Reasoning fields (optional)
+
+**Decision Criteria:**
+- ✅ PASS: Ready for training
+- ⚠️ REVIEW: Training possible with caveats
+- ❌ FAIL: Block training
+
+### Oracle Calibration Agent (v1.1)
+
+**Purpose:** Validate oracle performance before large-scale batch labeling
+
+**Template:** `docs/agents/templates/oracle-calibration-agent.md`
+
+**Strategy:**
+1. Sample ~200 random unlabeled articles
+2. Label with Gemini Pro (accurate, for calibration)
+3. Analyze results: completeness, distributions, reasoning, cost
+4. Generate calibration report with Ready/Review/Block recommendation
+
+**Critical Checks:**
+1. API success rate (95%+ required)
+2. All dimensions present with valid scores (0-10)
+3. Healthy variance (std dev > 1.0 across most dimensions)
+4. Range coverage (5+ out of 10 ranges per dimension)
+5. Reasoning quality (specific, justified)
+6. Cost projection acceptable
+
+**Cost:** ~$0.20 for 200-article calibration with Gemini Pro
+**Production:** Switch to Gemini Flash (~10x cheaper) after calibration passes
+
+### Usage Examples
+
+```bash
+# Dataset QA
+Task: "Audit the uplifting dataset at datasets/labeled/uplifting/labeled_articles.jsonl
+for dimensional regression training. Expected dimensions: 8 (agency, progress,
+collective_benefit, connection, innovation, justice, resilience, wonder).
+Use the dimensional regression QA criteria from
+docs/agents/templates/dimensional-regression-qa-agent.md"
+
+# Oracle Calibration
+Task: "Calibrate the oracle for uplifting filter before batch labeling.
+Sample 200 articles from unlabeled corpus, label with Gemini Pro,
+analyze results. Use calibration criteria from
+docs/agents/templates/oracle-calibration-agent.md"
+```
+
+## Filter Package Structure
+
+Filters are version-controlled packages containing all configuration:
+
+```
+filters/{filter_name}/v1/
+├── config.yaml                    # Dimensions, weights, tier boundaries (SSOT)
+├── prefilter.py                   # Pre-filter logic
+├── prompt-compressed.md           # Oracle labeling prompt
+├── README.md                      # Filter documentation
+└── model/                         # Trained model (after training)
+    ├── config.json
+    ├── pytorch_model.bin
+    └── tokenizer files
+```
+
+**Single Source of Truth:** `config.yaml` contains all filter-specific configuration used by generic scripts.
 
 ## Next Steps
 
-### Immediate (Before Training)
-1. **Fix unicode issues:**
-   - Run sanitization script on `all_labels.jsonl`
-   - Create `all_labels_clean.jsonl`
-   - Verify with: `grep -P '[^\x00-\x7F]' all_labels_clean.jsonl | wc -l` (should be minimal)
+### Ready for Training
 
-2. **Locate and merge original data:**
-   - SSH to GPU machine
-   - Find original 4,145 labels
-   - Copy to this machine
-   - Merge: `cat original.jsonl all_labels_clean.jsonl > combined_8162.jsonl`
-   - Deduplicate by article ID if needed
+1. **Prepare tech deployment training data:**
+   ```bash
+   python scripts/prepare_training_data.py \
+       --filter filters/sustainability_tech_deployment/v1 \
+       --input datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl \
+       --output-dir datasets/training/sustainability_tech_deployment
+   ```
 
-### Training on GPU Machine
-```bash
-# Option A: Train with current 4,017 labels (if original not found)
-python -m filters.sustainability_tech_deployment.v1.train \
-    --data datasets/labeled/sustainability_tech_deployment/all_labels_clean.jsonl \
-    --epochs 3 \
-    --batch-size 8 \
-    --learning-rate 2e-5 \
-    --output-dir filters/sustainability_tech_deployment/v1
+2. **Train models:**
+   ```bash
+   # Uplifting
+   python -m training.train \
+       --filter filters/uplifting/v1 \
+       --data-dir datasets/training/uplifting \
+       --output-dir filters/uplifting/v1 \
+       --model-name Qwen/Qwen2.5-7B \
+       --epochs 3 --batch-size 8 --learning-rate 2e-5
 
-# Option B: Train with merged 8,162 labels (recommended)
-python -m filters.sustainability_tech_deployment.v1.train \
-    --data datasets/labeled/sustainability_tech_deployment/combined_8162_clean.jsonl \
-    --epochs 3 \
-    --batch-size 8 \
-    --learning-rate 2e-5 \
-    --output-dir filters/sustainability_tech_deployment/v1
-```
+   # Tech Deployment
+   python -m training.train \
+       --filter filters/sustainability_tech_deployment/v1 \
+       --data-dir datasets/training/sustainability_tech_deployment \
+       --output-dir filters/sustainability_tech_deployment/v1 \
+       --model-name Qwen/Qwen2.5-7B \
+       --epochs 3 --batch-size 8 --learning-rate 2e-5
+   ```
 
-### Expected Improvements
-With 2x more training data:
-- Better coverage of edge cases
-- Reduced overfitting (train-val gap)
-- Target Val MAE: <1.20 (improvement from 1.31)
-- More stable per-dimension predictions
+3. **Evaluate on test sets**
+4. **Deploy for inference on full corpus**
 
-## Files to Transfer to GPU Machine
+## Resolved Issues
 
-**Essential:**
-```
-datasets/labeled/sustainability_tech_deployment/all_labels_clean.jsonl  (after unicode fix)
-filters/sustainability_tech_deployment/v1/  (filter config)
-```
+### ✅ Unicode Character Handling
+- **Issue:** VSCode warnings about unicode characters
+- **Resolution:** Confirmed `base_prefilter.py` handles properly, characters are valid
+- **Functions:** `sanitize_unicode()`, `sanitize_text_comprehensive()`, `clean_article()`
 
-**Optional (for analysis):**
-```
-datasets/labeled/sustainability_tech_deployment/labeled_batch_*.jsonl  (individual batches)
-datasets/labeled/sustainability_tech_deployment/.labeled_ids.json  (state tracking)
-```
+### ✅ Data Consolidation
+- **Issue:** Multiple JSONL files, unclear what to merge
+- **Resolution:** Consolidated to single `labeled_articles.jsonl` per filter, archived batches
 
-## Batch Labeling Stats
-- **LLM:** Gemini Flash (cheap, fast)
-- **Target:** 3,000 new labels
-- **Actual:** 3,000 new labels (4,017 total in batches from both sessions)
-- **Success rate:** 99.9% (only 3 failures in batch 30 - temporary API quota)
-- **Time:** ~2 hours 45 minutes
-- **Cost:** Minimal (Gemini Flash free tier)
+### ✅ Training Dataset Confusion
+- **Issue:** Multiple training directories from different dates
+- **Resolution:** Deleted old datasets, regenerated from current ground truth
 
-## Domain Name Search (Side Quest)
-**Goal:** Find short domain (2-3 letters) for positive/uplifting website
+### ✅ Filter-Specific Script Proliferation
+- **Issue:** Separate preparation script needed for each filter
+- **Resolution:** Created generic script that reads `config.yaml`
 
-**Findings:**
-- All 17,576 three-letter .nl domains are taken
-- Created script: `C:/local_dev/NexusMind-Filter/scripts/check_domains.py`
-- Supports multiple TLDs (.eu, .nl, .com, .org)
-- Usage: `python check_domains.py eu`
-
-**Status:** Paused - script ready to run for .eu domains
-
-## Projects Cross-Reference
-
-### This Project: llm-distillery
-- **Focus:** Training small LLM filters via knowledge distillation
-- **Current filter:** sustainability_tech_deployment (8 deployment dimensions)
-- **Issue:** Unicode in labeled data
-
-### Related Project: NexusMind-Filter (uplifting filter)
-- **Location:** `C:/local_dev/NexusMind-Filter`
-- **Focus:** LLM-powered semantic filtering for "uplifting" content
-- **Issue:** SAME unicode problem in filtered data
-- **Action needed:** Apply same unicode sanitization script there
+### ✅ QA Agent Misaligned Priorities
+- **Issue:** QA focused on tier classification instead of dimensional scores
+- **Resolution:** Created dimensional regression QA template, updated documentation
 
 ## Technical Debt / Known Issues
 
-1. **Unicode sanitization needed in TWO projects:**
-   - llm-distillery (this project)
-   - NexusMind-Filter (uplifting filter)
+None currently. All major issues resolved.
 
-2. **Data location ambiguity:**
-   - Original 4,145 labels whereabouts unknown
-   - Need to establish single source of truth for training data
+## Files Modified This Session
 
-3. **Training metadata path:**
-   - Training script should log exact data file path used
-   - Easier to reconstruct dataset later
+**Created:**
+- `scripts/prepare_training_data.py` - Generic training data preparation
+- `docs/agents/` - AI assistant documentation (portable!)
+  - `docs/agents/AI_AUGMENTED_WORKFLOW.md` - Philosophy and protocols
+  - `docs/agents/agent-operations.md` - Operational guide
+  - `docs/agents/README.md` - Agent docs overview
+  - `docs/agents/templates/dimensional-regression-qa-agent.md` - QA template (updated to v1.1)
+  - `docs/agents/templates/oracle-calibration-agent.md` - Oracle calibration template (NEW)
+  - `docs/agents/templates/ADR-TEMPLATE.md` - ADR template
+- `docs/decisions/README.md` - ADR directory guide
+- `docs/decisions/2025-11-12-dimensional-regression-training.md` - ADR
+- `docs/decisions/2025-11-12-generic-training-data-preparation.md` - ADR
+- `docs/decisions/2025-11-13-remove-tier-classification-from-oracle.md` - ADR (NEW)
+- `reports/uplifting_dimensional_regression_qa.md` - Validation report
+- `reports/sustainability_tech_deployment_dimensional_regression_qa.md` - Validation report
+- `temp/markdown_backup_2025-11-12/` - Backup of all markdown files
+- `scripts/analyze_merge.py` - Data consolidation analysis (moved to sandbox)
+- `scripts/merge_data.py` - Data consolidation script (moved to sandbox)
+- `scripts/consolidate_corpus.py` - Batch file archival (moved to sandbox)
+
+**Updated:**
+- `datasets/labeled/uplifting/README.md` - Training data format section
+- `datasets/labeled/sustainability_tech_deployment/README.md` - Training data format section
+- `training/README.md` - Generic script usage, updated paths
+- `docs/agents/AI_AUGMENTED_WORKFLOW.md` - Updated paths and structure
+- `docs/agents/agent-operations.md` - Added ADR protocol, automated docs, progressive context loading
+- `docs/decisions/README.md` - Updated paths to agent templates
+- `docs/decisions/2025-11-12-dimensional-regression-training.md` - Updated references
+- `SESSION_STATE.md` - This file
+
+**Removed:**
+- `scripts/prepare_training_data_tech_deployment.py` - Superseded by generic script
+- `scripts/prepare_training_data_uplifting.py` - Superseded by generic script
+- 85 batch JSONL files (archived to `archive/batches/`)
+
+**Archived:**
+- 20+ outdated documentation files to `archive/docs/`:
+  - `CURRENT_TASK.md`, `PROJECT_OVERVIEW.md`, `ARCHITECTURE.md`
+  - `ORPHANED_*.md`, `*_SUMMARY.md`, `*_UPDATES_NEEDED.md`
+  - `docs/filters/`, `docs/workflows/`, `docs/architecture/`
 
 ## Session Metadata
-- **Date:** 2025-11-11
+
+- **Date:** 2025-11-13 (continued from 2025-11-12)
 - **Branch:** main
-- **Last commit:** (to be created with this file)
-- **Machine:** Windows development machine (not GPU machine)
-- **GPU machine:** jeroen@llm-distiller (via SSH)
+- **Last commit:** (pending - includes documentation updates and oracle simplification)
+- **Machine:** Windows development machine
 
 ## Recovery Instructions
+
 To resume this work:
 
-1. **Read this file first:** `SESSION_STATE.md`
+1. **Read this file:** `SESSION_STATE.md`
 
-2. **Check data status:**
+2. **Verify ground truth datasets:**
    ```bash
-   cd C:/local_dev/llm-distillery
-   wc -l datasets/labeled/sustainability_tech_deployment/all_labels.jsonl
-   # Should show: 4017
+   wc -l datasets/labeled/uplifting/labeled_articles.jsonl
+   # Should show: 7715
+
+   wc -l datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl
+   # Should show: 8162
    ```
 
-3. **Apply unicode fix:**
+3. **Verify training data:**
    ```bash
-   python scripts/sanitize_unicode.py  # Create this script using code above
+   ls datasets/training/uplifting/
+   # Should show: train.jsonl, val.jsonl, test.jsonl
    ```
 
-4. **Locate original data on GPU machine:**
+4. **Prepare tech deployment training data:**
    ```bash
-   ssh jeroen@llm-distiller
-   cd /path/to/llm-distillery
-   find datasets -name "*.jsonl" | grep label
+   python scripts/prepare_training_data.py \
+       --filter filters/sustainability_tech_deployment/v1 \
+       --input datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl \
+       --output-dir datasets/training/sustainability_tech_deployment
    ```
 
-5. **Merge and train:**
-   - Follow "Next Steps" section above
+5. **Proceed to training** (see "Next Steps" section)
+
+## Key Insights
+
+### Filter Packages as Single Source of Truth
+- `config.yaml` defines dimensions, weights, tier boundaries
+- Generic scripts read config instead of hardcoding values
+- New filters require NO code changes, just new config
+- **See:** `docs/decisions/2025-11-12-generic-training-data-preparation.md`
+
+### Dimensional Regression vs Classification
+- Training targets: 8 dimensional scores (0-10)
+- NOT training on tier labels (metadata only)
+- Model learns gradients for each dimension independently
+- **See:** `docs/decisions/2025-11-12-dimensional-regression-training.md`
+
+### Agent-Assisted QA Workflow
+- Use Claude subagents for complex multi-step validation
+- Dimensional regression QA template ensures correct priorities
+- Focus on score quality, not tier classification accuracy
+- **See:** `docs/agents/agent-operations.md`
+
+### Architecture Decision Records (ADRs)
+- Document significant technical decisions in `docs/decisions/`
+- Capture context, decision, consequences, and alternatives
+- Use template: `docs/agents/templates/ADR-TEMPLATE.md`
+- Agents offer to create ADRs when detecting significant decisions
+
+### Automated Documentation Updates
+- Agents proactively offer to update docs after completing tasks
+- SESSION_STATE.md updated at session end
+- Component docs updated when interfaces change
+- Progressive context loading (10-20k tokens, broad → specific)
+
+### Stratified Splitting
+- Train/val/test splits maintain tier proportions
+- Realistic evaluation (val/test match production distribution)
+- Training may use oversampling for minority classes
+
+### Oracle Labeling Simplification (2025-11-13)
+- **Key insight:** Tier classification should NOT be generated by oracle
+- Oracle produces only: dimensional scores (0-10) + reasoning
+- Tier assignment moves to post-processing (computed from dimensional scores)
+- **Benefits:** Simpler prompts, no tier errors, flexibility to change thresholds, consistency with inference
+- Post-filtering handles dimensional scores → tier classification anyway
+- **See:** `docs/decisions/2025-11-13-remove-tier-classification-from-oracle.md`
+
+## Deferred for Future Discussion
+
+**User requested to discuss separately (not now):**
+1. Improving filter prompts
+2. Stratified splitting approach (score ranges vs tiers)
 
 ## Questions for Next Session
-- Where are the original 4,145 labels?
-- Do we want to fix unicode before or after merging datasets?
-- Should we retrain from scratch or fine-tune existing model?
-- Do we want to increase epochs (3 → 5) with more data?
+
+None - all previous session questions resolved.

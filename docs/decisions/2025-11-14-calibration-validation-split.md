@@ -101,7 +101,7 @@ Minor differences:
 
 1. **Create validation sample (DIFFERENT articles):**
    ```bash
-   python scripts/create_calibration_sample.py \
+   python sandbox/analysis_scripts/create_calibration_sample.py \
        --input articles_corpus.jsonl \
        --output validation_sample.jsonl \
        --n-positive 20 \

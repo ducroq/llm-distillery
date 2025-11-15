@@ -21,7 +21,7 @@
 
 ---
 
-## PROMPT
+## PROMPT TEMPLATE
 
 ```
 Analyze this article for investment risk signals based on CAPITAL PRESERVATION and MACRO RISK EVIDENCE.
@@ -172,6 +172,8 @@ NOISE (1.0/10):
 Article: "🚀 THIS PENNY STOCK IS ABOUT TO EXPLODE!! 🚀 Get in NOW! My secret Discord made 1000% last month! Join through my link for exclusive picks! Not financial advice 😉"
 Signal: ⚫ NOISE | Flags: speculation_noise, clickbait, affiliate_conflict
 Reasoning: "Pure speculation and FOMO marketing with affiliate links. No macro analysis, no evidence. Ignore completely. Red flags: rocket emojis, urgency tactics, 'secret group', affiliate link."
+
+DO NOT include any text outside the JSON object.
 ```
 
 ---

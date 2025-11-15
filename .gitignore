@@ -116,6 +116,7 @@ docs/_build/
 site/
 
 # Temporary files
+archive/
 tmp/
 temp/
 *.tmp

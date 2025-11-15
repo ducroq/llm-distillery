@@ -231,7 +231,7 @@ python scripts/label_batch.py \
 ### Required Components
 
 1. **Calibration sample creation script**
-   - `scripts/create_calibration_sample.py`
+   - `sandbox/analysis_scripts/create_calibration_sample.py`
    - Stratified sampling from article corpus
    - Configurable positive/negative/edge case ratios
 
@@ -419,7 +419,7 @@ See: docs/workflows/prompt-calibration.md
 
 ## Implementation Checklist
 
-- [ ] Create calibration sample script (`scripts/create_calibration_sample.py`)
+- [ ] Create calibration sample script (`sandbox/analysis_scripts/create_calibration_sample.py`)
 - [ ] Create Prompt Calibration Agent template (`docs/agents/templates/prompt-calibration-agent.md`)
 - [ ] Update training/README.md with calibration step
 - [ ] Create detailed calibration workflow doc (`docs/workflows/prompt-calibration.md`)
