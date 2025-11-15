@@ -31,15 +31,18 @@ class FilterDataset(Dataset):
         data_path: Path,
         tokenizer,
         max_length: int = 512,
+        prompt: str = None,
     ):
         """
         Args:
             data_path: Path to JSONL file with training examples
             tokenizer: HuggingFace tokenizer
             max_length: Maximum sequence length for tokenization
+            prompt: Optional filter prompt to prepend to each example (for instruction tuning)
         """
         self.tokenizer = tokenizer
         self.max_length = max_length
+        self.prompt = prompt
         self.examples = []
 
         # Load examples
@@ -62,7 +65,13 @@ class FilterDataset(Dataset):
         example = self.examples[idx]
 
         # Combine title and content
-        text = f"{example['title']}\n\n{example['content']}"
+        article_text = f"{example['title']}\n\n{example['content']}"
+
+        # Optionally prepend prompt (instruction tuning mode)
+        if self.prompt:
+            text = f"{self.prompt}\n\n{article_text}"
+        else:
+            text = article_text
 
         # Tokenize
         encoding = self.tokenizer(
@@ -362,6 +371,11 @@ def main():
         default=None,
         help="Path to checkpoint directory to resume training from (e.g., filters/uplifting/v1)",
     )
+    parser.add_argument(
+        "--include-prompt",
+        action="store_true",
+        help="Include filter prompt in training (instruction tuning mode). Prepends prompt-compressed.md to each article.",
+    )
 
     args = parser.parse_args()
 
@@ -396,17 +410,34 @@ def main():
         tokenizer.pad_token = tokenizer.eos_token
         print(f"  Set pad_token to eos_token: {tokenizer.eos_token}")
 
+    # Optionally load prompt for instruction tuning
+    prompt = None
+    if args.include_prompt:
+        prompt_path = args.filter / "prompt-compressed.md"
+        if not prompt_path.exists():
+            raise FileNotFoundError(f"Prompt file not found: {prompt_path}")
+
+        with open(prompt_path, "r", encoding="utf-8") as f:
+            prompt = f.read().strip()
+
+        print(f"\nInstruction tuning mode enabled")
+        print(f"  Loaded prompt from: {prompt_path}")
+        print(f"  Prompt length: {len(prompt)} characters")
+        print(f"  Warning: Longer sequences may require --max-length adjustment")
+
     # Load datasets
     print(f"\nLoading datasets from {args.data_dir}")
     train_dataset = FilterDataset(
         args.data_dir / "train.jsonl",
         tokenizer,
         max_length=args.max_length,
+        prompt=prompt,
     )
     val_dataset = FilterDataset(
         args.data_dir / "val.jsonl",
         tokenizer,
         max_length=args.max_length,
+        prompt=prompt,
     )
 
     print(f"Train: {len(train_dataset)} examples")
@@ -600,6 +631,8 @@ def main():
         "train_examples": len(train_dataset),
         "val_examples": len(val_dataset),
         "best_val_mae": best_val_mae,
+        "include_prompt": args.include_prompt,
+        "training_mode": "instruction_tuning" if args.include_prompt else "knowledge_distillation",
     }
 
     metadata_path = args.output_dir / "training_metadata.json"
