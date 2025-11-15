@@ -127,11 +127,19 @@ python -m ground_truth.batch_scorer \
     --output-dir datasets/scored/investment_risk_v2 \
     --llm gemini-flash \
     --batch-size 50 \
-    --target-scored 10000
+    --target-scored 10000 \
+    --random-sample \
+    --seed 42
 ```
 
 **Expected Cost:** ~$10 for 10,000 articles (Gemini Flash)
 **Expected Time:** ~2-3 hours
+
+**Important:** Always use `--random-sample` for training data generation to ensure:
+- No temporal bias (if source file is ordered by date)
+- No source bias (if ordered by feed/source)
+- Representative sample across the full dataset
+- Better generalization for student model training
 
 ---
 

@@ -1,0 +1,186 @@
+{
+  "validation_date": "2025-11-15",
+  "filter_version": "investment-risk-v2",
+  "oracle": "gemini-flash-1.5",
+  "sample_size": 30,
+  "data_source": "master_dataset_20251026_20251029.jsonl",
+  "success_rate": {
+    "scored": 30,
+    "total": 30,
+    "percentage": 100.0
+  },
+  "tier_distribution": {
+    "RED": 0,
+    "YELLOW": 7,
+    "GREEN": 0,
+    "BLUE": 3,
+    "NOISE": 20
+  },
+  "quality_metrics": {
+    "false_positive_count": 3,
+    "false_positive_rate": 10.0,
+    "legitimate_yellow_count": 4,
+    "legitimate_yellow_rate": 13.333333333333334,
+    "false_negative_count": 0,
+    "false_negative_rate": 0.0
+  },
+  "false_positives": [
+    {
+      "id": "arxiv_7ca88f364d9c",
+      "title": "The local Gaussian correlation networks among return tails in the Chinese stock market",
+      "source": "arxiv",
+      "scores": {
+        "signal_strength": 6,
+        "macro_risk_severity": 5,
+        "credit_market_stress": 3,
+        "systemic_risk": 6,
+        "evidence_quality": 7,
+        "actionability": 4
+      },
+      "reasoning": "The article suggests that negative tail correlations in the Chinese stock market are sensitive to risk, indicating potential systemic fragility. While not a crisis, this warrants monitoring and potentially reducing risk assets. The evidence quality is moderate, based on a new statistical method."
+    },
+    {
+      "id": "science_arxiv_cs_42cf27dbcbab",
+      "title": "Understanding and Mitigating Numerical Sources of Nondeterminism in LLM Inference",
+      "source": "science_arxiv_cs",
+      "scores": {
+        "signal_strength": 5,
+        "macro_risk_severity": 5,
+        "credit_market_stress": 3,
+        "systemic_risk": 5,
+        "evidence_quality": 7,
+        "actionability": 4
+      },
+      "reasoning": "The article highlights a potential fragility in LLM inference reproducibility due to hardware and software dependencies, which could impact the reliability of AI-driven investment strategies and model valuations. This introduces a moderate level of macro risk as AI becomes more integrated into financial decision-making. Hobby investors should monitor AI developments closely and rebalance portfolios to maintain target risk levels, given the increasing reliance on potentially unstable AI models."
+    },
+    {
+      "id": "science_mdpi_sensors_aa0ca0d9f157",
+      "title": "Sensors, Vol. 25, Pages 6594: Sensing and Analyzing Partial Discharge Phenomenology in Electrical Asset Components Supplied by Distorted AC Waveform",
+      "source": "science_mdpi_sensors",
+      "scores": {
+        "signal_strength": 5,
+        "macro_risk_severity": 5,
+        "credit_market_stress": 3,
+        "systemic_risk": 5,
+        "evidence_quality": 6,
+        "actionability": 4
+      },
+      "reasoning": "The article discusses the impact of distorted AC waveforms on electrical asset components, potentially leading to premature failures. This could have a moderate impact on industries relying on these components, creating some systemic fragility. Hobby investors should monitor their exposure to related sectors and consider rebalancing their portfolio to target."
+    }
+  ],
+  "legitimate_yellow_signals": [
+    {
+      "id": "global_news_reuters_4af0466158ab",
+      "title": "Jailed Istanbul mayor hit with new 'espionage' arrest order as opposition crackdown deepens",
+      "source": "global_news_reuters",
+      "scores": {
+        "signal_strength": 5,
+        "macro_risk_severity": 6,
+        "policy_regulatory_risk": 7,
+        "systemic_risk": 5,
+        "evidence_quality": 6,
+        "actionability": 5
+      },
+      "reasoning": "The deepening crackdown on opposition in Istanbul, as evidenced by the new arrest order for the jailed mayor, signals increased political and regulatory risk. This instability can negatively impact investor confidence and economic stability, particularly in emerging markets. Hobby investors should monitor the situation closely and consider rebalancing their portfolios to reduce exposure to Turkish assets or emerging markets generally."
+    },
+    {
+      "id": "newsapi_general_217c2e40a528",
+      "title": "US beef prices are soaring. Will Trump's plans lower them?",
+      "source": "newsapi_general",
+      "scores": {
+        "signal_strength": 5,
+        "macro_risk_severity": 5,
+        "policy_regulatory_risk": 6,
+        "systemic_risk": 3,
+        "evidence_quality": 5,
+        "actionability": 4
+      },
+      "reasoning": "Rising beef prices and ranchers' criticism of Trump's plans signal potential policy error risk. This could impact the commodities market and potentially equities if it leads to broader economic concerns. Hobby investors should monitor the situation closely and consider rebalancing their portfolio to target allocations."
+    },
+    {
+      "id": "italian_wired_italia_d1b2249e4737",
+      "title": "Hacking Team, torna lo spyware italiano in un cyberattacco alla Russia",
+      "source": "italian_wired_italia",
+      "scores": {
+        "signal_strength": 5,
+        "macro_risk_severity": 5,
+        "policy_regulatory_risk": 5,
+        "systemic_risk": 5,
+        "evidence_quality": 6,
+        "actionability": 5
+      },
+      "reasoning": "The article discusses a cyberattack linked to a company with a history of state-sponsored hacking, potentially escalating geopolitical tensions and increasing policy/regulatory risk. This could lead to market instability and affect equities and currencies. Hobby investors should monitor the situation closely and rebalance their portfolio to target allocations."
+    },
+    {
+      "id": "energy_utilities_utility_dive_ec6edb3a3920",
+      "title": "Maryland should resist rewriting utility monopoly laws",
+      "source": "energy_utilities_utility_dive",
+      "scores": {
+        "signal_strength": 6,
+        "macro_risk_severity": 5,
+        "policy_regulatory_risk": 7,
+        "systemic_risk": 4,
+        "evidence_quality": 6,
+        "actionability": 5
+      },
+      "reasoning": "The article discusses potential changes to utility monopoly laws in Maryland, introducing policy/regulatory risk. This uncertainty can impact equity valuations in the utility sector. Hobby investors should monitor the situation and rebalance their portfolios to target allocations if the regulatory landscape shifts significantly."
+    }
+  ],
+  "dimensional_stats": {
+    "macro_risk_severity": {
+      "mean": 1.83,
+      "std": 2.02,
+      "min": 0,
+      "max": 6
+    },
+    "credit_market_stress": {
+      "mean": 1.27,
+      "std": 1.21,
+      "min": 0,
+      "max": 4
+    },
+    "market_sentiment_extremes": {
+      "mean": 1.27,
+      "std": 1.21,
+      "min": 0,
+      "max": 4
+    },
+    "valuation_risk": {
+      "mean": 1.47,
+      "std": 1.48,
+      "min": 0,
+      "max": 4
+    },
+    "policy_regulatory_risk": {
+      "mean": 1.8,
+      "std": 2.1,
+      "min": 0,
+      "max": 7
+    },
+    "systemic_risk": {
+      "mean": 1.67,
+      "std": 1.87,
+      "min": 0,
+      "max": 6
+    },
+    "evidence_quality": {
+      "mean": 3.37,
+      "std": 2.01,
+      "min": 0,
+      "max": 7
+    },
+    "actionability": {
+      "mean": 1.67,
+      "std": 1.76,
+      "min": 0,
+      "max": 5
+    }
+  },
+  "verdict": "ISSUES_FOUND",
+  "verdict_details": {
+    "issue": "Academic papers bypassing filters",
+    "false_positive_rate": 10.0,
+    "recommendation": "Add explicit academic research filter to inline filters",
+    "target_false_positive_rate": 3.0
+  }
+}

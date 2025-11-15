@@ -178,13 +178,17 @@ python -m ground_truth.batch_scorer \
     --output-dir datasets/scored/uplifting_v4 \
     --llm gemini-flash \
     --batch-size 50 \
-    --target-scored 2500
+    --target-scored 2500 \
+    --random-sample \
+    --seed 42
 ```
 
 **Expected Cost:** ~$2.50 for 2,500 articles (Gemini Flash)
 **Expected Time:** ~45 minutes
 
-**Note:** Due to high prefilter block rate (82%), you may need ~14,000 input articles to get 2,500 scored articles.
+**Important Notes:**
+- **Always use `--random-sample`** for training data generation to ensure representative sampling and avoid temporal/source bias
+- Due to high prefilter block rate (82%), you may need ~14,000 input articles to get 2,500 scored articles
 
 ### Training Model
 

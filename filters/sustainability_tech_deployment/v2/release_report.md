@@ -185,13 +185,17 @@ python -m ground_truth.batch_scorer \
     --output-dir datasets/scored/sustainability_tech_deployment_v2 \
     --llm gemini-flash \
     --batch-size 50 \
-    --target-scored 2500
+    --target-scored 2500 \
+    --random-sample \
+    --seed 42
 ```
 
 **Expected Cost:** ~$2.50 for 2,500 articles (Gemini Flash)
 **Expected Time:** ~45 minutes
 
-**CRITICAL NOTE:** Due to EXTREMELY high prefilter block rate (93.3%), you may need **~40,000-50,000 input articles to get 2,500 scored articles**. This is BY DESIGN - the filter only passes deployed climate tech.
+**Important Notes:**
+- **Always use `--random-sample`** for training data generation to ensure representative sampling and avoid temporal/source bias
+- **CRITICAL:** Due to EXTREMELY high prefilter block rate (93.3%), you may need **~40,000-50,000 input articles to get 2,500 scored articles**. This is BY DESIGN - the filter only passes deployed climate tech.
 
 **Suggested alternative:** Use a curated dataset of climate/energy/sustainability articles instead of random articles to reduce the number of blocked articles.
 

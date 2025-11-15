@@ -1202,7 +1202,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--random-sample',
         action='store_true',
-        help='Randomly sample articles instead of sequential processing (recommended for training data)'
+        help='Randomly sample articles instead of sequential processing (STRONGLY RECOMMENDED for training data to avoid temporal/source bias)'
     )
     parser.add_argument(
         '--seed',

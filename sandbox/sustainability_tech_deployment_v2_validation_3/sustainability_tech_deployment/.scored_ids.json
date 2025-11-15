@@ -1,0 +1,12 @@
+{
+  "processed": [
+    "automotive_transport_electrek_4ffe40f8f27e",
+    "newsapi_general_b52b7b7fb906",
+    "dutch_news_nos_algemeen_5966ef5ad282"
+  ],
+  "total_scored": 3,
+  "batches_completed": 1,
+  "last_updated": "2025-11-15T12:29:11.051533",
+  "filter_name": "sustainability_tech_deployment",
+  "llm_provider": "gemini-flash"
+}

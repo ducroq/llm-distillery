@@ -1,0 +1,11 @@
+{
+  "processed": [
+    "italian_punto_informatico_1322da1d80c4",
+    "energy_utilities_hydrogen_fuel_news_5a1e2da3827d"
+  ],
+  "total_scored": 2,
+  "batches_completed": 1,
+  "last_updated": "2025-11-15T12:28:37.832299",
+  "filter_name": "sustainability_tech_deployment",
+  "llm_provider": "gemini-flash"
+}
