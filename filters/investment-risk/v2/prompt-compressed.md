@@ -2,7 +2,7 @@
 
 **Purpose**: Identify investment risk signals for defense-first portfolio management focused on capital preservation, not speculation.
 
-**Version**: 2.0-compressed-inline-filters
+**Version**: 2.1-academic-filter
 **Target**: Gemini Flash 1.5 / Claude Haiku / Fast models
 
 **Focus**: RISK SIGNALS and CAPITAL PRESERVATION, not stock picks or speculation.
@@ -43,6 +43,7 @@ Score Dimensions (0-10):
    - FOMO/speculation ("hot stocks", "buy now", "next big thing", meme stocks, crypto pumping)
    - Affiliate marketing ("sign up with this broker", promo codes, sponsored picks)
    - Clickbait without analysis ("Market CRASH coming!", "This ONE stock!", "Warren Buffett's secret!")
+   - **Academic research papers** (arxiv, journals, conference papers) without immediate actionable market impact
 
    **If NONE of above filters match, score normally:**
    - 0-2: None | 3-4: Minor | 5-6: Moderate | 7-8: Serious | 9-10: Crisis unfolding
@@ -54,6 +55,7 @@ Score Dimensions (0-10):
    - Stock picking or individual company analysis
    - Non-financial sector news (tech products, gaming, entertainment)
    - Political gossip without financial markets impact
+   - **Academic research papers** without immediate actionable market impact
 
    **If NONE of above filters match, score normally:**
    - 0-2: Healthy | 3-4: Some stress | 5-6: Moderate deterioration | 7-8: Serious stress | 9-10: Credit crisis
@@ -64,6 +66,7 @@ Score Dimensions (0-10):
    **❌ CRITICAL FILTERS - If article is ANY of these, score 0-2:**
    - Stock picking or FOMO marketing
    - Non-market content (product reviews, gaming, entertainment)
+   - **Academic research papers** without immediate actionable market impact
 
    **If NONE of above filters match, score normally:**
    - 0-2: Balanced | 3-4: Slight tilt | 5-6: Moderate extreme | 7-8: Dangerous extreme | 9-10: Panic or euphoria
@@ -74,6 +77,7 @@ Score Dimensions (0-10):
    **❌ CRITICAL FILTERS - If article is ANY of these, score 0-2:**
    - Stock picking (individual stock valuations, price targets)
    - Non-market content
+   - **Academic research papers** without immediate actionable market impact
 
    **If NONE of above filters match, score normally:**
    - 0-2: Attractive | 3-4: Fair | 5-6: Somewhat expensive | 7-8: Very expensive | 9-10: Bubble territory
@@ -86,6 +90,7 @@ Score Dimensions (0-10):
    - Stock picking or company-specific regulatory news
    - Political scandals without economic/market impact
    - Non-financial policy (education, healthcare without market implications)
+   - **Academic research papers** without immediate actionable market impact
 
    **If NONE of above filters match, score normally:**
    - 0-2: Supportive | 3-4: Neutral | 5-6: Some uncertainty | 7-8: Concerning changes | 9-10: Policy crisis
@@ -98,6 +103,7 @@ Score Dimensions (0-10):
    - Industry-specific risks WITHOUT financial system contagion (gaming delays, product launches, entertainment)
    - Political scandals/gossip without financial contagion
    - FOMO, speculation, or clickbait
+   - **Academic research papers** without immediate actionable market impact
 
    **If NONE of above filters match, score normally:**
    - 0-2: Resilient | 3-4: Normal risks | 5-6: Some fragility | 7-8: Significant fragility | 9-10: Lehman-moment risk
@@ -110,6 +116,7 @@ Score Dimensions (0-10):
    - Affiliate marketing or promotional content
    - Clickbait without substantive analysis
    - FOMO/speculation without data
+   - **Academic research papers** without immediate actionable market impact
 
    **If NONE of above filters match, score normally:**
    - 0-2: Poor | 3-4: Weak | 5-6: Moderate | 7-8: Strong | 9-10: Exceptional
@@ -121,6 +128,7 @@ Score Dimensions (0-10):
    - Stock picking (individual stocks, day trading, options, derivatives)
    - FOMO urgency ("buy NOW", "last chance", "secret picks")
    - Affiliate marketing
+   - **Academic research papers** - purely theoretical, not actionable for €10K-€500K hobby investors
 
    **If NONE of above filters match, score normally:**
    - 0-2: Not actionable | 3-4: Limited | 5-6: Moderate | 7-8: Very actionable | 9-10: Clear simple action

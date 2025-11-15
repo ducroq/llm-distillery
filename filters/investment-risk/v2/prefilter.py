@@ -66,6 +66,16 @@ class InvestmentRiskPreFilterV1:
         r'🚀|💎|🌙|💰|🤑',  # Common FOMO emojis
     ]
 
+    # Academic/research patterns (block - not actionable for hobby investors)
+    ACADEMIC_PATTERNS = [
+        r'\b(arxiv|arxiv\.org|doi\.org)\b',
+        r'\b(proceedings of|conference on|symposium on)\b',
+        r'\b(journal of|published in|research paper)\b',
+        r'\b(abstract:.*introduction.*methodology)\b',
+        r'\b(ieee|acm|springer|elsevier|mdpi)\b',
+        r'\b(theoretical.*framework|statistical.*model|simulation)\b',
+    ]
+
     def __init__(self):
         # Compile patterns for performance
         self.fomo_regex = re.compile('|'.join(self.FOMO_SPECULATION_PATTERNS), re.IGNORECASE)
@@ -73,6 +83,7 @@ class InvestmentRiskPreFilterV1:
         self.macro_context_regex = re.compile('|'.join(self.MACRO_CONTEXT_PATTERNS), re.IGNORECASE)
         self.affiliate_regex = re.compile('|'.join(self.AFFILIATE_CONFLICT_PATTERNS), re.IGNORECASE)
         self.clickbait_regex = re.compile('|'.join(self.CLICKBAIT_PATTERNS), re.IGNORECASE)
+        self.academic_regex = re.compile('|'.join(self.ACADEMIC_PATTERNS), re.IGNORECASE)
 
     def should_label(self, article: Dict) -> Tuple[bool, str]:
         """
@@ -84,6 +95,7 @@ class InvestmentRiskPreFilterV1:
             (False, "stock_picking") - Block stock picking
             (False, "affiliate_conflict") - Block affiliate marketing
             (False, "clickbait") - Block clickbait
+            (False, "academic_research") - Block academic papers
         """
         title = article.get('title', '').lower()
         text = article.get('text', '').lower()
@@ -96,6 +108,10 @@ class InvestmentRiskPreFilterV1:
         # Check for clickbait in title (before other patterns)
         if self.clickbait_regex.search(title):
             return (False, "clickbait")
+
+        # Check for academic papers (not actionable for hobby investors)
+        if self.academic_regex.search(combined):
+            return (False, "academic_research")
 
         # Check for stock picking (but allow if macro context present)
         if self.stock_picking_regex.search(combined):
@@ -171,6 +187,27 @@ def test_prefilter():
             "text": "YOLO into this penny stock! To the moon! Lambo time! 🚀💎",
             "expected": False,
             "reason": "fomo_speculation"
+        },
+        # BLOCK: Academic research paper (arxiv)
+        {
+            "title": "Correlation Networks in Chinese Stock Markets",
+            "text": "Abstract: This paper presents a statistical model for analyzing correlation structures in equity markets. Published in arxiv.org. Methodology section discusses simulation approaches...",
+            "expected": False,
+            "reason": "academic_research"
+        },
+        # BLOCK: Academic research paper (journal)
+        {
+            "title": "LLM Inference Reproducibility Analysis",
+            "text": "Published in Journal of Computer Science. We present a theoretical framework for analyzing non-deterministic behavior in large language models...",
+            "expected": False,
+            "reason": "academic_research"
+        },
+        # BLOCK: Academic research paper (conference)
+        {
+            "title": "Novel Electrical Sensors for Industrial Applications",
+            "text": "Proceedings of the IEEE Conference on Sensors 2024. This research paper presents experimental results from MDPI laboratory testing...",
+            "expected": False,
+            "reason": "academic_research"
         },
     ]
 
