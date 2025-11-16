@@ -1,0 +1,25 @@
+{
+  "processed": [
+    "spanish_xataka_9958b785bfe6",
+    "spanish_efeverde_5a6edce45bd5",
+    "french_01net_c71e9d693fe2",
+    "community_social_programming_reddit_613730c6e920",
+    "french_numerama_4f309e361474",
+    "economics_nber_working_papers_cba4c9b47172",
+    "community_social_reddit_artificial_0b96d2a9fe0b",
+    "positive_news_cultural_survival_a1abb3bcaa34",
+    "portuguese_canaltech_415add60c897",
+    "portuguese_canaltech_ec943b213897",
+    "fintech_markets_bloomberg_technology_c201c96206ec",
+    "portuguese_canaltech_bb644fa35364",
+    "french_usine_nouvelle_8b9565feffb9",
+    "french_sciences_et_avenir_2c4a3e2a4845",
+    "global_news_le_monde_science_a078cdfe3991",
+    "ai_quantum_journal_1d4a393ffe1e"
+  ],
+  "total_scored": 16,
+  "batches_completed": 1,
+  "last_updated": "2025-11-16T15:12:29.913865",
+  "filter_name": "uplifting",
+  "llm_provider": "gemini-flash"
+}

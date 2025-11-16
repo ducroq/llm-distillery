@@ -1,0 +1,349 @@
+{
+  "metadata": {
+    "total_articles": 12,
+    "categories": {
+      "high_scorers": 3,
+      "edge_cases": 4,
+      "low_scorers": 5
+    },
+    "purpose": "Manual validation of oracle scoring quality"
+  },
+  "articles": [
+    {
+      "id": "positive_news_cultural_survival_a1abb3bcaa34",
+      "category": "high_scorers",
+      "title": "Cultural Heritage at the Forefront: Eden FM Documents Indigenous Knowledge and History",
+      "content": "Cultural Heritage at the Forefront: Eden FM Documents Indigenous Knowledge and History Country South Africa prama.dewan Tue, 10/28/2025 - 05:12 Issues Human Rights Lands, Resources, and Environments Program 5 Main Image By Morne Pietersen, Radio Station Manager A local community radio station, Eden FM, is playing a pivotal role in preserving the cultural heritage and history of the Klein Karoo region through two distinct but interconnected research projects. The initiatives, undertaken with supp...",
+      "url": "https://www.culturalsurvival.org/news/cultural-heritage-forefront-eden-fm-documents-indigenous-knowledge-and-history",
+      "oracle_scores": {
+        "agency": 8,
+        "progress": 7,
+        "collective_benefit": 8,
+        "connection": 7,
+        "innovation": 6,
+        "justice": 7,
+        "resilience": 7,
+        "wonder": 6
+      },
+      "oracle_reasoning": "Eden FM is documenting Indigenous knowledge and history, specifically focusing on the Loerie bird and the forced removals under apartheid. This is leading to increased awareness, cultural pride, and the preservation of community stories, fostering resilience and connection to the past.",
+      "metadata": {
+        "avg_score": 7.0,
+        "collective_benefit": 8,
+        "variance": 0.7071067811865476
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "spanish_efeverde_5a6edce45bd5",
+      "category": "high_scorers",
+      "title": "Arraigada en la tradición, orientada hacia al futuro: la agricultura tradicional como solución climática. Por Qu Dongyu (director general de la FAO)",
+      "content": "Qu Dongyu Director general de la FAO En el siglo XVIII, una serie de erupciones volcánicas convirtió los fértiles campos de Lanzarote, la más oriental de las Islas Canarias españolas, en un desierto de ceniza negra. En lugar de abandonar la tierra, los agricultores se adaptaron. Cavaron hoyos en la grava volcánica para proteger sus cultivos […] La entrada Arraigada en la tradición, orientada hacia al futuro: la agricultura tradicional como solución climática. Por Qu Dongyu (director general de l...",
+      "url": "https://efeverde.com/fao-sistemas-patrimonio-agricola-mundial-sipam-2025/",
+      "oracle_scores": {
+        "agency": 7,
+        "progress": 7,
+        "collective_benefit": 8,
+        "connection": 5,
+        "innovation": 6,
+        "justice": 5,
+        "resilience": 8,
+        "wonder": 5
+      },
+      "oracle_reasoning": "The article describes how farmers in Lanzarote adapted to volcanic eruptions by developing traditional agricultural practices that allowed them to continue farming in a challenging environment. This demonstrates agency in addressing environmental challenges and progress toward sustainable agriculture, benefiting the community and preserving traditional knowledge.",
+      "metadata": {
+        "avg_score": 6.375,
+        "collective_benefit": 8,
+        "variance": 1.2183492931011204
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "community_social_programming_reddit_613730c6e920",
+      "category": "high_scorers",
+      "title": "How to test and replace any missing translations with i18next",
+      "content": "I recently found a really practical way to detect and fill missing translations when working with i18next and honestly, it saves a ton of time when you have dozens of JSON files to maintain. Step 1 ‚Äî Test for missing translations You can now automatically check if you‚Äôre missing any keys in your localization files. It works with your CLI, CI/CD pipelines, or even your Jest/Vitest test suite. Example: npx intlayer test:i18next It scans your codebase, compares it to your JSON files, and output...",
+      "url": "https://www.reddit.com/r/programming/comments/1oi5f42/how_to_test_and_replace_any_missing_translations/",
+      "oracle_scores": {
+        "agency": 6,
+        "progress": 6,
+        "collective_benefit": 7,
+        "connection": 5,
+        "innovation": 6,
+        "justice": 3,
+        "resilience": 4,
+        "wonder": 3
+      },
+      "oracle_reasoning": "This article describes a tool that helps developers ensure their software is properly translated into different languages. This improves access to information and services for people who speak different languages, which promotes equity and inclusion. The tool also automates the translation process, saving developers time and effort.",
+      "metadata": {
+        "avg_score": 5.0,
+        "collective_benefit": 7,
+        "variance": 1.4142135623730951
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "french_usine_nouvelle_8b9565feffb9",
+      "category": "edge_cases",
+      "title": "La montée en puissance contrariée de l'actionnariat salarié",
+      "content": "En fin d’année dernière, LVMH lançait son premier plan d’actionnariat salarié. Pour les grandes entreprises françaises, 2024 a été une année positive dans ce domaine. Selon le bilan de la Fédération française de l’actionnariat salarié (FAS), les salariés détenaient en moyenne 4% des […] Lire l'article...",
+      "url": "http://www.usinenouvelle.com/article/la-montee-en-puissance-contrariee-de-l-actionnariat-salarie.N2236863",
+      "oracle_scores": {
+        "agency": 5,
+        "progress": 5,
+        "collective_benefit": 6,
+        "connection": 3,
+        "innovation": 3,
+        "justice": 4,
+        "resilience": 3,
+        "wonder": 2
+      },
+      "oracle_reasoning": "The article discusses the increasing trend of employee stock ownership in large French companies, with LVMH launching its first plan. Employees holding an average of 4% of company shares suggests a move towards shared prosperity and economic dignity, though the extent of the benefit is unclear without further details.",
+      "metadata": {
+        "avg_score": 3.875,
+        "collective_benefit": 6,
+        "variance": 1.2686114456365274
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "economics_nber_working_papers_cba4c9b47172",
+      "category": "edge_cases",
+      "title": "Working it out: Randomized Modification and Entrepreneurial Effort in a Collateralized Debt Market -",
+      "content": "We enrich a standard debt overhang model with liquidity constraints to guide the design and interpretation of a collateralized debt modification experiment on a publicly traded lender’s delinquent vehicle loans to minibus entrepreneurs. Liquidity constraints add another borrower incentive compatibility constraint that interacts with debt overhang to shape repayment and effort. Consistent with model predictions, we find: debt reduction does not affect liquidity constrained borrowers; payment redu...",
+      "url": "https://www.nber.org/papers/w34398#fromrss",
+      "oracle_scores": {
+        "agency": 6,
+        "progress": 6,
+        "collective_benefit": 6,
+        "connection": 3,
+        "innovation": 5,
+        "justice": 5,
+        "resilience": 5,
+        "wonder": 3
+      },
+      "oracle_reasoning": "The article describes a debt modification experiment that led to improved repayment and entrepreneurial effort for minibus entrepreneurs. This suggests a potential strategy for improving the livelihoods of borrowers facing liquidity constraints, leading to a more equitable financial system.",
+      "metadata": {
+        "avg_score": 4.875,
+        "collective_benefit": 6,
+        "variance": 1.165922381636102
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "portuguese_canaltech_bb644fa35364",
+      "category": "edge_cases",
+      "title": "Com mais estrangeiros vindo ao Brasil, Vivo lança plano 5G para quem não tem CPF",
+      "content": "A Vivo anunciou nesta terça-feira (28) um novo plano de celular focado em turistas estrangeiros, o Vivo Tourist Plan. A novidade permite que o visitante contrate o serviço antes mesmo de chegar ao Brasil, com ativação 100% digital via eSIM. Operadora brasileira tem o melhor 5G do mundo, diz OpenSignal Vivo impede que ladrões acessem apps de banco em celulares roubados O plano custa R$ 55, com pagamento via cartão de crédito internacional, e usa o número do passaporte para a ativação, sem a neces...",
+      "url": "https://canaltech.com.br/telecom/com-mais-estrangeiros-vindo-ao-brasil-vivo-lanca-plano-5g-para-quem-nao-tem-cpf/",
+      "oracle_scores": {
+        "agency": 5,
+        "progress": 5,
+        "collective_benefit": 6,
+        "connection": 3,
+        "innovation": 4,
+        "justice": 3,
+        "resilience": 3,
+        "wonder": 3
+      },
+      "oracle_reasoning": "The article describes a new mobile plan by Vivo targeted at foreign tourists in Brazil, providing them with access to 5G internet without needing a CPF. This improves access to communication and information for tourists, potentially enhancing their experience and facilitating connection with others.",
+      "metadata": {
+        "avg_score": 4.0,
+        "collective_benefit": 6,
+        "variance": 1.118033988749895
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "portuguese_canaltech_ec943b213897",
+      "category": "edge_cases",
+      "title": "IA generativa permite falsificação \"perfeita\" de documentos, alerta especialista",
+      "content": "Não é de hoje que a inteligência artificial (IA) vem influenciando a maneira como a gente interage com a tecnologia, e isso também pode virar uma questão de cibersegurança no que diz respeito a falsificação de documentos e identidades digitais. Megavazamento expõe 183 milhões de credenciais do Gmail e outros serviços PF prende homem no Rio que disseminava abuso sexual infantil na dark web Durante o Cyber Security Summit 2025, evento que discute os desafios da segurança da informação na era digit...",
+      "url": "https://canaltech.com.br/seguranca/ia-generativa-permite-falsificacao-perfeita-de-documentos-alerta-especialista/",
+      "oracle_scores": {
+        "agency": 6,
+        "progress": 5,
+        "collective_benefit": 6,
+        "connection": 5,
+        "innovation": 5,
+        "justice": 4,
+        "resilience": 5,
+        "wonder": 3
+      },
+      "oracle_reasoning": "The article discusses the threat of AI-generated forgeries and proposes solutions such as cybersecurity education and international cooperation to combat digital identity fraud. While it highlights a problem, it also emphasizes proactive measures and the potential for AI to be used defensively, contributing to digital security.",
+      "metadata": {
+        "avg_score": 4.875,
+        "collective_benefit": 6,
+        "variance": 0.9270248108869579
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "community_social_reddit_artificial_0b96d2a9fe0b",
+      "category": "low_scorers",
+      "title": "I absolutely hate video generating AI",
+      "content": "All of social media is FLOODED with this stupid crap, and the worst thing about it is that currently AI is so good at this that most of those videos are indistinguishable from real ones, at least at the first glance. You watch a video, then go to comments and see people pointing out that's AI generated and you just feel that you wasted a minute of your life. It's like scrolling the social media lost its soul. Disheartening submitted by /u/amelix34 [link] [comments]...",
+      "url": "https://www.reddit.com/r/artificial/comments/1oi68z7/i_absolutely_hate_video_generating_ai/",
+      "oracle_scores": {
+        "agency": 1,
+        "progress": 1,
+        "collective_benefit": 1,
+        "connection": 1,
+        "innovation": 1,
+        "justice": 1,
+        "resilience": 1,
+        "wonder": 1
+      },
+      "oracle_reasoning": "The article expresses frustration with AI-generated content flooding social media. There is no documented progress toward human or planetary wellbeing. The content is doom-framed, focusing on the perceived loss of authenticity in social media.",
+      "metadata": {
+        "avg_score": 1.0,
+        "collective_benefit": 1,
+        "variance": 0.0
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "french_01net_c71e9d693fe2",
+      "category": "low_scorers",
+      "title": "Inconnu au bataillon, ce robot aspirateur est pourtant un best",
+      "content": "Non, il n'est pas forcément nécessaire de dépenser une fortune pour s'équiper d'un robot aspirateur haut de gamme avec station tout-en-un. Grâce à un deal monumental proposé par AliExpress, vous avez la chance de vous équiper d'un modèle qui rencontre un succès phénoménal auprès du public, pour un tarif défiant toute concurrence....",
+      "url": "https://www.01net.com/bons-plans/un-robot-aspirateur-avec-station-du-futur-a-237-e-cest-loffre-folle-du-jour-sur-aliexpress.html",
+      "oracle_scores": {
+        "agency": 2,
+        "progress": 2,
+        "collective_benefit": 3,
+        "connection": 0,
+        "innovation": 2,
+        "justice": 0,
+        "resilience": 0,
+        "wonder": 0
+      },
+      "oracle_reasoning": "This article is about a discounted robot vacuum cleaner. It does not demonstrate any progress towards human or planetary wellbeing. It is a product launch and business announcement.",
+      "metadata": {
+        "avg_score": 1.125,
+        "collective_benefit": 3,
+        "variance": 1.165922381636102
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "french_numerama_4f309e361474",
+      "category": "low_scorers",
+      "title": "Black Friday 2025 : dates, réductions avant l’heure, enseignes participantes… le guide complet",
+      "content": "Si le Black Friday a bien lieu fin novembre, les premières promotions n’attendront pas le fameux vendredi 28 novembre pour apparaître chez les e-commerçants. En effet, plusieurs enseignes devraient lancer les hostilités d’ici quelques jours. Voici tout ce qu’il faut savoir sur l’événement pour ne rater aucune promotion....",
+      "url": "https://www.numerama.com/tech/1834992-balck-friday-2025-dates-offres-et-sites.html",
+      "oracle_scores": {
+        "agency": 2,
+        "progress": 2,
+        "collective_benefit": 3,
+        "connection": 0,
+        "innovation": 2,
+        "justice": 0,
+        "resilience": 0,
+        "wonder": 0
+      },
+      "oracle_reasoning": "The article is about Black Friday sales and promotions. It primarily benefits consumers by providing information about upcoming deals, but it doesn't directly address any human or planetary wellbeing issues. It is business news focused on consumerism.",
+      "metadata": {
+        "avg_score": 1.125,
+        "collective_benefit": 3,
+        "variance": 1.165922381636102
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "portuguese_canaltech_415add60c897",
+      "category": "low_scorers",
+      "title": "Quanto vale a pena pagar no iPhone 15 na Black Friday 2025?",
+      "content": "Mesmo com os iPhones 16 e 17 no mercado, o iPhone 15 ainda é uma opção muito procurada pelos consumidores na Black Friday 2025. O motivo é o seu ótimo desempenho, que dá conta de tarefas cotidianas e jogos. Isso é garantido pelo chipset Apple A16 Bionic e pelos 6 GB de RAM. Quanto vale a pena pagar no Galaxy Buds3 Pro na Black Friday? Quanto vale a pena pagar no iPhone 16e na Black Friday 2025? O aparelho também se destaca pelo design compacto, com tela de 6,1 polegadas. Ele é a escolha ideal pa...",
+      "url": "https://canaltech.com.br/smartphone/quanto-vale-a-pena-pagar-no-iphone-15-na-black-friday-2025/",
+      "oracle_scores": {
+        "agency": 2,
+        "progress": 2,
+        "collective_benefit": 3,
+        "connection": 0,
+        "innovation": 2,
+        "justice": 0,
+        "resilience": 0,
+        "wonder": 0
+      },
+      "oracle_reasoning": "The article discusses the potential price of an iPhone during Black Friday 2025. It focuses on consumer advice and potential cost savings, but doesn't address any human or planetary wellbeing progress.",
+      "metadata": {
+        "avg_score": 1.125,
+        "collective_benefit": 3,
+        "variance": 1.165922381636102
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    },
+    {
+      "id": "french_sciences_et_avenir_2c4a3e2a4845",
+      "category": "low_scorers",
+      "title": "C'était \"un miracle humain\": la difficile fermeture de la maternité des Lilas",
+      "content": "Elle a accompagné des milliers de femmes sur plusieurs générations, dans la grossesse et l'accouchement: après 60 ans d'activité la maternité des Lilas (Seine-Saint-Denis) ferme ses portes pour raisons financières vendredi à 20H00, suscitant la tristesse et le désarroi des patientes et du personnel. Sur la haute façade en bois, aucune banderole n'est accrochée. Le site internet propose toujours des rendez-vous pour une consultation grossesse....",
+      "url": "https://www.sciencesetavenir.fr/sante/c-etait-un-miracle-humain-la-difficile-fermeture-de-la-maternite-des-lilas_189083?xtor=RSS-16",
+      "oracle_scores": {
+        "agency": 2,
+        "progress": 1,
+        "collective_benefit": 3,
+        "connection": 1,
+        "innovation": 1,
+        "justice": 1,
+        "resilience": 1,
+        "wonder": 1
+      },
+      "oracle_reasoning": "The article describes the closure of a maternity hospital due to financial reasons. This represents a loss of healthcare access for the community, not progress. There is no agency, progress, or collective benefit happening in the story.",
+      "metadata": {
+        "avg_score": 1.375,
+        "collective_benefit": 3,
+        "variance": 0.6959705453537527
+      },
+      "manual_review": {
+        "reviewed": false,
+        "oracle_correct": null,
+        "reviewer_notes": ""
+      }
+    }
+  ]
+}

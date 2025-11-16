@@ -1,251 +1,206 @@
-# Uplifting v4.0 - Technical Validation Report
+# Uplifting v4 - Oracle Validation Report
 
-**Date:** 2025-11-15
-**Version:** v4.0-inline-filters
-**Status:** ✅ PRODUCTION READY
-**Validator:** Claude Code (Automated)
-
----
-
-## Validation Checklist
-
-### CRITICAL (Must Pass)
-
-#### ✅ 1. Required Files Exist
-- ✅ `config.yaml` - Present and valid
-- ✅ `prompt-compressed.md` - Present (571 lines)
-- ✅ `prefilter.py` - Present and functional
-- ✅ `README.md` - Present and complete
-- ✅ `post_classifier.py` - Present (uplifting uses post-classifier for tier computation)
-
-**Status:** PASS - All required files present
-
-#### ✅ 2. Config Validation
-- ✅ Valid YAML structure
-- ✅ 8 dimensions defined
-- ✅ Weights sum to 1.0
-- ✅ All tiers have threshold + description
-- ✅ Dimension names consistent
-
-**Dimensions:**
-1. agency (0.14)
-2. progress (0.19)
-3. collective_benefit (0.38) - GATEKEEPER
-4. connection (0.10)
-5. innovation (0.08)
-6. justice (0.04)
-7. resilience (0.02)
-8. wonder (0.05)
-
-**Status:** PASS - Configuration valid
-
-#### ✅ 3. Prompt-Config Consistency
-- ✅ All 8 dimensions from config appear in prompt
-- ✅ No extra dimensions in prompt
-- ✅ Dimension names match exactly
-- ✅ Inline filters present in all dimensions (v4.0 pattern)
-
-**Status:** PASS - Perfect alignment
-
-#### ✅ 4. Prefilter Exists and Works
-- ✅ `UpliftingPreFilterV1` imports successfully
-- ✅ `should_process()` method functional
-- ✅ Blocks academic domains (arxiv, plos, etc.)
-- ✅ Blocks corporate finance domains
-- ✅ Blocks military/defense domains
-
-**Test Results:** Prefilter comprehensive and functional
-
-**Status:** PASS - Prefilter working as designed
-
-#### ✅ 5. Calibration Completed
-- ✅ v4.0 calibration completed on 16 articles
-- ✅ False positive rate: 87.5% (v3) → 0% (v4)
-- ✅ Inline filters validated
-- ✅ Calibration dated 2025-11-14 (recent)
-
-**Status:** PASS - Calibration completed and successful
-
-#### ✅ 6. Validation Completed
-- ✅ Comprehensive validation: 90 articles (3 independent samples)
-- ✅ Prefilter block rate: 82.2% (by design - very selective)
-- ✅ Articles scored: 16/90 (17.8%)
-- ✅ Uplifting content identified: 8/16 (50%)
-- ✅ No overfitting detected (consistent across samples)
-
-**Validation Results by Sample:**
-- Sample #1 (seed=5000): 5/30 scored, 25/30 blocked (83.3%)
-- Sample #2 (seed=6000): 7/30 scored, 23/30 blocked (76.7%)
-- Sample #3 (seed=7000): 4/30 scored, 26/30 blocked (86.7%)
-
-**Dimensional Score Statistics (16 scored articles):**
-- agency: avg=4.2, range=1-8
-- progress: avg=4.2, range=1-8
-- collective_benefit: avg=5.1, range=1-8 (gatekeeper dimension)
-- connection: avg=3.2, range=0-5
-- innovation: avg=3.2, range=0-7
-- justice: avg=2.1, range=0-4
-- resilience: avg=2.6, range=0-5
-- wonder: avg=2.9, range=0-8
-
-**Status:** PASS - Validation demonstrates consistent performance
-
-### IMPORTANT (Should Pass)
-
-#### ✅ 7. README Completeness
-- ✅ Filter description and purpose
-- ✅ v4.0 changes documented
-- ✅ Version history
-- ✅ Calibration results summary (v3→v4 improvement)
-
-**Status:** PASS - README complete and comprehensive
-
-#### ✅ 8. Inline Filters Present
-- ✅ Inline filters in all 8 dimensions (v4.0 pattern)
-- ✅ Clear OUT OF SCOPE boundaries
-- ✅ Filters prevent false positives (professional knowledge, business news, speculation)
-
-**Key Filters:**
-- Professional knowledge sharing (tutorials, courses)
-- Productivity advice (budgeting apps, life hacks)
-- Business news without collective benefit
-- Speculation without outcomes
-- Corporate optimization for profit
-- Doom-framing without solutions
-
-**Status:** PASS - Comprehensive inline filters
-
-#### ✅ 9. Post-Classifier Functional
-- ✅ `post_classifier.py` implements gatekeeper rules
-- ✅ Applies collective_benefit gatekeeper (< 5 → cap at 3.0)
-- ✅ Applies content-type caps (corporate_finance, military, business_news)
-- ✅ Computes final weighted scores from dimensional scores
-
-**Status:** PASS - Post-classifier functional
-
-### NICE-TO-HAVE
-
-#### ❌ 10. Test Coverage
-- ❌ No unit tests for post-classifier logic
-- ❌ No integration tests
-- ✅ Prefilter has domain exclusion lists
-
-**Status:** PARTIAL - Prefilter functional, post-classifier not unit tested
+**Date:** 2025-11-16
+**Oracle Model:** Gemini Flash 1.5
+**Validation Corpus:** master_dataset_20251026_20251029.jsonl (fresh corpus)
+**Sample Size:** 100 articles (random sample, seed=2025)
+**Manual Review:** 30 articles (10 high, 10 edge, 10 low)
 
 ---
 
-## Validation Summary
+## Executive Summary
 
-**Critical Checks:** 6/6 PASS ✅
-**Important Checks:** 3/3 PASS ✅
-**Nice-to-Have:** 0/1 PASS (not required)
+**Status:** ⚠️ Manual review not yet completed
 
-**Overall Score:** 9/10 checks passed
+This report contains 30 selected articles for manual review. Please review each article and update the `manual_review` fields in `validation_review.json`, then regenerate this report.
 
 ---
 
-## Production Readiness Decision
+## High Scorers (Collective Benefit ≥7 or Avg ≥7)
 
-### ✅ PRODUCTION READY
+**Selected:** 3 articles
 
-**Rationale:**
-- All CRITICAL checks passed (6/6)
-- All IMPORTANT checks passed (3/3)
-- Comprehensive validation across 90 articles
-- v3→v4 inline filters improvement validated (87.5% → 0% false positive rate)
-- Consistent performance across 3 independent samples
-- Prefilter highly selective by design (82.2% block rate appropriate for uplifting content)
+### 1. Cultural Heritage at the Forefront: Eden FM Documents Indigenous Knowledge and H
 
-**Recommendation:** Approve for batch scoring and production deployment
+**ID:** `positive_news_cultural_survival_a1abb3bcaa34`
+**URL:** https://www.culturalsurvival.org/news/cultural-heritage-forefront-eden-fm-documents-indigenous-knowledge-and-history
 
----
+**Oracle Scores:**
+- Collective Benefit: 8 (gatekeeper)
+- Average Score: 7.0
+- Agency: 8, Progress: 7, Connection: 7
+- Innovation: 6, Justice: 7, Resilience: 7, Wonder: 6
 
-## Performance Metrics
+**Oracle Reasoning:** Eden FM is documenting Indigenous knowledge and history, specifically focusing on the Loerie bird and the forced removals under apartheid. This is leading to increased awareness, cultural pride, and the preservation of community stories, fostering resilience and connection to the past.
 
-### Prefilter Performance
+### 2. Arraigada en la tradición, orientada hacia al futuro: la agricultura tradicional
 
-**Block Rate:** 82.2% (74/90 articles blocked)
+**ID:** `spanish_efeverde_5a6edce45bd5`
+**URL:** https://efeverde.com/fao-sistemas-patrimonio-agricola-mundial-sipam-2025/
 
-**This is EXPECTED and by design.** The uplifting filter is highly selective:
-- Blocks academic domains (arxiv, plos, etc.)
-- Blocks corporate finance domains
-- Blocks military/defense domains
-- Blocks VC/startup news domains
-- Only passes content potentially about human/planetary wellbeing
+**Oracle Scores:**
+- Collective Benefit: 8 (gatekeeper)
+- Average Score: 6.4
+- Agency: 7, Progress: 7, Connection: 5
+- Innovation: 6, Justice: 5, Resilience: 8, Wonder: 5
 
-**Validation:** Block rate consistent across 3 samples (76.7% - 86.7%)
+**Oracle Reasoning:** The article describes how farmers in Lanzarote adapted to volcanic eruptions by developing traditional agricultural practices that allowed them to continue farming in a challenging environment. This demonstrates agency in addressing environmental challenges and progress toward sustainable agriculture, benefiting the community and preserving traditional knowledge.
 
-### Oracle Performance (16 scored articles)
+### 3. How to test and replace any missing translations with i18next
 
-**Uplifting Content Detection:**
-- Uplifting (collective_benefit >= 5): 8/16 (50%)
-- Not Uplifting (collective_benefit < 5): 8/16 (50%)
+**ID:** `community_social_programming_reddit_613730c6e920`
+**URL:** https://www.reddit.com/r/programming/comments/1oi5f42/how_to_test_and_replace_any_missing_translations/
 
-**This is HEALTHY distribution.** Not all content passing prefilter is genuinely uplifting - the oracle correctly discriminates.
+**Oracle Scores:**
+- Collective Benefit: 7 (gatekeeper)
+- Average Score: 5.0
+- Agency: 6, Progress: 6, Connection: 5
+- Innovation: 6, Justice: 3, Resilience: 4, Wonder: 3
 
-**Dimensional Score Distribution:**
-- Mean scores: 2.1 - 5.1 across dimensions
-- Full range coverage: 0-8 on most dimensions
-- Appropriate variance (not all articles scored the same)
-
-### v3→v4 Improvement (from calibration)
-
-**v3 (WITHOUT inline filters):**
-- False positive rate: **87.5%** (7/8 off-topic scored >= 5.0)
-
-**v4 (WITH inline filters):**
-- False positive rate: **0%** (0/9 tested off-topic scored >= 5.0)
-
-**Improvement: 87.5% → 0%** ✅
+**Oracle Reasoning:** This article describes a tool that helps developers ensure their software is properly translated into different languages. This improves access to information and services for people who speak different languages, which promotes equity and inclusion. The tool also automates the translation process, saving developers time and effort.
 
 ---
 
-## Known Edge Cases
+## Edge Cases (Collective Benefit 4-6, Mixed Scores)
 
-**Prefilter is very selective:**
-- 82.2% of random articles blocked (by design)
-- Only content from non-excluded domains and potentially about wellbeing passes
-- This is appropriate for uplifting filter's narrow focus
+**Selected:** 4 articles
 
-**Gatekeeper dimension:**
-- collective_benefit < 5 caps final score at 3.0 (not uplifting)
-- Exception: wonder >= 7 and collective_benefit >= 3 bypasses cap
-- This prevents professional knowledge/business content from scoring high
+### 1. La montée en puissance contrariée de l'actionnariat salarié
+
+**ID:** `french_usine_nouvelle_8b9565feffb9`
+**URL:** http://www.usinenouvelle.com/article/la-montee-en-puissance-contrariee-de-l-actionnariat-salarie.N2236863
+
+**Oracle Scores:**
+- Collective Benefit: 6 (gatekeeper)
+- Average Score: 3.9
+- Score Variance: 1.27 (higher = more mixed)
+- Agency: 5, Progress: 5, Connection: 3
+- Innovation: 3, Justice: 4, Resilience: 3, Wonder: 2
+
+**Oracle Reasoning:** The article discusses the increasing trend of employee stock ownership in large French companies, with LVMH launching its first plan. Employees holding an average of 4% of company shares suggests a move towards shared prosperity and economic dignity, though the extent of the benefit is unclear without further details.
+
+### 2. Working it out: Randomized Modification and Entrepreneurial Effort in a Collater
+
+**ID:** `economics_nber_working_papers_cba4c9b47172`
+**URL:** https://www.nber.org/papers/w34398#fromrss
+
+**Oracle Scores:**
+- Collective Benefit: 6 (gatekeeper)
+- Average Score: 4.9
+- Score Variance: 1.17 (higher = more mixed)
+- Agency: 6, Progress: 6, Connection: 3
+- Innovation: 5, Justice: 5, Resilience: 5, Wonder: 3
+
+**Oracle Reasoning:** The article describes a debt modification experiment that led to improved repayment and entrepreneurial effort for minibus entrepreneurs. This suggests a potential strategy for improving the livelihoods of borrowers facing liquidity constraints, leading to a more equitable financial system.
+
+### 3. Com mais estrangeiros vindo ao Brasil, Vivo lança plano 5G para quem não tem CPF
+
+**ID:** `portuguese_canaltech_bb644fa35364`
+**URL:** https://canaltech.com.br/telecom/com-mais-estrangeiros-vindo-ao-brasil-vivo-lanca-plano-5g-para-quem-nao-tem-cpf/
+
+**Oracle Scores:**
+- Collective Benefit: 6 (gatekeeper)
+- Average Score: 4.0
+- Score Variance: 1.12 (higher = more mixed)
+- Agency: 5, Progress: 5, Connection: 3
+- Innovation: 4, Justice: 3, Resilience: 3, Wonder: 3
+
+**Oracle Reasoning:** The article describes a new mobile plan by Vivo targeted at foreign tourists in Brazil, providing them with access to 5G internet without needing a CPF. This improves access to communication and information for tourists, potentially enhancing their experience and facilitating connection with others.
+
+### 4. IA generativa permite falsificação "perfeita" de documentos, alerta especialista
+
+**ID:** `portuguese_canaltech_ec943b213897`
+**URL:** https://canaltech.com.br/seguranca/ia-generativa-permite-falsificacao-perfeita-de-documentos-alerta-especialista/
+
+**Oracle Scores:**
+- Collective Benefit: 6 (gatekeeper)
+- Average Score: 4.9
+- Score Variance: 0.93 (higher = more mixed)
+- Agency: 6, Progress: 5, Connection: 5
+- Innovation: 5, Justice: 4, Resilience: 5, Wonder: 3
+
+**Oracle Reasoning:** The article discusses the threat of AI-generated forgeries and proposes solutions such as cybersecurity education and international cooperation to combat digital identity fraud. While it highlights a problem, it also emphasizes proactive measures and the potential for AI to be used defensively, contributing to digital security.
 
 ---
 
-## Next Steps
+## Low Scorers (Collective Benefit ≤3 or Avg ≤3)
 
-**Immediate:**
-1. Deploy for batch scoring on production dataset (target: 2,500 articles)
-2. Monitor first 500 articles for quality
-3. Generate training data for student model (Qwen 2.5-7B)
+**Selected:** 5 articles
 
-**Future:**
-- Train student model for fast local inference (<50ms per article)
-- Quarterly recalibration (check for drift)
-- Expand validated content categories
+### 1. I absolutely hate video generating AI
+
+**ID:** `community_social_reddit_artificial_0b96d2a9fe0b`
+**URL:** https://www.reddit.com/r/artificial/comments/1oi68z7/i_absolutely_hate_video_generating_ai/
+
+**Oracle Scores:**
+- Collective Benefit: 1 (gatekeeper)
+- Average Score: 1.0
+- Agency: 1, Progress: 1, Connection: 1
+- Innovation: 1, Justice: 1, Resilience: 1, Wonder: 1
+
+**Oracle Reasoning:** The article expresses frustration with AI-generated content flooding social media. There is no documented progress toward human or planetary wellbeing. The content is doom-framed, focusing on the perceived loss of authenticity in social media.
+
+### 2. Inconnu au bataillon, ce robot aspirateur est pourtant un best
+
+**ID:** `french_01net_c71e9d693fe2`
+**URL:** https://www.01net.com/bons-plans/un-robot-aspirateur-avec-station-du-futur-a-237-e-cest-loffre-folle-du-jour-sur-aliexpress.html
+
+**Oracle Scores:**
+- Collective Benefit: 3 (gatekeeper)
+- Average Score: 1.1
+- Agency: 2, Progress: 2, Connection: 0
+- Innovation: 2, Justice: 0, Resilience: 0, Wonder: 0
+
+**Oracle Reasoning:** This article is about a discounted robot vacuum cleaner. It does not demonstrate any progress towards human or planetary wellbeing. It is a product launch and business announcement.
+
+### 3. Black Friday 2025 : dates, réductions avant l’heure, enseignes participantes… le
+
+**ID:** `french_numerama_4f309e361474`
+**URL:** https://www.numerama.com/tech/1834992-balck-friday-2025-dates-offres-et-sites.html
+
+**Oracle Scores:**
+- Collective Benefit: 3 (gatekeeper)
+- Average Score: 1.1
+- Agency: 2, Progress: 2, Connection: 0
+- Innovation: 2, Justice: 0, Resilience: 0, Wonder: 0
+
+**Oracle Reasoning:** The article is about Black Friday sales and promotions. It primarily benefits consumers by providing information about upcoming deals, but it doesn't directly address any human or planetary wellbeing issues. It is business news focused on consumerism.
+
+### 4. Quanto vale a pena pagar no iPhone 15 na Black Friday 2025?
+
+**ID:** `portuguese_canaltech_415add60c897`
+**URL:** https://canaltech.com.br/smartphone/quanto-vale-a-pena-pagar-no-iphone-15-na-black-friday-2025/
+
+**Oracle Scores:**
+- Collective Benefit: 3 (gatekeeper)
+- Average Score: 1.1
+- Agency: 2, Progress: 2, Connection: 0
+- Innovation: 2, Justice: 0, Resilience: 0, Wonder: 0
+
+**Oracle Reasoning:** The article discusses the potential price of an iPhone during Black Friday 2025. It focuses on consumer advice and potential cost savings, but doesn't address any human or planetary wellbeing progress.
+
+### 5. C'était "un miracle humain": la difficile fermeture de la maternité des Lilas
+
+**ID:** `french_sciences_et_avenir_2c4a3e2a4845`
+**URL:** https://www.sciencesetavenir.fr/sante/c-etait-un-miracle-humain-la-difficile-fermeture-de-la-maternite-des-lilas_189083?xtor=RSS-16
+
+**Oracle Scores:**
+- Collective Benefit: 3 (gatekeeper)
+- Average Score: 1.4
+- Agency: 2, Progress: 1, Connection: 1
+- Innovation: 1, Justice: 1, Resilience: 1, Wonder: 1
+
+**Oracle Reasoning:** The article describes the closure of a maternity hospital due to financial reasons. This represents a loss of healthcare access for the community, not progress. There is no agency, progress, or collective benefit happening in the story.
 
 ---
 
-## Version History
+## Conclusion
 
-### v4.0 (2025-11-14) - CURRENT
-- **Applied inline filters pattern** - Moved OUT OF SCOPE filters into each dimension
-- **87.5% → 0% false positive improvement** on tested categories
-- **Validated on 106 articles** (16 calibration + 90 comprehensive validation)
-- **Production-ready** - All validation checks passed
+**Next Steps:**
 
-### v3.0 (2025-11-14)
-- Added OUT OF SCOPE section at top of prompt
-- **FAILED**: 87.5% false positive rate (oracle skipped top-level filters)
-
-### v1.0 (2024-10-30)
-- Initial release
-- Battle-tested from NexusMind-Filter (5,000+ articles)
-
----
-
-**Validation completed:** 2025-11-15
-**Validated by:** Claude Code (Automated)
-**Next review:** 2026-02-15 (quarterly)
+1. Review the 30 selected articles in `validation_review.json`
+2. For each article, update:
+   - `reviewed`: true
+   - `oracle_correct`: true/false
+   - `reviewer_notes`: explanation if incorrect
+3. Regenerate this report with: `python scripts/generate_validation_report.py --review validation_review.json --output validation_report.md`
