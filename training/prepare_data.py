@@ -109,6 +109,35 @@ def load_labels(input_path: Path) -> List[Dict[str, Any]]:
     return labels
 
 
+def calculate_overall_score(
+    analysis: Dict[str, Any],
+    dimension_names: List[str] = None
+) -> float:
+    """Calculate overall score from analysis.
+
+    Tries to find overall_score field first, then calculates average from dimensions.
+    """
+    # Try different field names for overall score
+    overall_score = (analysis.get('overall_score') or
+                    analysis.get('overall_uplift_score'))
+
+    # If no overall score field, calculate average from dimensions
+    if overall_score is None and dimension_names:
+        scores = []
+        for dim in dimension_names:
+            # Handle both nested and flat formats
+            dim_data = analysis.get(dim)
+            if isinstance(dim_data, dict) and 'score' in dim_data:
+                scores.append(dim_data['score'])
+            elif isinstance(dim_data, (int, float)):
+                scores.append(dim_data)
+        overall_score = sum(scores) / len(scores) if scores else 0.0
+    elif overall_score is None:
+        overall_score = 0.0
+
+    return overall_score
+
+
 def assign_tier(overall_score: float, tier_boundaries: Dict[str, float]) -> str:
     """Assign tier based on overall score and tier boundaries.
 
@@ -148,38 +177,16 @@ def stratified_split(
     for label in labels:
         analysis = label.get(analysis_field, {})
 
-        # Try different field names for overall score
-        overall_score = (analysis.get('overall_score') or
-                        analysis.get('overall_uplift_score'))
+        # Calculate overall score
+        overall_score = calculate_overall_score(analysis, dimension_names)
 
         # DEBUG: Print first article's processing
         if debug_count == 0:
             print(f"\nDEBUG first article:")
-            print(f"  overall_score from field: {overall_score}")
-            print(f"  dimension_names present: {dimension_names is not None}")
-            print(f"  will calculate average: {overall_score is None and dimension_names is not None}")
-
-        # If no overall score field, calculate average from dimensions
-        if overall_score is None and dimension_names:
-            scores = []
-            for dim in dimension_names:
-                # Handle both nested and flat formats
-                dim_data = analysis.get(dim)
-                if isinstance(dim_data, dict) and 'score' in dim_data:
-                    scores.append(dim_data['score'])
-                elif isinstance(dim_data, (int, float)):
-                    scores.append(dim_data)
-            overall_score = sum(scores) / len(scores) if scores else 0.0
-            if debug_count == 0:
-                print(f"  calculated average: {overall_score} from {len(scores)} dimensions")
-        elif overall_score is None:
-            overall_score = 0.0
+            print(f"  calculated overall_score: {overall_score}")
+            debug_count += 1
 
         tier = assign_tier(overall_score, tier_boundaries)
-
-        if debug_count == 0:
-            print(f"  assigned tier: {tier}")
-            debug_count += 1
 
         if tier not in tier_groups:
             tier_groups[tier] = []
@@ -306,7 +313,8 @@ def print_statistics(
     val_set: List[Dict[str, Any]],
     test_set: List[Dict[str, Any]],
     analysis_field: str,
-    tier_boundaries: Dict[str, float]
+    tier_boundaries: Dict[str, float],
+    dimension_names: List[str] = None
 ):
     """Print dataset statistics."""
     print("\n" + "="*70)
@@ -318,9 +326,7 @@ def print_statistics(
     tier_counts = Counter()
     for label in labels:
         analysis = label.get(analysis_field, {})
-        overall_score = (analysis.get('overall_score') or
-                        analysis.get('overall_uplift_score') or
-                        0.0)
+        overall_score = calculate_overall_score(analysis, dimension_names)
         tier = assign_tier(overall_score, tier_boundaries)
         tier_counts[tier] += 1
 
@@ -340,9 +346,7 @@ def print_statistics(
     train_tier_counts = Counter()
     for item in train_set:
         analysis = item.get(analysis_field, {})
-        overall_score = (analysis.get('overall_score') or
-                        analysis.get('overall_uplift_score') or
-                        0.0)
+        overall_score = calculate_overall_score(analysis, dimension_names)
         tier = assign_tier(overall_score, tier_boundaries)
         train_tier_counts[tier] += 1
 
@@ -429,7 +433,7 @@ Examples:
     test_data = convert_to_training_format(test_set, analysis_field, dimension_names)
 
     # Print statistics
-    print_statistics(labels, train_set, val_set, test_set, analysis_field, tier_boundaries)
+    print_statistics(labels, train_set, val_set, test_set, analysis_field, tier_boundaries, dimension_names)
 
     # Save data
     save_training_data(train_data, val_data, test_data, output_dir)
