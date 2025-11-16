@@ -142,30 +142,35 @@ python scripts/label_batch.py \
 Split your labeled ground truth data using the generic preparation script:
 
 ```bash
-# For uplifting filter
+# For uplifting filter (with glob pattern support)
 python training/prepare_data.py \
-    --filter filters/uplifting/v1 \
-    --input datasets/labeled/uplifting/labeled_articles.jsonl \
-    --output-dir datasets/training/uplifting \
+    --filter filters/uplifting/v4 \
+    --input "datasets/scored/uplifting_v1/uplifting/scored_batch_*.jsonl" \
+    --output-dir datasets/training/uplifting_v4 \
     --train-ratio 0.8 \
     --val-ratio 0.1 \
-    --test-ratio 0.1
+    --test-ratio 0.1 \
+    --seed 42
 
-# For tech deployment filter
+# For single file input
 python training/prepare_data.py \
     --filter filters/sustainability_tech_deployment/v1 \
     --input datasets/labeled/sustainability_tech_deployment/labeled_articles.jsonl \
     --output-dir datasets/training/sustainability_tech_deployment \
     --train-ratio 0.8 \
     --val-ratio 0.1 \
-    --test-ratio 0.1
+    --test-ratio 0.1 \
+    --seed 42
 ```
 
-**Key Feature**: The script automatically reads filter configuration (dimensions, tier boundaries) from `config.yaml`, making it work for any filter without code changes.
+**Key Features**:
+- Automatically reads filter configuration (dimensions, tier boundaries) from `config.yaml`
+- Supports glob patterns for batch files (e.g., `scored_batch_*.jsonl`)
+- `--seed` ensures reproducible splits (use same seed in training)
 
 **Output**: `train.jsonl`, `val.jsonl`, `test.jsonl` with stratified splits maintaining tier proportions
 
-### Step 2: Train Model
+### Step 3: Train Model
 
 Train Qwen 2.5 on the prepared dataset:
 
@@ -174,17 +179,36 @@ python -m training.train \
     --filter filters/uplifting/v1 \
     --data-dir datasets/training/uplifting \
     --output-dir filters/uplifting/v1 \
-    --model-name Qwen/Qwen2.5-7B \
+    --model-name Qwen/Qwen2.5-1.5B \
     --epochs 3 \
     --batch-size 8 \
-    --learning-rate 2e-5
+    --learning-rate 2e-5 \
+    --max-length 512 \
+    --warmup-steps 500 \
+    --seed 42
 ```
+
+**Training Modes:**
+
+**Knowledge Distillation (Recommended - 52.6% better):**
+- Default mode (no `--include-prompt` flag)
+- Student learns directly from oracle scores
+- Shorter context (512 tokens)
+- Better accuracy (0.67 MAE vs 1.42 MAE for instruction tuning)
+- Investment-risk v2 result: 0.67 MAE ✅
+
+**Instruction Tuning (Not recommended):**
+- Add `--include-prompt` flag
+- Student learns to generate reasoning + scores
+- Longer context (1024 tokens)
+- Worse accuracy (52.6% worse MAE)
+- Use only if you need explainability
 
 **Output**: Trained model, training history, metadata saved to filter directory
 
 ## Model Architecture
 
-The training pipeline uses **Qwen 2.5-7B** adapted for multi-dimensional regression:
+The training pipeline uses **Qwen 2.5-1.5B** (recommended) or **Qwen 2.5-7B** adapted for multi-dimensional regression:
 
 ```
 Input: [title + content] (max 512 tokens)
@@ -269,18 +293,20 @@ training:
 
 ## Hardware Requirements
 
-### Qwen 2.5-7B (Recommended)
+### Qwen 2.5-1.5B (Recommended)
 
-- **GPU Memory**: 16GB+ (RTX 4090, A100)
-- **Training Time**: ~2-4 hours for 7,000 samples
-- **Expected Accuracy**: 90-95% vs oracle
+- **GPU Memory**: 12-16GB (RTX 3090, RTX 4090, A100)
+- **Training Time**: ~2-3 hours for 4,000-5,000 samples
+- **Expected Accuracy**: MAE 0.6-0.8 (excellent for filtering)
+- **LoRA Training**: Only 1.2% of parameters trained (18.5M out of 1.56B)
+- **Investment-risk v2 result**: 0.67 MAE with knowledge distillation ✅
 
 ### Alternative Models
 
-For limited hardware:
+For different requirements:
 
-- **Qwen 2.5-1.5B**: 8GB GPU, faster training, slightly lower accuracy
-- **Qwen 2.5-3B**: 12GB GPU, balanced performance
+- **Qwen 2.5-7B**: 24GB+ GPU, longer training, marginally better accuracy
+- **Qwen 2.5-3B**: 16GB GPU, balanced performance (untested)
 
 ## Output Structure
 
