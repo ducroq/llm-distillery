@@ -1,0 +1,102 @@
+======================================================================
+Sustainability Tech Deployment - Data Quality Verification
+======================================================================
+
+Total Articles: 8,413
+
+ERRORS AND WARNINGS:
+----------------------------------------------------------------------
+Parse errors: 0
+Missing analysis: 0
+All-zeros articles: 1
+
+DIMENSION SCORE DISTRIBUTIONS:
+----------------------------------------------------------------------
+Dimension                      Mean     Median   Min    Max    StdDev  
+----------------------------------------------------------------------
+deployment_maturity            2.41     1.0      0      10     1.93    
+technology_performance         2.48     1.0      0      8      1.94    
+cost_trajectory                2.04     1.0      0      9      1.62    
+scale_of_deployment            2.34     1.0      0      10     2.07    
+market_penetration             1.88     1.0      0      9      1.61    
+technology_readiness           2.70     1.0      0      10     2.25    
+supply_chain_maturity          2.19     1.0      0      10     1.93    
+proof_of_impact                1.96     1.0      0      8      1.53    
+
+CATEGORICAL DISTRIBUTIONS:
+----------------------------------------------------------------------
+
+Primary Technology:
+  other                            6561 ( 78.0%)
+  EVs                               438 (  5.2%)
+  solar                             353 (  4.2%)
+  batteries                         271 (  3.2%)
+  hydrogen                          184 (  2.2%)
+  sustainable_agriculture_tech       87 (  1.0%)
+  wind                               80 (  1.0%)
+  sustainable agriculture tech       76 (  0.9%)
+  grid_modernization                 37 (  0.4%)
+  water_treatment                    36 (  0.4%)
+
+Deployment Stage:
+  lab                              5358 ( 63.7%)
+  early_commercial                 1847 ( 22.0%)
+  pilot                             854 ( 10.2%)
+  commercial_proven                 309 (  3.7%)
+  mass_deployment                    45 (  0.5%)
+
+Confidence:
+  HIGH                             6726 ( 79.9%)
+  MEDIUM                           1641 ( 19.5%)
+  LOW                                46 (  0.5%)
+
+HIGH SCORERS (avg >= 7):
+----------------------------------------------------------------------
+
+ID: automotive_transport_electrek_e425864c80ec
+Title: Tesla (TSLA) announces 497,000 EV deliveries in Q3
+Avg Score: 7.0
+Scores: {'deployment_maturity': 7, 'technology_performance': 7, 'cost_trajectory': 6, 'scale_of_deployment': 8, 'market_penetration': 7, 'technology_readiness': 8, 'supply_chain_maturity': 7, 'proof_of_impact': 6}
+
+ID: global_news_reuters_e944b565f231
+Title: EVs put an end to China's usual holiday surge in gasoline use
+Avg Score: 7.0
+Scores: {'deployment_maturity': 7, 'technology_performance': 7, 'cost_trajectory': 6, 'scale_of_deployment': 8, 'market_penetration': 7, 'technology_readiness': 8, 'supply_chain_maturity': 7, 'proof_of_impact': 6}
+
+ID: global_news_BBC_world_2cee33e4ded2
+Title: Surge in Ukrainian attacks on oil refineries sparks Russian fuel shortages
+Avg Score: 7.4
+Scores: {'deployment_maturity': 7, 'technology_performance': 7, 'cost_trajectory': 7, 'scale_of_deployment': 8, 'market_penetration': 8, 'technology_readiness': 9, 'supply_chain_maturity': 8, 'proof_of_impact': 5}
+
+LOW SCORERS (avg <= 3):
+----------------------------------------------------------------------
+
+ID: dutch_news_nrc_afa56bc4aafc
+Title: Actrice Tilda Swinton bekijkt, bevoelt en besnuffelt haar kledingcollectie tijde
+Avg Score: 1.0
+Scores: {'deployment_maturity': 1, 'technology_performance': 1, 'cost_trajectory': 1, 'scale_of_deployment': 1, 'market_penetration': 1, 'technology_readiness': 1, 'supply_chain_maturity': 1, 'proof_of_impact': 1}
+
+ID: science_phys_org_e66445864f09
+Title: How does neighbor density affect seedling survival in tropical trees and lianas?
+Avg Score: 1.0
+Scores: {'deployment_maturity': 1, 'technology_performance': 1, 'cost_trajectory': 1, 'scale_of_deployment': 1, 'market_penetration': 1, 'technology_readiness': 1, 'supply_chain_maturity': 1, 'proof_of_impact': 1}
+
+ID: healthcare_medrxiv_1516fdb2e2e8
+Title: (Hydroxy-) Chloroquine, G6PD
+Avg Score: 1.0
+Scores: {'deployment_maturity': 1, 'technology_performance': 1, 'cost_trajectory': 1, 'scale_of_deployment': 1, 'market_penetration': 1, 'technology_readiness': 1, 'supply_chain_maturity': 1, 'proof_of_impact': 1}
+
+ALL-ZEROS EXAMPLES:
+----------------------------------------------------------------------
+
+ID: dutch_news_ad_algemeen_9eab2a10753a
+Title: Vanaf volgend jaar nieuw vaccin tegen HPV: ‘Beschermt tegen negen verschillende 
+Scores: [0, 0, 0, 0, 0, 0, 0, 0]
+
+======================================================================
+VERDICT:
+======================================================================
+OK - No significant issues detected
+
+Scored articles ready for training: 8,413
+======================================================================
