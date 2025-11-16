@@ -32,9 +32,9 @@
         "variance": 0.7071067811865476
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": true,
+        "reviewer_notes": "The article highlights positive efforts to preserve indigenous culture and history, which aligns well with the high scores given by the oracle."
       }
     },
     {
@@ -60,9 +60,9 @@
         "variance": 1.2183492931011204
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": true,
+        "reviewer_notes": "The article effectively highlights the resilience and innovation of traditional agricultural practices in the face of environmental challenges, justifying the high scores assigned by the oracle."
       }
     },
     {
@@ -88,9 +88,9 @@
         "variance": 1.4142135623730951
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": false,
+        "reviewer_notes": "Not really uplifting, more of a technical improvement article."
       }
     },
     {
@@ -116,9 +116,9 @@
         "variance": 1.2686114456365274
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": true,
+        "reviewer_notes": "The article effectively highlights the potential benefits of employee stock ownership plans, aligning with the oracle's positive assessment."
       }
     },
     {
@@ -144,9 +144,9 @@
         "variance": 1.165922381636102
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": false,
+        "reviewer_notes": "The article is quite technical and does not clearly demonstrate direct benefits to human or planetary wellbeing, making it less uplifting than the oracle suggests."
       }
     },
     {
@@ -172,9 +172,9 @@
         "variance": 1.118033988749895
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": false,
+        "reviewer_notes": "While the plan improves access for tourists, it does not significantly contribute to human or planetary wellbeing, making it less uplifting than the oracle suggests."
       }
     },
     {
@@ -200,9 +200,9 @@
         "variance": 0.9270248108869579
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": true,
+        "reviewer_notes": "The article effectively highlights the potential benefits of AI in enhancing cybersecurity measures, aligning with the oracle's positive assessment."
       }
     },
     {
@@ -228,9 +228,9 @@
         "variance": 0.0
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": true,
+        "reviewer_notes": "No significant issues found. The article clearly expresses negative sentiment towards AI-generated content, justifying the low scores assigned by the oracle."
       }
     },
     {
@@ -256,9 +256,9 @@
         "variance": 1.165922381636102
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": true,
+        "reviewer_notes": "No significant issues found. The article is a product promotion without clear benefits to human or planetary wellbeing, justifying the low scores assigned by the oracle."
       }
     },
     {
@@ -284,9 +284,9 @@
         "variance": 1.165922381636102
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": true,
+        "reviewer_notes": "The article provides useful information about Black Friday sales, but it lacks a focus on human or planetary wellbeing."
       }
     },
     {
@@ -312,9 +312,9 @@
         "variance": 1.165922381636102
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": true,
+        "reviewer_notes": "The article provides useful information about Black Friday sales, but it lacks a focus on human or planetary wellbeing."
       }
     },
     {
@@ -340,9 +340,9 @@
         "variance": 0.6959705453537527
       },
       "manual_review": {
-        "reviewed": false,
-        "oracle_correct": null,
-        "reviewer_notes": ""
+        "reviewed": true,
+        "oracle_correct": true,
+        "reviewer_notes": "The article effectively highlights the challenges faced by the maternity hospital and the impact on the community, aligning with the oracle's assessment."
       }
     }
   ]
