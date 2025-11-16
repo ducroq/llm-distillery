@@ -131,6 +131,7 @@ def stratified_split(
     labels: List[Dict[str, Any]],
     analysis_field: str,
     tier_boundaries: Dict[str, float],
+    dimension_names: List[str] = None,
     train_ratio: float = 0.8,
     val_ratio: float = 0.1,
     test_ratio: float = 0.1,
@@ -148,8 +149,21 @@ def stratified_split(
 
         # Try different field names for overall score
         overall_score = (analysis.get('overall_score') or
-                        analysis.get('overall_uplift_score') or
-                        0.0)
+                        analysis.get('overall_uplift_score'))
+
+        # If no overall score field, calculate average from dimensions
+        if overall_score is None and dimension_names:
+            scores = []
+            for dim in dimension_names:
+                # Handle both nested and flat formats
+                dim_data = analysis.get(dim)
+                if isinstance(dim_data, dict) and 'score' in dim_data:
+                    scores.append(dim_data['score'])
+                elif isinstance(dim_data, (int, float)):
+                    scores.append(dim_data)
+            overall_score = sum(scores) / len(scores) if scores else 0.0
+        elif overall_score is None:
+            overall_score = 0.0
 
         tier = assign_tier(overall_score, tier_boundaries)
 
@@ -387,6 +401,7 @@ Examples:
         labels,
         analysis_field,
         tier_boundaries,
+        dimension_names,
         args.train_ratio,
         args.val_ratio,
         args.test_ratio,
