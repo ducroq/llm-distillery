@@ -96,9 +96,13 @@ def add_filter_architecture(doc: Document, config: Dict, filter_readme_path: Pat
 
     # Overview
     add_section(doc, "Overview", 2)
+
+    # Get filter focus/philosophy/description (flexible field names)
+    filter_focus = config['filter'].get('focus') or config['filter'].get('philosophy') or config['filter'].get('description', 'N/A')
+
     doc.add_paragraph(
         f"The {config['filter']['name']} filter evaluates content based on the principle: "
-        f"\"{config['filter']['focus']}\". "
+        f"\"{filter_focus}\". "
         f"The filter uses a two-stage approach combining rule-based pre-filtering with "
         f"machine learning-based scoring."
     )
@@ -424,14 +428,25 @@ def main():
     filter_name = config['filter']['name']
     filter_version = config['filter']['version']
 
-    # Set default paths if not provided
+    # Set default paths if not provided - use filter package directory
     filter_label = f"{filter_name}_v{filter_version}"
 
+    # Default to filter package training_reports directory
+    history_parent = args.history.parent
+
     if args.plots_dir is None:
-        args.plots_dir = Path("reports") / f"{filter_label}_plots"
+        if "filters" in args.history.parts:
+            args.plots_dir = history_parent / "training_reports"
+        else:
+            args.plots_dir = Path("reports") / f"{filter_label}_plots"
 
     if args.output is None:
-        args.output = Path("reports") / f"{filter_label}_training_report.docx"
+        if "filters" in args.history.parts:
+            training_mode = metadata.get('training_mode', 'training')
+            report_name = f"{filter_label}_{training_mode}_report.docx"
+            args.output = history_parent / "training_reports" / report_name
+        else:
+            args.output = Path("reports") / f"{filter_label}_training_report.docx"
 
     print(f"Generating report for {filter_name} filter...")
     print(f"  Plots directory: {args.plots_dir}")

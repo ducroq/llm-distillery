@@ -208,9 +208,15 @@ def main():
         if filter_name is None:
             filter_name = "training"
 
-    # Set output directory
+    # Set output directory - default to filter package directory
     if args.output_dir is None:
-        output_dir = Path("reports") / f"{filter_name}_plots"
+        # If history is in a filter directory, output there
+        history_parent = args.history.parent
+        if "filters" in args.history.parts:
+            output_dir = history_parent / "training_reports"
+        else:
+            # Fallback to reports directory
+            output_dir = Path("reports") / f"{filter_name}_plots"
     else:
         output_dir = args.output_dir
 

@@ -21,7 +21,13 @@ The **Investment-Risk** filter has been developed, validated, and is ready for p
 
 **Recommendation:** Deploy to production for capital preservation signal detection.
 
-**See:** `ground_truth_quality_report.md` for comprehensive oracle quality analysis with dimensional histograms.
+**Training Status:** ✅ **COMPLETE** - Student model trained and ready (2025-11-16)
+- Knowledge Distillation model achieved 0.67 MAE (target: <1.0)
+- See `training_report.md` for complete training analysis
+
+**See:**
+- `ground_truth_quality_report.md` - Oracle quality analysis with dimensional histograms
+- `training_report.md` - Complete training results and model selection
 
 ---
 
@@ -229,21 +235,16 @@ python -m ground_truth.batch_scorer \
 
 ## Next Steps
 
-**Immediate:**
-1. ✅ **COMPLETE:** Generate ground truth (5,150 articles scored)
-2. ⏳ **NEXT:** Train Qwen 2.5-7B student model
-   ```bash
-   python training/prepare_data.py \
-       --filter filters/investment-risk/v2 \
-       --input datasets/scored/investment_risk_v2/investment-risk/scored_batch_*.jsonl \
-       --output-dir datasets/training/investment_risk_v2
+**Completed:**
+1. ✅ Generate ground truth (5,150 articles scored)
+2. ✅ Train student model (Knowledge Distillation, 0.67 MAE)
+3. ✅ Validate training approach (comparison analysis complete)
+4. ✅ Select production model (`../v2_distillation/`)
 
-   python training/train.py \
-       --config filters/investment-risk/v2/config.yaml \
-       --data-dir datasets/training/investment_risk_v2
-   ```
-3. ⏳ Validate student model vs oracle (target: ≥90% dimensional score correlation)
-4. ⏳ Deploy inference pipeline (prefilter + student model)
+**Immediate (Ready for Production):**
+1. ⏭️ Deploy inference pipeline (prefilter + `../v2_distillation/model/`)
+2. ⏭️ Set up production monitoring and validation
+3. ⏭️ Collect edge cases and feedback on live traffic
 
 **Future:**
 - Quarterly recalibration (check for drift)

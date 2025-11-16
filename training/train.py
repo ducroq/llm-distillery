@@ -6,10 +6,12 @@ Fine-tunes Qwen 2.5 models for multi-dimensional regression on filter-specific d
 
 import argparse
 import json
+import random
 import sys
 from pathlib import Path
 from typing import Dict, List
 
+import numpy as np
 import torch
 import yaml
 from torch.utils.data import DataLoader, Dataset
@@ -21,6 +23,17 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 from peft import LoraConfig, get_peft_model, TaskType
+
+
+def set_seed(seed: int):
+    """Set random seed for reproducibility across all libraries."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    # Make PyTorch deterministic (may impact performance slightly)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 class FilterDataset(Dataset):
@@ -376,8 +389,18 @@ def main():
         action="store_true",
         help="Include filter prompt in training (instruction tuning mode). Prepends prompt-compressed.md to each article.",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for reproducibility (default: 42)",
+    )
 
     args = parser.parse_args()
+
+    # Set random seed for reproducibility
+    set_seed(args.seed)
+    print(f"Random seed set to: {args.seed}")
 
     # Load filter config
     print(f"Loading filter config from {args.filter}")

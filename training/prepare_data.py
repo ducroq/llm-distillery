@@ -76,13 +76,36 @@ def get_analysis_field_name(filter_name: str) -> str:
     return f"{filter_name}_analysis"
 
 
-def load_labels(input_file: Path) -> List[Dict[str, Any]]:
-    """Load oracle labels from JSONL file."""
+def load_labels(input_path: Path) -> List[Dict[str, Any]]:
+    """Load oracle labels from JSONL file(s).
+
+    Supports both single files and glob patterns (e.g., scored_batch_*.jsonl).
+    """
+    import glob
+
     labels = []
-    with open(input_file, 'r', encoding='utf-8') as f:
-        for line in f:
-            if line.strip():
-                labels.append(json.loads(line))
+
+    # Check if path contains wildcard
+    input_str = str(input_path)
+    if '*' in input_str or '?' in input_str:
+        # Glob pattern - load all matching files
+        files = sorted(glob.glob(input_str))
+        if not files:
+            raise FileNotFoundError(f"No files matching pattern: {input_path}")
+
+        print(f"Found {len(files)} files matching pattern")
+        for file_path in files:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip():
+                        labels.append(json.loads(line))
+    else:
+        # Single file
+        with open(input_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip():
+                    labels.append(json.loads(line))
+
     return labels
 
 

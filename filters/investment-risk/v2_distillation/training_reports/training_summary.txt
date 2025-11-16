@@ -1,0 +1,21 @@
+================================================================================
+Training Summary - Epoch 3
+================================================================================
+
+Overall Metrics:
+  Train MAE:  0.6248
+  Val MAE:    0.6711
+  Train RMSE: 0.8415
+  Val RMSE:   0.9303
+  Train Loss: 0.7079
+  Val Loss:   0.8598
+
+Per-Dimension Validation MAE:
+  macro_risk_severity : Train=0.6483  Val=0.6955  Gap=+0.0472
+  credit_market_stress: Train=0.5089  Val=0.5597  Gap=+0.0508
+  market_sentiment_extremes: Train=0.5558  Val=0.5906  Gap=+0.0348
+  valuation_risk      : Train=0.5936  Val=0.6384  Gap=+0.0447
+  policy_regulatory_risk: Train=0.6708  Val=0.7363  Gap=+0.0655
+  systemic_risk       : Train=0.5897  Val=0.6366  Gap=+0.0470
+  evidence_quality    : Train=0.8222  Val=0.8622  Gap=+0.0400
+  actionability       : Train=0.6092  Val=0.6493  Gap=+0.0401
