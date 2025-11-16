@@ -144,12 +144,20 @@ def stratified_split(
 
     # Group by tier
     tier_groups = {}
+    debug_count = 0
     for label in labels:
         analysis = label.get(analysis_field, {})
 
         # Try different field names for overall score
         overall_score = (analysis.get('overall_score') or
                         analysis.get('overall_uplift_score'))
+
+        # DEBUG: Print first article's processing
+        if debug_count == 0:
+            print(f"\nDEBUG first article:")
+            print(f"  overall_score from field: {overall_score}")
+            print(f"  dimension_names present: {dimension_names is not None}")
+            print(f"  will calculate average: {overall_score is None and dimension_names is not None}")
 
         # If no overall score field, calculate average from dimensions
         if overall_score is None and dimension_names:
@@ -162,10 +170,16 @@ def stratified_split(
                 elif isinstance(dim_data, (int, float)):
                     scores.append(dim_data)
             overall_score = sum(scores) / len(scores) if scores else 0.0
+            if debug_count == 0:
+                print(f"  calculated average: {overall_score} from {len(scores)} dimensions")
         elif overall_score is None:
             overall_score = 0.0
 
         tier = assign_tier(overall_score, tier_boundaries)
+
+        if debug_count == 0:
+            print(f"  assigned tier: {tier}")
+            debug_count += 1
 
         if tier not in tier_groups:
             tier_groups[tier] = []
