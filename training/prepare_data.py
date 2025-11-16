@@ -207,7 +207,10 @@ def convert_to_training_format(
             continue  # Skip if no analysis
 
         # Extract dimension scores in correct order
-        dimensions = analysis.get('dimensions', {})
+        # Handle two formats:
+        # 1. Nested: analysis['dimensions'][dim_name] = score or {score: X, reasoning: Y}
+        # 2. Flat: analysis[dim_name] = score
+        dimensions = analysis.get('dimensions', analysis)  # If no 'dimensions' key, use analysis itself
 
         # Handle nested structure (dimensions can be objects with score/reasoning vs. flat score values)
         score_array = []
