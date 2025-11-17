@@ -74,6 +74,27 @@ See `sandbox/sustainability_tech_deployment_v3_validation/V3_VALIDATION_REPORT.m
 
 ---
 
+## Production Deployment Strategy
+
+**Status:** Deployed to production for passive data accumulation
+
+**Challenge:** v3 is EXTREMELY selective (1% pass rate)
+- From 151k raw articles → only ~1,500 scored articles
+- Target for training: 5,000+ articles
+- Gap: Only 30% of target
+
+**Strategy (2025-11-17):**
+1. Deploy v3 to production pipeline
+2. Accumulate deployment-specific data over 10-12 months
+3. Train model when sufficient data available (Q4 2025 - Q1 2026)
+4. Use innovation filter for immediate training needs
+
+**See:** `DEPLOYMENT_STRATEGY.md` for full deployment plan and timeline
+
+**Value proposition:** Zero false positives, powerful "tech works TODAY" narrative, worth the wait
+
+---
+
 ## Eight Dimensions (Scoring)
 
 1. **Deployment Maturity** (20%) - Lab → Pilot → Commercial → Mass Deployment
