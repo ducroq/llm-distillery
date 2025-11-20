@@ -1,0 +1,21 @@
+================================================================================
+Training Summary - Epoch 9
+================================================================================
+
+Overall Metrics:
+  Train MAE:  0.8503
+  Val MAE:    0.9730
+  Train RMSE: 1.1172
+  Val RMSE:   1.2669
+  Train Loss: 1.2483
+  Val Loss:   1.6047
+
+Per-Dimension Validation MAE:
+  agency              : Train=0.7530  Val=0.8760  Gap=+0.1230
+  progress            : Train=0.7592  Val=0.8823  Gap=+0.1231
+  collective_benefit  : Train=0.7498  Val=0.8661  Gap=+0.1164
+  connection          : Train=0.9366  Val=1.0415  Gap=+0.1049
+  innovation          : Train=0.7969  Val=0.8962  Gap=+0.0993
+  justice             : Train=0.9337  Val=1.0814  Gap=+0.1476
+  resilience          : Train=1.0152  Val=1.1721  Gap=+0.1569
+  wonder              : Train=0.8582  Val=0.9688  Gap=+0.1106

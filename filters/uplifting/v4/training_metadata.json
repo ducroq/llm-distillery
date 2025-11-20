@@ -1,0 +1,28 @@
+{
+  "filter_name": "uplifting",
+  "filter_version": "4.0",
+  "dimension_names": [
+    "agency",
+    "progress",
+    "collective_benefit",
+    "connection",
+    "innovation",
+    "justice",
+    "resilience",
+    "wonder"
+  ],
+  "num_dimensions": 8,
+  "model_name": "Qwen/Qwen2.5-1.5B",
+  "num_parameters": 1562203648,
+  "num_trainable_parameters": 12288,
+  "epochs": 6,
+  "batch_size": 8,
+  "learning_rate": 2e-05,
+  "max_length": 512,
+  "warmup_steps": 500,
+  "train_examples": 5365,
+  "val_examples": 669,
+  "best_val_mae": 0.9724704027175903,
+  "include_prompt": false,
+  "training_mode": "knowledge_distillation"
+}
