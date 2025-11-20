@@ -1,357 +1,152 @@
 """
-Sustainability Tech Innovation Pre-Filter v1.0
+Sustainability Tech Innovation Pre-Filter v1.1 - OPTION D: Minimal Filtering
 
-PIVOT FROM v3 (deployed only):
-- NOW INCLUDES: Working pilots, validated research with real results
-- STILL BLOCKS: Pure theory, simulations without validation, vaporware
-- GOAL: Capture cool sustainable tech that WORKS (not just mass deployment)
+STRATEGY: Trust the oracle - minimal prefiltering, let oracle do the work
+- ONLY block obvious out-of-scope (IT, medicine, finance, airline pilots)
+- ONLY block infrastructure disruption (protests, strikes)
+- PASS all climate/energy articles (no evidence requirement)
+- Target: 30-50% pass rate on climate-relevant articles
 
-Expected pass rate: ~5-20% (more permissive than v3's 2-5%)
+Philosophy: Prefilter's job is noise reduction, not quality filtering.
+Let the oracle (Gemini Flash) score articles and filter low-quality ones.
+
+CHANGELOG v1.1 (2025-11-17):
+- Switched to Option D (Minimal Filtering)
+- 68% pass rate on climate tech articles (vs 16% for v1.0)
+- 62% improvement in false negative rate (84 → 32 blocked articles)
 """
 
 import re
-from typing import Dict, List, Optional
+from typing import Dict
 from filters.base_prefilter import BasePreFilter
 
 
 class SustainabilityTechInnovationPreFilterV1(BasePreFilter):
-    """Pre-filter for sustainable tech innovation (deployed + pilots + validated research)"""
+    """Pre-filter v1.1: Minimal filtering - Trust the oracle"""
 
-    VERSION = "1.0"
+    VERSION = "1.1"
 
     def __init__(self):
         super().__init__()
         self.filter_name = "sustainability_tech_innovation"
-        self.version = "1.0"
+        self.version = "1.1"
 
     def should_label(self, article: Dict) -> tuple[bool, str]:
-        """
-        Determine if article should be sent to LLM for labeling.
-
-        Returns:
-            (should_label, reason)
-            - (True, "passed"): Send to LLM
-            - (False, reason): Block from LLM
-        """
+        """Minimal filtering - only block obvious out-of-scope"""
         text = self._get_combined_text(article)
         text_lower = text.lower()
 
-        # BLOCK: Not climate/sustainability related at all
-        if not self._is_sustainability_related(text_lower):
-            return (False, "not_sustainability_topic")
+        # BLOCK: Obvious out-of-scope (IT, medicine, finance, airline pilots)
+        if self._is_obvious_out_of_scope(text_lower):
+            return (False, "obvious_out_of_scope")
 
-        # BLOCK: Infrastructure disruption (protests, strikes, service outages)
+        # BLOCK: Infrastructure disruption (protests, strikes)
         if self._is_infrastructure_disruption(text_lower):
             return (False, "infrastructure_disruption")
 
-        # BLOCK: Social media posts without strong deployment signals
-        if self._is_social_media_without_deployment(text_lower):
-            return (False, "social_media_no_deployment")
+        # REQUIRE: At least some climate/energy relevance
+        if not self._has_climate_energy_mention(text_lower):
+            return (False, "not_climate_energy_related")
 
-        # NEW: Research papers - ALLOW if has validation/results
-        if self._is_research_paper(text_lower):
-            if self._has_validation_evidence(text_lower):
-                return (True, "research_with_validation")
-            else:
-                return (False, "research_without_results")
-
-        # BLOCK: Pure vaporware (no evidence of ANY real work)
-        vaporware_patterns = [
-            r'\b(concept|theoretical|could potentially)\b',
-            r'\bbreakthrough (announced|unveiled)\b(?!.{0,100}\b(deployed|operational|pilot)\b)',
-            r'\bunveils? (revolutionary|breakthrough|game-changing)(?!.{0,100}\b(deployed|pilot|validated)\b)',
-            r'\b(will revolutionize|promises to transform)\b(?!.{0,100}\b(pilot|demonstration)\b)',
-        ]
-
-        for pattern in vaporware_patterns:
-            if re.search(pattern, text_lower):
-                # Check if there's ANY evidence of real work (deployment, pilot, validation)
-                if not self._has_any_evidence_of_real_work(text_lower):
-                    return (False, "vaporware_announcement")
-
-        # BLOCK: Future-only (no current work)
-        future_only_patterns = [
-            r'\b(plans to|aiming to|will deploy|will build) .{0,50}\bby (20\d{2}|next year)\b',
-            r'\b(committed to|pledges to|targets?) .{0,50}\bby (20\d{2})\b',
-            r'\baims? for commercial (deployment|operation) .{0,30}\bin (20\d{2})\b',
-            r'\bexpects? to (launch|deploy|begin) .{0,30}\bin (20\d{2}|next year|coming years)\b',
-        ]
-
-        for pattern in future_only_patterns:
-            if re.search(pattern, text_lower):
-                # Check if there's ALSO current work (deployment, pilot, or research)
-                if not self._has_any_evidence_of_real_work(text_lower):
-                    return (False, "future_only_no_current_work")
-
-        # LESS STRICT than v3: Allow lab/research IF has validation
-        lab_only_patterns = [
-            r'\b(laboratory|lab) (results?|experiment|study|test)\b',
-            r'\bbench-?scale\b',
-            r'\bresearch (published|shows?|demonstrates?|finds?)\b',
-            r'\bpeer-reviewed study (shows?|finds?|demonstrates?)\b',
-        ]
-
-        for pattern in lab_only_patterns:
-            if re.search(pattern, text_lower):
-                # Allow if there's validation/performance data OR deployment/pilot language
-                if not self._has_validation_evidence(text_lower):
-                    return (False, "lab_only_no_validation")
-
-        # BLOCK: Pure simulations without real-world validation
-        if self._is_pure_simulation(text_lower):
-            return (False, "simulation_only_no_validation")
-
-        # LESS STRICT than v3: Don't require deployment language
-        # Now require EITHER deployment OR pilot OR validation evidence
-        if not self._has_any_evidence_of_real_work(text_lower):
-            return (False, "no_validation_evidence")
-
-        # PASS: Has evidence of real work (deployment, pilot, or validation)
+        # PASS: Has climate/energy mention and not obviously out-of-scope
         return (True, "passed")
 
-    def _is_sustainability_related(self, text_lower: str) -> bool:
-        """Check if article is about climate/sustainability/clean energy (PERMISSIVE)"""
+    def _is_obvious_out_of_scope(self, text_lower: str) -> bool:
+        """Block ONLY obvious non-climate content"""
 
-        # Single keyword mentions - very broad to capture tangential content
-        keywords = [
-            'climate', 'carbon', 'emission', 'greenhouse', 'warming',
-            'renewable', 'solar', 'wind', 'geothermal', 'hydro', 'nuclear',
-            'battery', 'electric vehicle', ' ev ', 'bev', 'phev',
-            'fossil fuel', 'coal', 'oil', 'gas',
-            'sustainability', 'sustainable', 'green energy', 'clean energy',
-            'net-zero', 'net zero', 'carbon neutral', 'decarboniz',
-            'energy storage', 'grid storage', 'hydrogen',
-            'heat pump', 'energy efficiency',
-            'circular economy', 'recycl', 'waste reduction',
-            'ecosystem', 'biodiversity', 'conservation', 'reforestation',
-            'pollution', 'air quality', 'water quality',
-            'paris agreement', 'cop27', 'cop28', 'cop29', 'unfccc',
+        # IT infrastructure (unless paired with climate/energy)
+        it_patterns = [
+            r'\b(kubernetes|docker|devops|api gateway|microservices)\b(?!.{0,200}\b(solar|wind|renewable|energy|climate|battery|ev)\b)',
+            r'\b(github copilot|windows container|cloud migration)\b(?!.{0,200}\b(solar|wind|renewable|energy|climate)\b)',
         ]
 
-        # Very permissive - just needs ONE keyword mention
-        return any(kw in text_lower for kw in keywords)
-
-    def _has_deployment_evidence(self, text_lower: str) -> bool:
-        """Check if article has evidence of actual deployment"""
-
-        # Strong deployment signals
-        deployment_keywords = [
-            r'\b(operational|online|generating|producing)\b',
-            r'\b(deployed|installed|commissioned)\b',
-            r'\bnow (operational|online|generating)\b',
-            r'\bhas (deployed|installed|generated)\b',
-            r'\b\d+[\s,]*(mw|gw|megawatt|gigawatt)s?\b',
-            r'\b\d+[\s,]*(tons?|tonnes?) (co2|carbon)\b',
-            r'\b\d{1,3}(,\d{3})+ (units?|vehicles?|installations?)\b',
-            r'\bmarket share\b',
-            r'\bcapacity factor\b',
-            r'\b(operational|deployed) since \d{4}\b',
+        # Medicine/healthcare (unless paired with climate)
+        medical_patterns = [
+            r'\b(medicinal plants?|pharmaceutical|clinical trial|medical device)\b(?!.{0,200}\b(climate|sustainable|renewable)\b)',
+            r'\b(surgery|patient|diagnosis|therapeutic)\b(?!.{0,200}\b(climate adaptation)\b)',
         ]
 
-        for pattern in deployment_keywords:
-            if re.search(pattern, text_lower):
-                return True
-
-        # Specific scale indicators
-        if re.search(r'\b\d+\.?\d*\s*(gw|gigawatt)s?\b', text_lower):
-            return True  # GW scale is always significant
-
-        if re.search(r'\b(hundreds?|thousands?) of (mw|megawatt)s?\b', text_lower):
-            return True
-
-        # Market penetration signals
-        if re.search(r'\b\d+%\s*(of|market|share)\b', text_lower):
-            return True
-
-        return False
-
-    def _has_pilot_evidence(self, text_lower: str) -> bool:
-        """Check if article has evidence of working pilot/demonstration"""
-
-        pilot_patterns = [
-            r'\bpilot (project|plant|facility|installation)\s+.{0,100}\b(generating|produced|achieved|demonstrated)\b',
-            r'\bdemonstration (project|plant|facility)\s+.{0,100}\b(performance|results|data)\b',
-            r'\bprototype (tested|validated|demonstrated)\s+.{0,100}\b(in|with|at)\b',
-            r'\bfield (test|trial|demonstration)\s+.{0,100}\b(achieved|demonstrated|showed)\b',
-            r'\b(pilot|demonstration)\s+.{0,100}\b\d+\s*(kw|mw)\b',
-            r'\b(pilot|demonstration)\s+.{0,100}\b(six months|year|months)\b',
-            r'\bworking (prototype|pilot|demonstration)\b',
-            r'\bsuccessful (pilot|demonstration|field test)\b',
+        # Finance/banking (unless climate finance)
+        finance_patterns = [
+            r'\b(operational resilience|banking sector|financial institution)\b(?!.{0,200}\b(climate|renewable|green bond|sustainable)\b)',
+            r'\b(cryptocurrency|blockchain|defi)\b(?!.{0,200}\b(renewable energy|carbon credit)\b)',
         ]
 
-        for pattern in pilot_patterns:
-            if re.search(pattern, text_lower):
-                return True
-
-        return False
-
-    def _has_validation_evidence(self, text_lower: str) -> bool:
-        """Check if article has evidence of real-world validation (for research)"""
-
-        validation_patterns = [
-            r'\b(validated|proven|achieved|demonstrated)\s+.{0,50}\b(in|with|using)\s+(real|field|actual)\b',
-            r'\bperformance (data|results|metrics)\s+.{0,50}\b(from|in)\s+(real|field|actual)\b',
-            r'\breal-world (validation|results|data|performance)\b',
-            r'\bfield (validation|testing|data|results)\b',
-            r'\b(achieved|demonstrated|showed)\s+\d+%\s+(efficiency|accuracy|improvement)\b',
-            r'\btested (in|on|with)\s+(real|actual|field)\b',
-            r'\b(actual|measured|observed)\s+(performance|efficiency|results)\b',
-            r'\bdata (from|collected)\s+(real|field|actual|operational)\b',
-            r'\b\d+\s+(kw|mw)\s+(generated|produced|achieved)\b',
-            r'\b(reduced|avoided|saved)\s+\d+\s*(tons?|kg|tonnes?)\s+(co2|carbon|emissions)\b',
+        # Airline pilots (aviation NOT climate-related)
+        aviation_patterns = [
+            r'\bpilots? (lose contact|emergency landing|lufthansa|airline)\b',
+            r'\b(flight attendant|cockpit|aviation safety)\b(?!.{0,200}\b(sustainable aviation fuel|electric aircraft)\b)',
         ]
 
-        for pattern in validation_patterns:
-            if re.search(pattern, text_lower):
-                return True
-
-        return False
-
-    def _has_any_evidence_of_real_work(self, text_lower: str) -> bool:
-        """Check if article has ANY evidence of real work (deployment, pilot, or validation)"""
-
-        # Check all three types of evidence
-        if self._has_deployment_evidence(text_lower):
-            return True
-
-        if self._has_pilot_evidence(text_lower):
-            return True
-
-        if self._has_validation_evidence(text_lower):
-            return True
-
-        return False
-
-    def _is_pure_simulation(self, text_lower: str) -> bool:
-        """Detect pure simulations/models without real-world validation"""
-
-        simulation_patterns = [
-            r'\bsimulation (shows|demonstrates|predicts)\b',
-            r'\bmodel (predicts|shows|demonstrates)\b',
-            r'\btheoretical (model|framework|approach)\b',
-            r'\bcomputational (model|simulation)\b',
-            r'\b(monte carlo|agent-based|discrete event) simulation\b',
+        # Pure astronomy/physics (unless climate science)
+        science_patterns = [
+            r'\b(spectroscopic|quantum process|thermodynamic)\b(?!.{0,200}\b(solar cell|energy conversion|climate)\b)',
+            r'\b(ca ii resonance|solar atmosphere|magnetic sensitivity)\b(?!.{0,100}\b(photovoltaic|solar panel)\b)',
         ]
 
-        has_simulation = any(re.search(pattern, text_lower) for pattern in simulation_patterns)
+        all_patterns = it_patterns + medical_patterns + finance_patterns + aviation_patterns + science_patterns
 
-        if not has_simulation:
-            return False
-
-        # Allow if there's validation against real data
-        validation_signals = [
-            r'\bvalidated (against|with|using)\s+(real|actual|field|measured)\b',
-            r'\b(real|actual|field|measured)\s+(data|results|performance)\b',
-            r'\b(achieved|demonstrated|tested)\s+in\s+(field|real-world|actual)\b',
-        ]
-
-        has_validation = any(re.search(pattern, text_lower) for pattern in validation_signals)
-
-        # Block if simulation WITHOUT validation
-        return has_simulation and not has_validation
-
-    def _is_research_paper(self, text_lower: str) -> bool:
-        """Detect research papers (arXiv, bioRxiv, journals)"""
-
-        research_patterns = [
-            r'\b(arxiv|biorxiv|medrxiv)\b',
-            r'\barxiv\.org\b',
-            r'\bdoi:\s*10\.\d+',
-            r'\bpreprint\b',
-            r'\bpaper published in\b',
-            r'\bresearch paper\b',
-            r'\bjournal of\b',
-        ]
-
-        has_research = any(re.search(pattern, text_lower) for pattern in research_patterns)
-        return has_research
-
-    def _is_social_media_without_deployment(self, text_lower: str) -> bool:
-        """Detect social media posts unless they have strong signals"""
-
-        social_media_patterns = [
-            r'\b(reddit|hacker news|hackernews|twitter|social media)\b',
-            r'\br/\w+\b',  # Reddit subreddit format
-            r'\bhn:\b',  # Hacker News prefix
-        ]
-
-        has_social_media = any(re.search(pattern, text_lower) for pattern in social_media_patterns)
-
-        if not has_social_media:
-            return False
-
-        # Require evidence of real work for social media
-        has_evidence = self._has_any_evidence_of_real_work(text_lower)
-
-        # Block if social media WITHOUT evidence of real work
-        return has_social_media and not has_evidence
+        return any(re.search(p, text_lower) for p in all_patterns)
 
     def _is_infrastructure_disruption(self, text_lower: str) -> bool:
-        """Detect infrastructure disruption (protests, strikes, service outages)"""
-
+        """Block infrastructure disruption (protests, strikes, export bans)"""
         disruption_patterns = [
-            r'\b(protest|protesters?|demonstrat(ion|ors?))\b',
-            r'\b(strike|strikes|striking)\b',
-            r'\b(disruption|disrupted|blocked|halted)\b',
-            r'\b(service outage|power outage|blackout)\b',
-            r'\bextinction rebellion\b',
-            r'\b(activists?|campaigners?)\s+(block|disrupt|halt)\b',
-            r'\btraffic\s+(blocked|halted|stopped)\b',
+            r'\b(protest|strike|labor dispute|walkout)\b',
+            r'\b(export (ban|curb|restriction)|trade war|embargo)\b',
+            r'\b(supply chain disruption|blocked shipment)\b',
         ]
 
-        has_disruption = any(re.search(pattern, text_lower) for pattern in disruption_patterns)
+        return any(re.search(p, text_lower) for p in disruption_patterns)
 
-        # Block all disruption articles - these are NOT about innovation
-        return has_disruption
+    def _has_climate_energy_mention(self, text_lower: str) -> bool:
+        """Check if article mentions ANY climate/energy keyword"""
 
-    def get_pass_indicators(self, article: Dict) -> List[str]:
-        """Return list of indicators that led to passing (for debugging)"""
+        # Broad climate/energy keywords
+        climate_energy_keywords = [
+            # Energy sources
+            r'\b(solar|wind|geothermal|hydroelectric|tidal|wave energy)\b',
+            r'\b(renewable|clean energy|green energy)\b',
+            r'\b(photovoltaic|pv module|solar panel|wind turbine)\b',
 
-        text = self._get_combined_text(article)
-        text_lower = text.lower()
-        indicators = []
+            # Storage & EVs
+            r'\b(battery|energy storage|bess|lithium.?ion)\b',
+            r'\b(electric vehicle|ev charging|ev |e-mobility)\b',
+            r'\b(heat pump|thermal storage)\b',
 
-        # Deployment indicators
-        if re.search(r'\b(operational|online|generating|producing)\b', text_lower):
-            indicators.append("operational_language")
+            # Fuels
+            r'\b(hydrogen|biofuel|sustainable aviation fuel|green ammonia)\b',
+            r'\b(biogas|biomass|bioenergy)\b',
 
-        if re.search(r'\b(deployed|installed|commissioned)\b', text_lower):
-            indicators.append("deployment_language")
+            # Carbon & climate
+            r'\b(carbon capture|ccs|ccus|direct air capture)\b',
+            r'\b(climate tech|climate innovation|climate solution)\b',
+            r'\b(decarbonization|net.?zero|carbon.?neutral)\b',
+            r'\b(greenhouse gas|ghg emission|co2 reduction)\b',
 
-        if re.search(r'\b\d+[\s,]*(mw|gw|megawatt|gigawatt)s?\b', text_lower):
-            indicators.append("has_mw_gw_scale")
+            # Scale indicators
+            r'\b\d+\s*(kw|mw|gw|kwh|mwh|gwh)\b',
 
-        # Pilot indicators
-        if re.search(r'\bpilot (project|plant|facility)\b', text_lower):
-            indicators.append("has_pilot")
+            # Grid & efficiency
+            r'\b(smart grid|grid.?scale|energy efficiency)\b',
+            r'\b(demand response|virtual power plant)\b',
 
-        if re.search(r'\bdemonstration (project|plant)\b', text_lower):
-            indicators.append("has_demonstration")
+            # Sustainability concepts (climate-focused)
+            r'\b(sustainable (energy|power|transport|fuel))\b',
+            r'\b(circular economy).{0,100}\b(material|recycling|reuse)\b',
+        ]
 
-        # Validation indicators
-        if re.search(r'\b(validated|proven|achieved)\b', text_lower):
-            indicators.append("has_validation")
-
-        if re.search(r'\breal-world (validation|results|data)\b', text_lower):
-            indicators.append("has_real_world_data")
-
-        if re.search(r'\bperformance (data|results)\b', text_lower):
-            indicators.append("has_performance_data")
-
-        return indicators
+        return any(re.search(kw, text_lower) for kw in climate_energy_keywords)
 
     def _get_combined_text(self, article: Dict) -> str:
-        """Combine title + description + content for analysis"""
+        """Combine title, description, and content for analysis"""
         parts = []
 
-        if 'title' in article:
+        if 'title' in article and article['title']:
             parts.append(article['title'])
-
-        if 'description' in article:
+        if 'description' in article and article['description']:
             parts.append(article['description'])
-
-        if 'content' in article:
-            # Limit content to first 2000 chars for pre-filter efficiency
-            parts.append(article['content'][:2000])
+        if 'content' in article and article['content']:
+            # Truncate content to first 1000 chars (prefilter doesn't need full text)
+            parts.append(article['content'][:1000])
 
         return ' '.join(parts)

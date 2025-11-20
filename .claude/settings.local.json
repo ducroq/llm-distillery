@@ -76,7 +76,11 @@
       "Bash(whois:*)",
       "Bash(git mv:*)",
       "Bash(tee:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git push:*)",
+      "Bash(if [ -f \"filters/sustainability_tech_deployment/$v/README.md\" ])",
+      "Bash(then head -10 \"filters/sustainability_tech_deployment/$v/README.md\")",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

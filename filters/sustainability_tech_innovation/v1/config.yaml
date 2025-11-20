@@ -1,19 +1,22 @@
-# Sustainability Pillar 1: Technology & Innovation - Version 1.0
+# Sustainability Pillar 1: Technology & Innovation - Version 1.1
 # Focus: COOL SUSTAINABLE TECH THAT WORKS (deployed, pilots, validated research)
 
 filter:
   name: sustainability_tech_innovation
-  version: "1.0"
+  version: "1.1"
   created: "2025-11-15"
+  updated: "2025-11-17"
   description: "Rate sustainable technology and innovation - deployed tech, working pilots, validated breakthroughs"
   pillar: "Technology & Innovation (what's working, not just theory)"
   purpose: "Identify cool sustainable tech with real results, not vaporware"
+  changelog_v1_1: "CRITICAL FIX: Added mandatory gatekeeper enforcement (85.7% → 0% FP target). Added Option D prefilter (68% pass rate, 62% fewer false negatives). Explicit proposal vs pilot examples in prompt."
   changelog_v1: "Pivoted from 'deployed only' to 'tech that works' - includes deployed, pilots, and validated research. Lowered deployment_maturity gatekeeper from 5.0 to 3.0 for broader coverage."
 
 prefilter:
   enabled: true
-  expected_pass_rate: 5-20%  # More permissive than v3 (was 2-5%)
-  description: "Blocks pure theory and vaporware. Allows deployed tech, working pilots, and validated research with real results."
+  implementation: "prefilter_option_d.py"  # Option D: Minimal Filtering - Trust the oracle
+  expected_pass_rate: 30-50%  # Higher pass rate, oracle filters FPs
+  description: "Option D: Minimal filtering - only blocks obvious out-of-scope (IT, medicine, finance, airline pilots) and infrastructure disruption. Trusts oracle to filter quality. 68% pass rate on climate tech articles (vs 16% for v1.0)."
 
   block_keywords:
     - pure_theory

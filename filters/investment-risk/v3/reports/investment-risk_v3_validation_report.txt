@@ -1,0 +1,394 @@
+================================================================================
+INVESTMENT-RISK V3 VALIDATION REPORT
+================================================================================
+
+Total articles analyzed: 4,654
+
+TIER DISTRIBUTION
+--------------------------------------------------------------------------------
+Tier            Count   Percentage Description                             
+--------------------------------------------------------------------------------
+RED                69        1.48% Act now - reduce risk immediately       
+YELLOW            550       11.82% Monitor closely - prepare for defense   
+GREEN               0        0.00% Consider buying - value emerging        
+BLUE              915       19.66% Educational content - no immediate action
+NOISE           3,120       67.04% Ignore - no actionable signal           
+--------------------------------------------------------------------------------
+
+ACTIONABLE SIGNAL RATE
+--------------------------------------------------------------------------------
+Actionable articles (RED + YELLOW + GREEN): 619 (13.30%)
+Non-actionable articles (BLUE + NOISE): 4,035 (86.70%)
+
+EXAMPLE ARTICLES BY TIER
+================================================================================
+
+RED TIER - Act now - reduce risk immediately
+--------------------------------------------------------------------------------
+
+Example 1:
+  Title: Denmark reports repeated Russian naval provocations in its straits
+  Source: global_news_reuters
+  Published: 2025-10-03T19:15:03
+  Reason: High risk signal (macro=7.0, credit=4.0, systemic=6.0)
+  Signal Strength: 5.15
+  Key Scores:
+    Macro Risk: 7
+    Credit Stress: 4
+    Sentiment Extremes: 5
+    Valuation Risk: 3
+    Systemic Risk: 6
+    Evidence Quality: 7
+    Actionability: 6
+  URL: https://news.google.com/rss/articles/CBMivgFBVV95cUxNNTdQM1QwakRURmZlUU1nVjhMNmd...
+
+Example 2:
+  Title: What Gaza looks like today, after two years of war
+  Source: global_news_reuters
+  Published: 2025-10-11T06:12:08
+  Reason: High risk signal (macro=7.0, credit=5.0, systemic=7.0)
+  Signal Strength: 5.90
+  Key Scores:
+    Macro Risk: 7
+    Credit Stress: 5
+    Sentiment Extremes: 6
+    Valuation Risk: 4
+    Systemic Risk: 7
+    Evidence Quality: 7
+    Actionability: 6
+  URL: https://news.google.com/rss/articles/CBMilgFBVV95cUxQNW9TVlZHc0hMV0plMWlsZ2dhNmx...
+
+Example 3:
+  Title: Porta
+  Source: portuguese_infomoney
+  Published: 2025-11-11T18:08:05
+  Reason: High risk signal (macro=7.0, credit=4.0, systemic=6.0)
+  Signal Strength: 5.25
+  Key Scores:
+    Macro Risk: 7
+    Credit Stress: 4
+    Sentiment Extremes: 5
+    Valuation Risk: 3
+    Systemic Risk: 6
+    Evidence Quality: 6
+    Actionability: 5
+  URL: https://www.infomoney.com.br/mundo/porta-avioes-dos-eua-se-desloca-para-regiao-d...
+
+Example 4:
+  Title: France's prime minister resigns after less than a month in office
+  Source: global_news_NPR_world
+  Published: 2025-10-06T10:07:55
+  Reason: High risk signal (macro=7.0, credit=4.0, systemic=6.0)
+  Signal Strength: 5.50
+  Key Scores:
+    Macro Risk: 7
+    Credit Stress: 4
+    Sentiment Extremes: 5
+    Valuation Risk: 4
+    Systemic Risk: 6
+    Evidence Quality: 6
+    Actionability: 6
+  URL: https://www.npr.org/2025/10/06/nx-s1-5563671/french-prime-minister-resigns-month...
+
+Example 5:
+  Title: Tuesday's News Links
+  Source: investor_signals_creditbubblestocks
+  Published: 2025-11-11T05:41:44.973000
+  Reason: High risk signal (macro=7.0, credit=5.0, systemic=6.0)
+  Signal Strength: 5.60
+  Key Scores:
+    Macro Risk: 7
+    Credit Stress: 5
+    Sentiment Extremes: 4
+    Valuation Risk: 5
+    Systemic Risk: 6
+    Evidence Quality: 6
+    Actionability: 6
+  URL: http://creditbubblebulletin.blogspot.com/2025/11/tuesdays-news-links_10.html
+
+YELLOW TIER - Monitor closely - prepare for defense
+--------------------------------------------------------------------------------
+
+Example 1:
+  Title: More than 2,700 stores are closing across the US this year. Here's the list.
+  Source: professional_business_business_insider
+  Published: 2025-10-29T09:43:01
+  Reason: Warning signal (macro=5.0, credit=3.0, valuation=5.0)
+  Signal Strength: 4.10
+  Key Scores:
+    Macro Risk: 5
+    Credit Stress: 3
+    Sentiment Extremes: 4
+    Valuation Risk: 5
+    Systemic Risk: 4
+    Evidence Quality: 6
+    Actionability: 5
+  URL: https://www.businessinsider.com/stores-closing-in-2025-list
+
+Example 2:
+  Title: Price and Volume Divergence in China’s Real Estate Markets: The Role of Local Governments -
+  Source: economics_nber_working_papers
+  Published: 2025-10-02T04:38:22.377379
+  Reason: Warning signal (macro=6.0, credit=6.0, valuation=6.0)
+  Signal Strength: 5.80
+  Key Scores:
+    Macro Risk: 6
+    Credit Stress: 6
+    Sentiment Extremes: 4
+    Valuation Risk: 6
+    Systemic Risk: 6
+    Evidence Quality: 7
+    Actionability: 5
+  URL: https://www.nber.org/papers/w34303#fromrss
+
+Example 3:
+  Title: Increases in the Money Supply, Not Corporate Profits, Drive Price Increases
+  Source: investor_signals_gold_eagle
+  Published: 2025-11-05T05:00:00
+  Reason: Warning signal (macro=5.0, credit=3.0, valuation=5.0)
+  Signal Strength: 4.15
+  Key Scores:
+    Macro Risk: 5
+    Credit Stress: 3
+    Sentiment Extremes: 3
+    Valuation Risk: 5
+    Systemic Risk: 4
+    Evidence Quality: 6
+    Actionability: 5
+  URL: https://www.gold-eagle.com/article/increases-money-supply-not-corporate-profits-...
+
+Example 4:
+  Title: Is nuclear the key to powering the data center boom?
+  Source: energy_utilities_utility_dive
+  Published: 2025-10-03T14:03:50
+  Reason: Warning signal (macro=5.0, credit=3.0, valuation=4.0)
+  Signal Strength: 4.10
+  Key Scores:
+    Macro Risk: 5
+    Credit Stress: 3
+    Sentiment Extremes: 3
+    Valuation Risk: 4
+    Systemic Risk: 4
+    Evidence Quality: 5
+    Actionability: 5
+  URL: https://www.utilitydive.com/news/is-nuclear-the-key-to-powering-the-data-center-...
+
+Example 5:
+  Title: Housing, immigration, and climate top concerns for Amsterdam voters ahead of elections
+  Source: dutch_news_NL_Times
+  Published: 2025-10-14T07:00:00
+  Reason: Warning signal (macro=5.0, credit=3.0, valuation=5.0)
+  Signal Strength: 4.40
+  Key Scores:
+    Macro Risk: 5
+    Credit Stress: 3
+    Sentiment Extremes: 4
+    Valuation Risk: 5
+    Systemic Risk: 4
+    Evidence Quality: 6
+    Actionability: 5
+  URL: https://nltimes.nl/2025/10/14/housing-immigration-climate-top-concerns-amsterdam...
+
+GREEN TIER - Consider buying - value emerging
+--------------------------------------------------------------------------------
+  No examples found
+
+BLUE TIER - Educational content - no immediate action
+--------------------------------------------------------------------------------
+
+Example 1:
+  Title: Security and AI’s potential to protect
+  Source: industry_intelligence_mckinsey_insights
+  Published: 2025-10-28T00:00:00
+  Reason: Educational content (evidence=6.0, actionability=4.0)
+  Signal Strength: 3.20
+  Key Scores:
+    Macro Risk: 3
+    Credit Stress: 3
+    Sentiment Extremes: 3
+    Valuation Risk: 3
+    Systemic Risk: 3
+    Evidence Quality: 6
+    Actionability: 4
+  URL: https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/security-and...
+
+Example 2:
+  Title: Criteria y Santander invertirán en el megafondo tecnológico europeo
+  Source: spanish_expansion
+  Published: 2025-10-29T02:14:51
+  Reason: Educational content (evidence=5.0, actionability=4.0)
+  Signal Strength: 3.50
+  Key Scores:
+    Macro Risk: 3
+    Credit Stress: 3
+    Sentiment Extremes: 3
+    Valuation Risk: 4
+    Systemic Risk: 4
+    Evidence Quality: 5
+    Actionability: 4
+  URL: https://www.expansion.com/empresas/2025/10/29/69013765e5fdea68268b4581.html
+
+Example 3:
+  Title: Some Social Security recipients are getting a double payment this month: find out who - and why
+  Source: newsapi_general
+  Published: 2025-10-17T12:19:24
+  Reason: Educational content (evidence=5.0, actionability=4.0)
+  Signal Strength: 3.20
+  Key Scores:
+    Macro Risk: 3
+    Credit Stress: 3
+    Sentiment Extremes: 3
+    Valuation Risk: 3
+    Systemic Risk: 3
+    Evidence Quality: 5
+    Actionability: 4
+  URL: https://en.as.com/latest_news/some-social-security-recipients-are-getting-a-doub...
+
+Example 4:
+  Title: El Parlamento de Extremadura aprueba una universidad rechazada por el ministerio: “3.000 euros de ca...
+  Source: global_news_el_pais
+  Published: 2025-10-09T10:26:39
+  Reason: Educational content (evidence=5.0, actionability=4.0)
+  Signal Strength: 3.85
+  Key Scores:
+    Macro Risk: 4
+    Credit Stress: 3
+    Sentiment Extremes: 3
+    Valuation Risk: 4
+    Systemic Risk: 4
+    Evidence Quality: 5
+    Actionability: 4
+  URL: https://elpais.com/educacion/2025-10-09/el-parlamento-de-extremadura-aprueba-una...
+
+Example 5:
+  Title: ICRAfail – A Lesson for the Future [pdf]
+  Source: community_social_hackernews_newest
+  Published: 2025-11-13T05:53:22
+  Reason: Educational content (evidence=5.0, actionability=3.0)
+  Signal Strength: 3.50
+  Key Scores:
+    Macro Risk: 3
+    Credit Stress: 3
+    Sentiment Extremes: 3
+    Valuation Risk: 3
+    Systemic Risk: 5
+    Evidence Quality: 5
+    Actionability: 3
+  URL: https://philarcher.org/icra/ICRAfail.pdf
+
+NOISE TIER - Ignore - no actionable signal
+--------------------------------------------------------------------------------
+
+Example 1:
+  Title: Lattice
+  Source: science_arxiv_cs
+  Published: 2025-09-29T04:00:00
+  Reason: Low evidence quality (2.0 < 4)
+  Signal Strength: 0.00
+  Key Scores:
+    Macro Risk: 1
+    Credit Stress: 1
+    Sentiment Extremes: 1
+    Valuation Risk: 1
+    Systemic Risk: 1
+    Evidence Quality: 2
+    Actionability: 1
+  URL: https://arxiv.org/abs/2509.21786
+
+Example 2:
+  Title: Topics in Probability, Parametric Estimation and Stochastic Calculus
+  Source: science_arxiv_math
+  Published: 2025-10-24T04:00:00
+  Reason: Low evidence quality (2.0 < 4)
+  Signal Strength: 0.00
+  Key Scores:
+    Macro Risk: 1
+    Credit Stress: 1
+    Sentiment Extremes: 1
+    Valuation Risk: 1
+    Systemic Risk: 1
+    Evidence Quality: 2
+    Actionability: 1
+  URL: https://arxiv.org/abs/2510.20163
+
+Example 3:
+  Title: The Performative Trap: Seven Hidden Harms of Feel
+  Source: professional_business_medium_startup
+  Published: 2025-10-25T11:34:20.889000
+  Reason: Low evidence quality (3.0 < 4)
+  Signal Strength: 0.00
+  Key Scores:
+    Macro Risk: 2
+    Credit Stress: 2
+    Sentiment Extremes: 2
+    Valuation Risk: 2
+    Systemic Risk: 2
+    Evidence Quality: 3
+    Actionability: 2
+  URL: https://paulaladenika.medium.com/the-performative-trap-seven-hidden-harms-of-fee...
+
+Example 4:
+  Title: Iconic Nissan Skyline set for 2027 rebirth, and it’ll be a manual
+  Source: automotive_autoexpress_uk
+  Published: 2025-10-30T10:19:51
+  Reason: Low evidence quality (3.0 < 4)
+  Signal Strength: 0.00
+  Key Scores:
+    Macro Risk: 2
+    Credit Stress: 2
+    Sentiment Extremes: 2
+    Valuation Risk: 2
+    Systemic Risk: 2
+    Evidence Quality: 3
+    Actionability: 2
+  URL: https://www.autoexpress.co.uk/nissan/368188/iconic-nissan-skyline-set-2027-rebir...
+
+Example 5:
+  Title: Solving a Million
+  Source: science_arxiv_cs
+  Published: 2025-11-13T05:00:00
+  Reason: Low evidence quality (3.0 < 4)
+  Signal Strength: 0.00
+  Key Scores:
+    Macro Risk: 2
+    Credit Stress: 2
+    Sentiment Extremes: 2
+    Valuation Risk: 2
+    Systemic Risk: 2
+    Evidence Quality: 3
+    Actionability: 2
+  URL: https://arxiv.org/abs/2511.09030
+
+
+ASSESSMENT
+================================================================================
+
+Distribution Analysis:
+
+  RED: 1.48% (expected 5-10%) - BELOW EXPECTED RANGE
+  YELLOW: 11.82% (expected 10-20%) - WITHIN EXPECTED RANGE
+  GREEN: 0.00% (expected 5-10%) - BELOW EXPECTED RANGE
+  BLUE: 19.66% (expected 20-30%) - BELOW EXPECTED RANGE
+  NOISE: 67.04% (expected 40-50%) - ABOVE EXPECTED RANGE
+
+Quality Assessment:
+
+RED FLAGS:
+  - Actionable signal rate is very low (13.30%)
+  - RED tier percentage is very low (1.48%)
+  - NOISE tier percentage is very high (67.04%)
+
+Overall Assessment:
+
+  NEEDS REVIEW - Significant deviation from expected distribution
+  1/5 tiers within expected ranges
+
+Recommendations:
+
+  - Consider reviewing threshold settings to increase actionable signals
+  - High noise rate suggests oracle may need better content filtering
+  - Low RED tier percentage may indicate thresholds are too strict
+
+================================================================================
+END OF REPORT
+================================================================================

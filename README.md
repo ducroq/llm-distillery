@@ -2,51 +2,73 @@
 
 **Transform large language model expertise into fast, specialized local models**
 
-LLM Distillery is a framework for distilling knowledge from large foundation models (Claude, Gemini, GPT-4) into small, domain-specific classifiers that run locally at 100x lower cost and 50x faster inference.
+LLM Distillery is a framework for distilling knowledge from large foundation models (Gemini Flash) into small, domain-specific classifiers that run locally at 100x lower cost and 50x faster inference.
 
 ## Overview
 
 Large language models excel at nuanced judgment tasks but are expensive and slow for production use. This framework:
 
-1. **Generates ground truth datasets** using Gemini Flash as labeling oracle
-2. **Fine-tunes Qwen2.5-7B-Instruct** (see [model decision](docs/decisions/2025-11-08-local-model-selection.md))
-3. **Validates quality** by comparing model predictions to ground truth
+1. **Generates ground truth datasets** using Gemini Flash as oracle (dimensional scoring only)
+2. **Fine-tunes Qwen2.5-7B-Instruct** for multi-dimensional regression
+3. **Validates quality** through comprehensive training data validation
 4. **Deploys locally** for fast, cost-effective batch inference (150x faster than oracle)
 
 ### Use Cases
 
-- **Content filtering**: Sustainability impact, uplifting news, policy relevance
-- **Investment intelligence**: Technology readiness, greenwashing detection, evidence strength
-- **Quality assessment**: Clinical evidence, regulatory status, technical credibility
-- **Multi-dimensional scoring**: Rate content on 8+ dimensions simultaneously
+- **Content filtering**: Uplifting news, sustainability tech deployment, investment risk signals
+- **Multi-dimensional scoring**: Rate content on 8 dimensions simultaneously (0-10 scale)
+- **Tier classification**: Flexible postfilter tier assignment without model retraining
 
-## Current Status (October 2025)
+## Current Status (November 2025)
 
-### ✅ Completed
-- **Filter Architecture**: Versioned filter packages (pre-filter + prompt + config)
-- **Uplifting Filter v1**: 8-dimension framework with rule-based pre-filter (93% pass rate)
-- **Sustainability Filter v1**: 8-dimension framework with greenwashing/vaporware detection
-- **Investment Risk Filter v1**: 8-dimension framework for capital preservation (FOMO/speculation blocking)
-- **5-Pillar Sustainability Framework**: Multi-filter oracle for training specialized models
-  - **Tech Deployment** (8 dimensions): Deployed tech vs vaporware, scaling evidence
-  - **Economic Viability** (8 dimensions): Cost competitiveness, profitability, jobs
-  - **Policy Effectiveness** (8 dimensions): Outcomes, replicability, durability
-  - **Nature Recovery** (8 dimensions): Ecosystem health, pollution reduction
-  - **Movement Growth** (8 dimensions): Social momentum, behavior change
-- **Oracle Calibration**: Compare Flash/Pro/Sonnet to select best LLM
-- **Pre-filter Calibration**: Measure blocking effectiveness before ground truth generation
-- **Generic Batch Labeler**: Universal labeling engine supporting filter packages
-- **Secrets Management**: Secure API key handling (env vars + secrets.ini)
-- **Comprehensive Documentation**: Filter guides, calibration workflow
-- **Training Pipeline**: Qwen 2.5-7B fine-tuning with multi-dimensional regression
-- **Ground Truth Dataset**: 7,715 labeled articles for uplifting filter v1
+### 🎯 Training Data Ready - 3 Filters Validated
 
-### 🚧 In Progress
-- Master datasets expansion (targeting 99K articles)
+**Training datasets prepared and validated** for all three active filters:
 
-### 📝 Planned
-- Evaluation framework (model vs oracle comparison)
-- Inference server (pre-filter + model deployment)
+- **uplifting v4**: 6,705 examples (validated, ready for training)
+  - 8 dimensions: agency, progress, collective_benefit, connection, innovation, justice, resilience, wonder
+  - Philosophy: MEANING not TONE
+  - Status: ✅ Validated, zero duplicates, ready for model training
+
+- **sustainability_tech_innovation v2**: 4,968 examples (validated, ready for training)
+  - 8 dimensions: deployment_maturity, technology_performance, cost_trajectory, scale, market, readiness, supply_chain, proof
+  - Philosophy: "Pilots and research need real results, not just theory"
+  - Status: ✅ Validated, zero duplicates, ready for model training
+
+- **investment-risk v4**: 4,880 examples (validated, ready for training)
+  - 8 dimensions: macro_risk, credit_stress, sentiment, valuation, policy, systemic, evidence, actionability
+  - Philosophy: "You can't predict crashes, but you can prepare for them"
+  - Status: ✅ Validated, zero duplicates, ready for model training
+
+### ✅ Architecture Harmonization Complete (Nov 2025)
+
+All filters now follow consistent oracle output discipline:
+- ✅ **Oracle outputs dimensional scores ONLY** (0-10 per dimension + reasoning)
+- ✅ **Tier classification in postfilters** (enables flexible thresholds without retraining)
+- ✅ **Harmonized prompt structure** (scope → gatekeepers → article → dimensions)
+- ✅ **Inline filters for every dimension** (fast model compatibility)
+
+**Result**: Clean separation of concerns - oracle scores, postfilter classifies. Change tier thresholds without re-labeling training data.
+
+### ✅ Training Pipeline Complete
+
+- **Data preparation**: `training/prepare_data.py` with stratified splitting (tier or score-bin based)
+- **Data validation**: `training/validate_training_data.py` with comprehensive quality checks
+- **Deduplication**: `training/deduplicate_training_data.py` for cross-split duplicate removal
+- **Validation reports**: Auto-generated summaries saved to filter directories
+
+### ✅ Development Tools & Agents
+
+- **Filter Development Guide Agent**: End-to-end lifecycle guidance (9 phases: planning → deployment)
+- **Filter Harmonizer Agent**: Automated consistency checking and validation
+- **Batch Scoring**: Generic `ground_truth.batch_scorer` supporting all filter packages
+- **Dataset Profiling**: Master dataset with 402K articles (Oct-Nov 2025)
+
+### 🚧 Next Steps
+
+- **Model Training**: Train Qwen2.5-7B student models on validated datasets
+- **Model Evaluation**: Compare student vs oracle performance
+- **Production Deployment**: Inference server with prefilter + model + postfilter
 
 ## Quick Start
 
@@ -55,11 +77,8 @@ Large language models excel at nuanced judgment tasks but are expensive and slow
 ```bash
 cd C:\local_dev\llm-distillery
 
-# Using pip
-pip install anthropic google-generativeai
-
-# Or install all planned dependencies
-pip install -r requirements.txt  # (when available)
+# Install required packages
+pip install anthropic google-generativeai pyyaml
 ```
 
 ### 2. Set Up API Keys
@@ -75,331 +94,260 @@ gemini_billing_api_key = AIza_billing_key  # Optional: 150 RPM vs 2 RPM
 
 **Important**: This file is git-ignored for security.
 
-### 3. Calibrate Pre-Filter
+### 3. Score Training Data
 
-Test pre-filter blocking effectiveness (500 articles recommended):
-
-```bash
-python -m ground_truth.calibrate_prefilter \
-    --filter filters/uplifting/v1 \
-    --source datasets/raw/master_dataset_*.jsonl \
-    --sample-size 500 \
-    --output reports/uplifting_v1_prefilter_cal.md
-```
-
-**Output**: Pass rate, block reason distribution, sample blocked articles
-
-### 4. Calibrate Oracle
-
-Compare Flash vs Pro/Sonnet to choose best LLM (100 articles recommended):
+Score 5K+ articles with oracle:
 
 ```bash
-python -m ground_truth.calibrate_oracle \
-    --filter filters/uplifting/v1 \
-    --source datasets/raw/master_dataset_*.jsonl \
-    --sample-size 100 \
-    --models gemini-flash,gemini-pro,claude-sonnet \
-    --output reports/uplifting_v1_oracle_cal.md
+python -m ground_truth.batch_scorer \
+  --filter filters/uplifting/v4 \
+  --source datasets/raw/master_dataset.jsonl \
+  --output-dir datasets/scored/uplifting_v4_training \
+  --llm gemini-flash \
+  --target-count 5000 \
+  --batch-size 100
 ```
 
-**Output**: Agreement rates, score distributions, cost analysis
+**Process**: Stream articles → Prefilter → Oracle scores → Save to batches
 
-See [Filter Development Guide](filters/README.md) for complete workflow.
+### 4. Prepare Training Data
 
-### 5. Generate Ground Truth
-
-Label articles with oracle (stops at 2,500 passing articles):
+Split scored data into train/val/test sets with stratification:
 
 ```bash
-python -m ground_truth.batch_labeler \
-    --filter filters/uplifting/v1 \
-    --source datasets/raw/master_dataset_*.jsonl \
-    --target-labeled 2500 \
-    --oracle gemini-flash \
-    --output datasets/labeled/uplifting_v1/
+python training/prepare_data.py \
+  --filter filters/uplifting/v4 \
+  --data-source datasets/scored/uplifting_v4_training \
+  --output-dir datasets/training/uplifting_v4
 ```
 
-**Process**: Stream articles → Pre-filter → Label passing articles → Stop at target
+**Output**: train.jsonl (80%), val.jsonl (10%), test.jsonl (10%) with stratified sampling
 
-### 6. Train a Model
+### 5. Validate Training Data
 
-**Step 6a: Prepare Dataset**
-
-Split labeled data into train/val/test:
+Run comprehensive quality checks:
 
 ```bash
-python -m training.prepare_dataset \
-    --filter filters/uplifting/v1 \
-    --dataset datasets/uplifting_ground_truth_v1/labeled_articles.jsonl \
-    --output-dir datasets/uplifting_ground_truth_v1_splits
+# Full validation with detailed report
+python training/validate_training_data.py \
+  --data-dir datasets/training/uplifting_v4 \
+  --filter filters/uplifting/v4
+
+# If duplicates found, deduplicate
+python training/deduplicate_training_data.py datasets/training/uplifting_v4
+
+# Generate summary report for filter documentation
+python scripts/validation/generate_validation_summary.py \
+  --data-dir datasets/training/uplifting_v4 \
+  --filter-name uplifting \
+  --version v4 \
+  --output filters/uplifting/v4/TRAINING_DATA_VALIDATION.md
 ```
 
-**Step 6b: Train Qwen 2.5 Model**
+**Checks performed**:
+- Structural integrity (required fields, ID uniqueness, label array length)
+- Data distribution (train/val/test splits at 80/10/10)
+- Label quality (score range [0-10], no NaN values, sufficient variance)
+- Content quality (non-empty titles/content, reasonable lengths)
+- Consistency (dimension names match across splits and config)
+- Score distributions per dimension
 
-Fine-tune on prepared dataset:
+### 6. Train a Model (Coming Soon)
+
+Fine-tune Qwen2.5-7B on prepared dataset:
 
 ```bash
 python -m training.train \
-    --filter filters/uplifting/v1 \
-    --data-dir datasets/uplifting_ground_truth_v1_splits \
-    --output-dir inference/deployed/uplifting_v1 \
-    --model-name Qwen/Qwen2.5-7B \
-    --epochs 3 \
-    --batch-size 8
+  --filter filters/uplifting/v4 \
+  --data-dir datasets/training/uplifting_v4 \
+  --output-dir models/uplifting_v4 \
+  --base-model unsloth/Qwen2.5-7B-Instruct \
+  --epochs 3 \
+  --batch-size 4
 ```
 
 **Requirements**: 16GB+ GPU (RTX 4090, A100), ~2-4 hours training time
 
-See [training/README.md](training/README.md) for details.
-
-### 7. Evaluate Quality (Planned)
-
-```bash
-# Coming soon
-python -m evaluation.evaluate_model \
-    --filter filters/uplifting/v1 \
-    --model inference/deployed/uplifting_v1/ \
-    --test-set datasets/labeled/uplifting_v1/test.jsonl
-```
-
-### 8. Run Inference (Planned)
-
-```bash
-# Coming soon - deployed filter includes pre-filter + model
-python -m inference.predict \
-    --filter inference/deployed/uplifting_v1/ \
-    --input articles.jsonl \
-    --output predictions.jsonl
-```
-
 ## Documentation
 
 - **[Full Documentation](docs/README.md)** - Complete docs index
-- **[Calibration Guide](docs/guides/calibration.md)** - How to compare Claude vs Gemini
-- **[Architecture Overview](docs/architecture/overview.md)** - System design and components
-- **[Project Structure](#project-structure)** - Directory organization
+- **[Architecture](docs/ARCHITECTURE.md)** - System design and oracle output discipline
+- **[System Overview](docs/SYSTEM_OVERVIEW.md)** - Current state and datasets
+- **[Filter Development Guide](docs/agents/README.md)** - 9-phase filter development lifecycle
+- **[Repository Structure](docs/REPOSITORY_STRUCTURE.md)** - Directory organization
+- **[Decisions Log](docs/DECISIONS.md)** - Strategic decisions and rationale
 
 ## Architecture
+
+### Oracle → Student Model Knowledge Distillation
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    GROUND TRUTH GENERATION                   │
 │                                                              │
-│  Raw Articles  →  LLM Oracle  →  Labeled Dataset            │
-│  (50K samples)    (Claude)       (JSON ratings)             │
+│  Raw Articles  →  Oracle (Gemini Flash)  →  Labeled Dataset │
+│  (5K+ samples)    8 dimensional scores      (JSONL)         │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                       FINE-TUNING                            │
+│                   DATA PREPARATION & VALIDATION              │
 │                                                              │
-│  Ground Truth  →  Small Model  →  Trained Classifier        │
-│  (JSONL)          (DeBERTa)       (90%+ accuracy)           │
+│  Scored Data  →  Stratified Split  →  Quality Validation    │
+│  (batches)       (80/10/10)           (dedupe, checks)      │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                      VALIDATION                              │
+│                       KNOWLEDGE DISTILLATION                 │
 │                                                              │
-│  Test Set  →  Compare  →  Quality Metrics                   │
-│               (Model vs Oracle)   (Accuracy, MAE, F1)       │
+│  Training Data  →  Student Model  →  Trained Classifier     │
+│  (validated)       (Qwen2.5-7B)      (90%+ MAE ≤1.5)       │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                    DEPLOYMENT                                │
+│                      DEPLOYMENT                              │
 │                                                              │
-│  Article  →  Local Model  →  Predictions                    │
-│  (input)     (<50ms)          (8 dimensions)                │
+│  Article  →  [Prefilter]  →  [Model]  →  [Postfilter]      │
+│  (input)     <5ms Python      20-50ms      <10ms Python     │
+│              rule-based        Qwen2.5     tier classify    │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### Runtime Inference Pipeline
+
+Once trained, the deployed system processes articles through **3 stages**:
+
+```
+Article → [Prefilter] → [Student Model] → [Postfilter] → Tier + Scores
+           <5ms          20-50ms            <10ms
+           (Python)      (Qwen2.5-7B)       (Python)
+```
+
+**Stage 1: Prefilter** (Fast, Rule-Based)
+- Blocks obvious out-of-scope content
+- ~5ms per article
+- Target: <10% false negative rate
+
+**Stage 2: Student Model** (LLM Inference)
+- Scores 8 dimensions (0-10 each)
+- Uses fine-tuned Qwen2.5-7B (local)
+- 20-50ms per article
+
+**Stage 3: Postfilter** (Tier Classification)
+- Maps dimensional scores → tier
+- Applies gatekeeper rules from config.yaml
+- Flexible thresholds without retraining
+- <10ms per article
+
+**Key Benefit**: Change tier definitions by updating config only, no model retraining needed.
 
 ## Project Structure
 
 ```
 llm-distillery/
-├── filters/                    # Versioned filter packages (single source of truth)
-│   ├── <filter-name>/v<version>/
-│   │   ├── prompt-compressed.md  # For batch labeling (USED)
-│   │   ├── prompt-extended.md    # Full with examples (optional)
-│   │   ├── prefilter.py          # Rule-based pre-filter
-│   │   ├── config.yaml           # Configuration
-│   │   └── README.md             # Documentation
+├── filters/                    # Versioned filter packages
+│   ├── uplifting/v4/          # Uplifting content filter
+│   ├── sustainability_tech_innovation/v2/  # Sustainability tech
+│   ├── investment-risk/v4/    # Investment risk signals
+│   └── README.md              # Filter development guide
 │
-├── ground_truth/              # Ground truth generation
-│   ├── generate.py           # Main CLI for dataset creation
-│   ├── samplers.py           # Stratified sampling strategies
-│   ├── llm_evaluators.py     # Claude/Gemini API wrappers
-│   └── validators.py         # Quality checks, consistency
+├── ground_truth/              # Oracle scoring pipeline
+│   ├── batch_scorer.py        # Universal scoring engine
+│   ├── llm_client.py         # Gemini/Claude API clients
+│   └── prefilter_runner.py   # Prefilter execution
+│
+├── training/                  # Model training pipeline
+│   ├── prepare_data.py       # Stratified train/val/test splits
+│   ├── validate_training_data.py  # Quality validation
+│   ├── deduplicate_training_data.py  # Cross-split deduplication
+│   └── train.py              # Model fine-tuning (planned)
 │
 ├── datasets/                  # Generated datasets
-│   ├── sustainability_50k.jsonl
-│   └── splits/               # Train/val/test splits
+│   ├── raw/                  # Raw article collections
+│   ├── scored/               # Oracle-scored batches
+│   └── training/             # Prepared train/val/test splits
 │
-├── training/                  # Model fine-tuning
-│   ├── train.py              # Training script
-│   ├── models.py             # Model architectures
-│   ├── datasets.py           # PyTorch Dataset classes
-│   └── configs/              # Training configurations
-│       └── sustainability_deberta.yaml
+├── docs/                      # Documentation
+│   ├── agents/               # Development guide agents
+│   ├── decisions/            # Architecture decision records
+│   ├── ARCHITECTURE.md       # System architecture
+│   └── SYSTEM_OVERVIEW.md    # Current state & datasets
 │
-├── evaluation/                # Quality assessment
-│   ├── evaluate.py           # Model vs oracle comparison
-│   ├── calibration.py        # Drift detection
-│   └── metrics.py            # Custom metrics
+├── scripts/                   # Utility scripts (organized by phase)
+│   ├── validation/           # Phase 3-5: Validation utilities
+│   ├── training/             # Phase 6-7: Training utilities
+│   ├── oracle/               # Phase 3: Oracle calibration
+│   ├── deployment/           # Phase 9: Model deployment
+│   └── dataset/              # General dataset utilities
 │
-├── inference/                 # Deployed models
-│   ├── predict.py            # Single prediction
-│   ├── batch_predict.py      # Batch processing
-│   ├── serve.py              # FastAPI server
-│   └── models/               # Model checkpoints
-│       └── sustainability_v1/
-│
-└── tests/                     # Unit tests
-    ├── test_ground_truth.py
-    ├── test_training.py
-    └── test_inference.py
+└── config/                    # Configuration
+    └── credentials/          # API keys (git-ignored)
 ```
 
-## Available Filters
+## Filter Development Workflow
 
-> **See [filters/README.md](filters/README.md) for complete filter development workflow**
+See [Filter Development Guide](docs/agents/README.md) for the complete 9-phase workflow:
 
-### 1. Uplifting Content Filter v1.0 ✅
-**Focus**: MEANING not TONE - genuine human and planetary wellbeing
-
-**Pre-filter blocks**: Corporate finance, military buildups (93% pass rate)
-
-**Dimensions (8)**: Agency, progress, collective_benefit (gatekeeper), connection, innovation, justice, resilience, wonder
-
-**Use Cases**: Positive news aggregation, solutions journalism, progress indicators
-
-**Status**: ✅ Implemented, ⏳ Calibration pending
-
-**Package**: [`filters/uplifting/v1/`](filters/uplifting/v1/)
-
----
-
-### 2. Sustainability Impact Filter v1.0 ✅
-**Focus**: DEPLOYED TECHNOLOGY and MEASURED OUTCOMES
-
-**Pre-filter blocks**: Greenwashing, vaporware, fossil fuel transition
-
-**Dimensions (8)**: Climate_impact, technical_credibility (gatekeeper), economic_viability, deployment_readiness, systemic_impact, justice_equity, innovation_quality, evidence_strength
-
-**Use Cases**: Climate tech investment, greenwashing detection, progress tracking
-
-**Status**: ✅ Implemented, ⏳ Calibration pending
-
-**Package**: [`filters/sustainability/v1/`](filters/sustainability/v1/)
-
----
-
-### 3. Investment Risk Filter v1.0 ✅
-**Focus**: CAPITAL PRESERVATION and MACRO RISK SIGNALS, not stock picking
-
-**Pre-filter blocks**: FOMO/speculation, stock picking, affiliate marketing, clickbait
-
-**Dimensions (8)**: macro_risk_severity, credit_market_stress, market_sentiment_extremes, valuation_risk, policy_regulatory_risk, systemic_risk, evidence_quality (gatekeeper), actionability
-
-**Use Cases**: Portfolio defense, risk monitoring, opportunity identification, noise filtering
-
-**Status**: ✅ Implemented, ⏳ Calibration pending
-
-**Package**: [`filters/investment-risk/v1/`](filters/investment-risk/v1/)
-
----
-
-### 4. SEECE Energy Tech Filter v1.0 ⏳
-**Status**: Prompt available, prefilter pending
-
----
-
-### 5. Future of Education Filter v1.0 ⏳
-**Status**: Prompt available, prefilter pending
+1. **Planning** - Define dimensions, tiers, gatekeepers
+2. **Architecture** - Harmonize prompt structure, inline filters
+3. **Validation** - Oracle calibration on sample articles
+4. **Prefilter** - Test false negative/positive rates
+5. **Training Data** - Score 5K+ articles, validate quality ✅ (current)
+6. **Training** - Fine-tune student model
+7. **Testing** - Benchmark vs oracle, integration tests
+8. **Documentation** - Complete all reports and guides
+9. **Deployment** - Production release with monitoring
 
 ## Cost Analysis
 
-### Ground Truth Generation (One-time)
-- **50K articles** × **$0.003/article** (Claude 3.5 Sonnet)
-- **Total**: ~$150 per filter
+### Ground Truth Generation (One-time per filter)
+- **5K articles** × **$0.001/article** (Gemini Flash)
+- **Total**: ~$5-10 per filter
 
 ### Local Model Inference (Ongoing)
-- **Cost**: $0 (runs locally)
+- **Cost**: $0 (runs locally on GPU)
 - **Speed**: 20-50ms per article
-- **Accuracy**: 90-95% vs. Claude
+- **Accuracy**: 90-95% agreement with oracle (MAE ≤1.5)
 
 ### ROI Calculation
 If processing **4,000 articles/day**:
-- **Claude API**: 4,000 × $0.003 × 365 = **$4,380/year**
-- **Local Model**: Training cost $150 + hosting ~$10/month = **$270/year**
-- **Savings**: **$4,110/year per filter** (94% cost reduction)
-
-## Performance Benchmarks
-
-| Model | Size | Inference Time | Memory | Accuracy vs Claude |
-|-------|------|----------------|--------|--------------------|
-| DistilBERT | 66M params | 15ms | 500MB | 88-92% |
-| DeBERTa-v3-small | 44M params | 25ms | 400MB | 90-94% |
-| BERT-base | 110M params | 35ms | 800MB | 91-95% |
-| Flan-T5-base | 250M params | 80ms | 1.5GB | 93-96% |
-
-**Recommended**: DeBERTa-v3-small (best quality/speed tradeoff)
+- **Oracle API**: 4,000 × $0.001 × 365 = **$1,460/year**
+- **Local Model**: Training cost $10 + hosting ~$0 = **$10/year**
+- **Savings**: **$1,450/year per filter** (99% cost reduction)
 
 ## Roadmap
 
-### Phase 1: Ground Truth Generation ✅ (Current)
-- [x] Model calibration (Claude vs Gemini)
-- [x] Generic batch labeler
-- [x] Uplifting filter prompt & validation
-- [x] Secrets management
-- [x] Timeout protection & caching
-- [ ] Full ground truth generation CLI
-- [ ] Stratified sampling
+### ✅ Phase 1: Ground Truth Generation (Complete)
+- [x] Harmonized filter architecture
+- [x] Generic batch scorer
+- [x] Oracle calibration (Flash vs Pro)
+- [x] Prefilter validation
+- [x] Training data collection (5K+ per filter)
+- [x] Data validation pipeline
 
-### Phase 2: Training Pipeline (Next)
-- [ ] PyTorch training script
-- [ ] Model architectures (BERT, DeBERTa, T5)
-- [ ] Training configs
-- [ ] Experiment tracking (W&B)
+### 🚧 Phase 2: Model Training (Current)
+- [x] Data preparation with stratification
+- [x] Training data validation
+- [ ] Qwen2.5-7B fine-tuning script
+- [ ] Training monitoring & checkpointing
+- [ ] Model evaluation framework
 
-### Phase 3: Evaluation & Deployment
-- [ ] Model vs oracle comparison
-- [ ] Calibration drift detection
-- [ ] FastAPI inference server
-- [ ] Docker deployment
-
-### Phase 4: Additional Filters
-- [ ] Sustainability filter
-- [ ] EU policy relevance filter
-- [ ] Healthcare AI readiness filter
-
-### Phase 5: Advanced Features
-- [ ] Multi-task learning
-- [ ] Active learning
-- [ ] Model compression (quantization, pruning)
-- [ ] Model registry with versioning
+### 📝 Phase 3: Deployment (Planned)
+- [ ] Inference server (prefilter + model + postfilter)
+- [ ] Batch processing pipeline
+- [ ] Production monitoring
+- [ ] Model registry & versioning
 
 ## Contributing
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+This is a personal research project. Contributions and suggestions welcome via issues.
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
 
-## Citation
-
-If you use LLM Distillery in your research or project, please cite:
-
-```bibtex
-@software{llm_distillery,
-  title = {LLM Distillery: Knowledge Distillation from Large Language Models},
-  author = {Your Name},
-  year = {2025},
-  url = {https://github.com/yourusername/llm-distillery}
-}
-```
-
 ## Acknowledgments
 
-- Built for the [Content Aggregator](https://github.com/yourusername/content-aggregator) project
-- Inspired by model distillation research from Hinton et al.
-- LLM evaluation powered by Anthropic Claude and Google Gemini
+- Built for the Content Aggregator project
+- Oracle scoring powered by Google Gemini Flash
+- Student models based on Qwen2.5-7B-Instruct
+- Architecture inspired by knowledge distillation research

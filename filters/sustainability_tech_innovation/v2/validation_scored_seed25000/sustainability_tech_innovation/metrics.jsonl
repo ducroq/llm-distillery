@@ -1,0 +1,3 @@
+{"timestamp": "2025-11-18T21:13:48.033643Z", "article_id": "github_8cd4580aa62c", "filter_name": "sustainability_tech_innovation", "llm_provider": "gemini-flash", "success": true, "attempts_made": 1, "time_taken_seconds": 4.3, "json_repaired": false}
+{"timestamp": "2025-11-18T21:13:52.682040Z", "article_id": "science_arxiv_cs_f6ce788f64be", "filter_name": "sustainability_tech_innovation", "llm_provider": "gemini-flash", "success": true, "attempts_made": 1, "time_taken_seconds": 4.14, "json_repaired": false}
+{"timestamp": "2025-11-18T21:13:57.370973Z", "article_id": "science_arxiv_physics_578ce6853043", "filter_name": "sustainability_tech_innovation", "llm_provider": "gemini-flash", "success": true, "attempts_made": 1, "time_taken_seconds": 4.19, "json_repaired": false}

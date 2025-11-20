@@ -2,9 +2,11 @@
 
 **Purpose**: Rate cool sustainable tech that WORKS - deployed tech, working pilots, validated breakthroughs.
 
-**Version**: 1.0
+**Version**: 1.1
 
 **Focus**: Technology with REAL RESULTS, not just theory or promises.
+
+**Philosophy**: "Pilots and research need real results, not just theory."
 
 **Oracle Output**: Dimensional scores only (0-10 per dimension). Tier classification (if needed) is applied post-processing, not by the oracle.
 
@@ -42,6 +44,50 @@ Rate this article on 8 dimensions (0-10 scale). Focus: SUSTAINABLE TECH THAT WOR
 - ❌ "Scientists propose new battery chemistry" → EXCLUDE (theory only)
 - ❌ "Startup announces 2027 hydrogen plant" → EXCLUDE (future promise)
 - ❌ "Simulation predicts 40% efficiency improvement" → EXCLUDE (no real-world validation)
+
+---
+
+## ⚠️ CRITICAL: MANDATORY GATEKEEPER RULES ⚠️
+
+**BEFORE SCORING:** Determine if article describes REAL WORK with EVIDENCE:
+
+### What is REAL WORK?
+- ✅ **Deployed** (operational, generating power, in use)
+- ✅ **Working pilot** (pilot with performance data: "5 MW for 6 months", "COP 3.5 achieved", "95% uptime")
+- ✅ **Validated research** (field tests, real-world measurements, not simulations)
+
+### What is NOT real work?
+- ❌ **Proposals** ("plans to deploy", "proposes 600 MW", "announces 2027 launch")
+- ❌ **Future-only** ("will deploy", "coming in 2027", "expected to generate")
+- ❌ **Theory/simulations** (models without field validation, predictions without real data)
+
+### EXAMPLES - Proposals vs Pilots:
+- ❌ **PROPOSAL:** "Xcel proposes 600 MW solar farm, delivery 2027" → deployment_maturity = 1-2 (future only)
+- ✅ **PILOT:** "5 MW geothermal pilot generates power for 6 months" → deployment_maturity = 4-5 (working pilot with data)
+- ❌ **ANNOUNCEMENT:** "Company announces breakthrough battery, production 2026" → deployment_maturity = 1-2 (vaporware)
+- ✅ **DEPLOYMENT:** "50 MW battery operates since 2023, 90% uptime" → deployment_maturity = 6-7 (deployed, proven)
+- ❌ **SIMULATION:** "Model predicts 40% efficiency gain" → deployment_maturity = 1-2 (theory only)
+- ✅ **FIELD TEST:** "Heat pump achieves COP 3.5 in Nordic field trial" → deployment_maturity = 3-4 (validated)
+
+### ENFORCEMENT:
+
+**AFTER scoring all dimensions:**
+
+1. IF **deployment_maturity < 3.0** (no real work, theory/proposals only):
+   - **IMMEDIATELY SET all dimensional scores = 1.0**
+   - **SET overall score = 1.0**
+   - **SET deployment_stage = "theory_only" OR "out_of_scope"**
+   - **REASONING:** No real-world work = Not in scope for this filter
+
+2. IF **proof_of_impact < 3.0** (no real data, no measurements):
+   - **IMMEDIATELY SET all dimensional scores = 1.0**
+   - **SET overall score = 1.0**
+   - **SET deployment_stage = "theory_only"**
+   - **REASONING:** No real impact data = Not in scope
+
+**NOTE:** Proposals about future deployments MUST score deployment_maturity = 1-2, triggering gatekeeper enforcement.
+
+---
 
 ARTICLE:
 Title: {title}
@@ -226,17 +272,20 @@ Verified emissions avoided / energy generated (OR pilot impact data)
 
 ## Scoring Calibration
 
-**Development Stage → Overall Score Mapping:**
+**Score dimensional evidence honestly. Postfilter will classify stage based on scores.**
 
-- **mass_deployment** (GW-scale, years operational, proven) → 8-10
-- **commercial_proven** (multi-site, revenue-generating, scaling) → 6-8
-- **validated_pilots** (working pilots with strong performance data) → 5-7
-- **working_pilots** (pilots with some performance data) → 4-6
-- **validated_research** (field validation, real-world data) → 3-5
-- **lab_only** (no real-world validation) → 1-2
-- **theory_only** (no implementation at all) → 0-2
+**Development Stage → Expected Score Range (for postfilter reference):**
+
+- **mass_deployment** (GW-scale, years operational, proven) → Scores typically 8-10
+- **commercial_proven** (multi-site, revenue-generating, scaling) → Scores typically 6-8
+- **validated_pilots** (working pilots with strong performance data) → Scores typically 5-7
+- **working_pilots** (pilots with some performance data) → Scores typically 4-6
+- **validated_research** (field validation, real-world data) → Scores typically 3-5
+- **lab_only** (no real-world validation) → Scores typically 1-2
+- **theory_only** (no implementation at all) → Scores typically 0-2
 
 **Important:**
+- Score based on EVIDENCE, not stage label
 - Working pilots with performance data should score 4-6 (not 1-3)
 - Validated research with field data should score 3-5 (not 1-2)
 - Deployed commercial tech should score 5-8+ (as before)
@@ -263,15 +312,6 @@ Examples:
 - "Battery recall announced" → Score deployment scale, note issues in performance dimension
 
 Negative news often indicates REAL tech facing real-world challenges, which confirms it's past theory stage.
-
----
-
-## Gatekeeper Rules
-
-1. **If DEPLOYMENT_MATURITY < 3.0**: Cap overall score at 2.9 (theory only, no real work)
-2. **If PROOF_OF_IMPACT < 3.0**: Cap overall score at 2.9 (must have some real data, even from pilots)
-
-**NOTE:** Lowered thresholds from v3 (was 5.0/4.0) to allow pilots and validated research.
 
 ---
 
@@ -332,6 +372,8 @@ Negative news often indicates REAL tech facing real-world challenges, which conf
 
 ## Output Format (JSON)
 
+**ORACLE OUTPUTS DIMENSIONAL SCORES ONLY. Postfilter will classify tier/stage.**
+
 {{
   "deployment_maturity": {{"score": <0-10>, "reasoning": "Brief justification"}},
   "technology_performance": {{"score": <0-10>, "reasoning": "..."}},
@@ -342,8 +384,7 @@ Negative news often indicates REAL tech facing real-world challenges, which conf
   "supply_chain_maturity": {{"score": <0-10>, "reasoning": "..."}},
   "proof_of_impact": {{"score": <0-10>, "reasoning": "..."}},
   "overall_assessment": "<1-2 sentence summary>",
-  "primary_technology": "solar|wind|batteries|EVs|heat_pumps|hydrogen|geothermal|other|out_of_scope",
-  "deployment_stage": "mass_deployment|commercial_proven|validated_pilots|working_pilots|validated_research|lab_only|theory_only|out_of_scope",
+  "primary_technology": "solar|wind|batteries|EVs|heat_pumps|hydrogen|geothermal|other",
   "confidence": "HIGH|MEDIUM|LOW"
 }}
 
@@ -368,6 +409,25 @@ DO NOT include any text outside the JSON object.
 
 ## CHANGELOG
 
+**v1.1 (2025-11-17):**
+- **CRITICAL FIX: MANDATORY GATEKEEPER ENFORCEMENT**
+  - Moved gatekeeper rules to TOP of prompt (before article, before dimensions)
+  - Added ALL-CAPS enforcement instructions with explicit SET commands
+  - Added 6 examples distinguishing proposals from pilots
+  - Problem: v1.0 had 85.7% false positive rate (proposals scored as pilots)
+  - Solution: "IF deployment_maturity < 3.0 → SET all scores = 1.0" (MANDATORY)
+
+- **PREFILTER: Option D (Minimal Filtering)**
+  - Strategy: Trust oracle, only block obvious out-of-scope
+  - Results: 68% pass rate on climate articles (vs 16% for v1.0)
+  - 62% improvement in false negative rate (84 → 32 blocked articles)
+
+- **HARMONIZATION with uplifting/investment-risk:**
+  - Added Philosophy line to header
+  - Moved ARTICLE placement to after gatekeeper rules (matches uplifting structure)
+  - Removed duplicate gatekeeper reminder section (consolidated to one enforcement point)
+  - Structure now: Scope → Gatekeepers → Article → Dimensions → Examples → Output
+
 **v1.0 (2025-11-15):**
 - **PIVOT from tech_deployment v3:** Broadened scope from "deployed only" to "tech that works"
 - **NEW INCLUSIONS:** Working pilots with performance data, validated research with field results
@@ -378,4 +438,4 @@ DO NOT include any text outside the JSON object.
 
 ---
 
-**Token estimate**: ~2,400 tokens (v3 was ~1,800 tokens)
+**Token estimate**: ~2,900 tokens (v1.0 was ~2,400 tokens, added gatekeeper enforcement section)

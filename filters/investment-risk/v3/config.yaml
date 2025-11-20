@@ -1,0 +1,235 @@
+# Investment Risk Filter Configuration v3.0
+
+filter:
+  name: investment-risk
+  version: "3.0"
+  created: "2025-10-30"
+  updated: "2025-11-17"
+  description: "Capital preservation filter for defense-first portfolio management"
+  philosophy: "You can't predict crashes, but you can prepare for them."
+  changelog_v3: "HARMONIZED ARCHITECTURE: Oracle outputs dimensional scores only, signal tier (RED/YELLOW/GREEN/BLUE/NOISE) computed by postfilter. Clean separation enables flexible tier thresholds without retraining. Forked from v2 to preserve clean training data lineage."
+  changelog_v2: "Applied inline filters pattern - moved scope filters into each dimension definition. Reduced false positive rate from 50-75% to 25-37%."
+
+# Scoring dimensions and weights
+scoring:
+  dimensions:
+    macro_risk_severity:
+      weight: 0.25
+      description: "Systemic economic/financial risk signals"
+      gatekeeper: false
+
+    credit_market_stress:
+      weight: 0.20
+      description: "Credit market deterioration indicators"
+      gatekeeper: false
+
+    market_sentiment_extremes:
+      weight: 0.15
+      description: "Dangerous sentiment extremes (panic or euphoria)"
+      gatekeeper: false
+
+    valuation_risk:
+      weight: 0.15
+      description: "Valuation extremes (bubble or deep value)"
+      gatekeeper: false
+
+    policy_regulatory_risk:
+      weight: 0.10
+      description: "Policy errors and regulatory changes"
+      gatekeeper: false
+
+    systemic_risk:
+      weight: 0.15
+      description: "Contagion and cascading failure potential"
+      gatekeeper: false
+
+    evidence_quality:
+      weight: 0.00  # Not used in signal_strength, but GATEKEEPER for RED tier
+      description: "Quality of data and analysis"
+      gatekeeper: true
+      gatekeeper_threshold: 5  # RED signals require evidence_quality >= 5
+      gatekeeper_rule: "RED tier requires evidence_quality >= 5, else downgrade to YELLOW"
+
+    actionability:
+      weight: 0.00  # Used in action_priority, not signal_strength
+      description: "Actionability for hobby investors (€10K-€500K portfolios)"
+      gatekeeper: false
+
+  # Signal tier classification thresholds
+  tier_thresholds:
+    RED:
+      condition: "(macro_risk_severity >= 7 OR credit_market_stress >= 7 OR systemic_risk >= 8) AND evidence_quality >= 5 AND actionability >= 5"
+      description: "Act now - reduce risk immediately"
+      weights:
+        macro_risk_severity: 0.30
+        credit_market_stress: 0.25
+        systemic_risk: 0.25
+        evidence_quality: 0.20
+
+    YELLOW:
+      condition: "(macro_risk_severity IN 5-6 OR credit_market_stress IN 5-6 OR valuation_risk IN 7-8) AND evidence_quality >= 5 AND actionability >= 4"
+      description: "Monitor closely - prepare for defense"
+      weights:
+        macro_risk_severity: 0.25
+        credit_market_stress: 0.20
+        valuation_risk: 0.25
+        policy_regulatory_risk: 0.20
+        evidence_quality: 0.10
+
+    GREEN:
+      condition: "market_sentiment_extremes >= 7 (fear) AND valuation_risk <= 3 (cheap) AND evidence_quality >= 6 AND actionability >= 5"
+      description: "Consider buying - value emerging"
+      weights:
+        valuation_risk_inverted: 0.35  # (10 - valuation_risk), lower is better
+        market_sentiment_extremes: 0.35  # Higher fear = better opportunity
+        evidence_quality: 0.20
+        actionability: 0.10
+
+    BLUE:
+      condition: "Educational, historical analysis, no immediate action required"
+      description: "Understand - no action"
+
+    NOISE:
+      condition: "Flagged by pre-filters OR individual stock tips OR evidence_quality < 4"
+      description: "Ignore - no signal"
+
+  # Content type caps (applied post-scoring)
+  content_type_caps:
+    speculation_noise:
+      max_signal_strength: 0.0
+      description: "FOMO/speculation content blocked"
+
+    stock_picking:
+      max_signal_strength: 0.0
+      description: "Individual stock recommendations blocked"
+
+    affiliate_conflict:
+      max_signal_strength: 0.0
+      description: "Affiliate marketing blocked"
+
+    clickbait:
+      max_evidence_quality: 3
+      max_signal_strength: 3.0
+      description: "Clickbait content penalized"
+
+# Pre-filter configuration
+prefilter:
+  version: "1.0"
+  class_name: "InvestmentRiskPreFilterV1"
+  target_pass_rate: "40-70%"  # Conservative filtering
+
+  categories:
+    fomo_speculation:
+      description: "Hot stocks, meme stocks, crypto pumping, FOMO"
+      patterns: 8
+      action: "block"
+
+    stock_picking:
+      description: "Individual stock recommendations without macro context"
+      patterns: 6
+      exceptions: 6  # Macro context patterns (allow if present)
+      action: "block_unless_macro"
+
+    affiliate_conflict:
+      description: "Affiliate marketing, promotional codes, sponsored content"
+      patterns: 4
+      action: "block"
+
+    clickbait:
+      description: "Sensationalist headlines without substantive analysis"
+      patterns: 5
+      action: "block"
+
+# Ground truth generation configuration
+ground_truth:
+  oracle_model: "gemini-flash"
+  target_labeled: 2500
+  sample_strategy: "random"  # Match production RSS distribution
+  quality_threshold: 0.7
+
+# Training configuration (planned)
+training:
+  model_architecture: "qwen-2.5-7b"
+  target_accuracy: 0.90  # vs oracle
+  target_inference_time_ms: 50
+
+  # Multi-output regression
+  outputs:
+    - signal_tier (classification: RED/YELLOW/GREEN/BLUE/NOISE)
+    - signal_strength (regression: 0-10)
+    - macro_risk_severity (regression: 0-10)
+    - credit_market_stress (regression: 0-10)
+    - market_sentiment_extremes (regression: 0-10)
+    - valuation_risk (regression: 0-10)
+    - policy_regulatory_risk (regression: 0-10)
+    - systemic_risk (regression: 0-10)
+    - evidence_quality (regression: 0-10)
+    - actionability (regression: 0-10)
+
+# Deployment configuration
+deployment:
+  inference_pipeline:
+    - prefilter  # Fast, local, free (blocks 30-60%)
+    - model      # Qwen 2.5-7B (scores passing articles)
+
+  expected_throughput: "1000 articles/hour"
+  expected_cost_per_article: "$0 (after training)"
+  expected_latency: "<50ms per article"
+
+# Validation metrics
+validation:
+  primary_metrics:
+    - tier_classification_accuracy  # vs oracle
+    - signal_strength_mae           # vs oracle
+    - dimension_score_correlation   # vs oracle
+
+  secondary_metrics:
+    - false_positive_rate  # Blocked valuable content
+    - false_negative_rate  # Passed noise content
+    - inference_time
+    - throughput
+
+# Risk indicators tracked
+risk_indicators:
+  - yield_curve_inversion
+  - recession_indicators_converging
+  - credit_spread_widening
+  - bank_stress_signals
+  - policy_error_risk
+  - extreme_sentiment
+  - valuation_extreme
+  - systemic_fragility
+
+# Asset classes monitored
+asset_classes:
+  - equities
+  - fixed_income
+  - credit
+  - currencies
+  - commodities
+  - real_estate
+  - cash_equivalents
+
+# Time horizons
+time_horizons:
+  immediate: "0-3 months"
+  short_term: "3-12 months"
+  medium_term: "1-3 years"
+  long_term: "3+ years"
+
+# Geographic scope
+geographic_scopes:
+  - us
+  - europe
+  - global
+  - emerging_markets
+  - specific_country
+
+# Recommended actions
+recommended_actions:
+  - increase_cash
+  - rebalance_to_target
+  - reduce_risk_assets
+  - consider_buying_quality
+  - monitor_closely
+  - no_action_needed

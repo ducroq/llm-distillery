@@ -1,0 +1,12 @@
+{
+  "processed": [
+    "github_8cd4580aa62c",
+    "science_arxiv_cs_f6ce788f64be",
+    "science_arxiv_physics_578ce6853043"
+  ],
+  "total_scored": 3,
+  "batches_completed": 1,
+  "last_updated": "2025-11-18T21:13:57.876951",
+  "filter_name": "sustainability_tech_innovation",
+  "llm_provider": "gemini-flash"
+}

@@ -1,0 +1,14 @@
+{
+  "processed": [
+    "energy_utilities_clean_technica_d4f9faf8eccf",
+    "global_news_el_pais_ciencia_377392e0bebe",
+    "science_nature_news_ddcb5a456845",
+    "energy_utilities_utility_dive_94a9cf55ec93",
+    "energy_utilities_pv_magazine_06ad99991701"
+  ],
+  "total_scored": 5,
+  "batches_completed": 1,
+  "last_updated": "2025-11-18T21:14:01.164701",
+  "filter_name": "sustainability_tech_innovation",
+  "llm_provider": "gemini-flash"
+}

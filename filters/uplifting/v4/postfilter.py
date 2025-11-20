@@ -63,8 +63,8 @@ class UpliftingPostFilter:
         'collective_benefit': 0.38,  # Gatekeeper dimension
         'connection': 0.10,
         'innovation': 0.08,
-        'justice': 0.03,
-        'resilience': 0.03,
+        'justice': 0.04,  # Updated to match config.yaml
+        'resilience': 0.02,  # Updated to match config.yaml
         'wonder': 0.05
     }
 

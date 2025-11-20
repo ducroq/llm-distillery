@@ -156,6 +156,28 @@ def assign_tier(overall_score: float, tier_boundaries: Dict[str, float]) -> str:
     return list(tier_boundaries.keys())[-1]
 
 
+def assign_score_bin(overall_score: float) -> str:
+    """Assign score bin for stratification when tiers are not available.
+
+    Bins:
+        0-2: very_low
+        2-4: low
+        4-6: medium
+        6-8: high
+        8-10: very_high
+    """
+    if overall_score >= 8.0:
+        return 'very_high'
+    elif overall_score >= 6.0:
+        return 'high'
+    elif overall_score >= 4.0:
+        return 'medium'
+    elif overall_score >= 2.0:
+        return 'low'
+    else:
+        return 'very_low'
+
+
 def stratified_split(
     labels: List[Dict[str, Any]],
     analysis_field: str,
@@ -166,12 +188,20 @@ def stratified_split(
     test_ratio: float = 0.1,
     seed: int = 42
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
-    """Split data into train/val/test sets with stratification by tier."""
+    """Split data into train/val/test sets with stratification by tier or score bins."""
     assert abs(train_ratio + val_ratio + test_ratio - 1.0) < 0.01, "Ratios must sum to 1.0"
 
     random.seed(seed)
 
-    # Group by tier
+    # Determine stratification method
+    use_score_bins = not tier_boundaries or len(tier_boundaries) == 0
+
+    if use_score_bins:
+        print("Using score bin stratification (no tiers defined)")
+    else:
+        print(f"Using tier stratification ({len(tier_boundaries)} tiers)")
+
+    # Group by tier or score bin
     tier_groups = {}
     debug_count = 0
     for label in labels:
@@ -186,18 +216,29 @@ def stratified_split(
             print(f"  calculated overall_score: {overall_score}")
             debug_count += 1
 
-        tier = assign_tier(overall_score, tier_boundaries)
+        # Assign to stratum (tier or score bin)
+        if use_score_bins:
+            stratum = assign_score_bin(overall_score)
+        else:
+            stratum = assign_tier(overall_score, tier_boundaries)
 
-        if tier not in tier_groups:
-            tier_groups[tier] = []
-        tier_groups[tier].append(label)
+        if stratum not in tier_groups:
+            tier_groups[stratum] = []
+        tier_groups[stratum].append(label)
 
-    # Split each tier
+    # Print stratification distribution
+    print(f"\nStratification distribution:")
+    for stratum in sorted(tier_groups.keys()):
+        count = len(tier_groups[stratum])
+        pct = (count / len(labels) * 100) if len(labels) > 0 else 0
+        print(f"  {stratum:20s}: {count:5d} ({pct:5.1f}%)")
+
+    # Split each stratum
     train_set = []
     val_set = []
     test_set = []
 
-    for tier, items in tier_groups.items():
+    for stratum, items in tier_groups.items():
         random.shuffle(items)
 
         n = len(items)
@@ -321,40 +362,56 @@ def print_statistics(
     print("DATASET STATISTICS")
     print("="*70)
 
-    # Original distribution
-    print("\nOriginal Dataset (Tier labels - metadata only):")
-    tier_counts = Counter()
+    use_score_bins = not tier_boundaries or len(tier_boundaries) == 0
+
+    if use_score_bins:
+        print("\nOriginal Dataset (Score bin distribution):")
+        strata_order = ['very_low', 'low', 'medium', 'high', 'very_high']
+    else:
+        print("\nOriginal Dataset (Tier distribution):")
+        strata_order = list(tier_boundaries.keys())
+
+    stratum_counts = Counter()
     for label in labels:
         analysis = label.get(analysis_field, {})
         overall_score = calculate_overall_score(analysis, dimension_names)
-        tier = assign_tier(overall_score, tier_boundaries)
-        tier_counts[tier] += 1
+        if use_score_bins:
+            stratum = assign_score_bin(overall_score)
+        else:
+            stratum = assign_tier(overall_score, tier_boundaries)
+        stratum_counts[stratum] += 1
 
     total = len(labels)
-    for tier_name in tier_boundaries.keys():
-        count = tier_counts.get(tier_name, 0)
+    for stratum_name in strata_order:
+        count = stratum_counts.get(stratum_name, 0)
         pct = (count / total * 100) if total > 0 else 0
-        print(f"  {tier_name:20s}: {count:5d} ({pct:5.1f}%)")
+        print(f"  {stratum_name:20s}: {count:5d} ({pct:5.1f}%)")
 
     print(f"\nSplit Sizes (Stratified):")
     print(f"  Train: {len(train_set)} labels")
     print(f"  Val:   {len(val_set)} labels")
     print(f"  Test:  {len(test_set)} labels")
 
-    # Train tier distribution
-    print(f"\nTrain Tier Distribution (Informational - not used in training):")
-    train_tier_counts = Counter()
+    if use_score_bins:
+        print(f"\nTrain Score Bin Distribution:")
+    else:
+        print(f"\nTrain Tier Distribution:")
+
+    train_stratum_counts = Counter()
     for item in train_set:
         analysis = item.get(analysis_field, {})
         overall_score = calculate_overall_score(analysis, dimension_names)
-        tier = assign_tier(overall_score, tier_boundaries)
-        train_tier_counts[tier] += 1
+        if use_score_bins:
+            stratum = assign_score_bin(overall_score)
+        else:
+            stratum = assign_tier(overall_score, tier_boundaries)
+        train_stratum_counts[stratum] += 1
 
     train_total = len(train_set)
-    for tier_name in tier_boundaries.keys():
-        count = train_tier_counts.get(tier_name, 0)
+    for stratum_name in strata_order:
+        count = train_stratum_counts.get(stratum_name, 0)
         pct = (count / train_total * 100) if train_total > 0 else 0
-        print(f"  {tier_name:20s}: {count:5d} ({pct:5.1f}%)")
+        print(f"  {stratum_name:20s}: {count:5d} ({pct:5.1f}%)")
 
 
 def main():

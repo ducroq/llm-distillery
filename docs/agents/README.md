@@ -35,6 +35,34 @@
 
 ---
 
+## Filter Development Agents
+
+### filter-development-guide.md
+**For:** Filter developers
+**Purpose:** End-to-end filter lifecycle guidance (9 phases: planning → deployment)
+**When to use:** Starting new filters, reviewing production readiness, debugging validation issues
+
+**9 Phases Covered:**
+1. Planning - Define purpose, dimensions, tiers, gatekeepers
+2. Architecture - Create harmonized prompt structure
+3. Validation - Oracle calibration (50-100 articles)
+4. Prefilter - Test & optimize (avoid false negatives!)
+5. Training Data - Score 5K+ articles, validate quality
+6. Training - Knowledge distillation
+7. Testing - Benchmark vs oracle
+8. Documentation - Complete reports & README
+9. Deployment - Production rollout
+
+**Output:** Phase-specific guidance, checklists, validation criteria, common pitfalls
+
+**Usage:**
+```
+Use the filter-development-guide agent to start a new filter from scratch
+Use the filter-development-guide agent to review existing filter for production readiness
+```
+
+---
+
 ## templates/
 
 Reusable templates for agent tasks:
@@ -42,32 +70,17 @@ Reusable templates for agent tasks:
 ### ADR-TEMPLATE.md
 Template for Architecture Decision Records. Copy this when documenting significant technical decisions.
 
-### dimensional-regression-qa-agent.md
+### dimensional-regression-qa-agent.md (if exists)
 **Purpose:** Dataset quality assurance for dimensional regression training
 **When:** After consolidating labeled data, before training
 **Output:** QA report with Pass/Review/Fail status
-**Example:** Validates 8 dimensional scores are present, valid (0-10), with good range coverage
 
-### oracle-calibration-agent.md
+### oracle-calibration-agent.md (if exists)
 **Purpose:** Validate oracle performance before large-scale batch scoring
 **When:** Before labeling thousands of articles, after prompt changes, periodic quality checks
 **Output:** Calibration report with Ready/Review/Block recommendation
-**Oracle:** Uses Gemini Pro for calibration (accurate), Gemini Flash for production (cheap)
-**Cost:** ~$0.20 for 200-article calibration sample
 
-**Format:**
-```yaml
----
-name: "Agent Name"
-description: "What this agent does"
-model: "sonnet"  # or "haiku" for quick tasks
-trigger_keywords:
-  - "keyword 1"
-when_to_use: "When to invoke"
-focus: "Primary focus"
-output: "What it produces"
----
-```
+**Note:** Some templates may be in planning - check directory for current availability.
 
 ---
 
@@ -110,6 +123,17 @@ output: "What it produces"
 ---
 
 ## Version History
+
+### v1.2 (2025-11-17)
+- **Removed:** filter-harmonizer.md (redundant - filter-development-guide covers all harmonization checks in Phase 2)
+- **Reason:** Development guide is more comprehensive and caught critical issues harmonizer missed
+
+### v1.1 (2025-11-17)
+- **Added:** Filter Development Agents section
+- **Added:** filter-development-guide.md (9-phase lifecycle guidance)
+- **Added:** filter-harmonizer.md (automated consistency checking - later removed in v1.2)
+- **Added:** Supporting documents (FILTER_HARMONIZATION_GUIDE.md, FILTER_CHECKLIST.md)
+- **Updated:** Templates section to reflect current availability
 
 ### v1.0 (2025-11-12)
 - Initial agent documentation structure

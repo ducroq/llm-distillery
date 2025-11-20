@@ -7,6 +7,8 @@
 
 **Focus**: MEANING not TONE - what is happening for human/planetary wellbeing, not emotional writing style.
 
+**Philosophy**: "Focus on what is HAPPENING for human/planetary wellbeing, not tone."
+
 **Oracle Output**: Dimensional scores only (0-10 per dimension). Tier classification is applied post-processing, not by the oracle.
 
 ---
@@ -211,6 +213,10 @@ STEP 2: Score Dimensions (0-10)
    - 0-2: None | 3-4: Limited | 5-6: Moderate | 7-8: Significant | 9-10: Profound wonder
 
 STEP 3: Output JSON
+
+**NOTE:** content_type is descriptive metadata (what kind of story?), NOT tier classification. Oracle classifies story type, postfilter computes tier (impact/connection/not_uplifting) from dimensional scores.
+
+**ORACLE OUTPUTS DIMENSIONAL SCORES ONLY. Tier classification applied by postfilter.**
 
 {{
   "content_type": "solutions_story|corporate_finance|business_news|military_security|peace_process|environmental|community_building",

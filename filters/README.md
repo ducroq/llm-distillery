@@ -2,242 +2,308 @@
 
 This directory contains versioned filter packages for LLM Distillery. Each filter is a complete, self-contained system for evaluating content on specific semantic dimensions.
 
+**Organization**:
+- `filters/` - Active filters (production or in-development)
+- `filters/todo/` - Planned filters (design/planning phase)
+
+**See also**: [SYSTEM_OVERVIEW.md](../SYSTEM_OVERVIEW.md) for comprehensive filter status and training progress.
+
 ---
 
-## Filter Architecture
+## Harmonized Architecture (November 2025)
+
+All filters follow consistent structure to enable flexible deployment and retraining:
+
+### Core Principles
+
+1. **Oracle Output Discipline**
+   - Oracle outputs **dimensional scores ONLY** (0-10 per dimension + reasoning)
+   - Oracle does NOT output tier/stage classifications
+   - Postfilter classifies tiers based on dimensional scores
+
+2. **Benefits**
+   - ✅ **Flexible thresholds**: Change tier boundaries without re-labeling training data
+   - ✅ **Clean distillation**: Student models learn dimensional scoring, not classification
+   - ✅ **Separation of concerns**: Oracle scores, postfilter classifies
+
+3. **Harmonized Prompt Structure**
+   - Header (Purpose, Version, Philosophy, Oracle Output)
+   - Tier/Stage Definitions (reference only)
+   - ## PROMPT TEMPLATE
+   - Scope/Rules (what's in/out of scope)
+   - ARTICLE: {title}\n{text}
+   - Dimensions with inline `❌ CRITICAL FILTERS`
+   - Output Format (dimensional scores + metadata)
+   - Examples (optional)
+   - CHANGELOG
+
+4. **Inline Filters**
+   - Every dimension MUST have inline filters for fast model compatibility
+   - Format: `**❌ CRITICAL FILTERS - If article is ANY of these, score 0-2:**`
+
+---
+
+## Filter Package Structure
 
 Each filter package contains:
 
 ```
 filters/<filter-name>/v<version>/
-├── prompt-compressed.md # Compressed prompt for batch labeling (ALWAYS USED)
-├── prompt-extended.md   # Extended prompt with examples (optional, for documentation)
-├── prefilter.py        # Fast rule-based filter (blocks obvious low-value content)
-├── config.yaml         # Weights, thresholds, tier boundaries, deployment specs
-└── README.md           # Filter documentation and calibration status
+├── prompt-compressed.md    # Oracle prompt (ALWAYS USED for scoring)
+├── prompt-extended.md      # Extended version with examples (optional, documentation)
+├── prefilter.py           # Fast rule-based filter (noise reduction)
+├── postfilter.py          # Tier classification from dimensional scores
+├── config.yaml            # Weights, thresholds, tier boundaries, deployment specs
+├── README.md              # Filter documentation
+└── validation_report.md   # Calibration and validation results
 ```
-
-**Prompt Versions**:
-- `prompt-compressed.md` - Optimized for batch labeling with Gemini Flash (shorter, less tokens)
-- `prompt-extended.md` - Full version with detailed examples and validation cases (optional)
 
 ---
 
-## Available Filters
+## Active Filters
 
-### 1. Uplifting Content Filter (v1.0)
+### 1. uplifting v4 ✅ Production-Ready
+
 **Purpose**: Rate content for uplifting semantic value based on genuine human and planetary wellbeing.
+
+**Philosophy**: "MEANING not TONE"
+
+**Status**: Harmonized, validated (16 samples), ready for training data generation
+
+**Dimensions (8)**:
+- agency, progress, collective_benefit (gatekeeper), connection, innovation, justice, resilience, wonder
 
 **Pre-filter blocks**:
 - Corporate finance (unless worker coop/public benefit)
 - Military buildups (unless peace/demilitarization)
+- Business news without collective benefit
 
-**Dimensions (8)**: agency, progress, collective_benefit (gatekeeper), connection, innovation, justice, resilience, wonder
+**Oracle Output**: Flat dimensional scores (0-10) + overall reasoning
 
-**Status**: ✅ Implemented, ⏳ Calibration pending
+**Tier Classification** (postfilter):
+- impact, connection, not_uplifting (based on dimensional scores)
 
-[View details →](uplifting/v1/README.md)
-
----
-
-### 2. Sustainability Impact Filter (v1.0)
-**Purpose**: Rate content for sustainability relevance based on DEPLOYED TECHNOLOGY and MEASURED OUTCOMES.
-
-**Pre-filter blocks**:
-- Greenwashing (unless verified/specific data)
-- Vaporware (unless deployed units/contracts)
-- Fossil fuel transition tactics (unless genuine renewables)
-
-**Dimensions (8)**: climate_impact, technical_credibility (gatekeeper), economic_viability, deployment_readiness, systemic_impact, justice_equity, innovation_quality, evidence_strength
-
-**Status**: ✅ Implemented, ⏳ Calibration pending
-
-[View details →](sustainability/v1/README.md)
+**Location**: [filters/uplifting/v4/](uplifting/v4/)
 
 ---
 
-### 3. Investment Risk Filter (v1.0)
-**Purpose**: Identify investment risk signals for defense-first portfolio management.
+### 2. investment-risk v3 ✅ Ready for Training
+
+**Purpose**: Identify investment risk signals for defense-first portfolio management focused on capital preservation.
+
+**Philosophy**: "You can't predict crashes, but you can prepare for them."
+
+**Status**: Harmonized, ready for training data generation (queued after sustainability_tech_innovation)
+
+**Dimensions (8)**:
+- macro_risk_severity, credit_market_stress, market_sentiment_extremes, valuation_risk, policy_regulatory_risk, systemic_risk, evidence_quality (gatekeeper), actionability
 
 **Pre-filter blocks**:
 - FOMO/speculation (hot stocks, meme stocks, crypto pumping)
 - Stock picking (unless macro context)
 - Affiliate marketing (broker links, promo codes)
 - Clickbait (sensationalist headlines)
+- Academic research papers (unless actionable)
 
-**Dimensions (8)**: macro_risk_severity, credit_market_stress, market_sentiment_extremes, valuation_risk, policy_regulatory_risk, systemic_risk, evidence_quality (gatekeeper), actionability
+**Oracle Output**: Dimensional scores (0-10) + reasoning + metadata (risk indicators, asset classes, time horizon)
 
-**Status**: ✅ Implemented, ⏳ Calibration pending
+**Tier Classification** (postfilter):
+- 🔴 RED FLAG, 🟡 YELLOW WARNING, 🟢 GREEN OPPORTUNITY, 🔵 BLUE EDUCATIONAL, ⚫ NOISE
 
-[View details →](investment-risk/v1/README.md)
+**Changes from v2**:
+- v2 → v3: Removed signal_tier from oracle output (moved to postfilter)
+- Clean fork to ensure training data has no classification artifacts
 
----
-
-### 4. SEECE Energy Tech Filter (v1.0)
-**Purpose**: Evaluate clean energy and efficiency technologies.
-
-**Status**: ⏳ Pending implementation
-
----
-
-### 5. Future of Education Filter (v1.0)
-**Purpose**: Assess educational innovations and AI in learning.
-
-**Status**: ⏳ Pending implementation
+**Location**: [filters/investment-risk/v3/](investment-risk/v3/)
 
 ---
 
-## Filter Development Workflow
+### 3. sustainability_tech_innovation v1 🔄 Scoring Training Data
 
-### Phase 1: Design & Implementation
-1. Create filter directory: `filters/<name>/v1/`
-2. Write prompt template: Extract pre-classification rules (STEP 1) and scoring dimensions (STEP 2)
-3. Implement pre-filter: Convert STEP 1 rules to regex/keyword patterns
-4. Create config: Define weights, thresholds, tier boundaries
-5. Test pre-filter: Run built-in test cases
+**Purpose**: Rate sustainable technology that WORKS - deployed tech, working pilots, validated research (not theory or vaporware).
 
-### Phase 2: Calibration
-**Purpose**: Validate filter effectiveness before ground truth generation.
+**Philosophy**: "Pilots and research need real results, not just theory."
 
-#### 2.1 Pre-filter Calibration (500 samples)
-```bash
-python -m ground_truth.calibrate_prefilter \
-    --filter filters/uplifting/v1 \
-    --source datasets/raw/master_dataset_*.jsonl \
-    --sample-size 500 \
-    --output reports/uplifting_v1_prefilter_calibration.md
+**Status**: Harmonized, validation complete (31/50 articles), scoring 5K training articles (in progress)
+
+**Dimensions (8)**:
+- deployment_maturity (gatekeeper), technology_performance, cost_trajectory, scale_of_deployment, market_penetration, technology_readiness, supply_chain_maturity, proof_of_impact (gatekeeper)
+
+**Pre-filter** (Option D: Minimal Filtering):
+- Block obvious out-of-scope (IT infrastructure, medicine, finance, airline pilots)
+- Block infrastructure disruption (protests, strikes)
+- Require climate/energy mention
+- Pass rate: 68% (vs 16% for v1.0)
+- False negative improvement: 62% reduction (84 → 32 blocked articles)
+
+**Oracle Output**: Dimensional scores (0-10) + per-dimension reasoning + metadata (primary_technology, confidence)
+
+**Tier Classification** (postfilter):
+- breakthrough (8.0+), validated (6.0+), promising (4.0+), early_stage (2.0+), vaporware (<2.0)
+
+**Gatekeeper Enforcement**:
+- IF deployment_maturity < 3.0 OR proof_of_impact < 3.0 → SET all scores = 1.0
+- Status: ✅ Working perfectly (0% violations vs 85.7% in v1.0)
+
+**Key Improvements** (v1.0 → v1.1):
+- Fixed gatekeeper enforcement (85.7% FP → 0% FP)
+- Optimized prefilter (16% → 68% pass rate)
+- Harmonized architecture (dimensional scores only)
+
+**Location**: [filters/sustainability_tech_innovation/v1/](sustainability_tech_innovation/v1/)
+
+---
+
+### 4. sustainability_tech_deployment v3 🔄 Scoring in Progress
+
+**Purpose**: Track deployment at scale (GW-level renewable energy, mass adoption)
+
+**Status**: Scoring training data (background)
+
+**Focus**: Deployment metrics, scaling evidence, infrastructure buildout
+
+**Location**: [filters/sustainability_tech_deployment/v3/](sustainability_tech_deployment/v3/)
+
+---
+
+## Planned Filters (filters/todo/)
+
+**Future sustainability pillar filters** (design/planning phase):
+
+1. **ai_augmented_practice** - AI augmentation for professional practice
+2. **future-of-education** - Educational innovation and transformation
+3. **seece** - Social, economic, and environmental corporate excellence
+4. **sustainability_economic_viability** - Economic aspects of sustainability (cost, profitability, jobs)
+5. **sustainability_movement_growth** - Growth of sustainability movement (social momentum, behavior change)
+6. **sustainability_nature_recovery** - Nature restoration and recovery (ecosystem health, pollution reduction)
+7. **sustainability_policy_effectiveness** - Policy impact and effectiveness (outcomes, replicability, durability)
+
+**Note**: These filters are in early planning stages. Move to active filters (filters/) when development begins.
+
+---
+
+## Filter Development
+
+### Using the Filter Development Guide Agent
+
+For comprehensive lifecycle guidance (9 phases: planning → deployment):
+
+```
+Use the filter-development-guide agent to:
+1. Start a new filter from scratch
+2. Review existing filter for production readiness
+3. Debug validation issues
 ```
 
-**Measures**:
-- Pass rate (% of articles sent to LLM)
-- Block reason distribution
-- Sample blocked articles for false negative review
+**Documentation**: [docs/agents/filter-development-guide.md](../docs/agents/filter-development-guide.md)
 
-**Goal**: 40-70% pass rate (balanced filtering)
+### Using the Filter Harmonizer Agent
 
----
+For consistency checking and validation:
 
-#### 2.2 Oracle Calibration (100 samples)
-```bash
-python -m ground_truth.calibrate_oracle \
-    --filter filters/uplifting/v1 \
-    --source datasets/raw/master_dataset_*.jsonl \
-    --sample-size 100 \
-    --models gemini-flash,gemini-pro,claude-sonnet \
-    --output reports/uplifting_v1_oracle_calibration.md
+```
+Use the filter-harmonizer agent to:
+1. Validate filter structure and architecture
+2. Check oracle output format (dimensional scores only)
+3. Generate harmonization reports
 ```
 
-**Measures**:
-- Agreement rates between models
-- Score distributions
-- Cost analysis
-- Dimension-level correlation
-
-**Goal**: Choose oracle (typically Flash for cost/speed, Pro/Sonnet if quality issues)
+**Documentation**: [docs/agents/filter-harmonizer.md](../docs/agents/filter-harmonizer.md)
 
 ---
 
-### Phase 3: Ground Truth Generation
-```bash
-python -m ground_truth.batch_labeler \
-    --filter filters/uplifting/v1 \
-    --source datasets/raw/master_dataset_*.jsonl \
-    --target-labeled 2500 \
-    --oracle gemini-flash \
-    --output datasets/labeled/uplifting_v1/
+## Development Workflow
+
+### 1. Planning Phase
+- Define purpose, philosophy, target use case
+- Design dimensions (6-8 recommended)
+- Define tiers/stages (classification scheme)
+- Identify gatekeeper rules
+
+### 2. Architecture Phase
+- Create harmonized prompt (scope → gatekeepers → article → dimensions)
+- Design prefilter (minimal, avoid false negatives)
+- Design postfilter (tier classification from scores)
+- Create config.yaml
+
+### 3. Validation Phase
+- Score 50-100 validation articles
+- Analyze score distribution
+- Verify gatekeeper enforcement
+- Calibrate thresholds
+
+### 4. Training Data Phase
+- Score 5K+ articles with oracle
+- Validate training data quality
+- Split into train/val sets (90/10)
+
+### 5. Training Phase
+- Fine-tune Qwen2.5-7B on oracle scores
+- Validate model performance
+- Target: 92-96% accuracy
+
+### 6. Deployment Phase
+- Production testing
+- Deploy model
+- Monitor performance
+
+---
+
+## Key Documents
+
+- **[SYSTEM_OVERVIEW.md](../SYSTEM_OVERVIEW.md)** - Comprehensive system status and filter progress
+- **[DOCUMENTATION_IMPROVEMENTS.md](../DOCUMENTATION_IMPROVEMENTS.md)** - Documentation audit and improvement plan
+- **[docs/agents/filter-development-guide.md](../docs/agents/filter-development-guide.md)** - Full lifecycle guidance
+- **[docs/agents/filter-harmonizer.md](../docs/agents/filter-harmonizer.md)** - Consistency checking
+- **[docs/agents/FILTER_CHECKLIST.md](../docs/agents/FILTER_CHECKLIST.md)** - Development checklist
+
+---
+
+## Quick Reference
+
+### Oracle Output Discipline
+
+**✅ CORRECT** - Oracle outputs dimensions only:
+```json
+{
+  "dimension_name": {"score": 7, "reasoning": "..."},
+  "another_dimension": {"score": 6, "reasoning": "..."},
+  "metadata_field": "value",  // Simple metadata OK
+  "confidence": "HIGH"
+}
 ```
 
-**Process**:
-1. Stream through master datasets
-2. Apply pre-filter (fast, local, free)
-3. Label passing articles with oracle (LLM API)
-4. Save labeled articles (JSONL)
-5. Stop when target reached (2,500 articles)
-
----
-
-### Phase 4: Model Training
-```bash
-python -m training.train \
-    --filter filters/uplifting/v1 \
-    --dataset datasets/labeled/uplifting_v1/ \
-    --output inference/deployed/uplifting_v1/
+**❌ WRONG** - Oracle outputs classification:
+```json
+{
+  "dimension_name": {"score": 7, "reasoning": "..."},
+  "signal_tier": "RED_FLAG",        // ← Classification, should be in postfilter
+  "deployment_stage": "commercial", // ← Classification, should be in postfilter
+  ...
+}
 ```
 
-**Output**: Trained Qwen 2.5-7B model checkpoint
+### Prefilter Philosophy
 
----
+- **False negatives** (blocking good articles): **CRITICAL FAILURE** - lost forever
+- **False positives** (passing bad articles): Acceptable - oracle catches them
+- Target: <10% false negative rate
+- Philosophy: Noise reduction, not quality filtering
 
-### Phase 5: Evaluation & Deployment
-```bash
-# Evaluate model vs oracle
-python -m evaluation.evaluate_model \
-    --filter filters/uplifting/v1 \
-    --model inference/deployed/uplifting_v1/ \
-    --test-set datasets/labeled/uplifting_v1/test.jsonl
+### Inline Filters
 
-# Deploy to production
-cp -r filters/uplifting/v1/prefilter.py inference/deployed/uplifting_v1/
-cp -r filters/uplifting/v1/config.yaml inference/deployed/uplifting_v1/
+Every dimension MUST have inline filters:
+
+```markdown
+**❌ CRITICAL FILTERS - If article is ANY of these, score 0-2:**
+- Filter criterion 1
+- Filter criterion 2
+- Filter criterion 3
+
+**If NONE of above filters match, score normally:**
+- 0-2: Description | 3-4: Description | 5-6: Description | 7-8: Description | 9-10: Description
 ```
 
-**Deployed filter**: `prefilter.py` + `model.bin` + `config.yaml`
-
 ---
 
-## Design Principles
-
-### 1. **Pre-filter + Prompt Coupling**
-Pre-filter rules are extracted from prompt STEP 1. They evolve together within the same version.
-
-**Example (Uplifting)**:
-- Prompt: "If corporate finance AND NOT worker coop → FLAG corporate_finance (max_score=2)"
-- Pre-filter: Blocks "corporate_finance" articles unless they match exception patterns
-
-### 2. **Versioning**
-Filters use semantic versioning: `v1.0`, `v1.1`, `v2.0`
-
-**Version bump triggers**:
-- Major (v1 → v2): Fundamental changes to scoring dimensions or pre-filter logic
-- Minor (v1.0 → v1.1): Refinements to weights, thresholds, or patterns
-- Patch (v1.0.0 → v1.0.1): Bug fixes, documentation updates
-
-### 3. **Calibration-First**
-Never generate ground truth without calibration:
-1. Pre-filter calibration validates blocking logic
-2. Oracle calibration chooses best LLM (Flash/Pro/Sonnet)
-3. Both save costs and improve training data quality
-
-### 4. **Deployment Package**
-Each deployed filter includes:
-- Pre-filter (Python module)
-- Trained model (Qwen checkpoint)
-- Config (YAML with thresholds)
-
-**Inference pipeline**: Article → Pre-filter → [if passed] → Model → Score + Tier
-
----
-
-## Performance Targets
-
-| Metric | Target | Achieved (Uplifting v1) | Achieved (Sustainability v1) |
-|--------|--------|-------------------------|------------------------------|
-| Pre-filter pass rate | 40-70% | ⏳ Calibration pending | ⏳ Calibration pending |
-| Oracle cost/article | < $0.01 | ⏳ Calibration pending | ⏳ Calibration pending |
-| Model accuracy vs oracle | > 90% | ⏳ Training pending | ⏳ Training pending |
-| Inference time | < 50ms | ⏳ Deployment pending | ⏳ Deployment pending |
-
----
-
-## Next Steps
-
-1. ✅ Implement uplifting and sustainability filters
-2. ⏳ Run pre-filter calibration (500 samples each)
-3. ⏳ Run oracle calibration (100 samples each)
-4. ⏳ Generate ground truth (2,500 samples each)
-5. ⏳ Train Qwen models
-6. ⏳ Deploy and evaluate
-
----
-
-**For detailed calibration workflow, see**: [docs/guides/ground-truth-generation.md](../docs/guides/ground-truth-generation.md)
+**Last Updated**: 2025-11-17 (Harmonization milestone)

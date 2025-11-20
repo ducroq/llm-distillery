@@ -9,6 +9,8 @@
 
 **Philosophy**: "You can't predict crashes, but you can prepare for them."
 
+**Oracle Output**: Dimensional scores only (0-10 per dimension). Signal tier classification (RED/YELLOW/GREEN/BLUE/NOISE) is applied post-processing, not by the oracle.
+
 ---
 
 ## SIGNAL TIERS
@@ -134,14 +136,6 @@ Score Dimensions (0-10):
    - 0-2: Not actionable | 3-4: Limited | 5-6: Moderate | 7-8: Very actionable | 9-10: Clear simple action
    - Time horizon (weeks/months not days), portfolio-level (not individual stocks), low-cost, simple
 
-Classify Signal Tier:
-
-**🔴 RED FLAG**: Macro Risk ≥7 OR Credit Stress ≥7 OR Systemic Risk ≥8, Evidence ≥5, Actionability ≥5
-**🟡 YELLOW WARNING**: Macro Risk 5-6 OR Credit Stress 5-6 OR Valuation Risk 7-8, Evidence ≥5, Actionability ≥4
-**🟢 GREEN OPPORTUNITY**: Sentiment ≥7 (fear) AND Valuation ≤3 (cheap), Evidence ≥6, Actionability ≥5
-**🔵 BLUE CONTEXT**: Educational, historical analysis, long-term trends (no immediate action)
-**⚫ NOISE**: Multiple dimensions scored 0-2 due to filters OR individual stock tips OR evidence <4
-
 Metadata:
 
 **Risk Indicators** (true/false): yield_curve_inversion, recession_indicators_converging, credit_spread_widening, bank_stress_signals, policy_error_risk, extreme_sentiment, valuation_extreme, systemic_fragility
@@ -156,10 +150,9 @@ Metadata:
 
 Output JSON:
 
-{{
-  "signal_tier": "RED|YELLOW|GREEN|BLUE|NOISE",
-  "signal_strength": <0-10>,
+**NOTE: ORACLE OUTPUTS DIMENSIONAL SCORES ONLY. Signal tier (RED/YELLOW/GREEN/BLUE/NOISE) computed by postfilter.**
 
+{{
   "macro_risk_severity": <0-10>,
   "credit_market_stress": <0-10>,
   "market_sentiment_extremes": <0-10>,
@@ -236,7 +229,27 @@ DO NOT include any text outside the JSON object.
 
 ---
 
-## SCORING FORMULA (Applied post-labeling)
+## POST-PROCESSING REFERENCE (NOT part of oracle output)
+
+The oracle produces dimensional scores only. Signal tier classification and overall scoring are computed post-labeling:
+
+### Signal Tier Classification
+
+Signal tier is computed from dimensional scores using these rules:
+
+**🔴 RED FLAG**: macro_risk_severity ≥7 OR credit_market_stress ≥7 OR systemic_risk ≥8, AND evidence_quality ≥5, AND actionability ≥5
+
+**🟡 YELLOW WARNING**: macro_risk_severity 5-6 OR credit_market_stress 5-6 OR valuation_risk 7-8, AND evidence_quality ≥5, AND actionability ≥4
+
+**🟢 GREEN OPPORTUNITY**: market_sentiment_extremes ≥7 (fear) AND valuation_risk ≤3 (cheap), AND evidence_quality ≥6, AND actionability ≥5
+
+**🔵 BLUE CONTEXT**: Educational, historical analysis, long-term trends (no immediate action needed) - determined by content analysis
+
+**⚫ NOISE**: Multiple dimensions scored 0-2 due to filters OR individual stock tips OR evidence_quality <4
+
+The oracle does NOT output signal_tier. Postfilter applies this classification logic at inference time.
+
+### Signal Strength Calculation
 
 ```python
 # RED signals
