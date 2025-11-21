@@ -297,9 +297,8 @@ def main():
     print(f"Loading adapter weights from: {model_path}")
     # Load the adapter weights manually
     from safetensors.torch import load_file
-    from pathlib import Path
 
-    adapter_weights_path = Path(model_path) / "adapter_model.safetensors"
+    adapter_weights_path = model_path / "adapter_model.safetensors"
     print(f"Looking for weights at: {adapter_weights_path}")
     print(f"File exists: {adapter_weights_path.exists()}")
 
@@ -315,7 +314,7 @@ def main():
     else:
         # List what files are actually there
         print(f"Files in {model_path}:")
-        for f in Path(model_path).iterdir():
+        for f in model_path.iterdir():
             print(f"  {f.name}")
         raise FileNotFoundError(f"Adapter weights not found: {adapter_weights_path}")
 
