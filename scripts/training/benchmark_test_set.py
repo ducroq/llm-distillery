@@ -285,7 +285,7 @@ def main():
 
     # Load LoRA adapters
     print(f"Loading LoRA adapters from: {args.model_dir}")
-    model = PeftModel.from_pretrained(base_model, args.model_dir)
+    model = PeftModel.from_pretrained(base_model, str(args.model_dir))
     model = model.to(device)
 
     print(f"Model loaded successfully")
