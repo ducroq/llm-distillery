@@ -285,9 +285,13 @@ def main():
 
     # Load LoRA adapters
     print(f"Loading LoRA adapters from: {args.model_dir}")
-    # Use absolute path to avoid HuggingFace Hub repo interpretation
+    # Use absolute path and is_trainable=False for local inference
     model_path = args.model_dir.resolve()
-    model = PeftModel.from_pretrained(base_model, str(model_path))
+    model = PeftModel.from_pretrained(
+        base_model,
+        str(model_path),
+        is_trainable=False
+    )
     model = model.to(device)
 
     print(f"Model loaded successfully")
