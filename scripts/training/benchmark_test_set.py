@@ -295,33 +295,29 @@ def main():
         base_model.config.pad_token_id = tokenizer.pad_token_id
         print(f"Set model pad_token_id to: {tokenizer.pad_token_id}")
 
-    print("Applying PEFT config to base model...")
-    # Create PEFT model structure
-    model = get_peft_model(base_model, peft_config)
+    # Try using merge_and_unload to get a clean base model with adapters applied
+    print("Loading model with adapters merged...")
+    try:
+        # Load as PeftModel first
+        temp_model = get_peft_model(base_model, peft_config)
 
-    print(f"Loading adapter weights from: {model_path}")
-    # Load the adapter weights manually
-    from safetensors.torch import load_file
+        # Load adapter weights
+        from safetensors.torch import load_file
+        adapter_weights_path = model_path / "adapter_model.safetensors"
 
-    adapter_weights_path = model_path / "adapter_model.safetensors"
-    print(f"Looking for weights at: {adapter_weights_path}")
-    print(f"File exists: {adapter_weights_path.exists()}")
+        if adapter_weights_path.exists():
+            adapter_state_dict = load_file(str(adapter_weights_path))
+            temp_model.load_state_dict(adapter_state_dict, strict=False)
 
-    if adapter_weights_path.exists():
-        adapter_state_dict = load_file(str(adapter_weights_path))
-        # Use incompatible_keys to see what's loaded
-        incompatible_keys = model.load_state_dict(adapter_state_dict, strict=False)
-        print(f"✓ Adapter weights loaded successfully")
-        if incompatible_keys.missing_keys:
-            print(f"  Missing keys: {len(incompatible_keys.missing_keys)}")
-        if incompatible_keys.unexpected_keys:
-            print(f"  Unexpected keys: {len(incompatible_keys.unexpected_keys)}")
-    else:
-        # List what files are actually there
-        print(f"Files in {model_path}:")
-        for f in model_path.iterdir():
-            print(f"  {f.name}")
-        raise FileNotFoundError(f"Adapter weights not found: {adapter_weights_path}")
+            # Merge adapters into base model for inference
+            print("Merging LoRA adapters into base model...")
+            model = temp_model.merge_and_unload()
+            print("✓ Adapters merged successfully")
+        else:
+            raise FileNotFoundError(f"Adapter weights not found: {adapter_weights_path}")
+    except Exception as e:
+        print(f"Warning: Merge failed ({e}), using PEFT model directly")
+        model = temp_model
 
     model = model.to(device)
 
