@@ -290,6 +290,11 @@ def main():
         problem_type="regression",
     )
 
+    # Set pad_token_id on model config to match tokenizer
+    if base_model.config.pad_token_id is None:
+        base_model.config.pad_token_id = tokenizer.pad_token_id
+        print(f"Set model pad_token_id to: {tokenizer.pad_token_id}")
+
     print("Applying PEFT config to base model...")
     # Create PEFT model structure
     model = get_peft_model(base_model, peft_config)
