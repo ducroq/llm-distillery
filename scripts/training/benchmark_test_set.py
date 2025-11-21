@@ -297,12 +297,26 @@ def main():
     print(f"Loading adapter weights from: {model_path}")
     # Load the adapter weights manually
     from safetensors.torch import load_file
-    adapter_weights_path = model_path / "adapter_model.safetensors"
+    from pathlib import Path
+
+    adapter_weights_path = Path(model_path) / "adapter_model.safetensors"
+    print(f"Looking for weights at: {adapter_weights_path}")
+    print(f"File exists: {adapter_weights_path.exists()}")
+
     if adapter_weights_path.exists():
         adapter_state_dict = load_file(str(adapter_weights_path))
-        model.load_state_dict(adapter_state_dict, strict=False)
-        print("✓ Adapter weights loaded successfully")
+        # Use incompatible_keys to see what's loaded
+        incompatible_keys = model.load_state_dict(adapter_state_dict, strict=False)
+        print(f"✓ Adapter weights loaded successfully")
+        if incompatible_keys.missing_keys:
+            print(f"  Missing keys: {len(incompatible_keys.missing_keys)}")
+        if incompatible_keys.unexpected_keys:
+            print(f"  Unexpected keys: {len(incompatible_keys.unexpected_keys)}")
     else:
+        # List what files are actually there
+        print(f"Files in {model_path}:")
+        for f in Path(model_path).iterdir():
+            print(f"  {f.name}")
         raise FileNotFoundError(f"Adapter weights not found: {adapter_weights_path}")
 
     model = model.to(device)
