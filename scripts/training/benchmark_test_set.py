@@ -307,10 +307,19 @@ def main():
     adapter_state_dict = load_file(str(adapter_weights_path))
     print(f"Loaded {len(adapter_state_dict)} weight tensors from adapter file")
 
+    # Debug: Print score layer keys in saved weights
+    print("\nDEBUG: Score layer keys in saved weights:")
+    score_keys = [k for k in adapter_state_dict.keys() if 'score' in k.lower()]
+    for k in score_keys:
+        print(f"  {k}: shape {adapter_state_dict[k].shape}")
+    if not score_keys:
+        print("  (No score keys found)")
+
     # Fix key names for PEFT version compatibility
     # Old format: lora_A.weight -> New format: lora_A.default.weight
-    print("Remapping keys for PEFT compatibility...")
+    print("\nRemapping keys for PEFT compatibility...")
     remapped_state_dict = {}
+    lora_keys_remapped = 0
     for key, value in adapter_state_dict.items():
         # Fix LoRA adapter keys
         if ".lora_A.weight" in key or ".lora_B.weight" in key:
@@ -318,16 +327,31 @@ def main():
             new_key = key.replace(".lora_A.weight", ".lora_A.default.weight")
             new_key = new_key.replace(".lora_B.weight", ".lora_B.default.weight")
             remapped_state_dict[new_key] = value
-            print(f"  Remapped: {key} -> {new_key}")
+            lora_keys_remapped += 1
         else:
             remapped_state_dict[key] = value
 
+    print(f"  Remapped {lora_keys_remapped} LoRA weight keys")
+
     # Apply PEFT to base model
-    print("Creating PEFT model structure...")
+    print("\nCreating PEFT model structure...")
     model = get_peft_model(base_model, peft_config)
 
+    # Debug: Print score layer keys in model structure
+    print("\nDEBUG: Score layer keys in model structure:")
+    model_score_keys = [k for k, v in model.named_parameters() if 'score' in k.lower()]
+    for k in model_score_keys:
+        print(f"  {k}")
+    if not model_score_keys:
+        print("  (No score keys found)")
+
+    print("\nDEBUG: All module names in model:")
+    all_modules = [name for name, _ in model.named_modules() if 'score' in name.lower()]
+    for name in all_modules:
+        print(f"  {name}")
+
     # Load adapter weights with detailed logging
-    print("Loading remapped weights into model...")
+    print("\nLoading remapped weights into model...")
     incompatible = model.load_state_dict(remapped_state_dict, strict=False)
 
     if incompatible.missing_keys:
