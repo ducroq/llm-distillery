@@ -1,0 +1,28 @@
+{
+  "filter_name": "investment-risk",
+  "filter_version": "4.0",
+  "dimension_names": [
+    "macro_risk_severity",
+    "credit_market_stress",
+    "market_sentiment_extremes",
+    "valuation_risk",
+    "policy_regulatory_risk",
+    "systemic_risk",
+    "evidence_quality",
+    "actionability"
+  ],
+  "num_dimensions": 8,
+  "model_name": "Qwen/Qwen2.5-1.5B",
+  "num_parameters": 1562203648,
+  "num_trainable_parameters": 18477056,
+  "epochs": 9,
+  "batch_size": 8,
+  "learning_rate": 2e-05,
+  "max_length": 512,
+  "warmup_steps": 500,
+  "train_examples": 3902,
+  "val_examples": 488,
+  "best_val_mae": 0.39141610264778137,
+  "include_prompt": false,
+  "training_mode": "knowledge_distillation"
+}
