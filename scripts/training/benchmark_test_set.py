@@ -17,7 +17,7 @@ import yaml
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-from peft import PeftModel
+from peft import PeftModel, AutoPeftModelForSequenceClassification
 
 
 class FilterDataset(Dataset):
@@ -275,23 +275,34 @@ def main():
         shuffle=False,
     )
 
-    # Load base model
-    print(f"\nLoading base model: {base_model_name}")
-    base_model = AutoModelForSequenceClassification.from_pretrained(
-        base_model_name,
-        num_labels=num_dimensions,
-        problem_type="regression",
-    )
-
-    # Load LoRA adapters
-    print(f"Loading LoRA adapters from: {args.model_dir}")
-    # Use absolute path and is_trainable=False for local inference
+    # Load model with LoRA adapters using AutoPeftModel
+    print(f"\nLoading model with LoRA adapters from: {args.model_dir}")
     model_path = args.model_dir.resolve()
-    model = PeftModel.from_pretrained(
-        base_model,
-        str(model_path),
-        is_trainable=False
-    )
+
+    # AutoPeftModel can load the base model + adapters directly from local directory
+    try:
+        model = AutoPeftModelForSequenceClassification.from_pretrained(
+            str(model_path),
+            num_labels=num_dimensions,
+            problem_type="regression",
+            is_trainable=False,
+        )
+    except Exception as e:
+        print(f"Warning: AutoPeftModel failed ({e}), trying manual load...")
+        # Fallback: Load base model first, then add adapters
+        base_model = AutoModelForSequenceClassification.from_pretrained(
+            base_model_name,
+            num_labels=num_dimensions,
+            problem_type="regression",
+        )
+        # Try loading with local_files_only to prevent HF Hub lookups
+        model = PeftModel.from_pretrained(
+            base_model,
+            str(model_path),
+            is_trainable=False,
+            local_files_only=True,
+        )
+
     model = model.to(device)
 
     print(f"Model loaded successfully")
