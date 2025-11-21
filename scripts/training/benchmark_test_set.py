@@ -295,29 +295,43 @@ def main():
         base_model.config.pad_token_id = tokenizer.pad_token_id
         print(f"Set model pad_token_id to: {tokenizer.pad_token_id}")
 
-    # Try using merge_and_unload to get a clean base model with adapters applied
-    print("Loading model with adapters merged...")
-    try:
-        # Load as PeftModel first
-        temp_model = get_peft_model(base_model, peft_config)
+    # Load adapter weights including modules_to_save (score layer)
+    print("Loading LoRA adapter weights...")
+    from safetensors.torch import load_file
 
-        # Load adapter weights
-        from safetensors.torch import load_file
-        adapter_weights_path = model_path / "adapter_model.safetensors"
+    adapter_weights_path = model_path / "adapter_model.safetensors"
+    if not adapter_weights_path.exists():
+        raise FileNotFoundError(f"Adapter weights not found: {adapter_weights_path}")
 
-        if adapter_weights_path.exists():
-            adapter_state_dict = load_file(str(adapter_weights_path))
-            temp_model.load_state_dict(adapter_state_dict, strict=False)
+    # Load the full state dict
+    adapter_state_dict = load_file(str(adapter_weights_path))
+    print(f"Loaded {len(adapter_state_dict)} weight tensors from adapter file")
 
-            # Merge adapters into base model for inference
-            print("Merging LoRA adapters into base model...")
-            model = temp_model.merge_and_unload()
-            print("✓ Adapters merged successfully")
-        else:
-            raise FileNotFoundError(f"Adapter weights not found: {adapter_weights_path}")
-    except Exception as e:
-        print(f"Warning: Merge failed ({e}), using PEFT model directly")
-        model = temp_model
+    # Apply PEFT to base model
+    print("Creating PEFT model structure...")
+    model = get_peft_model(base_model, peft_config)
+
+    # Load adapter weights with detailed logging
+    print("Loading weights into model...")
+    incompatible = model.load_state_dict(adapter_state_dict, strict=False)
+
+    if incompatible.missing_keys:
+        print(f"  Warning: {len(incompatible.missing_keys)} missing keys")
+        # Show first few
+        for key in list(incompatible.missing_keys)[:5]:
+            print(f"    - {key}")
+        if len(incompatible.missing_keys) > 5:
+            print(f"    ... and {len(incompatible.missing_keys) - 5} more")
+
+    if incompatible.unexpected_keys:
+        print(f"  Warning: {len(incompatible.unexpected_keys)} unexpected keys")
+        # Show first few
+        for key in list(incompatible.unexpected_keys)[:5]:
+            print(f"    - {key}")
+        if len(incompatible.unexpected_keys) > 5:
+            print(f"    ... and {len(incompatible.unexpected_keys) - 5} more")
+
+    print("✓ Weights loaded")
 
     model = model.to(device)
 
