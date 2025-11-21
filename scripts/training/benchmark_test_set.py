@@ -317,9 +317,11 @@ def main():
 
     # Fix key names for PEFT version compatibility
     # Old format: lora_A.weight -> New format: lora_A.default.weight
+    # Score layer: base_model.model.score.weight -> base_model.model.score.modules_to_save.default.weight
     print("\nRemapping keys for PEFT compatibility...")
     remapped_state_dict = {}
     lora_keys_remapped = 0
+    score_keys_remapped = 0
     for key, value in adapter_state_dict.items():
         # Fix LoRA adapter keys
         if ".lora_A.weight" in key or ".lora_B.weight" in key:
@@ -328,10 +330,20 @@ def main():
             new_key = new_key.replace(".lora_B.weight", ".lora_B.default.weight")
             remapped_state_dict[new_key] = value
             lora_keys_remapped += 1
+        # Fix score layer (modules_to_save)
+        elif key == "base_model.model.score.weight":
+            new_key = "base_model.model.score.modules_to_save.default.weight"
+            remapped_state_dict[new_key] = value
+            score_keys_remapped += 1
+        elif key == "base_model.model.score.bias":
+            new_key = "base_model.model.score.modules_to_save.default.bias"
+            remapped_state_dict[new_key] = value
+            score_keys_remapped += 1
         else:
             remapped_state_dict[key] = value
 
     print(f"  Remapped {lora_keys_remapped} LoRA weight keys")
+    print(f"  Remapped {score_keys_remapped} score layer keys")
 
     # Apply PEFT to base model
     print("\nCreating PEFT model structure...")
@@ -370,7 +382,7 @@ def main():
         if len(incompatible.unexpected_keys) > 5:
             print(f"    ... and {len(incompatible.unexpected_keys) - 5} more")
 
-    print("✓ Weights loaded")
+    print("Weights loaded successfully")
 
     model = model.to(device)
 
