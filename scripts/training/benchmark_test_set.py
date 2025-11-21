@@ -17,7 +17,7 @@ import yaml
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-from peft import PeftModel, AutoPeftModelForSequenceClassification
+from peft import PeftModel, AutoPeftModelForSequenceClassification, PeftConfig, get_peft_model
 
 
 class FilterDataset(Dataset):
@@ -275,33 +275,35 @@ def main():
         shuffle=False,
     )
 
-    # Load model with LoRA adapters using AutoPeftModel
+    # Load model with LoRA adapters
     print(f"\nLoading model with LoRA adapters from: {args.model_dir}")
     model_path = args.model_dir.resolve()
 
-    # AutoPeftModel can load the base model + adapters directly from local directory
-    try:
-        model = AutoPeftModelForSequenceClassification.from_pretrained(
-            str(model_path),
-            num_labels=num_dimensions,
-            problem_type="regression",
-            is_trainable=False,
-        )
-    except Exception as e:
-        print(f"Warning: AutoPeftModel failed ({e}), trying manual load...")
-        # Fallback: Load base model first, then add adapters
-        base_model = AutoModelForSequenceClassification.from_pretrained(
-            base_model_name,
-            num_labels=num_dimensions,
-            problem_type="regression",
-        )
-        # Try loading with local_files_only to prevent HF Hub lookups
-        model = PeftModel.from_pretrained(
-            base_model,
-            str(model_path),
-            is_trainable=False,
-            local_files_only=True,
-        )
+    # Workaround for PEFT's HF Hub validation: Load config first, then manually load weights
+    print("Loading PEFT config...")
+    peft_config = PeftConfig.from_pretrained(str(model_path))
+
+    print(f"Loading base model: {peft_config.base_model_name_or_path}")
+    base_model = AutoModelForSequenceClassification.from_pretrained(
+        peft_config.base_model_name_or_path,
+        num_labels=num_dimensions,
+        problem_type="regression",
+    )
+
+    print("Applying PEFT config to base model...")
+    # Create PEFT model structure
+    model = get_peft_model(base_model, peft_config)
+
+    print(f"Loading adapter weights from: {model_path}")
+    # Load the adapter weights manually
+    from safetensors.torch import load_file
+    adapter_weights_path = model_path / "adapter_model.safetensors"
+    if adapter_weights_path.exists():
+        adapter_state_dict = load_file(str(adapter_weights_path))
+        model.load_state_dict(adapter_state_dict, strict=False)
+        print("✓ Adapter weights loaded successfully")
+    else:
+        raise FileNotFoundError(f"Adapter weights not found: {adapter_weights_path}")
 
     model = model.to(device)
 
