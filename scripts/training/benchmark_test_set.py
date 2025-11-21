@@ -307,13 +307,28 @@ def main():
     adapter_state_dict = load_file(str(adapter_weights_path))
     print(f"Loaded {len(adapter_state_dict)} weight tensors from adapter file")
 
+    # Fix key names for PEFT version compatibility
+    # Old format: lora_A.weight -> New format: lora_A.default.weight
+    print("Remapping keys for PEFT compatibility...")
+    remapped_state_dict = {}
+    for key, value in adapter_state_dict.items():
+        # Fix LoRA adapter keys
+        if ".lora_A.weight" in key or ".lora_B.weight" in key:
+            # Insert .default before .weight
+            new_key = key.replace(".lora_A.weight", ".lora_A.default.weight")
+            new_key = new_key.replace(".lora_B.weight", ".lora_B.default.weight")
+            remapped_state_dict[new_key] = value
+            print(f"  Remapped: {key} -> {new_key}")
+        else:
+            remapped_state_dict[key] = value
+
     # Apply PEFT to base model
     print("Creating PEFT model structure...")
     model = get_peft_model(base_model, peft_config)
 
     # Load adapter weights with detailed logging
-    print("Loading weights into model...")
-    incompatible = model.load_state_dict(adapter_state_dict, strict=False)
+    print("Loading remapped weights into model...")
+    incompatible = model.load_state_dict(remapped_state_dict, strict=False)
 
     if incompatible.missing_keys:
         print(f"  Warning: {len(incompatible.missing_keys)} missing keys")
