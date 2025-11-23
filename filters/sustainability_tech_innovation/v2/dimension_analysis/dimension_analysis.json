@@ -1,0 +1,416 @@
+{
+  "filter": "filters\\sustainability_tech_innovation\\v2",
+  "num_training_examples": 3976,
+  "dimension_names": [
+    "deployment_maturity",
+    "technology_performance",
+    "cost_trajectory",
+    "scale_of_deployment",
+    "market_penetration",
+    "technology_readiness",
+    "supply_chain_maturity",
+    "proof_of_impact"
+  ],
+  "correlation_analysis": {
+    "correlation_matrix": [
+      [
+        1.0,
+        0.9095703122112606,
+        0.8487706713815661,
+        0.943565708868845,
+        0.9205620877045513,
+        0.9549283969461853,
+        0.8865917236956852,
+        0.8843332383125666
+      ],
+      [
+        0.9095703122112606,
+        1.0,
+        0.7990628116465839,
+        0.865169088280458,
+        0.8599770759145882,
+        0.9445552108787428,
+        0.7856029849116732,
+        0.9251260245183546
+      ],
+      [
+        0.848770671381566,
+        0.799062811646584,
+        0.9999999999999998,
+        0.8184096008755543,
+        0.8604231733946092,
+        0.8377899813522673,
+        0.84074809721542,
+        0.7992589381147926
+      ],
+      [
+        0.9435657088688449,
+        0.8651690882804581,
+        0.8184096008755543,
+        0.9999999999999998,
+        0.9388046353859203,
+        0.9213456463720745,
+        0.8765459513862114,
+        0.8679962058592187
+      ],
+      [
+        0.9205620877045513,
+        0.8599770759145882,
+        0.8604231733946093,
+        0.9388046353859203,
+        1.0,
+        0.9070889359973974,
+        0.8802895668133708,
+        0.8607840519770212
+      ],
+      [
+        0.9549283969461851,
+        0.9445552108787428,
+        0.8377899813522673,
+        0.9213456463720745,
+        0.9070889359973973,
+        0.9999999999999999,
+        0.8850211994368903,
+        0.8919597614490721
+      ],
+      [
+        0.8865917236956852,
+        0.7856029849116734,
+        0.84074809721542,
+        0.8765459513862114,
+        0.8802895668133707,
+        0.8850211994368902,
+        1.0,
+        0.7633553508777281
+      ],
+      [
+        0.8843332383125666,
+        0.9251260245183545,
+        0.7992589381147926,
+        0.8679962058592188,
+        0.8607840519770212,
+        0.8919597614490722,
+        0.763355350877728,
+        1.0
+      ]
+    ],
+    "dimension_names": [
+      "deployment_maturity",
+      "technology_performance",
+      "cost_trajectory",
+      "scale_of_deployment",
+      "market_penetration",
+      "technology_readiness",
+      "supply_chain_maturity",
+      "proof_of_impact"
+    ],
+    "high_correlation_pairs": [
+      {
+        "dim1": "deployment_maturity",
+        "dim2": "technology_readiness",
+        "correlation": 0.9549283969461853,
+        "strength": "very high"
+      },
+      {
+        "dim1": "technology_performance",
+        "dim2": "technology_readiness",
+        "correlation": 0.9445552108787428,
+        "strength": "very high"
+      },
+      {
+        "dim1": "deployment_maturity",
+        "dim2": "scale_of_deployment",
+        "correlation": 0.943565708868845,
+        "strength": "very high"
+      },
+      {
+        "dim1": "scale_of_deployment",
+        "dim2": "market_penetration",
+        "correlation": 0.9388046353859203,
+        "strength": "very high"
+      },
+      {
+        "dim1": "technology_performance",
+        "dim2": "proof_of_impact",
+        "correlation": 0.9251260245183546,
+        "strength": "very high"
+      },
+      {
+        "dim1": "scale_of_deployment",
+        "dim2": "technology_readiness",
+        "correlation": 0.9213456463720745,
+        "strength": "very high"
+      },
+      {
+        "dim1": "deployment_maturity",
+        "dim2": "market_penetration",
+        "correlation": 0.9205620877045513,
+        "strength": "very high"
+      },
+      {
+        "dim1": "deployment_maturity",
+        "dim2": "technology_performance",
+        "correlation": 0.9095703122112606,
+        "strength": "very high"
+      },
+      {
+        "dim1": "market_penetration",
+        "dim2": "technology_readiness",
+        "correlation": 0.9070889359973974,
+        "strength": "very high"
+      },
+      {
+        "dim1": "technology_readiness",
+        "dim2": "proof_of_impact",
+        "correlation": 0.8919597614490721,
+        "strength": "high"
+      },
+      {
+        "dim1": "deployment_maturity",
+        "dim2": "supply_chain_maturity",
+        "correlation": 0.8865917236956852,
+        "strength": "high"
+      },
+      {
+        "dim1": "technology_readiness",
+        "dim2": "supply_chain_maturity",
+        "correlation": 0.8850211994368903,
+        "strength": "high"
+      },
+      {
+        "dim1": "deployment_maturity",
+        "dim2": "proof_of_impact",
+        "correlation": 0.8843332383125666,
+        "strength": "high"
+      },
+      {
+        "dim1": "market_penetration",
+        "dim2": "supply_chain_maturity",
+        "correlation": 0.8802895668133708,
+        "strength": "high"
+      },
+      {
+        "dim1": "scale_of_deployment",
+        "dim2": "supply_chain_maturity",
+        "correlation": 0.8765459513862114,
+        "strength": "high"
+      },
+      {
+        "dim1": "scale_of_deployment",
+        "dim2": "proof_of_impact",
+        "correlation": 0.8679962058592187,
+        "strength": "high"
+      },
+      {
+        "dim1": "technology_performance",
+        "dim2": "scale_of_deployment",
+        "correlation": 0.865169088280458,
+        "strength": "high"
+      },
+      {
+        "dim1": "market_penetration",
+        "dim2": "proof_of_impact",
+        "correlation": 0.8607840519770212,
+        "strength": "high"
+      },
+      {
+        "dim1": "cost_trajectory",
+        "dim2": "market_penetration",
+        "correlation": 0.8604231733946092,
+        "strength": "high"
+      },
+      {
+        "dim1": "technology_performance",
+        "dim2": "market_penetration",
+        "correlation": 0.8599770759145882,
+        "strength": "high"
+      },
+      {
+        "dim1": "deployment_maturity",
+        "dim2": "cost_trajectory",
+        "correlation": 0.8487706713815661,
+        "strength": "high"
+      },
+      {
+        "dim1": "cost_trajectory",
+        "dim2": "supply_chain_maturity",
+        "correlation": 0.84074809721542,
+        "strength": "high"
+      },
+      {
+        "dim1": "cost_trajectory",
+        "dim2": "technology_readiness",
+        "correlation": 0.8377899813522673,
+        "strength": "high"
+      },
+      {
+        "dim1": "cost_trajectory",
+        "dim2": "scale_of_deployment",
+        "correlation": 0.8184096008755543,
+        "strength": "high"
+      },
+      {
+        "dim1": "cost_trajectory",
+        "dim2": "proof_of_impact",
+        "correlation": 0.7992589381147926,
+        "strength": "high"
+      },
+      {
+        "dim1": "technology_performance",
+        "dim2": "cost_trajectory",
+        "correlation": 0.7990628116465839,
+        "strength": "high"
+      },
+      {
+        "dim1": "technology_performance",
+        "dim2": "supply_chain_maturity",
+        "correlation": 0.7856029849116732,
+        "strength": "high"
+      },
+      {
+        "dim1": "supply_chain_maturity",
+        "dim2": "proof_of_impact",
+        "correlation": 0.7633553508777281,
+        "strength": "high"
+      }
+    ]
+  },
+  "pca_analysis": {
+    "variance_explained": [
+      0.8905621219489419,
+      0.04010668085184777,
+      0.025501912589478207,
+      0.01652036071472303,
+      0.010595901081985212,
+      0.008099500836087443,
+      0.005009653090220325,
+      0.0036038688867161815
+    ],
+    "cumulative_variance": [
+      0.8905621219489419,
+      0.9306688028007897,
+      0.9561707153902679,
+      0.972691076104991,
+      0.9832869771869761,
+      0.9913864780230636,
+      0.9963961311132838,
+      1.0
+    ],
+    "n_components_90": 2,
+    "n_components_95": 3,
+    "n_components_99": 6,
+    "loadings": [
+      [
+        0.3649750931477852,
+        0.3520447244522046,
+        0.33723643811290993,
+        0.3592182781282693,
+        0.3588681924991111,
+        0.36467909946275456,
+        0.34324332102332594,
+        0.34712865660292186
+      ],
+      [
+        -0.01671548857264423,
+        -0.488931929994442,
+        0.39467783225235287,
+        0.05757115097872603,
+        0.16155147360818414,
+        -0.12418145283308615,
+        0.5488068368810385,
+        -0.5087949248146789
+      ],
+      [
+        -0.19129819984141544,
+        0.09418595406693982,
+        0.8130279995422689,
+        -0.3741124274521024,
+        -0.11074520258354878,
+        -0.15149425276285358,
+        -0.2560597671201192,
+        0.22973409744108336
+      ],
+      [
+        -0.06690431923522464,
+        -0.35845568899490926,
+        0.032002560318819255,
+        0.4400768800892385,
+        0.5388187587312112,
+        -0.38349785741325,
+        -0.4318063197480208,
+        0.22020115272925245
+      ],
+      [
+        -0.3223990872929339,
+        -0.20544201030384232,
+        -0.18694631774734088,
+        -0.13130210952086666,
+        -0.07389835935563188,
+        -0.2464227574220024,
+        0.539446899127803,
+        0.6666896874570372
+      ],
+      [
+        -0.47372347330796766,
+        0.3404526011531872,
+        -0.13765502303279664,
+        -0.37088216362776594,
+        0.6746345873284659,
+        0.08509745723277716,
+        0.07274265312220564,
+        -0.18844287015193967
+      ],
+      [
+        0.6759037839589477,
+        -0.2298612541065141,
+        -0.11929193161141935,
+        -0.6074538651672987,
+        0.2828398431804964,
+        -0.1084814309032617,
+        -0.03152115165706872,
+        0.11969517406022567
+      ],
+      [
+        -0.2006029880344336,
+        -0.5373062586010817,
+        0.018273083970817904,
+        -0.10112369110070134,
+        0.04397063003710643,
+        0.775778984294369,
+        -0.17799927721741093,
+        0.1582729531270143
+      ]
+    ],
+    "interpretation": {
+      "total_dimensions": 8,
+      "effective_dimensions_90": 2,
+      "effective_dimensions_95": 3,
+      "effective_dimensions_99": 6,
+      "redundancy_ratio": 0.625
+    }
+  },
+  "reduction_suggestions": {
+    "merge_suggestions": [
+      {
+        "merged_group_id": 1,
+        "dimensions": [
+          "cost_trajectory",
+          "deployment_maturity",
+          "market_penetration",
+          "proof_of_impact",
+          "scale_of_deployment",
+          "supply_chain_maturity",
+          "technology_performance",
+          "technology_readiness"
+        ],
+        "suggested_name": "merged_cost_trajectory",
+        "count": 8,
+        "reason": "Correlation >= 0.85"
+      }
+    ],
+    "independent_dimensions": [],
+    "original_count": 8,
+    "reduced_count": 1,
+    "reduction_percentage": 87.5
+  }
+}

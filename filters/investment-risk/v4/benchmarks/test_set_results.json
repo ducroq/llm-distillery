@@ -1,0 +1,36 @@
+{
+  "filter_name": "investment-risk",
+  "filter_version": "4.0",
+  "base_model": "Qwen/Qwen2.5-1.5B",
+  "test_examples": 490,
+  "dimension_names": [
+    "macro_risk_severity",
+    "credit_market_stress",
+    "market_sentiment_extremes",
+    "valuation_risk",
+    "policy_regulatory_risk",
+    "systemic_risk",
+    "evidence_quality",
+    "actionability"
+  ],
+  "metrics": {
+    "mae": 0.39536991715431213,
+    "rmse": 0.5986034870147705,
+    "macro_risk_severity_mae": 0.406281054019928,
+    "macro_risk_severity_rmse": 0.6219980120658875,
+    "credit_market_stress_mae": 0.3402658998966217,
+    "credit_market_stress_rmse": 0.4963020980358124,
+    "market_sentiment_extremes_mae": 0.3588462471961975,
+    "market_sentiment_extremes_rmse": 0.5196520686149597,
+    "valuation_risk_mae": 0.35892578959465027,
+    "valuation_risk_rmse": 0.5239607691764832,
+    "policy_regulatory_risk_mae": 0.44991791248321533,
+    "policy_regulatory_risk_rmse": 0.6909807920455933,
+    "systemic_risk_mae": 0.37985509634017944,
+    "systemic_risk_rmse": 0.5628206133842468,
+    "evidence_quality_mae": 0.49515172839164734,
+    "evidence_quality_rmse": 0.773543655872345,
+    "actionability_mae": 0.3737156093120575,
+    "actionability_rmse": 0.5442858934402466
+  }
+}

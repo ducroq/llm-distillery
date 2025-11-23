@@ -1,0 +1,36 @@
+{
+  "filter_name": "sustainability_tech_innovation",
+  "filter_version": "2.0",
+  "base_model": "Qwen/Qwen2.5-1.5B",
+  "test_examples": 496,
+  "dimension_names": [
+    "deployment_maturity",
+    "technology_performance",
+    "cost_trajectory",
+    "scale_of_deployment",
+    "market_penetration",
+    "technology_readiness",
+    "supply_chain_maturity",
+    "proof_of_impact"
+  ],
+  "metrics": {
+    "mae": 0.6424678564071655,
+    "rmse": 0.9394134879112244,
+    "deployment_maturity_mae": 0.6124193668365479,
+    "deployment_maturity_rmse": 0.8902756571769714,
+    "technology_performance_mae": 0.7669729590415955,
+    "technology_performance_rmse": 1.096371054649353,
+    "cost_trajectory_mae": 0.5480234026908875,
+    "cost_trajectory_rmse": 0.7920570373535156,
+    "scale_of_deployment_mae": 0.6304792761802673,
+    "scale_of_deployment_rmse": 0.9022338390350342,
+    "market_penetration_mae": 0.5800076127052307,
+    "market_penetration_rmse": 0.8180631399154663,
+    "technology_readiness_mae": 0.7690791487693787,
+    "technology_readiness_rmse": 1.1713486909866333,
+    "supply_chain_maturity_mae": 0.6159328818321228,
+    "supply_chain_maturity_rmse": 0.93746417760849,
+    "proof_of_impact_mae": 0.6168285012245178,
+    "proof_of_impact_rmse": 0.838962197303772
+  }
+}

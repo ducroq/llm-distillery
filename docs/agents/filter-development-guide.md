@@ -26,12 +26,16 @@ output: "Interactive checklists with status indicators, validation reports, and 
 ```
 Planning → Architecture → Validation → Prefilter → Training Data → Training → Testing → Documentation → Deployment
    ↓           ↓              ↓            ↓              ↓            ↓          ↓           ↓              ↓
- Define    Harmonize      Calibrate    Optimize     Score 5K+     Distill    Benchmark   Document      Release
+ Define    Harmonize    Calibrate +    Optimize     Score 5K+     Distill    Benchmark   Document      Release
+                        Redundancy
+                         Analysis*
 ```
 
-**Timeline**: 2-4 weeks from planning to deployment
+**\*CRITICAL NEW STEP**: Phase 3 now includes dimension redundancy analysis - can save 50-75% training time!
+
+**Timeline**: 2-4 weeks from planning to deployment (faster with good dimension design!)
 **Cost**: ~$5-10 for training data (5K articles @ $0.001/article)
-**Artifacts**: config.yaml, prompts, prefilter, validation report, training report, release report, README
+**Artifacts**: config.yaml, prompts, prefilter, validation report, **dimension_analysis/**, training report, release report, README
 
 **📦 Filter Package Philosophy**: Each filter is a complete, self-contained package. All validation reports, calibration data, and documentation should live within the filter directory (`filters/{filter_name}/v{version}/`). This makes each filter independently deployable and auditable.
 
@@ -76,7 +80,11 @@ Planning → Architecture → Validation → Prefilter → Training Data → Tra
 ### Common Pitfalls
 
 1. **Too many dimensions** - Stick to 6-8 core dimensions
-2. **Overlapping dimensions** - Each dimension should measure something distinct
+2. **Overlapping dimensions** - Each dimension should measure something distinct (will be validated in Phase 3!)
+   - **CRITICAL**: In Phase 3, we'll analyze dimension redundancy via PCA/correlation
+   - Design dimensions to be as independent as possible
+   - Think: "Can an article score high on X but low on Y?"
+   - If not, X and Y might be redundant
 3. **No gatekeepers** - Most filters need hard requirements (e.g., "must have real-world data")
 4. **Arbitrary weights** - Weights should reflect actual importance
 
@@ -239,6 +247,8 @@ as reference."
 - [ ] **Tier distribution** - Examples from each tier
 - [ ] **Manual review** - 10-20 articles reviewed by human
 - [ ] **Threshold calibration** - Adjust if tier distribution skewed
+- [ ] **Dimension redundancy analysis** - Run analyze_oracle_dimension_redundancy.py
+- [ ] **Redundancy check PASSED** - Redundancy ratio < 50%, PC1 < 85%, or redesign approved
 
 ### Validation Process
 
@@ -359,6 +369,122 @@ python scripts/compute_tiers.py \
 - 70-79%: Acceptable
 - <70%: Review prompt, add examples, clarify rubrics
 
+#### Step 9: **CRITICAL** - Dimension Redundancy Analysis
+
+**WHY THIS IS CRITICAL**: This single analysis can save 50-75% of training time and prevent weeks of wasted effort! Analysis of previous filters revealed 62-87% dimension redundancy that could have been detected BEFORE training.
+
+**When to run**: After validation sample (100 articles minimum) is scored
+
+**What it does**:
+- Computes correlation matrix between dimensions
+- Performs PCA to find true dimensionality
+- Identifies redundant dimensions (highly correlated >0.85)
+- Suggests dimension merges/reductions
+- Reveals if oracle is rating on single factor vs independent dimensions
+
+**Command**:
+```bash
+python scripts/analysis/analyze_oracle_dimension_redundancy.py \
+  --filter filters/{filter_name}/v1 \
+  --data-dir sandbox/{filter_name}_validation \
+  --correlation-threshold 0.85
+```
+
+**What to look for**:
+
+**🟢 GOOD (Proceed with training)**:
+- Redundancy ratio < 30%
+- PC1 variance < 70%
+- Most dimension correlations < 0.7
+- Effective dimensions (95% variance) ≥ 70% of original
+
+**Example**:
+```
+Original dimensions: 8
+Effective dimensions (95%): 6
+Redundancy ratio: 25%
+PC1 variance: 65%
+High correlations: 3 pairs
+
+→ Dimensions are mostly independent, proceed!
+```
+
+**🟡 WARNING (Consider reduction)**:
+- Redundancy ratio 30-50%
+- PC1 variance 70-85%
+- Several dimension pairs with r > 0.85
+- Effective dimensions 50-70% of original
+
+**Example**:
+```
+Original dimensions: 8
+Effective dimensions (95%): 5
+Redundancy ratio: 37.5%
+PC1 variance: 75%
+High correlations: 14 pairs
+
+→ Moderate redundancy. Consider merging 2-3 dimensions.
+→ Can proceed but will have correlated errors.
+```
+
+**🔴 STOP (Redesign required)**:
+- Redundancy ratio > 50%
+- PC1 variance > 85%
+- Most dimensions correlated > 0.85
+- Effective dimensions < 50% of original
+
+**Example**:
+```
+Original dimensions: 8
+Effective dimensions (95%): 3
+Redundancy ratio: 62.5%
+PC1 variance: 89%
+High correlations: 28 pairs (ALL dimensions!)
+
+→ SEVERE REDUNDANCY! Oracle rating on single factor.
+→ DO NOT proceed to training.
+→ Redesign dimensions or oracle prompt.
+```
+
+**Why high redundancy is bad**:
+1. **Wasted training time**: Training 8 dimensions when only 2-3 needed (3-4x slower!)
+2. **Harder to interpret**: 8 correlated scores vs 2 clear scores
+3. **Overfitting risk**: More parameters = higher overfitting
+4. **Correlated errors**: When model errs on one dimension, errs on all (seen in error analysis)
+5. **Wasted oracle cost**: Generating 8 scores when 2-3 would suffice
+
+**Historical examples** (from actual analysis):
+- **investment-risk v4**: 87.1% variance in PC1, could reduce 8→2 dimensions (75% reduction)
+- **sustainability_tech_innovation v2**: 89.1% variance in PC1, could reduce 8→1 dimension (87% reduction!)
+- **uplifting v4**: 75.0% variance in PC1, could reduce 8→6 dimensions (25% reduction)
+
+**If redundancy detected, choose:**
+
+**Option A: Redesign Dimensions**
+1. Keep dimensions with low correlation to others
+2. Merge highly correlated dimensions (r > 0.85)
+3. Example: investment-risk 8 dimensions → "overall_risk" + "evidence_quality"
+
+**Option B: Improve Oracle Prompt**
+1. Add explicit: "Rate dimensions independently"
+2. Provide contrastive examples (high X, low Y; low X, high Y)
+3. Use separate oracle calls per dimension
+4. Emphasize what makes each dimension different
+
+**Option C: Accept and Document**
+1. If redundancy < 40% and you want granularity
+2. Document that dimensions are correlated
+3. Accept longer training time
+4. Plan for correlated prediction errors
+
+**Output**: Analysis creates visualizations in `filters/{filter_name}/v1/dimension_analysis/`:
+- Correlation heatmap
+- Hierarchical clustering dendrogram
+- PCA variance explained (scree plot)
+- PCA component loadings
+
+**MUST DO**: Review visualizations and redundancy metrics before proceeding to Phase 5 (Training Data Generation)!
+
 ### Validation Criteria
 
 **PASS:**
@@ -368,6 +494,8 @@ python scripts/compute_tiers.py \
 - Gatekeepers enforced correctly
 - Tier distribution balanced (<60% in any tier)
 - Manual review ≥70% agreement
+- **Dimension redundancy < 50% OR redesign complete**
+- **PC1 variance < 85% OR redesign complete**
 
 **REVIEW:**
 - Success rate 90-95% (investigate failures)
@@ -382,6 +510,8 @@ python scripts/compute_tiers.py \
 - Gatekeepers not enforced (prompt unclear)
 - >70% in one tier (thresholds wrong)
 - Manual review <60% agreement (prompt doesn't work)
+- **Dimension redundancy > 50% without redesign plan** (will waste training time!)
+- **PC1 variance > 85% without redesign** (oracle rating on single factor)
 
 ### Common Issues and Fixes
 

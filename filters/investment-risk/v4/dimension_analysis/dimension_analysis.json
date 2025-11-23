@@ -1,0 +1,411 @@
+{
+  "filter": "filters\\investment-risk\\v4",
+  "num_training_examples": 3902,
+  "dimension_names": [
+    "macro_risk_severity",
+    "credit_market_stress",
+    "market_sentiment_extremes",
+    "valuation_risk",
+    "policy_regulatory_risk",
+    "systemic_risk",
+    "evidence_quality",
+    "actionability"
+  ],
+  "correlation_analysis": {
+    "correlation_matrix": [
+      [
+        1.0,
+        0.92628702670227,
+        0.894772812835772,
+        0.9078893250988543,
+        0.8705238818209785,
+        0.9717049670462069,
+        0.7569712492648154,
+        0.9501482059587217
+      ],
+      [
+        0.9262870267022701,
+        0.9999999999999999,
+        0.8366550248888818,
+        0.8483563919856703,
+        0.8029195437573002,
+        0.957594909714361,
+        0.6797113237322739,
+        0.8746823744625832
+      ],
+      [
+        0.894772812835772,
+        0.8366550248888818,
+        0.9999999999999998,
+        0.8818582955597527,
+        0.73395805398982,
+        0.9006251180592252,
+        0.7164298904287546,
+        0.9342273523334856
+      ],
+      [
+        0.9078893250988543,
+        0.8483563919856701,
+        0.8818582955597526,
+        0.9999999999999999,
+        0.828433489958938,
+        0.8960138949756778,
+        0.766196315755001,
+        0.9222263134013075
+      ],
+      [
+        0.8705238818209785,
+        0.8029195437573002,
+        0.7339580539898198,
+        0.8284334899589381,
+        1.0,
+        0.8594517575833335,
+        0.7292289827390288,
+        0.8395209678008534
+      ],
+      [
+        0.971704967046207,
+        0.957594909714361,
+        0.9006251180592251,
+        0.8960138949756778,
+        0.8594517575833335,
+        0.9999999999999998,
+        0.7573157206629211,
+        0.9436984688326846
+      ],
+      [
+        0.7569712492648155,
+        0.6797113237322738,
+        0.7164298904287547,
+        0.7661963157550009,
+        0.7292289827390287,
+        0.7573157206629211,
+        1.0,
+        0.7978146508163483
+      ],
+      [
+        0.9501482059587216,
+        0.8746823744625833,
+        0.9342273523334857,
+        0.9222263134013075,
+        0.8395209678008533,
+        0.9436984688326846,
+        0.7978146508163484,
+        1.0
+      ]
+    ],
+    "dimension_names": [
+      "macro_risk_severity",
+      "credit_market_stress",
+      "market_sentiment_extremes",
+      "valuation_risk",
+      "policy_regulatory_risk",
+      "systemic_risk",
+      "evidence_quality",
+      "actionability"
+    ],
+    "high_correlation_pairs": [
+      {
+        "dim1": "macro_risk_severity",
+        "dim2": "systemic_risk",
+        "correlation": 0.9717049670462069,
+        "strength": "very high"
+      },
+      {
+        "dim1": "credit_market_stress",
+        "dim2": "systemic_risk",
+        "correlation": 0.957594909714361,
+        "strength": "very high"
+      },
+      {
+        "dim1": "macro_risk_severity",
+        "dim2": "actionability",
+        "correlation": 0.9501482059587217,
+        "strength": "very high"
+      },
+      {
+        "dim1": "systemic_risk",
+        "dim2": "actionability",
+        "correlation": 0.9436984688326846,
+        "strength": "very high"
+      },
+      {
+        "dim1": "market_sentiment_extremes",
+        "dim2": "actionability",
+        "correlation": 0.9342273523334856,
+        "strength": "very high"
+      },
+      {
+        "dim1": "macro_risk_severity",
+        "dim2": "credit_market_stress",
+        "correlation": 0.92628702670227,
+        "strength": "very high"
+      },
+      {
+        "dim1": "valuation_risk",
+        "dim2": "actionability",
+        "correlation": 0.9222263134013075,
+        "strength": "very high"
+      },
+      {
+        "dim1": "macro_risk_severity",
+        "dim2": "valuation_risk",
+        "correlation": 0.9078893250988543,
+        "strength": "very high"
+      },
+      {
+        "dim1": "market_sentiment_extremes",
+        "dim2": "systemic_risk",
+        "correlation": 0.9006251180592252,
+        "strength": "very high"
+      },
+      {
+        "dim1": "valuation_risk",
+        "dim2": "systemic_risk",
+        "correlation": 0.8960138949756778,
+        "strength": "high"
+      },
+      {
+        "dim1": "macro_risk_severity",
+        "dim2": "market_sentiment_extremes",
+        "correlation": 0.894772812835772,
+        "strength": "high"
+      },
+      {
+        "dim1": "market_sentiment_extremes",
+        "dim2": "valuation_risk",
+        "correlation": 0.8818582955597527,
+        "strength": "high"
+      },
+      {
+        "dim1": "credit_market_stress",
+        "dim2": "actionability",
+        "correlation": 0.8746823744625832,
+        "strength": "high"
+      },
+      {
+        "dim1": "macro_risk_severity",
+        "dim2": "policy_regulatory_risk",
+        "correlation": 0.8705238818209785,
+        "strength": "high"
+      },
+      {
+        "dim1": "policy_regulatory_risk",
+        "dim2": "systemic_risk",
+        "correlation": 0.8594517575833335,
+        "strength": "high"
+      },
+      {
+        "dim1": "credit_market_stress",
+        "dim2": "valuation_risk",
+        "correlation": 0.8483563919856703,
+        "strength": "high"
+      },
+      {
+        "dim1": "policy_regulatory_risk",
+        "dim2": "actionability",
+        "correlation": 0.8395209678008534,
+        "strength": "high"
+      },
+      {
+        "dim1": "credit_market_stress",
+        "dim2": "market_sentiment_extremes",
+        "correlation": 0.8366550248888818,
+        "strength": "high"
+      },
+      {
+        "dim1": "valuation_risk",
+        "dim2": "policy_regulatory_risk",
+        "correlation": 0.828433489958938,
+        "strength": "high"
+      },
+      {
+        "dim1": "credit_market_stress",
+        "dim2": "policy_regulatory_risk",
+        "correlation": 0.8029195437573002,
+        "strength": "high"
+      },
+      {
+        "dim1": "evidence_quality",
+        "dim2": "actionability",
+        "correlation": 0.7978146508163483,
+        "strength": "high"
+      },
+      {
+        "dim1": "valuation_risk",
+        "dim2": "evidence_quality",
+        "correlation": 0.766196315755001,
+        "strength": "high"
+      },
+      {
+        "dim1": "systemic_risk",
+        "dim2": "evidence_quality",
+        "correlation": 0.7573157206629211,
+        "strength": "high"
+      },
+      {
+        "dim1": "macro_risk_severity",
+        "dim2": "evidence_quality",
+        "correlation": 0.7569712492648154,
+        "strength": "high"
+      },
+      {
+        "dim1": "market_sentiment_extremes",
+        "dim2": "policy_regulatory_risk",
+        "correlation": 0.73395805398982,
+        "strength": "high"
+      },
+      {
+        "dim1": "policy_regulatory_risk",
+        "dim2": "evidence_quality",
+        "correlation": 0.7292289827390288,
+        "strength": "high"
+      },
+      {
+        "dim1": "market_sentiment_extremes",
+        "dim2": "evidence_quality",
+        "correlation": 0.7164298904287546,
+        "strength": "high"
+      }
+    ]
+  },
+  "pca_analysis": {
+    "variance_explained": [
+      0.8705595939757055,
+      0.047790953387252734,
+      0.03462485642133763,
+      0.02125080781250118,
+      0.012818620085430617,
+      0.0066170857122754565,
+      0.004035727276850511,
+      0.002302355328646551
+    ],
+    "cumulative_variance": [
+      0.8705595939757055,
+      0.9183505473629582,
+      0.9529754037842958,
+      0.974226211596797,
+      0.9870448316822277,
+      0.9936619173945032,
+      0.9976976446713537,
+      1.0000000000000002
+    ],
+    "n_components_90": 2,
+    "n_components_95": 3,
+    "n_components_99": 6,
+    "loadings": [
+      [
+        0.37041742712736825,
+        0.3527222279985007,
+        0.35116087246143474,
+        0.3585215833612564,
+        0.3382810323309221,
+        0.3708240801134133,
+        0.3132921777113381,
+        0.36936395551059165
+      ],
+      [
+        -0.15387958971979615,
+        -0.3577814221211697,
+        -0.1779882786648777,
+        0.010774774893894,
+        0.12265899641845429,
+        -0.19168268446403242,
+        0.8744614971416804,
+        -0.006871086342928702
+      ],
+      [
+        0.07471969072970583,
+        0.13731726598155758,
+        -0.5595505984870609,
+        -0.11823468819832259,
+        0.7660010365025868,
+        0.05531503701713102,
+        -0.13997676456211117,
+        -0.19767090493926218
+      ],
+      [
+        0.07249452019498119,
+        0.6084272098793994,
+        -0.25254222883867783,
+        -0.4522017987766734,
+        -0.37700458289422034,
+        0.27285866568906386,
+        0.3271327976451851,
+        -0.18082216787876712
+      ],
+      [
+        -0.0984486033232242,
+        0.2547261074634909,
+        -0.4000210698543833,
+        0.8014048496771745,
+        -0.2538345517740938,
+        -0.09344736865289689,
+        0.00896644791379926,
+        -0.22340793561547534
+      ],
+      [
+        0.5840556472519814,
+        -0.31953725334237904,
+        -0.5052767211168585,
+        -0.025922538021838467,
+        -0.27099883727583396,
+        0.06933941924274274,
+        -0.07361206665704943,
+        0.46597354059654994
+      ],
+      [
+        -0.6047553676599234,
+        0.24672247521416504,
+        -0.20860071853109152,
+        -0.05388270343205577,
+        0.033437931914922225,
+        -0.0743498964177142,
+        -0.0626100138025661,
+        0.7186204448757652
+      ],
+      [
+        -0.334262370915799,
+        -0.36149461507683606,
+        -0.09641620037248663,
+        0.08399531765030126,
+        -0.05138312511425218,
+        0.8539129770980671,
+        -0.03371338184025028,
+        -0.09107592140988077
+      ]
+    ],
+    "interpretation": {
+      "total_dimensions": 8,
+      "effective_dimensions_90": 2,
+      "effective_dimensions_95": 3,
+      "effective_dimensions_99": 6,
+      "redundancy_ratio": 0.625
+    }
+  },
+  "reduction_suggestions": {
+    "merge_suggestions": [
+      {
+        "merged_group_id": 1,
+        "dimensions": [
+          "actionability",
+          "credit_market_stress",
+          "macro_risk_severity",
+          "market_sentiment_extremes",
+          "policy_regulatory_risk",
+          "systemic_risk",
+          "valuation_risk"
+        ],
+        "suggested_name": "merged_actionability",
+        "count": 7,
+        "reason": "Correlation >= 0.85"
+      }
+    ],
+    "independent_dimensions": [
+      "evidence_quality"
+    ],
+    "original_count": 8,
+    "reduced_count": 2,
+    "reduction_percentage": 75.0
+  }
+}

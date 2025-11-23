@@ -43,9 +43,9 @@
 **When to use:** Starting new filters, reviewing production readiness, debugging validation issues
 
 **9 Phases Covered:**
-1. Planning - Define purpose, dimensions, tiers, gatekeepers
+1. Planning - Define purpose, dimensions (design for independence!), tiers, gatekeepers
 2. Architecture - Create harmonized prompt structure
-3. Validation - Oracle calibration (50-100 articles)
+3. Validation - Oracle calibration (50-100 articles) + **CRITICAL: Dimension redundancy analysis**
 4. Prefilter - Test & optimize (avoid false negatives!)
 5. Training Data - Score 5K+ articles, validate quality
 6. Training - Knowledge distillation
@@ -123,6 +123,15 @@ Template for Architecture Decision Records. Copy this when documenting significa
 ---
 
 ## Version History
+
+### v1.3 (2025-11-22)
+- **CRITICAL UPDATE:** Added dimension redundancy analysis to Phase 3 (Validation)
+- **Impact:** Can save 50-75% of training time by detecting redundant dimensions early
+- **Added:** Step 9 in Phase 3 - Dimension redundancy analysis with PCA/correlation
+- **Updated:** Validation criteria to include redundancy thresholds (must be < 50%, PC1 < 85%)
+- **Updated:** Phase 1 planning guidance to emphasize dimension independence
+- **Analysis tool:** `scripts/analysis/analyze_oracle_dimension_redundancy.py`
+- **Reason:** Post-hoc analysis revealed 62-87% dimension redundancy in all three v4 models - would have been detectable before training!
 
 ### v1.2 (2025-11-17)
 - **Removed:** filter-harmonizer.md (redundant - filter-development-guide covers all harmonization checks in Phase 2)

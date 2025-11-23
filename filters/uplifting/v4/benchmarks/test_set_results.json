@@ -1,0 +1,36 @@
+{
+  "filter_name": "uplifting",
+  "filter_version": "4.0",
+  "base_model": "Qwen/Qwen2.5-1.5B",
+  "test_examples": 671,
+  "dimension_names": [
+    "agency",
+    "progress",
+    "collective_benefit",
+    "connection",
+    "innovation",
+    "justice",
+    "resilience",
+    "wonder"
+  ],
+  "metrics": {
+    "mae": 0.9681282043457031,
+    "rmse": 1.2538013458251953,
+    "agency_mae": 0.8889864087104797,
+    "agency_rmse": 1.1503551006317139,
+    "progress_mae": 0.8827516436576843,
+    "progress_rmse": 1.138229250907898,
+    "collective_benefit_mae": 0.8517775535583496,
+    "collective_benefit_rmse": 1.1147059202194214,
+    "connection_mae": 1.0497180223464966,
+    "connection_rmse": 1.327517032623291,
+    "innovation_mae": 0.916841447353363,
+    "innovation_rmse": 1.176039695739746,
+    "justice_mae": 1.068847417831421,
+    "justice_rmse": 1.3655339479446411,
+    "resilience_mae": 1.1357604265213013,
+    "resilience_rmse": 1.501251220703125,
+    "wonder_mae": 0.9503424167633057,
+    "wonder_rmse": 1.2045257091522217
+  }
+}
