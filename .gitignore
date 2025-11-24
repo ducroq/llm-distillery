@@ -20,11 +20,13 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
+# Virtual environments (never sync these!)
 venv/
 env/
 ENV/
-.venv
+.venv/
+venv_*/
+*_venv/
 
 # Environment variables
 .env
@@ -139,3 +141,30 @@ notebooks/exploratory/
 *.old
 *_backup.*
 *_test.*
+
+# ==============================================================================
+# FreeFileSync - Large files handled by file sync, not git
+# ==============================================================================
+# These files are synced via FreeFileSync between local and GPU machine
+# They should NOT be in git due to size
+
+# Large model files (sync via FreeFileSync)
+*.safetensors
+*.gguf
+*.h5
+*.keras
+
+# Large datasets (sync via FreeFileSync)
+*.parquet
+*.feather
+*.arrow
+
+# Checkpoints and training outputs (sync via FreeFileSync)
+checkpoints/
+training_outputs/
+model_outputs/
+
+# FreeFileSync backup and database files
+.sync-backups/
+*.ffs_db
+*.ffs_lock

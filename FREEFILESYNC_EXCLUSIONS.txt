@@ -1,0 +1,131 @@
+================================================================================
+FreeFileSync Exclusion Rules for llm-distillery
+================================================================================
+
+HOW TO USE:
+1. Open FreeFileSync
+2. Click the "Filter" button (funnel icon)
+3. Paste these patterns into the "Exclude" field
+
+================================================================================
+CRITICAL EXCLUSIONS (MUST HAVE!)
+================================================================================
+
+# Git repository database - DO NOT SYNC THIS!
+\.git\
+
+# Virtual environments - DO NOT SYNC!
+\venv\
+\env\
+\ENV\
+\.venv\
+\venv_*\
+\*_venv\
+
+================================================================================
+RECOMMENDED EXCLUSIONS (Python/Build artifacts)
+================================================================================
+
+# Python cache
+\__pycache__\
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Build artifacts
+\build\
+\dist\
+\*.egg-info\
+
+# IDE settings (optional - only if you use different IDEs)
+\.vscode\
+\.idea\
+*.swp
+*.swo
+
+# Pytest cache
+\.pytest_cache\
+
+# Coverage reports
+\.coverage
+\htmlcov\
+
+# Jupyter checkpoints
+\.ipynb_checkpoints\
+
+================================================================================
+OPTIONAL EXCLUSIONS (Depending on your workflow)
+================================================================================
+
+# Archive/temp folders (if you don't need these on GPU)
+\archive\
+\tmp\
+\temp\
+*.tmp
+
+# Logs (if generated on both machines)
+*.log
+*.log.*
+\logs\
+\wandb\
+
+# Documentation builds
+\docs\_build\
+\site\
+
+================================================================================
+FILE PATTERNS TO EXCLUDE
+================================================================================
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backup files
+*.bak
+*.old
+*_backup.*
+
+# Temporary files
+*~
+nul
+
+================================================================================
+EXAMPLE FREEFILESYNC FILTER CONFIGURATION
+================================================================================
+
+In FreeFileSync, your Exclude filter should look like:
+
+  \.git\
+  \venv\
+  \__pycache__\
+  *.pyc
+  .DS_Store
+
+Note: Use backslashes (\) for directory separators, they work on both Windows and Linux
+
+================================================================================
+TESTING YOUR EXCLUSIONS
+================================================================================
+
+1. Run FreeFileSync in "Compare" mode first (don't sync yet!)
+2. Check the preview - you should NOT see:
+   - .git folder
+   - venv folder
+   - __pycache__ folders
+3. Only sync if the preview looks correct!
+
+================================================================================
+BIDIRECTIONAL SYNC SETTINGS
+================================================================================
+
+Recommended settings in FreeFileSync:
+
+1. Comparison Method: "File time and size"
+2. Sync Direction: "Two way" or "Mirror" (your choice)
+3. Conflict Resolution: "Show popup" (safer) or "Newer file wins"
+4. Handle Deletion: Your choice, but "Versioning" is safer
+
+================================================================================
