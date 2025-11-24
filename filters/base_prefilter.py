@@ -3,7 +3,7 @@ Base PreFilter Class
 
 Provides common functionality for all semantic prefilters:
 - Comprehensive text cleaning (Unicode, HTML, invisible chars, security)
-- Standard interface for should_label()
+- Standard interface for apply_filter()
 - Shared utilities
 
 All filter prefilters should inherit from this base class.
@@ -23,7 +23,7 @@ class BasePreFilter:
     Base class for semantic prefilters.
 
     Provides automatic Unicode sanitization and standard interface.
-    Subclasses should implement should_label() method.
+    Subclasses should implement apply_filter() method.
     """
 
     VERSION = "0.0"  # Override in subclass
@@ -105,7 +105,7 @@ class BasePreFilter:
             min_length: Minimum content length in characters (defaults to MIN_CONTENT_LENGTH)
 
         Returns:
-            (should_label, reason)
+            (apply_filter, reason)
             - (True, "passed"): Content is long enough
             - (False, "content_too_short"): Content below minimum threshold
         """
@@ -120,9 +120,9 @@ class BasePreFilter:
 
         return (True, "passed")
 
-    def should_label(self, article: Dict) -> Tuple[bool, str]:
+    def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """
-        Determine if article should be sent to LLM for labeling.
+        Determine if article should be sent to LLM for scoring.
 
         Subclasses MUST implement this method.
 
@@ -130,8 +130,30 @@ class BasePreFilter:
             article: Dict with 'title' and 'text'/'content' keys
 
         Returns:
-            (should_label, reason)
+            (should_score, reason)
             - (True, "passed"): Send to LLM
             - (False, "reason"): Block with reason string
         """
-        raise NotImplementedError("Subclasses must implement should_label()")
+        raise NotImplementedError("Subclasses must implement apply_filter()")
+    
+    def _get_combined_text(self, article: Dict) -> str:
+        """Combine title + description + content for analysis"""
+        parts = []
+
+        if 'title' in article:
+            parts.append(article['title'])
+
+        if 'description' in article:
+            parts.append(article['description'])
+
+        if 'content' in article:
+            # Limit content to first 2000 chars for pre-filter efficiency
+            parts.append(article['content'][:2000])
+
+        return ' '.join(parts)
+    
+    def _get_combined_clean_text(self, article: Dict) -> str:
+        """Combine and comprehensively clean title + description + content for analysis"""
+        combined_text = self._get_combined_text(article)    
+        return self.sanitize_text_comprehensive(combined_text.lower())
+

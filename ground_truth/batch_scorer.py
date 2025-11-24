@@ -303,39 +303,53 @@ class GenericBatchScorer:
         }
 
     def _load_prompt_template(self) -> str:
-        """Load prompt template from markdown file."""
+        """
+        Load prompt template from markdown file.
+
+        Supports two formats:
+        1. Legacy format: Extracts content from ## PROMPT TEMPLATE section
+        2. Modern format: Uses entire file as-is (truly prompt-agnostic)
+
+        The modern format allows filters to use any prompt structure without
+        requiring boilerplate wrapper sections.
+        """
         if not self.prompt_path.exists():
             raise FileNotFoundError(f"Prompt file not found: {self.prompt_path}")
 
         with open(self.prompt_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        # Extract prompt from markdown code blocks
-        # Try to find prompt template section
-        # Look for ## PROMPT TEMPLATE section with ```...``` block
+        # Try legacy format first (backward compatibility)
         prompt_section_marker = "## PROMPT TEMPLATE"
-        end_marker = "DO NOT include any text outside the JSON object.\n```"
 
-        prompt_section_idx = content.find(prompt_section_marker)
-        if prompt_section_idx == -1:
-            raise ValueError(f"Could not find '## PROMPT TEMPLATE' section in {self.prompt_path}")
+        if prompt_section_marker in content:
+            # Legacy format: Extract from structured section
+            end_marker = "DO NOT include any text outside the JSON object.\n```"
 
-        # Find the opening ``` after the section header
-        start_idx = content.find("\n```\n", prompt_section_idx)
-        if start_idx == -1:
-            raise ValueError(f"Could not find opening ``` in PROMPT TEMPLATE section of {self.prompt_path}")
+            prompt_section_idx = content.find(prompt_section_marker)
+            start_idx = content.find("\n```\n", prompt_section_idx)
 
-        # Find the closing marker
-        end_idx = content.find(end_marker, start_idx)
-        if end_idx == -1:
-            raise ValueError(
-                f"Could not find closing marker in {self.prompt_path}\n"
-                f"Expected: 'DO NOT include any text outside the JSON object.\\n```'"
-            )
+            if start_idx == -1:
+                raise ValueError(f"Could not find opening ``` in PROMPT TEMPLATE section of {self.prompt_path}")
 
-        # Extract prompt (skip the opening ``` and newline, exclude closing marker)
-        prompt = content[start_idx + 5:end_idx + len(end_marker) - 4]
-        return prompt.strip()
+            end_idx = content.find(end_marker, start_idx)
+            if end_idx == -1:
+                raise ValueError(
+                    f"Could not find closing marker in {self.prompt_path}\n"
+                    f"Expected: 'DO NOT include any text outside the JSON object.\\n```'"
+                )
+
+            # Extract prompt (skip the opening ``` and newline, exclude closing marker)
+            prompt = content[start_idx + 5:end_idx + len(end_marker) - 4]
+            self.is_modern_format = False
+            return prompt.strip()
+
+        else:
+            # Modern format: Use entire file (truly prompt-agnostic)
+            # Supports LCSA framework, custom structures, etc.
+            print(f"  Using modern prompt format (entire file)")
+            self.is_modern_format = True
+            return content.strip()
 
     def _init_llm_client(self, api_key: Optional[str]):
         """Initialize LLM client based on provider."""
@@ -496,6 +510,10 @@ class GenericBatchScorer:
         - Stay within context window limits
         - Preserve key information (beginning + ending)
         - Prepare for future small-model compatibility
+
+        Supports two prompt formats:
+        - Legacy: Uses .format() with {title}, {source}, {published_date}, {text} placeholders
+        - Modern: Replaces [Paste the summary of the article here] with article text
         """
         # CRITICAL: Sanitize article FIRST to prevent encoding errors when sending to API
         # This removes surrogates, HTML, BiDi marks, etc. before any processing
@@ -506,14 +524,27 @@ class GenericBatchScorer:
         # Smart compression (targets ~800 words ≈ 3000 tokens)
         compressed_content = self._smart_compress_content(content, max_words=800)
 
-        # Build prompt with cleaned data
-        # (already sanitized above, but _sanitize_unicode is idempotent so safe to call again)
-        return self.prompt_template.format(
-            title=self._sanitize_unicode(article.get('title', 'N/A')),
-            source=self._sanitize_unicode(article.get('source', 'N/A')),
-            published_date=self._sanitize_unicode(article.get('published_date', 'N/A')),
-            text=self._sanitize_unicode(compressed_content)
-        )
+        # Build prompt based on format type
+        if hasattr(self, 'is_modern_format') and self.is_modern_format:
+            # Modern format: Replace placeholder text with article summary
+            title = self._sanitize_unicode(article.get('title', 'N/A'))
+            source = self._sanitize_unicode(article.get('source', 'N/A'))
+            published_date = self._sanitize_unicode(article.get('published_date', 'N/A'))
+            text = self._sanitize_unicode(compressed_content)
+
+            # Build article summary
+            article_summary = f"Title: {title}\nSource: {source}\nPublished: {published_date}\n\n{text}"
+
+            # Replace placeholder text
+            return self.prompt_template.replace('[Paste the summary of the article here]', article_summary)
+        else:
+            # Legacy format: Use .format() with placeholders
+            return self.prompt_template.format(
+                title=self._sanitize_unicode(article.get('title', 'N/A')),
+                source=self._sanitize_unicode(article.get('source', 'N/A')),
+                published_date=self._sanitize_unicode(article.get('published_date', 'N/A')),
+                text=self._sanitize_unicode(compressed_content)
+            )
 
     def analyze_article(
         self,
@@ -1231,7 +1262,7 @@ if __name__ == '__main__':
         # Wrap prefilter object to match batch_scorer interface
         # Filter packages return (bool, reason) but batch_scorer expects just bool
         if prefilter_obj:
-            prefilter = lambda article: prefilter_obj.should_label(article)[0]
+            prefilter = lambda article: prefilter_obj.apply_filter(article)[0]
             # Store prefilter object for Unicode cleaning
             prefilter.prefilter_obj = prefilter_obj
         else:

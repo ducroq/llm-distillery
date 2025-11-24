@@ -121,38 +121,39 @@ scoring:
 
 ### Checklist
 
+- [ ] **Prompt format selected** - Modern (recommended) or Legacy
+- [ ] **Input placeholder** - `**INPUT DATA:** [Paste the summary...]` (modern) or ARTICLE marker (legacy)
 - [ ] **Header complete** - Purpose, Version, Focus, Philosophy, Oracle Output statement
-- [ ] **Scope section** - IN SCOPE / OUT OF SCOPE clearly defined
-- [ ] **ARTICLE placement** - After scope/rules, before dimensions
+- [ ] **Scope section** - IN SCOPE / OUT OF SCOPE clearly defined (if using traditional structure)
 - [ ] **Gatekeeper rules** - Documented and positioned correctly
-- [ ] **Dimensions with inline filters** - Each dimension has ❌ CRITICAL FILTERS section
-- [ ] **Examples section** - At least 3 examples (high, mid, low)
+- [ ] **Dimensions defined** - Table format (modern) or inline filters (legacy) with clear scoring rubrics
+- [ ] **Contrastive examples** - Examples showing dimension independence (e.g., high X + low Y)
 - [ ] **Output format** - JSON schema WITHOUT tier/stage classification
-- [ ] **Post-processing section** - "NOT part of oracle output" - tier calculation explained
-- [ ] **CHANGELOG** - Version history structure ready
+- [ ] **Post-processing section** - "NOT part of oracle output" - tier calculation explained (optional)
+- [ ] **CHANGELOG** - Version history structure ready (optional)
 
 ### Validation Criteria
 
 **PASS:**
-- All sections present in correct order
-- Oracle Output statement: "Dimensional scores only (0-10)"
-- ARTICLE after scope/rules
-- Every dimension has inline filters
+- Prompt format clearly identified (modern or legacy)
+- Modern format: `**INPUT DATA:** [Paste the summary...]` placeholder present
+- Legacy format: ARTICLE marker after scope/rules
+- Oracle Output statement: "Dimensional scores only (0-10)" (if applicable)
+- Dimensions have clear scoring rubrics (table or inline filters)
+- Contrastive examples showing dimension independence
 - JSON output has NO tier/stage fields (only dimensional scores + metadata)
-- Post-processing section explains tier calculation
-- CHANGELOG present
 
 **REVIEW:**
 - Philosophy statement missing (optional but recommended)
-- Inline filters present but could be more specific
-- Examples could be more diverse
+- Examples could show more dimension independence patterns
+- Post-processing section missing (optional but helpful)
 
 **FAIL:**
 - Oracle outputs tier classification (violates architecture)
-- ARTICLE before scope section
-- Missing inline filters (fast models will skip top-level scope)
-- No post-processing section
-- No CHANGELOG
+- Modern format with `.format()` placeholders ({title}, {text}) - won't work with JSON examples
+- Legacy format without proper wrapper sections
+- Missing scoring rubrics for dimensions
+- No examples showing dimension independence
 
 ### Key Architectural Principles
 
@@ -170,22 +171,51 @@ scoring:
 
 **Why:** Tier classification is post-processing logic. Oracle focuses on accurate dimensional assessment. This allows changing tier thresholds without re-labeling data.
 
-#### 2. Standard Prompt Structure
+#### 2. Prompt File Format
+
+**Two formats supported** (batch_scorer.py automatically detects):
+
+**Modern Format (RECOMMENDED)**:
+- Use entire file as-is, no wrapper sections needed
+- Include `**INPUT DATA:** [Paste the summary of the article here]` placeholder
+- batch_scorer replaces placeholder with actual article data
+- Allows any custom structure (LCSA framework, tables, etc.)
+- Example: `filters/sustainability_technology/v1/prompt-compressed.md`
+
+**Legacy Format**:
+- Requires `## PROMPT TEMPLATE` section wrapper
+- Uses `{title}`, `{source}`, `{published_date}`, `{text}` placeholders
+- batch_scorer uses `.format()` to inject article data
+- Example: `filters/uplifting/v4/prompt-compressed.md`
+
+**When to use Modern Format**:
+- Custom frameworks (LCSA, risk matrices, etc.)
+- Prompts with JSON examples (curly braces would break `.format()`)
+- Cleaner, more flexible structure
+- Default for new filters
+
+**When to use Legacy Format**:
+- Backward compatibility with existing filters
+- Simple prompts without custom structure
+
+#### 3. Standard Prompt Content Structure
 
 **Correct order:**
 ```
 1. Header (Purpose, Version, Focus, Philosophy, Oracle Output)
 2. Scope (IN SCOPE / OUT OF SCOPE)
 3. Rules/Gatekeepers
-4. ARTICLE ← Must be here, after scope
-5. Dimensional scoring (with inline filters)
+4. **INPUT DATA:** [Paste the summary of the article here] ← Placeholder for modern format
+5. Dimensional scoring (with inline filters or table format)
 6. Examples
 7. Output format (JSON schema)
 8. Post-processing reference (NOT part of oracle output)
-9. CHANGELOG
+9. CHANGELOG (if tracking versions)
 ```
 
-#### 3. Inline Filter Format (CRITICAL)
+**Note**: Legacy format has ARTICLE marker instead of INPUT DATA placeholder.
+
+#### 4. Inline Filter Format (CRITICAL)
 
 **Every dimension must have:**
 ```markdown
@@ -393,20 +423,25 @@ python scripts/analysis/analyze_oracle_dimension_redundancy.py \
 **What to look for**:
 
 **🟢 GOOD (Proceed with training)**:
-- Redundancy ratio < 30%
-- PC1 variance < 70%
-- Most dimension correlations < 0.7
-- Effective dimensions (95% variance) ≥ 70% of original
+- PC1 variance < 70% (dimensions measure different things)
+- **Zero** high correlations (r > 0.85) between dimension pairs
+- Moderate correlations (0.70-0.85) acceptable if they reflect domain relationships
+- Redundancy ratio < 50% OR explained by natural domain relationships
+- Effective dimensions (95% variance) ≥ 60% of original
 
 **Example**:
 ```
-Original dimensions: 8
-Effective dimensions (95%): 6
-Redundancy ratio: 25%
-PC1 variance: 65%
-High correlations: 3 pairs
+Original dimensions: 6
+Effective dimensions (95%): 5
+Redundancy ratio: 60%
+PC1 variance: 66.5%
+High correlations (>0.85): 0
+Moderate correlations (0.70-0.85): 3 pairs (TRL↔Economics, Social↔Governance, etc.)
 
-→ Dimensions are mostly independent, proceed!
+→ Moderate correlations reflect real-world relationships
+→ Individual articles show variation from trends
+→ Dimensions provide distinct filtering value
+→ PROCEED TO TRAINING ✓
 ```
 
 **🟡 WARNING (Consider reduction)**:
@@ -445,6 +480,44 @@ High correlations: 28 pairs (ALL dimensions!)
 → DO NOT proceed to training.
 → Redesign dimensions or oracle prompt.
 ```
+
+**⚠️ IMPORTANT: Moderate Correlations vs Problematic Redundancy**
+
+**Moderate correlations (0.70-0.85) are often ACCEPTABLE** if they reflect real domain relationships rather than oracle failure. Key distinction:
+
+**✅ Acceptable Domain Relationships**:
+- Moderate correlations (0.70-0.85) with realistic causality
+  - Example: TRL ↔ Economics (r=0.76) - mature tech *tends* to be cheaper
+  - Example: Social ↔ Governance (r=0.77) - good governance *tends* to improve equity
+- PC1 variance < 70% (multi-dimensional problem)
+- **Zero** high correlations (r > 0.85)
+- Individual articles show variation from the trend
+  - High TRL + Low Economics (nuclear power)
+  - Low TRL + High Economics (early prototypes)
+- Dimensions provide distinct filtering value
+
+**❌ Problematic Redundancy**:
+- High correlations (r > 0.85) across most dimension pairs
+- PC1 variance > 85% (essentially one-dimensional)
+- Dimensions *always* move together regardless of article content
+- Oracle rating on single "overall quality" factor
+- No distinct filtering value from separate dimensions
+
+**Real Example - sustainability_technology v1**:
+```
+PC1 variance: 66.5% ✓ (multi-dimensional)
+High correlations (>0.85): 0 ✓ (dimensions independent)
+Moderate correlations:
+  - TRL ↔ Economics: r=0.76 (natural relationship)
+  - Social ↔ Governance: r=0.77 (natural relationship)
+  - Environment ↔ Governance: r=0.71 (natural relationship)
+
+→ Correlations reflect reality, not oracle failure
+→ Dimensions vary independently in individual articles
+→ PROCEED TO TRAINING ✓
+```
+
+**Decision Rule**: If PC1 < 70% AND zero high correlations (>0.85), moderate correlations are acceptable. The dimensions capture real-world patterns while allowing independent variation.
 
 **Why high redundancy is bad**:
 1. **Wasted training time**: Training 8 dimensions when only 2-3 needed (3-4x slower!)
