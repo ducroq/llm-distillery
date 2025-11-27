@@ -1,0 +1,11 @@
+{
+  "merged_at": "2025-11-25T13:43:15.384048",
+  "source_dirs": [
+    "datasets\\calibration\\calibration_1k_20251125_091431",
+    "datasets\\calibration\\calibration_1k_20251125_120437"
+  ],
+  "total_sampled": 1020,
+  "total_scored": 0,
+  "remaining": 1000,
+  "completion_pct": 0.0
+}
