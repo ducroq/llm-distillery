@@ -21,24 +21,23 @@ Large language models excel at nuanced judgment tasks but are expensive and slow
 
 ## Current Status (November 2025)
 
-### 🎯 Training Data Ready - 3 Filters Validated
+### 🚀 Production Ready Filters
 
-**Training datasets prepared and validated** for all three active filters:
+- **sustainability_technology v1**: ✅ **DEPLOYED**
+  - 6 dimensions (LCSA framework): technology_readiness, technical_performance, economic_competitiveness, life_cycle_environmental_impact, social_equity_impact, governance_systemic_impact
+  - Model: Qwen2.5-1.5B + LoRA (18.5M trainable params)
+  - Test MAE: 0.690 | All dimensions < 1.0
+  - Deployed: [HuggingFace Hub](https://huggingface.co/jeergrvgreg/sustainability-technology-v1)
+
+### 🎯 Training Data Ready
 
 - **uplifting v4**: 6,705 examples (validated, ready for training)
   - 8 dimensions: agency, progress, collective_benefit, connection, innovation, justice, resilience, wonder
   - Philosophy: MEANING not TONE
-  - Status: ✅ Validated, zero duplicates, ready for model training
-
-- **sustainability_tech_innovation v2**: 4,968 examples (validated, ready for training)
-  - 8 dimensions: deployment_maturity, technology_performance, cost_trajectory, scale, market, readiness, supply_chain, proof
-  - Philosophy: "Pilots and research need real results, not just theory"
-  - Status: ✅ Validated, zero duplicates, ready for model training
 
 - **investment-risk v4**: 4,880 examples (validated, ready for training)
   - 8 dimensions: macro_risk, credit_stress, sentiment, valuation, policy, systemic, evidence, actionability
   - Philosophy: "You can't predict crashes, but you can prepare for them"
-  - Status: ✅ Validated, zero duplicates, ready for model training
 
 ### ✅ Architecture Harmonization Complete (Nov 2025)
 
@@ -66,9 +65,8 @@ All filters now follow consistent oracle output discipline:
 
 ### 🚧 Next Steps
 
-- **Model Training**: Train Qwen2.5-7B student models on validated datasets
-- **Model Evaluation**: Compare student vs oracle performance
-- **Production Deployment**: Inference server with prefilter + model + postfilter
+- **Train remaining filters**: uplifting v4, investment-risk v4
+- **Production deployment**: Batch processing pipeline for high-volume scoring
 
 ## Quick Start
 
