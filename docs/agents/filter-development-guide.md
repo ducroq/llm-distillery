@@ -2111,76 +2111,327 @@ python scripts/benchmark_inference.py \
 
 ## Phase 9: Deployment
 
-**Goal**: Deploy to production with monitoring and rollback plan
+**Goal**: Deploy filter for production use with proper inference modules and documentation
 
 ### Checklist
 
-- [ ] **Deployment environment** - Production infrastructure ready
-- [ ] **Model uploaded** - Trained model accessible
-- [ ] **Integration complete** - Filter integrated into pipeline
-- [ ] **Smoke test** - Process 100 test articles successfully
-- [ ] **Monitoring configured** - Metrics, alerts, logging
-- [ ] **Rollback plan** - Can revert to previous version
-- [ ] **Documentation updated** - Production URLs, access info
-- [ ] **Team notified** - Stakeholders aware of new filter
+- [ ] **Inference module** - `inference.py` created for local/GPU inference
+- [ ] **HuggingFace Hub module** - `inference_hub.py` for Hub-based inference (optional)
+- [ ] **Test script** - `test_inference.py` with sample articles
+- [ ] **Upload to HuggingFace** - Model accessible via Hub (optional but recommended)
+- [ ] **DEPLOYMENT.md** - Filter-specific deployment guide
+- [ ] **Test passes** - Both local and Hub inference work
+- [ ] **Documentation updated** - README reflects deployed status
+
+### Deployment Artifacts
+
+Each deployed filter should have these files in its directory:
+
+```
+filters/{filter_name}/v1/
+├── inference.py           # Local inference module
+├── inference_hub.py       # HuggingFace Hub inference (optional)
+├── test_inference.py      # Test script with sample articles
+├── DEPLOYMENT.md          # Deployment guide
+├── model/                 # Trained model artifacts
+│   ├── adapter_model.safetensors
+│   ├── adapter_config.json
+│   └── ...
+└── benchmarks/            # Test set results
+    └── test_set_results.json
+```
 
 ### Deployment Process
 
-#### Step 1: Pre-Deployment Checklist
+#### Step 1: Create Inference Module
+
+Create `filters/{filter_name}/v1/inference.py`:
+
+```python
+"""
+{Filter Name} v1 - Production Inference Pipeline
+
+Usage:
+    from filters.{filter_name}.v1.inference import {FilterName}Scorer
+
+    scorer = {FilterName}Scorer()
+    result = scorer.score_article(article)
+"""
+
+class {FilterName}Scorer:
+    """Production scorer with prefilter → model → postfilter pipeline."""
+
+    def __init__(self, model_path=None, device=None, use_prefilter=True):
+        # Load model, tokenizer, prefilter
+        pass
+
+    def score_article(self, article: dict) -> dict:
+        # Returns: passed_prefilter, scores, weighted_average, tier
+        pass
+
+    def score_batch(self, articles: list, batch_size=16) -> list:
+        # Efficient batch scoring
+        pass
+```
+
+**Key features:**
+- Auto-detect device (CPU/GPU)
+- Optional prefilter for efficiency
+- Gatekeeper enforcement in postfilter
+- Tier assignment based on config thresholds
+
+**Reference implementation:** `filters/sustainability_technology/v1/inference.py`
+
+#### Step 2: Create HuggingFace Hub Module (Optional)
+
+Create `filters/{filter_name}/v1/inference_hub.py`:
+
+```python
+"""
+{Filter Name} v1 - HuggingFace Hub Inference
+
+Usage:
+    from filters.{filter_name}.v1.inference_hub import {FilterName}ScorerHub
+
+    scorer = {FilterName}ScorerHub(
+        repo_id="username/{filter_name}-v1",
+        token="hf_..."
+    )
+    result = scorer.score_article(article)
+"""
+
+class {FilterName}ScorerHub:
+    """Scorer that loads model from HuggingFace Hub."""
+
+    def __init__(self, repo_id, token=None, device=None, use_prefilter=True):
+        # Download and load from Hub
+        pass
+```
+
+**Reference implementation:** `filters/sustainability_technology/v1/inference_hub.py`
+
+#### Step 3: Create Test Script
+
+Create `filters/{filter_name}/v1/test_inference.py`:
+
+```python
+"""
+Test script for {filter_name} v1 filter.
+
+Usage:
+    python -m filters.{filter_name}.v1.test_inference
+    python -m filters.{filter_name}.v1.test_inference --from-hub
+"""
+
+TEST_ARTICLES = [
+    {
+        "id": "high_relevance",
+        "title": "...",
+        "content": "...",
+        "expected_tier": "high",
+    },
+    {
+        "id": "low_relevance",
+        "title": "...",
+        "content": "...",
+        "expected_tier": "low",
+    },
+    # Add 2-4 more test cases
+]
+
+def test_inference(use_hub=False):
+    # Load scorer (local or Hub)
+    # Score each test article
+    # Compare actual vs expected tier
+    # Report pass/fail
+    pass
+```
+
+**Test cases should include:**
+- High-scoring article (expected: high tier)
+- Medium-scoring article (expected: medium tier)
+- Low-scoring article (expected: low tier)
+- Off-topic article (expected: blocked by prefilter or low tier)
+
+**Reference implementation:** `filters/sustainability_technology/v1/test_inference.py`
+
+#### Step 4: Upload to HuggingFace Hub
+
+```bash
+# Upload model to HuggingFace Hub
+python scripts/deployment/upload_to_huggingface.py \
+  --filter filters/{filter_name}/v1 \
+  --repo-name username/{filter_name}-v1 \
+  --token $HF_TOKEN \
+  --private  # Remove for public model
+```
+
+**Uploaded files:**
+- `adapter_model.safetensors` - Trained LoRA weights
+- `adapter_config.json` - PEFT configuration
+- `tokenizer.json`, `vocab.json` - Tokenizer files
+- `training_metadata.json` - Training configuration
+- `README.md` - Model card (auto-generated)
+
+#### Step 5: Run Tests
+
+```bash
+# Test local inference
+python -m filters.{filter_name}.v1.test_inference
+
+# Test HuggingFace Hub inference
+python -m filters.{filter_name}.v1.test_inference --from-hub
+```
+
+**Expected output:**
+```
+[OK] All tests PASSED!
+Results: 4/4 tests passed
+```
+
+#### Step 6: Create DEPLOYMENT.md
+
+Create `filters/{filter_name}/v1/DEPLOYMENT.md` with:
 
 ```markdown
-## Pre-Deployment Checklist
+# {Filter Name} v1 - Deployment Guide
 
-- [ ] All Phase 8 documentation complete
-- [ ] Release report approved
-- [ ] Model artifacts ready (weights, config)
-- [ ] Prefilter code reviewed and tested
-- [ ] Postfilter config validated
-- [ ] Integration tests passed
-- [ ] Performance benchmarks met
-- [ ] Rollback plan documented
+**Status**: ✅ Production Ready
+
+## Quick Start
+
+\```python
+from filters.{filter_name}.v1.inference import {FilterName}Scorer
+
+scorer = {FilterName}Scorer()
+result = scorer.score_article({"title": "...", "content": "..."})
+print(result['tier'])
+\```
+
+## Deployment Options
+
+| Source | Device | Use Case |
+|--------|--------|----------|
+| Local + CPU | Testing, low volume |
+| Local + GPU | Batch processing |
+| HuggingFace + CPU | Quick tests |
+| HuggingFace + GPU | Cloud deployment |
+
+## Output Format
+
+- `passed_prefilter`: bool
+- `scores`: dict of dimension scores
+- `weighted_average`: float
+- `tier`: string
+- `gatekeeper_applied`: bool
+
+## Hardware Requirements
+
+- Minimum: 8GB RAM (CPU)
+- Recommended: 4GB VRAM (GPU)
+
+## Performance
+
+- Test MAE: X.XX
+- Inference: ~15ms/article (GPU)
 ```
 
-#### Step 2: Deploy to Staging
+**Reference implementation:** `filters/sustainability_technology/v1/DEPLOYMENT.md`
 
-```bash
-# Deploy model to staging environment
-python scripts/deploy.py \
-  --model filters/{filter_name}/v1_distillation/final \
-  --config filters/{filter_name}/v1/config.yaml \
-  --environment staging
+#### Step 7: Update Filter README
 
-# Run smoke test
-python scripts/smoke_test.py \
-  --filter {filter_name} \
-  --environment staging \
-  --sample-size 100
+Update `filters/{filter_name}/v1/README.md` to reflect deployed status:
+
+```markdown
+**Status:** ✅ DEPLOYED
+
+## Deployment
+
+- **HuggingFace Hub:** [username/{filter_name}-v1](https://huggingface.co/username/{filter_name}-v1)
+- **Test MAE:** X.XX
+- **All dimensions:** < 1.0 MAE
+
+See `DEPLOYMENT.md` for usage instructions.
 ```
 
-**Verify:**
-- Model loads correctly
-- Prefilter works
-- Postfilter classifies correctly
-- Latency within target (<50ms)
-- No errors or crashes
+### Validation Criteria
 
-#### Step 3: Deploy to Production
+**PASS:**
+- `inference.py` loads model and scores articles
+- `test_inference.py` passes all test cases
+- Model uploaded to HuggingFace Hub (if using)
+- `DEPLOYMENT.md` documents usage
+- Both CPU and GPU inference work
 
-```bash
-# Deploy to production
-python scripts/deploy.py \
-  --model filters/{filter_name}/v1_distillation/final \
-  --config filters/{filter_name}/v1/config.yaml \
-  --environment production
+**REVIEW:**
+- Some test cases fail (investigate)
+- Hub upload failed (check token/permissions)
+- Missing DEPLOYMENT.md (create it)
 
-# Run smoke test in production
-python scripts/smoke_test.py \
-  --filter {filter_name} \
-  --environment production \
-  --sample-size 100
+**FAIL:**
+- inference.py crashes or produces wrong output
+- Model doesn't load
+- No test script
+- No documentation
+
+### Deployment Options
+
+#### Option A: Local Deployment (Recommended for Batch)
+
+Best for high-volume batch processing:
+
+```python
+from filters.{filter_name}.v1.inference import {FilterName}Scorer
+
+scorer = {FilterName}Scorer(device="cuda")  # or "cpu"
+results = scorer.score_batch(articles, batch_size=16)
 ```
 
-#### Step 4: Configure Monitoring
+**Throughput:** ~50-100 articles/second (GPU)
+
+#### Option B: HuggingFace Hub (Recommended for Sharing)
+
+Best for testing or when model needs to be accessible from multiple machines:
+
+```python
+from filters.{filter_name}.v1.inference_hub import {FilterName}ScorerHub
+
+scorer = {FilterName}ScorerHub(
+    repo_id="username/{filter_name}-v1",
+    token="hf_..."
+)
+```
+
+**Note:** Model is downloaded once and cached locally.
+
+#### Option C: HuggingFace Inference Endpoints (For API)
+
+For real-time API access (paid):
+1. Go to huggingface.co/username/{filter_name}-v1
+2. Click "Deploy" → "Inference Endpoints"
+3. Select GPU instance
+4. Use generated API endpoint
+
+**Cost:** ~$1.30/hour for GPU endpoint
+
+### Post-Deployment
+
+#### Monitoring Checklist
+
+- [ ] Score distribution matches training data
+- [ ] Tier distribution reasonable
+- [ ] No crashes or errors
+- [ ] Latency within targets
+
+#### Updating the Model
+
+To deploy a new version:
+1. Train new model (v2)
+2. Create new inference modules
+3. Upload to HuggingFace as new repo or version
+4. Update imports in consuming code
+
+### Configure Monitoring (Production)
 
 **Metrics to monitor:**
 - Throughput (articles/minute)
@@ -2250,24 +2501,24 @@ Day 5: 100% traffic → Full rollout
 **Trigger:** Critical issue found in production
 
 **Process:**
-```bash
-# Revert to previous version
-python scripts/rollback.py \
-  --filter {filter_name} \
-  --to-version v0 \
-  --environment production
+1. Update imports to use previous model version
+2. Or: Point `inference.py` to previous model directory
+3. Or: Use previous HuggingFace Hub version
 
-# Verify rollback
-python scripts/smoke_test.py \
-  --filter {filter_name} \
-  --environment production
+**Example:**
+```python
+# Rollback to previous version
+scorer = FilterScorer(model_path="filters/{filter_name}/v0/model")
+
+# Or use specific HuggingFace commit
+scorer = FilterScorerHub(repo_id="username/{filter_name}-v1", revision="abc123")
 ```
 
 **Post-rollback:**
 1. Investigate issue
 2. Fix in development
 3. Re-test thoroughly
-4. Attempt deployment again
+4. Deploy new version
 
 ### Validation Criteria
 
