@@ -15,11 +15,15 @@ Usage:
 """
 
 import json
+import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+# Suppress the "should TRAIN this model" warning - we load trained weights from LoRA adapter
+logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
 from peft import PeftModel, PeftConfig
 from huggingface_hub import hf_hub_download
 
