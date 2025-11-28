@@ -129,6 +129,8 @@ nul
 # Sandbox/Experimental - NOT committed (safe space for prototyping)
 # General experimentation, prototypes
 sandbox/
+# Python working directory (temp files)
+python/
 # Quick tests, temporary work
 scratch/
 # Testing new ideas, playing with code
@@ -153,6 +155,11 @@ notebooks/exploratory/
 *.gguf
 *.h5
 *.keras
+
+# Tokenizer files (download from HuggingFace, don't track in git)
+**/model/tokenizer.json
+**/model/vocab.json
+**/model/merges.txt
 
 # Large datasets (sync via FreeFileSync)
 *.parquet
