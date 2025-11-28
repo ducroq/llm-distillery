@@ -46,7 +46,7 @@ for multi-dimensional content scoring using the **{filter_config['filter']['name
 The model was trained using **knowledge distillation** from Gemini Flash, learning to replicate
 its judgment patterns on content evaluation.
 
-**Filter Focus**: {filter_config['filter']['focus']}
+**Filter Focus**: {filter_config['filter'].get('focus', filter_config['filter'].get('description', 'Multi-dimensional content scoring'))}
 
 ## Intended Use
 
