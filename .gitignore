@@ -150,6 +150,9 @@ notebooks/exploratory/
 # These files are synced via FreeFileSync between local and GPU machine
 # They should NOT be in git due to size
 
+# Binary reports (keep locally, not in git)
+*.docx
+
 # Large model files (sync via FreeFileSync)
 *.safetensors
 *.gguf
