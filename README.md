@@ -29,11 +29,14 @@ Large language models excel at nuanced judgment tasks but are expensive and slow
   - Test MAE: 0.690 | All dimensions < 1.0
   - Deployed: [HuggingFace Hub](https://huggingface.co/jeergrvgreg/sustainability-technology-v1)
 
-### 🎯 Training Data Ready
+- **uplifting v5**: ✅ **DEPLOYED**
+  - 6 orthogonal dimensions: human_wellbeing_impact, social_cohesion_impact, justice_rights_impact, evidence_level, benefit_distribution, change_durability
+  - Model: Qwen2.5-1.5B + LoRA (18.5M trainable params)
+  - Validation MAE: 0.681 | All dimensions < 0.80
+  - Evidence gatekeeper: speculation capped at 3.0
+  - Deployed: [HuggingFace Hub](https://huggingface.co/jeergrvgreg/uplifting-filter-v5) (private)
 
-- **uplifting v4**: 6,705 examples (validated, ready for training)
-  - 8 dimensions: agency, progress, collective_benefit, connection, innovation, justice, resilience, wonder
-  - Philosophy: MEANING not TONE
+### 🎯 Training Data Ready
 
 - **investment-risk v4**: 4,880 examples (validated, ready for training)
   - 8 dimensions: macro_risk, credit_stress, sentiment, valuation, policy, systemic, evidence, actionability
@@ -65,7 +68,7 @@ All filters now follow consistent oracle output discipline:
 
 ### 🚧 Next Steps
 
-- **Train remaining filters**: uplifting v4, investment-risk v4
+- **Train remaining filters**: investment-risk v4
 - **Production deployment**: Batch processing pipeline for high-volume scoring
 
 ## Quick Start
@@ -243,7 +246,7 @@ Article → [Prefilter] → [Student Model] → [Postfilter] → Tier + Scores
 ```
 llm-distillery/
 ├── filters/                    # Versioned filter packages
-│   ├── uplifting/v4/          # Uplifting content filter
+│   ├── uplifting/v5/          # Uplifting content filter (production ready)
 │   ├── sustainability_tech_innovation/v2/  # Sustainability tech
 │   ├── investment-risk/v4/    # Investment risk signals
 │   └── README.md              # Filter development guide
