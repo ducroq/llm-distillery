@@ -22,6 +22,7 @@ import os
 import time
 import re
 import logging
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
@@ -103,7 +104,77 @@ class ErrorType(Enum):
     JSON_EXTRACTION_FAILED = "json_extraction_failed"
     LLM_API_ERROR = "llm_api_error"
     EMPTY_RESPONSE = "empty_response"
+    RATE_LIMIT = "rate_limit"
+    AUTH_ERROR = "auth_error"
     UNKNOWN = "unknown"
+
+
+class LLMError(Exception):
+    """Base exception for LLM-related errors."""
+    def __init__(self, message: str, error_type: ErrorType, retryable: bool = True):
+        super().__init__(message)
+        self.error_type = error_type
+        self.retryable = retryable
+
+
+class LLMTimeoutError(LLMError):
+    """LLM call timed out."""
+    def __init__(self, message: str, timeout_seconds: int):
+        super().__init__(message, ErrorType.TIMEOUT, retryable=True)
+        self.timeout_seconds = timeout_seconds
+
+
+class LLMRateLimitError(LLMError):
+    """Rate limit exceeded."""
+    def __init__(self, message: str, retry_after: Optional[int] = None):
+        super().__init__(message, ErrorType.RATE_LIMIT, retryable=True)
+        self.retry_after = retry_after
+
+
+class LLMAuthError(LLMError):
+    """Authentication/authorization error."""
+    def __init__(self, message: str):
+        super().__init__(message, ErrorType.AUTH_ERROR, retryable=False)
+
+
+class LLMResponseError(LLMError):
+    """Error in LLM response (empty, invalid, etc.)."""
+    def __init__(self, message: str, error_type: ErrorType):
+        super().__init__(message, error_type, retryable=True)
+
+
+@dataclass
+class RetryState:
+    """Tracks state across retry attempts for an article analysis."""
+    article_id: str
+    start_time: float = field(default_factory=time.time)
+    current_attempt: int = 0
+    max_attempts: int = 3
+    json_repaired: bool = False
+    error_type: Optional[ErrorType] = None
+    error_message: Optional[str] = None
+
+    def increment_attempt(self) -> int:
+        """Increment and return current attempt number (1-indexed for display)."""
+        self.current_attempt += 1
+        return self.current_attempt
+
+    def has_retries_left(self) -> bool:
+        """Check if more retry attempts are available."""
+        return self.current_attempt < self.max_attempts
+
+    def get_backoff_seconds(self) -> float:
+        """Get exponential backoff delay for current attempt."""
+        return 2 ** (self.current_attempt - 1)  # 1s, 2s, 4s
+
+    def elapsed_time(self) -> float:
+        """Get elapsed time since start."""
+        return time.time() - self.start_time
+
+    def set_error(self, error_type: ErrorType, message: str):
+        """Record error details."""
+        self.error_type = error_type
+        self.error_message = message
 
 
 def safe_print(msg: str):
@@ -546,6 +617,152 @@ class GenericBatchScorer:
                 text=self._sanitize_unicode(compressed_content)
             )
 
+    def _call_llm_with_timeout(
+        self,
+        prompt: str,
+        timeout_seconds: int
+    ) -> str:
+        """
+        Call LLM provider with timeout protection.
+
+        Args:
+            prompt: The prompt to send
+            timeout_seconds: Maximum time to wait
+
+        Returns:
+            Response text from LLM
+
+        Raises:
+            LLMTimeoutError: If call times out
+            LLMRateLimitError: If rate limited
+            LLMAuthError: If authentication fails
+            LLMError: For other LLM errors
+        """
+        result = [None]  # Mutable container for thread result
+        exception = [None]  # Mutable container for exceptions
+
+        def call_llm():
+            try:
+                if self.llm_provider == "claude":
+                    message = self.llm_client.messages.create(
+                        model="claude-3-7-sonnet-20250219",
+                        max_tokens=4096,
+                        temperature=0.3,
+                        system="You are an expert analyst. You respond only with valid JSON following the exact format specified. DO NOT include any text outside the JSON object.",
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    result[0] = message.content[0].text.strip()
+
+                elif self.llm_provider in ["gemini", "gemini-pro", "gemini-flash"]:
+                    response = self.llm_client.generate_content(
+                        prompt,
+                        generation_config=genai.types.GenerationConfig(
+                            temperature=0.3,
+                            max_output_tokens=4096,
+                        )
+                    )
+                    result[0] = response.text.strip()
+
+                elif self.llm_provider == "gpt4":
+                    response = self.llm_client.chat.completions.create(
+                        model="gpt-4-turbo-preview",
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=0.3,
+                        max_tokens=4096,
+                    )
+                    result[0] = response.choices[0].message.content.strip()
+            except Exception as e:
+                exception[0] = e
+
+        # Run LLM call in thread with timeout
+        thread = threading.Thread(target=call_llm)
+        thread.daemon = True
+        thread.start()
+        thread.join(timeout=timeout_seconds)
+
+        if thread.is_alive():
+            raise LLMTimeoutError(
+                f"LLM call timed out after {timeout_seconds}s",
+                timeout_seconds
+            )
+
+        if exception[0]:
+            self._classify_and_raise_exception(exception[0])
+
+        if not result[0]:
+            raise LLMResponseError("Empty response from LLM", ErrorType.EMPTY_RESPONSE)
+
+        return result[0]
+
+    def _classify_and_raise_exception(self, exc: Exception):
+        """
+        Classify an exception from LLM provider and raise appropriate LLMError.
+
+        Args:
+            exc: The original exception
+
+        Raises:
+            LLMRateLimitError: For rate limit errors
+            LLMAuthError: For authentication errors
+            LLMError: For other errors
+        """
+        error_str = str(exc).lower()
+        error_type_str = type(exc).__name__.lower()
+
+        # Check for rate limiting
+        if any(term in error_str for term in ['rate limit', 'ratelimit', 'quota', '429', 'too many requests']):
+            # Try to extract retry-after if available
+            retry_after = None
+            if hasattr(exc, 'retry_after'):
+                retry_after = exc.retry_after
+            raise LLMRateLimitError(str(exc), retry_after)
+
+        # Check for authentication errors
+        if any(term in error_str for term in ['auth', 'unauthorized', '401', '403', 'invalid key', 'api key']):
+            raise LLMAuthError(str(exc))
+
+        # Generic LLM error
+        raise LLMError(str(exc), ErrorType.LLM_API_ERROR, retryable=True)
+
+    def _parse_json_response(self, response_text: str, state: RetryState) -> Optional[Dict]:
+        """
+        Extract and parse JSON from LLM response with repair fallback.
+
+        Args:
+            response_text: Raw response from LLM
+            state: Current retry state (updated if repair succeeds)
+
+        Returns:
+            Parsed JSON dict or None if parsing failed
+
+        Raises:
+            LLMResponseError: If JSON extraction or parsing fails
+        """
+        # Extract JSON from response
+        json_str = extract_json_from_response(response_text)
+
+        if not json_str:
+            self._log_failed_response(state.article_id, response_text, "No JSON found", state.current_attempt)
+            raise LLMResponseError(
+                "Could not extract JSON from response",
+                ErrorType.JSON_EXTRACTION_FAILED
+            )
+
+        # Try parsing JSON with repair fallback
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError as e:
+            # Try repair
+            try:
+                repaired_json = repair_json(json_str)
+                result = json.loads(repaired_json)
+                state.json_repaired = True
+                safe_print(f"  INFO: JSON repair successful for article {state.article_id}")
+                return result
+            except json.JSONDecodeError as e2:
+                self._log_failed_response(state.article_id, response_text, str(e2), state.current_attempt)
+                raise LLMResponseError(str(e2), ErrorType.JSON_PARSE_ERROR)
+
     def analyze_article(
         self,
         article: Dict,
@@ -563,176 +780,116 @@ class GenericBatchScorer:
         Returns:
             Analysis dict or None if all retries failed
         """
-        start_time = time.time()
         prompt = self.build_prompt(article)
         article_id = article.get('id', 'unknown')
 
-        # Tracking variables
-        json_repaired = False
-        error_type = None
-        error_message = None
-        final_attempt = 0
+        # Initialize retry state
+        state = RetryState(article_id=article_id, max_attempts=max_retries)
 
-        # Directory for error logs
+        # Ensure error log directory exists
         error_log_dir = self.output_dir / 'error_logs'
         error_log_dir.mkdir(exist_ok=True)
 
-        for attempt in range(max_retries):
-            final_attempt = attempt + 1
+        while state.has_retries_left():
+            attempt_num = state.increment_attempt()
+
             try:
-                # Use threading for cross-platform timeout
-                import threading
+                # Call LLM with timeout
+                response_text = self._call_llm_with_timeout(prompt, timeout_seconds)
 
-                result = [None]  # Mutable container for thread result
-                exception = [None]  # Mutable container for exceptions
+                # Parse JSON response
+                analysis = self._parse_json_response(response_text, state)
 
-                def call_llm():
-                    try:
-                        if self.llm_provider == "claude":
-                            message = self.llm_client.messages.create(
-                                model="claude-3-7-sonnet-20250219",
-                                max_tokens=4096,  # Increased from 2048 to reduce truncation
-                                temperature=0.3,
-                                system="You are an expert analyst. You respond only with valid JSON following the exact format specified. DO NOT include any text outside the JSON object.",
-                                messages=[{"role": "user", "content": prompt}]
-                            )
-                            result[0] = message.content[0].text.strip()
-
-                        elif self.llm_provider in ["gemini", "gemini-pro", "gemini-flash"]:
-                            response = self.llm_client.generate_content(
-                                prompt,
-                                generation_config=genai.types.GenerationConfig(
-                                    temperature=0.3,
-                                    max_output_tokens=4096,  # Increased from 2048
-                                )
-                            )
-                            result[0] = response.text.strip()
-
-                        elif self.llm_provider == "gpt4":
-                            response = self.llm_client.chat.completions.create(
-                                model="gpt-4-turbo-preview",
-                                messages=[{"role": "user", "content": prompt}],
-                                temperature=0.3,
-                                max_tokens=4096,  # Increased from 2048
-                            )
-                            result[0] = response.choices[0].message.content.strip()
-                    except Exception as e:
-                        exception[0] = e
-
-                # Run LLM call in thread with timeout
-                thread = threading.Thread(target=call_llm)
-                thread.daemon = True
-                thread.start()
-                thread.join(timeout=timeout_seconds)
-
-                if thread.is_alive():
-                    error_type = ErrorType.TIMEOUT
-                    error_message = f"Timeout after {timeout_seconds}s"
-                    safe_print(f"  TIMEOUT after {timeout_seconds}s for article {article_id} (attempt {attempt + 1}/{max_retries})")
-                    if attempt < max_retries - 1:
-                        time.sleep(2 ** attempt)  # Exponential backoff
-                        continue
-                    # Log and return after all retries exhausted
-                    time_taken = time.time() - start_time
-                    self._log_metrics(article_id, False, error_type, final_attempt, time_taken, False, error_message)
-                    return None
-
-                if exception[0]:
-                    raise exception[0]
-
-                response_text = result[0]
-                if not response_text:
-                    error_type = ErrorType.EMPTY_RESPONSE
-                    error_message = "Empty response from LLM"
-                    safe_print(f"  WARNING: No response for article {article_id}")
-                    time_taken = time.time() - start_time
-                    self._log_metrics(article_id, False, error_type, final_attempt, time_taken, False, error_message)
-                    return None
-
-                # Use robust JSON extraction
-                json_str = extract_json_from_response(response_text)
-
-                if not json_str:
-                    error_type = ErrorType.JSON_EXTRACTION_FAILED
-                    error_message = "Could not extract JSON from response"
-                    safe_print(f"  WARNING: Could not extract JSON from response for article {article_id}")
-                    self._log_failed_response(article_id, response_text, "No JSON found", attempt + 1)
-                    if attempt < max_retries - 1:
-                        time.sleep(2 ** attempt)
-                        continue
-                    # Log and return after all retries exhausted
-                    time_taken = time.time() - start_time
-                    self._log_metrics(article_id, False, error_type, final_attempt, time_taken, False, error_message)
-                    return None
-
-                # Try parsing JSON with repair if needed
-                analysis = None
-                parse_error = None
-
-                try:
-                    # First try: parse as-is
-                    analysis = json.loads(json_str)
-                except json.JSONDecodeError as e:
-                    parse_error = e
-                    # Second try: repair and parse
-                    try:
-                        repaired_json = repair_json(json_str)
-                        analysis = json.loads(repaired_json)
-                        json_repaired = True
-                        safe_print(f"  INFO: JSON repair successful for article {article_id}")
-                    except json.JSONDecodeError as e2:
-                        parse_error = e2
-
-                if analysis is None:
-                    error_type = ErrorType.JSON_PARSE_ERROR
-                    error_message = str(parse_error)
-                    # Log full response for debugging
-                    self._log_failed_response(article_id, response_text, str(parse_error), attempt + 1)
-
-                    if attempt < max_retries - 1:
-                        safe_print(f"  WARNING: JSON parse failed for article {article_id} (attempt {attempt + 1}/{max_retries}): {parse_error}")
-                        safe_print(f"  Retrying in {2 ** attempt} seconds...")
-                        time.sleep(2 ** attempt)  # Exponential backoff: 1s, 2s, 4s
-                        continue
-                    else:
-                        safe_print(f"  ERROR: JSON parse failed for article {article_id} after {max_retries} attempts")
-                        safe_print(f"     Error: {parse_error}")
-                        safe_print(f"     Response preview: {response_text[:200]}...")
-                        # Log and return after all retries exhausted
-                        time_taken = time.time() - start_time
-                        self._log_metrics(article_id, False, error_type, final_attempt, time_taken, json_repaired, error_message)
-                        return None
-
-                # Success! Return raw oracle scores (no post-processing for training data)
-                # Post-classification (caps, gatekeeper, tiers) should happen at inference time,
-                # not during ground truth creation. Training targets should be raw dimensional scores.
-
-                # Add metadata
+                # Success! Add metadata
                 analysis['analyzed_at'] = datetime.utcnow().isoformat() + 'Z'
                 analysis['analyzed_by'] = f'{self.llm_provider}-api-batch'
                 analysis['filter_name'] = self.filter_name
 
                 # Log success metrics
-                time_taken = time.time() - start_time
-                self._log_metrics(article_id, True, None, final_attempt, time_taken, json_repaired, None)
-
+                self._log_metrics(
+                    article_id, True, None, state.current_attempt,
+                    state.elapsed_time(), state.json_repaired, None
+                )
                 return analysis
 
-            except Exception as e:
-                error_type = ErrorType.LLM_API_ERROR
-                error_message = str(e)
-                safe_print(f"  WARNING: Error analyzing article {article_id} (attempt {attempt + 1}/{max_retries}): {e}")
-                if attempt < max_retries - 1:
-                    time.sleep(2 ** attempt)
-                    continue
-                # Log and return after all retries exhausted
-                time_taken = time.time() - start_time
-                self._log_metrics(article_id, False, error_type, final_attempt, time_taken, False, error_message)
+            except LLMAuthError as e:
+                # Auth errors are not retryable
+                state.set_error(e.error_type, str(e))
+                safe_print(f"  AUTH ERROR for article {article_id}: {e}")
+                self._log_metrics(
+                    article_id, False, state.error_type, state.current_attempt,
+                    state.elapsed_time(), state.json_repaired, state.error_message
+                )
                 return None
 
-        # Should not reach here, but just in case
-        time_taken = time.time() - start_time
-        self._log_metrics(article_id, False, ErrorType.UNKNOWN, final_attempt, time_taken, False, "Unknown error")
+            except LLMRateLimitError as e:
+                state.set_error(e.error_type, str(e))
+                backoff = e.retry_after if e.retry_after else state.get_backoff_seconds() * 2
+                safe_print(f"  RATE LIMITED for article {article_id}, waiting {backoff}s...")
+                if state.has_retries_left():
+                    time.sleep(backoff)
+                    continue
+                self._log_metrics(
+                    article_id, False, state.error_type, state.current_attempt,
+                    state.elapsed_time(), state.json_repaired, state.error_message
+                )
+                return None
+
+            except LLMTimeoutError as e:
+                state.set_error(e.error_type, str(e))
+                safe_print(f"  TIMEOUT after {e.timeout_seconds}s for article {article_id} (attempt {attempt_num}/{max_retries})")
+                if state.has_retries_left():
+                    time.sleep(state.get_backoff_seconds())
+                    continue
+                self._log_metrics(
+                    article_id, False, state.error_type, state.current_attempt,
+                    state.elapsed_time(), state.json_repaired, state.error_message
+                )
+                return None
+
+            except LLMResponseError as e:
+                state.set_error(e.error_type, str(e))
+                safe_print(f"  {e.error_type.value.upper()} for article {article_id} (attempt {attempt_num}/{max_retries}): {e}")
+                if state.has_retries_left():
+                    time.sleep(state.get_backoff_seconds())
+                    continue
+                safe_print(f"  ERROR: Failed for article {article_id} after {max_retries} attempts")
+                self._log_metrics(
+                    article_id, False, state.error_type, state.current_attempt,
+                    state.elapsed_time(), state.json_repaired, state.error_message
+                )
+                return None
+
+            except LLMError as e:
+                state.set_error(e.error_type, str(e))
+                safe_print(f"  LLM ERROR for article {article_id} (attempt {attempt_num}/{max_retries}): {e}")
+                if e.retryable and state.has_retries_left():
+                    time.sleep(state.get_backoff_seconds())
+                    continue
+                self._log_metrics(
+                    article_id, False, state.error_type, state.current_attempt,
+                    state.elapsed_time(), state.json_repaired, state.error_message
+                )
+                return None
+
+            except Exception as e:
+                # Unexpected error - classify and handle
+                state.set_error(ErrorType.UNKNOWN, str(e))
+                safe_print(f"  UNEXPECTED ERROR for article {article_id} (attempt {attempt_num}/{max_retries}): {type(e).__name__}: {e}")
+                if state.has_retries_left():
+                    time.sleep(state.get_backoff_seconds())
+                    continue
+                self._log_metrics(
+                    article_id, False, state.error_type, state.current_attempt,
+                    state.elapsed_time(), state.json_repaired, state.error_message
+                )
+                return None
+
+        # Should not reach here, but safety fallback
+        self._log_metrics(
+            article_id, False, ErrorType.UNKNOWN, state.current_attempt,
+            state.elapsed_time(), False, "Exhausted retries"
+        )
         return None
 
     def _log_failed_response(self, article_id: str, response_text: str, error: str, attempt: int):
