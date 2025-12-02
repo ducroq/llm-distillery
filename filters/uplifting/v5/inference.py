@@ -2,23 +2,26 @@
 Uplifting Content Filter v5 - Production Inference Pipeline
 
 This module provides the complete inference pipeline for scoring articles
-using the trained uplifting content filter.
+using the trained uplifting content filter with local model files.
 
-Pipeline: Article → Prefilter → Model → Gatekeeper → Tier
+Pipeline: Article -> Prefilter -> Model -> Gatekeeper -> Tier
 
 Usage:
+    # Python API
     from filters.uplifting.v5.inference import UpliftingScorer
 
     scorer = UpliftingScorer()
     result = scorer.score_article(article)
+
+    # CLI
+    python filters/uplifting/v5/inference.py --input articles.jsonl --output results.jsonl
 """
 
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
-import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 # Suppress the "should TRAIN this model" warning - we load trained weights from LoRA adapter
@@ -26,51 +29,23 @@ logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
 from peft import PeftConfig, get_peft_model
 from safetensors.torch import load_file
 
-# Import prefilter
-from filters.uplifting.v5.prefilter import UpliftingPreFilterV5
+from filters.uplifting.v5.base_scorer import BaseUpliftingScorer
+
+logger = logging.getLogger(__name__)
 
 
-class UpliftingScorer:
+class UpliftingScorer(BaseUpliftingScorer):
     """
     Production scorer for uplifting content filter v5.
 
-    Loads the trained LoRA model and provides scoring with:
+    Loads the trained LoRA model from local files and provides scoring with:
     - Optional prefiltering for efficiency
     - Per-dimension scores (6 orthogonal dimensions)
     - Evidence gatekeeper logic
-    - Tier assignment
+    - Tier assignment (high_impact/moderate_uplift/not_uplifting)
+
+    For loading from HuggingFace Hub, use UpliftingScorerHub instead.
     """
-
-    FILTER_NAME = "uplifting"
-    FILTER_VERSION = "5.0"
-
-    DIMENSION_NAMES = [
-        "human_wellbeing_impact",
-        "social_cohesion_impact",
-        "justice_rights_impact",
-        "evidence_level",
-        "benefit_distribution",
-        "change_durability",
-    ]
-
-    DIMENSION_WEIGHTS = {
-        "human_wellbeing_impact": 0.25,
-        "social_cohesion_impact": 0.15,
-        "justice_rights_impact": 0.10,
-        "evidence_level": 0.20,
-        "benefit_distribution": 0.20,
-        "change_durability": 0.10,
-    }
-
-    TIER_THRESHOLDS = [
-        ("high_impact", 7.0, "Verified, broadly beneficial, lasting positive change"),
-        ("moderate_uplift", 4.0, "Documented benefits with moderate reach or durability"),
-        ("not_uplifting", 0.0, "Speculation, elite-only benefits, or no documented impact"),
-    ]
-
-    # Gatekeeper: Evidence < 3 caps overall at 3.0
-    EVIDENCE_GATEKEEPER_MIN = 3.0
-    EVIDENCE_GATEKEEPER_CAP = 3.0
 
     def __init__(
         self,
@@ -79,279 +54,124 @@ class UpliftingScorer:
         use_prefilter: bool = True,
     ):
         """
-        Initialize the scorer.
+        Initialize the scorer with local model files.
 
         Args:
-            model_path: Path to model directory (default: auto-detect)
+            model_path: Path to model directory (default: ./model)
             device: Device to use ('cuda', 'cpu', or None for auto)
             use_prefilter: Whether to apply prefilter before scoring
         """
+        # Set model path before calling super().__init__
         if model_path is None:
             model_path = Path(__file__).parent / "model"
         self.model_path = Path(model_path)
 
-        if device is None:
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:
-            self.device = torch.device(device)
+        # Initialize base class (sets device, loads prefilter)
+        super().__init__(device=device, use_prefilter=use_prefilter)
 
-        self.use_prefilter = use_prefilter
-        if use_prefilter:
-            self.prefilter = UpliftingPreFilterV5()
-
+        # Load the model
         self._load_model()
 
     def _load_model(self):
-        """Load the trained LoRA model."""
-        print(f"Loading model from {self.model_path}")
-        print(f"Device: {self.device}")
+        """
+        Load the trained LoRA model from local files.
 
-        # Load PEFT config
-        peft_config = PeftConfig.from_pretrained(str(self.model_path))
-        base_model_name = peft_config.base_model_name_or_path
+        Raises:
+            FileNotFoundError: If model files not found
+            RuntimeError: If model loading fails
+        """
+        # Validate model path exists
+        if not self.model_path.exists():
+            raise FileNotFoundError(
+                f"Model directory not found: {self.model_path}\n"
+                f"Please ensure the model is trained and saved."
+            )
 
-        # Load tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained(base_model_name)
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.tokenizer.eos_token
-
-        # Load base model
-        base_model = AutoModelForSequenceClassification.from_pretrained(
-            base_model_name,
-            num_labels=len(self.DIMENSION_NAMES),
-            problem_type="regression",
-        )
-
-        if base_model.config.pad_token_id is None:
-            base_model.config.pad_token_id = self.tokenizer.pad_token_id
-
-        # Create PEFT model
-        self.model = get_peft_model(base_model, peft_config)
-
-        # Load adapter weights
         adapter_path = self.model_path / "adapter_model.safetensors"
-        adapter_state_dict = load_file(str(adapter_path))
+        if not adapter_path.exists():
+            raise FileNotFoundError(
+                f"Adapter weights not found: {adapter_path}\n"
+                f"Please ensure the model training completed successfully."
+            )
 
-        # Remap keys for PEFT compatibility
-        remapped = {}
-        for key, value in adapter_state_dict.items():
-            if ".lora_A.weight" in key or ".lora_B.weight" in key:
-                new_key = key.replace(".lora_A.weight", ".lora_A.default.weight")
-                new_key = new_key.replace(".lora_B.weight", ".lora_B.default.weight")
-                remapped[new_key] = value
-            elif key == "base_model.model.score.weight":
-                remapped["base_model.model.score.modules_to_save.default.weight"] = value
-            elif key == "base_model.model.score.bias":
-                remapped["base_model.model.score.modules_to_save.default.bias"] = value
-            else:
-                remapped[key] = value
+        try:
+            logger.info(f"Loading model from {self.model_path}")
+            logger.info(f"Device: {self.device}")
+            print(f"Loading model from {self.model_path}")
+            print(f"Device: {self.device}")
 
-        self.model.load_state_dict(remapped, strict=False)
-        self.model = self.model.to(self.device)
-        self.model.eval()
+            # Load PEFT config
+            peft_config = PeftConfig.from_pretrained(str(self.model_path))
+            base_model_name = peft_config.base_model_name_or_path
 
-        print("Model loaded successfully")
+            # Load tokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
 
-    def score_article(
-        self,
-        article: Dict,
-        skip_prefilter: bool = False,
-    ) -> Dict:
-        """
-        Score a single article.
+            # Load base model
+            base_model = AutoModelForSequenceClassification.from_pretrained(
+                base_model_name,
+                num_labels=len(self.DIMENSION_NAMES),
+                problem_type="regression",
+            )
 
-        Args:
-            article: Dict with 'title' and 'content' keys
-            skip_prefilter: Force skip prefilter even if enabled
+            if base_model.config.pad_token_id is None:
+                base_model.config.pad_token_id = self.tokenizer.pad_token_id
 
-        Returns:
-            Dict with:
-                - passed_prefilter: bool
-                - prefilter_reason: str (if blocked)
-                - scores: Dict[dimension_name, float] (if passed)
-                - weighted_average: float (if passed)
-                - tier: str (if passed)
-                - tier_description: str (if passed)
-                - gatekeeper_applied: bool
-        """
-        result = {
-            "passed_prefilter": True,
-            "prefilter_reason": None,
-            "scores": None,
-            "weighted_average": None,
-            "tier": None,
-            "tier_description": None,
-            "gatekeeper_applied": False,
-        }
+            # Create PEFT model
+            self.model = get_peft_model(base_model, peft_config)
 
-        # Apply prefilter
-        if self.use_prefilter and not skip_prefilter:
-            passed, reason = self.prefilter.apply_filter(article)
-            if not passed:
-                result["passed_prefilter"] = False
-                result["prefilter_reason"] = reason
-                return result
+            # Load adapter weights
+            adapter_state_dict = load_file(str(adapter_path))
 
-        # Prepare input
-        text = f"{article['title']}\n\n{article['content']}"
-        inputs = self.tokenizer(
-            text,
-            max_length=512,
-            padding="max_length",
-            truncation=True,
-            return_tensors="pt",
-        )
+            # Remap keys for PEFT compatibility
+            # PEFT expects ".default" suffix after lora_A/lora_B weights
+            remapped = {}
+            for key, value in adapter_state_dict.items():
+                if ".lora_A.weight" in key or ".lora_B.weight" in key:
+                    new_key = key.replace(".lora_A.weight", ".lora_A.default.weight")
+                    new_key = new_key.replace(".lora_B.weight", ".lora_B.default.weight")
+                    remapped[new_key] = value
+                elif key == "base_model.model.score.weight":
+                    remapped["base_model.model.score.modules_to_save.default.weight"] = value
+                elif key == "base_model.model.score.bias":
+                    remapped["base_model.model.score.modules_to_save.default.bias"] = value
+                else:
+                    remapped[key] = value
 
-        # Move to device
-        inputs = {k: v.to(self.device) for k, v in inputs.items()}
+            self.model.load_state_dict(remapped, strict=False)
+            self.model = self.model.to(self.device)
+            self.model.eval()
 
-        # Get predictions
-        with torch.no_grad():
-            outputs = self.model(**inputs)
-            raw_scores = outputs.logits[0].cpu().numpy()
+            logger.info("Model loaded successfully")
+            print("Model loaded successfully")
 
-        # Clamp scores to 0-10 range
-        scores = {
-            dim: float(max(0.0, min(10.0, raw_scores[i])))
-            for i, dim in enumerate(self.DIMENSION_NAMES)
-        }
-        result["scores"] = scores
-
-        # Compute weighted average
-        weighted_avg = sum(
-            scores[dim] * self.DIMENSION_WEIGHTS[dim]
-            for dim in self.DIMENSION_NAMES
-        )
-
-        # Apply gatekeeper: Evidence < 3 caps overall at 3.0
-        if scores["evidence_level"] < self.EVIDENCE_GATEKEEPER_MIN:
-            if weighted_avg > self.EVIDENCE_GATEKEEPER_CAP:
-                weighted_avg = self.EVIDENCE_GATEKEEPER_CAP
-                result["gatekeeper_applied"] = True
-
-        result["weighted_average"] = weighted_avg
-
-        # Assign tier
-        for tier_name, threshold, description in self.TIER_THRESHOLDS:
-            if weighted_avg >= threshold:
-                result["tier"] = tier_name
-                result["tier_description"] = description
-                break
-
-        return result
-
-    def score_batch(
-        self,
-        articles: List[Dict],
-        batch_size: int = 16,
-        skip_prefilter: bool = False,
-    ) -> List[Dict]:
-        """
-        Score a batch of articles efficiently.
-
-        Args:
-            articles: List of article dicts
-            batch_size: Batch size for inference
-            skip_prefilter: Skip prefilter for all articles
-
-        Returns:
-            List of result dicts (same as score_article)
-        """
-        results = []
-
-        # First pass: prefilter
-        articles_to_score = []
-        article_indices = []
-
-        for i, article in enumerate(articles):
-            result = {
-                "passed_prefilter": True,
-                "prefilter_reason": None,
-                "scores": None,
-                "weighted_average": None,
-                "tier": None,
-                "tier_description": None,
-                "gatekeeper_applied": False,
-            }
-
-            if self.use_prefilter and not skip_prefilter:
-                passed, reason = self.prefilter.apply_filter(article)
-                if not passed:
-                    result["passed_prefilter"] = False
-                    result["prefilter_reason"] = reason
-                    results.append(result)
-                    continue
-
-            articles_to_score.append(article)
-            article_indices.append(i)
-            results.append(result)
-
-        # Second pass: batch inference
-        if articles_to_score:
-            for batch_start in range(0, len(articles_to_score), batch_size):
-                batch_end = min(batch_start + batch_size, len(articles_to_score))
-                batch = articles_to_score[batch_start:batch_end]
-                batch_indices = article_indices[batch_start:batch_end]
-
-                # Tokenize batch
-                texts = [f"{a['title']}\n\n{a['content']}" for a in batch]
-                inputs = self.tokenizer(
-                    texts,
-                    max_length=512,
-                    padding="max_length",
-                    truncation=True,
-                    return_tensors="pt",
-                )
-                inputs = {k: v.to(self.device) for k, v in inputs.items()}
-
-                # Inference
-                with torch.no_grad():
-                    outputs = self.model(**inputs)
-                    batch_scores = outputs.logits.cpu().numpy()
-
-                # Process each result
-                for j, idx in enumerate(batch_indices):
-                    raw_scores = batch_scores[j]
-
-                    scores = {
-                        dim: float(max(0.0, min(10.0, raw_scores[k])))
-                        for k, dim in enumerate(self.DIMENSION_NAMES)
-                    }
-                    results[idx]["scores"] = scores
-
-                    # Weighted average
-                    weighted_avg = sum(
-                        scores[dim] * self.DIMENSION_WEIGHTS[dim]
-                        for dim in self.DIMENSION_NAMES
-                    )
-
-                    # Gatekeeper
-                    if scores["evidence_level"] < self.EVIDENCE_GATEKEEPER_MIN:
-                        if weighted_avg > self.EVIDENCE_GATEKEEPER_CAP:
-                            weighted_avg = self.EVIDENCE_GATEKEEPER_CAP
-                            results[idx]["gatekeeper_applied"] = True
-
-                    results[idx]["weighted_average"] = weighted_avg
-
-                    # Tier
-                    for tier_name, threshold, description in self.TIER_THRESHOLDS:
-                        if weighted_avg >= threshold:
-                            results[idx]["tier"] = tier_name
-                            results[idx]["tier_description"] = description
-                            break
-
-        return results
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise RuntimeError(f"Failed to load model: {type(e).__name__}: {e}")
 
 
 def main():
-    """Example usage / CLI interface."""
+    """CLI interface for batch scoring."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Score articles with uplifting content filter v5")
-    parser.add_argument("--input", "-i", type=Path, help="Input JSONL file with articles")
-    parser.add_argument("--output", "-o", type=Path, help="Output JSONL file for results")
-    parser.add_argument("--no-prefilter", action="store_true", help="Skip prefilter")
-    parser.add_argument("--batch-size", type=int, default=16, help="Batch size")
+    parser = argparse.ArgumentParser(
+        description="Score articles with uplifting content filter v5"
+    )
+    parser.add_argument(
+        "--input", "-i", type=Path, help="Input JSONL file with articles"
+    )
+    parser.add_argument(
+        "--output", "-o", type=Path, help="Output JSONL file for results"
+    )
+    parser.add_argument(
+        "--no-prefilter", action="store_true", help="Skip prefilter"
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=16, help="Batch size for inference"
+    )
 
     args = parser.parse_args()
 
@@ -375,7 +195,8 @@ def main():
             print(f"Writing results to {args.output}")
             with open(args.output, "w", encoding="utf-8") as f:
                 for article, result in zip(articles, results):
-                    output = {"article_id": article.get("id", ""), **result}
+                    article_id = article.get("id") or article.get("article_id", "")
+                    output = {"article_id": article_id, **result}
                     f.write(json.dumps(output) + "\n")
         else:
             # Print summary
@@ -411,13 +232,13 @@ def main():
 
         print(f"\nResults:")
         print(f"  Passed prefilter: {result['passed_prefilter']}")
-        if result['scores']:
+        if result["scores"]:
             print(f"  Scores:")
-            for dim, score in result['scores'].items():
+            for dim, score in result["scores"].items():
                 print(f"    {dim}: {score:.2f}")
             print(f"  Weighted average: {result['weighted_average']:.2f}")
             print(f"  Tier: {result['tier']} ({result['tier_description']})")
-            if result['gatekeeper_applied']:
+            if result["gatekeeper_applied"]:
                 print(f"  Note: Evidence gatekeeper applied (speculation capped)")
 
 
