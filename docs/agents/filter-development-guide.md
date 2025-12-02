@@ -1640,6 +1640,7 @@ python -m training.evaluate \
 
 ### Checklist
 
+- [ ] **Automated test suite** - Run pytest to validate data and inference
 - [ ] **Oracle benchmark** - Compare student vs oracle on sample
 - [ ] **Agreement rate** - How often do student and oracle agree?
 - [ ] **MAE vs oracle** - Mean absolute error per dimension
@@ -1650,6 +1651,42 @@ python -m training.evaluate \
 - [ ] **Failure mode analysis** - When does model fail?
 
 ### Testing Process
+
+#### Test 0: Automated Test Suite (pytest)
+
+**Goal:** Validate data pipeline, inference modules, and reproducibility.
+
+The project includes ML-focused pytest tests that validate:
+- Training data format and quality
+- Data leakage prevention (no overlap between splits)
+- Model inference pipelines
+- Output validation (score ranges, shapes)
+- Reproducibility of data splits and model inference
+
+```bash
+# Run all tests (fast tests only, ~2 min)
+pytest tests/ -v
+
+# Run ML tests specifically
+pytest tests/ml/ -v
+
+# Run slow tests including model inference (requires GPU/trained model)
+pytest tests/ml/ -v -m slow
+
+# Skip slow tests in CI
+pytest tests/ -v -m "not slow"
+
+# Run data pipeline tests only
+pytest tests/ml/test_data_pipeline.py -v
+
+# Run reproducibility tests
+pytest tests/ml/test_reproducibility.py -v
+```
+
+**Expected results:**
+- All data pipeline tests should pass (validates training data format)
+- Inference tests pass if trained model is available (skipped otherwise)
+- Reproducibility tests pass (same seed → same results)
 
 #### Test 1: Oracle Benchmark
 
