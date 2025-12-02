@@ -1,5 +1,5 @@
 """
-Investment Risk Pre-filter v1.0
+Investment Risk Pre-filter v3.0
 
 Fast rule-based filter to block obvious NOISE content before LLM evaluation.
 Focuses on blocking FOMO, stock picking, affiliate marketing, and clickbait.
@@ -12,10 +12,10 @@ import re
 from typing import Dict, Tuple
 
 
-class InvestmentRiskPreFilterV1:
+class InvestmentRiskPreFilterV3:
     """Fast rule-based pre-filter for investment risk content"""
 
-    VERSION = "1.0"
+    VERSION = "3.0"
 
     # FOMO and speculation patterns (block)
     FOMO_SPECULATION_PATTERNS = [
@@ -129,7 +129,7 @@ class InvestmentRiskPreFilterV1:
 # Test the pre-filter
 def test_prefilter():
     """Test investment risk pre-filter"""
-    prefilter = InvestmentRiskPreFilterV1()
+    prefilter = InvestmentRiskPreFilterV3()
 
     test_cases = [
         # PASS: Macro risk analysis
@@ -211,7 +211,7 @@ def test_prefilter():
         },
     ]
 
-    print(f"\nTesting Investment Risk Pre-filter v{InvestmentRiskPreFilterV1.VERSION}\n")
+    print(f"\nTesting Investment Risk Pre-filter v{InvestmentRiskPreFilterV3.VERSION}\n")
     print("=" * 80)
 
     passed = 0

@@ -1,5 +1,5 @@
 """
-Uplifting Pre-Filter v1.0
+Uplifting Pre-Filter v4.0
 
 Blocks obvious low-value content before LLM labeling:
 - Corporate finance (unless worker coop/public benefit/open source)
@@ -18,10 +18,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from base_prefilter import BasePreFilter
 
 
-class UpliftingPreFilterV1(BasePreFilter):
+class UpliftingPreFilterV4(BasePreFilter):
     """Fast rule-based pre-filter for uplifting content"""
 
-    VERSION = "1.0"
+    VERSION = "4.0"
 
     # Domain Exclusions
     ACADEMIC_DOMAINS = [
@@ -198,7 +198,7 @@ class UpliftingPreFilterV1(BasePreFilter):
 def test_prefilter():
     """Test the prefilter with sample articles"""
 
-    prefilter = UpliftingPreFilterV1()
+    prefilter = UpliftingPreFilterV4()
 
     test_cases = [
         # Should BLOCK - Content too short
@@ -268,7 +268,7 @@ def test_prefilter():
         },
     ]
 
-    print("Testing Uplifting Pre-Filter v1.0")
+    print("Testing Uplifting Pre-Filter v4.0")
     print("=" * 60)
 
     for i, test in enumerate(test_cases, 1):
