@@ -6,7 +6,8 @@ This module defines a pre-filter for evaluating articles related to sustainabili
 
 import re
 from typing import Dict, List, Optional, Tuple
-from filters.base_prefilter import BasePreFilter
+
+from filters.common.base_prefilter import BasePreFilter
 
 
 class SustainabilityTechnologyPreFilterV1(BasePreFilter):

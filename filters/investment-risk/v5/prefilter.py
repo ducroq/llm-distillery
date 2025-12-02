@@ -8,13 +8,9 @@ Philosophy: When in doubt, let it through. Better to score some noise than miss 
 """
 
 import re
-import sys
-from pathlib import Path
 from typing import Dict, Tuple
 
-# Import base prefilter
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from base_prefilter import BasePreFilter
+from filters.common.base_prefilter import BasePreFilter
 
 
 class InvestmentRiskPreFilterV5(BasePreFilter):

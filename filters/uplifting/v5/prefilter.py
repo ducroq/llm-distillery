@@ -17,13 +17,9 @@ Changes from v4:
 """
 
 import re
-import sys
-from pathlib import Path
-from typing import Dict, Tuple, List
+from typing import Dict, List, Tuple
 
-# Import base prefilter
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from base_prefilter import BasePreFilter
+from filters.common.base_prefilter import BasePreFilter
 
 
 class UpliftingPreFilterV5(BasePreFilter):
