@@ -92,7 +92,8 @@ def load_sample_articles(source_pattern: str, sample_size: int, seed: int = 42) 
                 try:
                     article = json.loads(line.strip())
                     all_articles.append(article)
-                except:
+                except json.JSONDecodeError:
+                    # Skip malformed JSON lines
                     continue
 
     print(f"  Total articles available: {len(all_articles):,}")

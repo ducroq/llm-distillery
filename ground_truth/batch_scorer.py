@@ -967,7 +967,8 @@ class GenericBatchScorer:
                                 continue
 
                             articles.append(article)
-                        except:
+                        except json.JSONDecodeError:
+                            # Skip malformed JSON lines
                             continue
             except FileNotFoundError:
                 print(f"Warning: Source file not found: {source_file}")
@@ -1019,7 +1020,8 @@ class GenericBatchScorer:
                                 continue
 
                             all_articles.append(article)
-                        except:
+                        except json.JSONDecodeError:
+                            # Skip malformed JSON lines
                             continue
             except FileNotFoundError:
                 print(f"Warning: Source file not found: {source_file}")

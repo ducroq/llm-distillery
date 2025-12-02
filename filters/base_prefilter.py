@@ -3,13 +3,15 @@ Base PreFilter Class
 
 Provides common functionality for all semantic prefilters:
 - Comprehensive text cleaning (Unicode, HTML, invisible chars, security)
+- Article structure validation
 - Standard interface for apply_filter()
 - Shared utilities
 
 All filter prefilters should inherit from this base class.
 """
 
-from typing import Dict, Tuple
+import re
+from typing import Dict, List, Tuple, Optional
 import sys
 from pathlib import Path
 
@@ -28,6 +30,96 @@ class BasePreFilter:
 
     VERSION = "0.0"  # Override in subclass
     MIN_CONTENT_LENGTH = 300  # Minimum content length to prevent framework leakage
+
+    @staticmethod
+    def validate_article(article) -> Tuple[bool, str]:
+        """
+        Validate article structure before processing.
+
+        Checks:
+        - Article is a dict
+        - Has required fields (title, content/text)
+        - Fields are non-empty strings
+
+        Args:
+            article: Object to validate
+
+        Returns:
+            (is_valid, reason)
+            - (True, "valid"): Article structure is valid
+            - (False, "reason"): Why validation failed
+        """
+        # Check type
+        if not isinstance(article, dict):
+            return (False, f"invalid_type_{type(article).__name__}")
+
+        # Check for title
+        if 'title' not in article:
+            return (False, "missing_title")
+
+        title = article.get('title')
+        if not isinstance(title, str) or not title.strip():
+            return (False, "empty_title")
+
+        # Check for content (supports both 'content' and 'text' keys)
+        content = article.get('content') or article.get('text')
+        if content is None:
+            return (False, "missing_content")
+
+        if not isinstance(content, str) or not content.strip():
+            return (False, "empty_content")
+
+        return (True, "valid")
+
+    @staticmethod
+    def has_any_pattern(text: str, patterns: List[re.Pattern]) -> bool:
+        """
+        Check if text matches any regex pattern in the list.
+
+        Args:
+            text: Text to search
+            patterns: List of compiled regex patterns
+
+        Returns:
+            True if any pattern matches
+        """
+        return any(pattern.search(text) for pattern in patterns)
+
+    @staticmethod
+    def count_pattern_matches(text: str, patterns: List[re.Pattern]) -> int:
+        """
+        Count total matches across all patterns.
+
+        Args:
+            text: Text to search
+            patterns: List of compiled regex patterns
+
+        Returns:
+            Total number of matches across all patterns
+        """
+        return sum(len(pattern.findall(text)) for pattern in patterns)
+
+    @staticmethod
+    def has_any_keyword(
+        text: str,
+        keywords: List[str],
+        case_sensitive: bool = False
+    ) -> bool:
+        """
+        Check if text contains any keyword from the list.
+
+        Args:
+            text: Text to search
+            keywords: List of keywords to find
+            case_sensitive: Whether to match case (default: False)
+
+        Returns:
+            True if any keyword found
+        """
+        if not case_sensitive:
+            text = text.lower()
+            keywords = [k.lower() for k in keywords]
+        return any(kw in text for kw in keywords)
 
     @staticmethod
     def sanitize_unicode(text: str) -> str:

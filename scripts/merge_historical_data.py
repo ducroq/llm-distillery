@@ -103,7 +103,8 @@ def sort_articles_by_date(articles: list[Dict]) -> list[Dict]:
                         if 'T' in date_str:
                             date_str = date_str.split('T')[0]
                         return date_str
-                except:
+                except (ValueError, TypeError, AttributeError):
+                    # Date parsing failed, try next field
                     pass
 
         # Default to far future if no date (will be at the end)

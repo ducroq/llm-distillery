@@ -2,18 +2,26 @@
 Test script to list available Gemini models.
 
 Usage:
-    export GOOGLE_API_KEY="your-key"
     python scripts/test_gemini_models.py
 """
 
-import os
-import google.generativeai as genai
+import sys
+from pathlib import Path
 
-# Configure API
-api_key = os.getenv("GOOGLE_API_KEY")
+# Add project root to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import google.generativeai as genai
+from ground_truth.secrets_manager import get_secrets_manager
+
+# Configure API using SecretsManager
+secrets = get_secrets_manager()
+api_key = secrets.get_gemini_key()
+
 if not api_key:
-    print("ERROR: GOOGLE_API_KEY not set")
-    exit(1)
+    print("ERROR: Gemini API key not found")
+    print("Set GOOGLE_API_KEY environment variable or add to config/credentials/secrets.ini")
+    sys.exit(1)
 
 genai.configure(api_key=api_key)
 
