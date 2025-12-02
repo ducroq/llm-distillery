@@ -81,7 +81,8 @@
       "Bash(if [ -f \"filters/sustainability_tech_deployment/$v/README.md\" ])",
       "Bash(then head -10 \"filters/sustainability_tech_deployment/$v/README.md\")",
       "WebSearch",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(pytest:*)"
     ],
     "deny": [],
     "ask": []

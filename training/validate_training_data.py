@@ -6,13 +6,16 @@ Usage:
     python training/validate_training_data.py --data-dir datasets/training/uplifting_v4 --filter filters/uplifting/v4
 """
 
-import json
+# Standard library imports
 import argparse
-from pathlib import Path
-from typing import Dict, List, Any, Tuple
-from collections import Counter
-import yaml
+import json
 import statistics
+from collections import Counter
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+# Third-party imports
+import yaml
 
 
 class TrainingDataValidator:

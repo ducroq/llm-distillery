@@ -17,29 +17,30 @@ Usage:
         --batch-size 50
 """
 
+# Standard library imports
+import glob
+import importlib.util
 import json
-import os
-import time
-import re
 import logging
+import os
+import random
+import re
+import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from enum import Enum
+
+# Third-party imports
 import anthropic
 import google.generativeai as genai
-from datetime import datetime
-import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import threading
-import importlib.util
-import glob
-import random
 
-# Import secrets manager
+# Local imports
 from .secrets_manager import get_secrets_manager
-
-# Import comprehensive text cleaning
 from .text_cleaning import clean_article as clean_article_comprehensive, sanitize_text_comprehensive
 
 

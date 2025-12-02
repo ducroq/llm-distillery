@@ -16,13 +16,16 @@ Usage:
         --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
 """
 
+# Standard library imports
+import argparse
 import json
 import random
-import yaml
-from pathlib import Path
-from typing import List, Dict, Any, Tuple
 from collections import Counter
-import argparse
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+# Third-party imports
+import yaml
 
 
 def load_filter_config(filter_dir: Path) -> Dict[str, Any]:

@@ -11,9 +11,9 @@ All filter prefilters should inherit from this base class.
 """
 
 import re
-from typing import Dict, List, Tuple, Optional
 import sys
 from pathlib import Path
+from typing import Dict, List, Tuple, Optional
 
 # Import text cleaning from ground_truth module
 sys.path.insert(0, str(Path(__file__).parent.parent / 'ground_truth'))
@@ -30,6 +30,7 @@ class BasePreFilter:
 
     VERSION = "0.0"  # Override in subclass
     MIN_CONTENT_LENGTH = 300  # Minimum content length to prevent framework leakage
+    MAX_PREFILTER_CONTENT = 2000  # Content chars to analyze in prefilter (for efficiency)
 
     @staticmethod
     def validate_article(article) -> Tuple[bool, str]:
@@ -239,8 +240,8 @@ class BasePreFilter:
             parts.append(article['description'])
 
         if 'content' in article:
-            # Limit content to first 2000 chars for pre-filter efficiency
-            parts.append(article['content'][:2000])
+            # Limit content for pre-filter efficiency
+            parts.append(article['content'][:self.MAX_PREFILTER_CONTENT])
 
         return ' '.join(parts)
     
