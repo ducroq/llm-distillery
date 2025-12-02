@@ -77,9 +77,27 @@ def get_analysis_field_name(filter_name: str) -> str:
 
 
 def load_labels(input_path: Path) -> List[Dict[str, Any]]:
-    """Load oracle labels from JSONL file(s).
+    """
+    Load oracle-labeled articles from JSONL file(s).
 
-    Supports both single files and glob patterns (e.g., scored_batch_*.jsonl).
+    Supports both single files and glob patterns for loading multiple
+    batch files at once.
+
+    Args:
+        input_path: Path to JSONL file, or glob pattern (e.g., "scored_batch_*.jsonl")
+
+    Returns:
+        List of article dicts with oracle analysis
+
+    Raises:
+        FileNotFoundError: If path/pattern matches no files
+
+    Examples:
+        >>> # Single file
+        >>> labels = load_labels(Path("datasets/labeled/articles.jsonl"))
+
+        >>> # Glob pattern for multiple batch files
+        >>> labels = load_labels(Path("datasets/scored/scored_batch_*.jsonl"))
     """
     import glob
 
@@ -188,7 +206,50 @@ def stratified_split(
     test_ratio: float = 0.1,
     seed: int = 42
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
-    """Split data into train/val/test sets with stratification by tier or score bins."""
+    """
+    Split labeled data into train/validation/test sets with stratification.
+
+    Stratification ensures each split maintains the same distribution of
+    quality tiers (or score bins) as the original dataset. This prevents
+    train/test skew where one split might have mostly high-quality articles.
+
+    Stratification method:
+    - If tier_boundaries provided: Groups by tier (e.g., gold/silver/bronze)
+    - Otherwise: Groups by score bins (very_low/low/medium/high/very_high)
+
+    Args:
+        labels: List of articles with oracle analysis results
+        analysis_field: Key containing analysis (e.g., "uplifting_analysis")
+        tier_boundaries: Dict mapping tier names to minimum score thresholds,
+                        sorted by threshold descending. Empty dict uses score bins.
+        dimension_names: Ordered list of dimension names for score calculation.
+                        Required if analysis uses nested dimension format.
+        train_ratio: Proportion for training set (default: 0.8 = 80%)
+        val_ratio: Proportion for validation set (default: 0.1 = 10%)
+        test_ratio: Proportion for test set (default: 0.1 = 10%)
+        seed: Random seed for reproducibility (default: 42)
+
+    Returns:
+        Tuple of (train_set, val_set, test_set), each a list of article dicts
+
+    Raises:
+        AssertionError: If ratios don't sum to approximately 1.0
+
+    Example:
+        >>> train, val, test = stratified_split(
+        ...     labels=labeled_articles,
+        ...     analysis_field="uplifting_analysis",
+        ...     tier_boundaries={"gold": 8.0, "silver": 6.0, "bronze": 4.0},
+        ...     dimension_names=["agency", "progress", "connection"],
+        ...     train_ratio=0.8, val_ratio=0.1, test_ratio=0.1
+        ... )
+        >>> print(f"Train: {len(train)}, Val: {len(val)}, Test: {len(test)}")
+
+    Notes:
+        - Small strata (<10 examples) may not maintain exact ratios
+        - Each stratum is shuffled independently before splitting
+        - Final sets are shuffled after combining all strata
+    """
     assert abs(train_ratio + val_ratio + test_ratio - 1.0) < 0.01, "Ratios must sum to 1.0"
 
     random.seed(seed)
@@ -262,17 +323,51 @@ def convert_to_training_format(
     analysis_field: str,
     dimension_names: List[str]
 ) -> List[Dict[str, Any]]:
-    """Convert oracle labels to simplified training format (score arrays only).
+    """
+    Convert oracle-labeled articles to simplified training format.
 
-    Format:
-    {
-        "id": "article-123",
-        "title": "...",
-        "content": "...",
-        "url": "...",
-        "labels": [7, 8, 6, 5, 7, 4, 6, 5],  # dimension scores as array
-        "dimension_names": ["agency", "progress", ...]
-    }
+    Extracts dimensional scores from oracle analysis and creates a format
+    suitable for training regression models. The output uses score arrays
+    for efficient batch processing during training.
+
+    Input format (oracle labels):
+        {
+            "id": "article-123",
+            "title": "Article Title",
+            "content": "Full article text...",
+            "uplifting_analysis": {
+                "dimensions": {
+                    "agency": {"score": 7, "reasoning": "..."},
+                    "progress": 8,  # Flat format also supported
+                    ...
+                }
+            }
+        }
+
+    Output format (training data):
+        {
+            "id": "article-123",
+            "title": "Article Title",
+            "content": "Full article text...",
+            "url": "https://...",
+            "labels": [7, 8, 6, 5, 7, 4],  # Scores in dimension order
+            "dimension_names": ["agency", "progress", ...]
+        }
+
+    Args:
+        labels: List of articles with oracle analysis
+        analysis_field: Key containing analysis (e.g., "uplifting_analysis")
+        dimension_names: Ordered list of dimension names. Order determines
+                        the position of each score in the labels array.
+
+    Returns:
+        List of training examples with score arrays
+
+    Notes:
+        - Articles without analysis are silently skipped
+        - Missing dimensions default to score 0
+        - Supports both nested format (dim: {score, reasoning})
+          and flat format (dim: score)
     """
     training_data = []
 
@@ -321,7 +416,27 @@ def save_training_data(
     test_data: List[Dict[str, Any]],
     output_dir: Path
 ):
-    """Save training, validation, and test data to JSONL files."""
+    """
+    Save training, validation, and test data to JSONL files.
+
+    Creates the output directory if needed and writes:
+    - train.jsonl: Training examples
+    - val.jsonl: Validation examples
+    - test.jsonl: Test examples
+
+    Args:
+        train_data: List of training examples
+        val_data: List of validation examples
+        test_data: List of test examples
+        output_dir: Directory to save files (created if needed)
+
+    Example:
+        >>> save_training_data(train, val, test, Path("datasets/training/uplifting"))
+        # Creates:
+        #   datasets/training/uplifting/train.jsonl
+        #   datasets/training/uplifting/val.jsonl
+        #   datasets/training/uplifting/test.jsonl
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Save train set

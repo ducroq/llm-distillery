@@ -43,12 +43,35 @@ from .secrets_manager import get_secrets_manager
 from .text_cleaning import clean_article as clean_article_comprehensive, sanitize_text_comprehensive
 
 
-def load_filter_package(filter_path: Path) -> Tuple:
+def load_filter_package(filter_path: Path) -> Tuple[Optional[object], Path, Dict]:
     """
-    Load filter package components from filters/<name>/v1/ structure.
+    Load filter package components from a filter directory.
+
+    A filter package follows the structure:
+        filters/<name>/v<N>/
+        ├── prefilter.py      # Optional: PreFilter class for early filtering
+        ├── prompt.md         # Required: LLM prompt template
+        ├── prompt-compressed.md  # Optional: Compressed version (preferred)
+        └── config.yaml       # Optional: Filter configuration
+
+    Args:
+        filter_path: Path to filter directory (e.g., Path("filters/uplifting/v5"))
 
     Returns:
-        (prefilter_instance, prompt_path, config_dict)
+        Tuple of (prefilter_instance, prompt_path, config_dict):
+        - prefilter_instance: Instantiated PreFilter class, or None if not found
+        - prompt_path: Path to prompt file (compressed preferred)
+        - config_dict: Loaded config.yaml contents, or {} if not found
+
+    Raises:
+        FileNotFoundError: If no prompt file exists in the filter directory
+
+    Example:
+        >>> prefilter, prompt_path, config = load_filter_package(
+        ...     Path("filters/uplifting/v5")
+        ... )
+        >>> if prefilter:
+        ...     passed, reason = prefilter.apply_filter(article)
     """
     print(f"Loading filter package: {filter_path}")
 
@@ -309,13 +332,39 @@ def setup_logging(output_dir: Path, filter_name: str) -> Tuple[logging.Logger, P
 
 class GenericBatchScorer:
     """
-    Generic batch scorer that works with any semantic filter prompt.
+    Generic batch scorer for LLM-based oracle labeling.
 
-    Key improvements over NexusMind version:
-    - Prompt-agnostic (loads from markdown files)
-    - Supports multiple LLM providers (Claude, Gemini, GPT-4)
-    - Configurable output structure
-    - No hardcoded filter logic
+    This is the core component for generating ground truth training data.
+    It sends articles to an LLM with a scoring prompt and collects the
+    dimensional scores for training smaller models via knowledge distillation.
+
+    Features:
+    - Multi-provider support: Claude, Gemini (Flash/Pro), GPT-4
+    - Robust error handling with typed exceptions
+    - Automatic retry with exponential backoff
+    - JSON repair for malformed LLM responses
+    - Progress checkpointing for resumable batches
+    - Structured metrics logging
+
+    Workflow:
+        1. Load articles from source JSONL files
+        2. Optional prefiltering (skip obviously off-topic content)
+        3. Send to LLM with scoring prompt
+        4. Parse JSON response (with repair if needed)
+        5. Save scored articles to output JSONL
+        6. Track progress for resumability
+
+    Example:
+        >>> scorer = GenericBatchScorer(
+        ...     prompt_path="filters/uplifting/v5/prompt.md",
+        ...     llm_provider="gemini-flash",
+        ...     output_dir="datasets/scored/uplifting",
+        ... )
+        >>> scorer.run(
+        ...     source_files=["datasets/raw/articles.jsonl"],
+        ...     target_scored=1000,
+        ...     batch_size=50
+        ... )
     """
 
     def __init__(
@@ -327,14 +376,22 @@ class GenericBatchScorer:
         filter_name: Optional[str] = None
     ):
         """
-        Initialize batch scorer.
+        Initialize the batch scorer.
 
         Args:
-            prompt_path: Path to prompt markdown file (e.g., prompts/sustainability.md)
-            llm_provider: "claude", "gemini", or "gpt4"
-            api_key: API key (or None to use environment variables)
-            output_dir: Directory to save scored data
-            filter_name: Name of filter (auto-detected from prompt_path if None)
+            prompt_path: Path to prompt markdown file containing the scoring
+                        instructions for the LLM. Typically located at
+                        filters/<name>/v<N>/prompt.md or prompt-compressed.md
+            llm_provider: LLM provider to use. Options:
+                        - "claude": Claude 3.7 Sonnet
+                        - "gemini" or "gemini-pro": Gemini 1.5 Pro
+                        - "gemini-flash": Gemini 1.5 Flash (fastest/cheapest)
+                        - "gpt4": GPT-4 Turbo
+            api_key: API key for the provider. If None, reads from environment
+                    variables or config/credentials/secrets.ini
+            output_dir: Directory to save scored articles and logs
+            filter_name: Name of the filter (e.g., "uplifting"). If None,
+                        auto-detected from prompt_path directory structure.
         """
         self.prompt_path = Path(prompt_path)
         self.llm_provider = llm_provider.lower()
