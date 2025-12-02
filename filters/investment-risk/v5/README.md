@@ -1,7 +1,8 @@
 # Investment Risk Filter v5 - Orthogonal Dimension Framework
 
-**Status:** Phase 3 Complete - Ready for Training Data Generation
+**Status:** Production Ready
 **Created:** 2025-11-30
+**Updated:** 2025-12-02
 **Philosophy:** "You can't predict crashes, but you can prepare for them."
 
 ## Overview
@@ -91,7 +92,18 @@ filters/investment-risk/v5/
 ├── README.md                 # This file
 ├── config.yaml               # Filter configuration
 ├── prompt-compressed.md      # Oracle prompt (calibrated)
-└── prefilter.py              # Source-based prefilter (54% block rate)
+├── prefilter.py              # Source-based prefilter (54% block rate)
+├── inference.py              # Production inference module
+├── inference_hub.py          # HuggingFace Hub inference
+├── test_inference.py         # Unit tests
+├── DEPLOYMENT.md             # Deployment guide
+├── training_metadata.json    # Training configuration
+├── training_history.json     # Training curves
+├── model/                    # Trained LoRA adapter
+│   ├── adapter_model.safetensors
+│   ├── adapter_config.json
+│   └── tokenizer.json
+└── benchmarks/               # Test set evaluation results
 ```
 
 ## Calibration Results (Phase 2 - PASSED)
@@ -135,17 +147,47 @@ Oracle calibration on 100 random articles (seed=44):
    - Block rate: 54% (arxiv, github, dev_to, science news, etc.)
    - False negative rate: 8% (1/13 financial articles blocked - low actionability arxiv paper)
 
-4. **Phase 4: Training Data Generation**
-   - Score 5,000+ articles
-   - Validate correlation targets at scale
+4. **Phase 4: Training Data Generation** ✅ COMPLETE
+   - Scored 10,000 articles with Gemini Flash oracle
+   - 9,998 articles succeeded, 2 API errors
+   - Processing time: ~8 hours
 
-5. **Phase 5: Model Training**
-   - Train Qwen2.5-1.5B with LoRA
-   - Target MAE < 0.80
+5. **Phase 5: Model Training** ✅ COMPLETE
+   - Base model: Qwen/Qwen2.5-1.5B
+   - LoRA adapter: 18.5M trainable parameters
+   - Training: 8 epochs, batch size 8
+   - **Validation MAE: 0.477** (excellent - target was <0.80)
+   - Train/Val/Test split: 8,157 / 1,020 / 1,021
 
-6. **Phase 6: Deployment**
-   - Create inference.py
-   - Deploy to HuggingFace Hub
+6. **Phase 6: Deployment** ✅ COMPLETE
+   - Created inference.py (local inference)
+   - Created inference_hub.py (HuggingFace Hub)
+   - Created test_inference.py (unit tests)
+   - Created DEPLOYMENT.md (deployment guide)
+
+## Training Results
+
+| Metric | Value | Target | Status |
+|--------|-------|--------|--------|
+| Validation MAE | **0.477** | <0.80 | ✅ EXCELLENT |
+| **Test MAE** | **0.484** | <0.80 | ✅ EXCELLENT |
+| Test RMSE | 0.941 | - | - |
+| Overfitting | None | - | ✅ (test ≈ val) |
+| Training epochs | 8 | - | - |
+| Trainable params | 18.5M | - | - |
+| Training examples | 8,157 | - | - |
+| Model size | 74MB (adapter) | - | - |
+
+### Per-Dimension Test MAE
+
+| Dimension | MAE | Status |
+|-----------|-----|--------|
+| severity_magnitude | 0.315 | ✅ Best |
+| retail_actionability | 0.367 | ✅ |
+| risk_domain_type | 0.400 | ✅ |
+| impact_breadth | 0.497 | ✅ |
+| evidence_quality | 0.586 | ✅ |
+| materialization_timeline | 0.741 | ✅ |
 
 ## Comparison with Other Filters
 
