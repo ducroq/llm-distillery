@@ -17,7 +17,7 @@ Changes from v4:
 """
 
 import re
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple, List
 
 from filters.common.base_prefilter import BasePreFilter
 
@@ -59,6 +59,42 @@ class UpliftingPreFilterV5(BasePreFilter):
         'janes.com',
         'defensepriorities.org',
         'breakingdefense.com',
+    ]
+
+    # === CRIME/VIOLENCE INDICATORS ===
+
+    CRIME_VIOLENCE_PATTERNS = [
+        # Violent crimes
+        r'\b(murder|murdered|murderer|homicide|killing|killed|manslaughter)\b',
+        r'\b(rape|raped|rapist|sexual assault|sexually assaulted|molest|molestation)\b',
+        r'\b(assault|assaulted|battery|stabbing|stabbed|shooting|shot dead)\b',
+        r'\b(abuse|abused|abuser|child abuse|domestic violence|trafficking)\b',
+
+        # Criminal justice (perpetrator focus)
+        r'\b(sentenced|sentenced to|conviction|convicted|guilty verdict|prison sentence)\b',
+        r'\b(arrested|charged with|indicted|defendant|perpetrator|offender)\b',
+        r'\b(jail|prison|incarceration|life sentence|death penalty|execution)\b',
+        r'\b(tbs|forensic psychiatric|criminally insane)\b',  # Dutch: terbeschikkingstelling
+
+        # Crime events
+        r'\b(robbery|burglary|theft|fraud|embezzlement|kidnapping|abduction)\b',
+        r'\b(terrorist|terrorism|extremist|mass shooting|massacre|atrocity)\b',
+        r'\b(victim|victims|survivor of crime|crime victim)\b',
+
+        # Dutch crime terms
+        r'\b(verkracht|verkrachting|misbruik|mishandel|moord|doodslag|cel|gevangenis)\b',
+    ]
+
+    CRIME_VIOLENCE_EXCEPTIONS = [
+        # Reform and rehabilitation focus
+        r'\b(rehabilitation|restorative justice|reintegration|reform|reforming)\b',
+        r'\b(crime prevention|violence prevention|intervention program)\b',
+        r'\b(survivor support|victim support|healing|recovery program)\b',
+        r'\b(recidivism reduction|second chance|reentry program)\b',
+
+        # Policy/systemic reform
+        r'\b(prison reform|criminal justice reform|decarceration|abolition)\b',
+        r'\b(diversion program|alternative sentencing|community service)\b',
     ]
 
     CODE_HOSTING_DOMAINS = [
@@ -172,6 +208,14 @@ class UpliftingPreFilterV5(BasePreFilter):
             re.compile(p, re.IGNORECASE) for p in self.OUTCOME_EVIDENCE_PATTERNS
         ]
 
+        # Crime/violence
+        self.crime_violence_regex = [
+            re.compile(p, re.IGNORECASE) for p in self.CRIME_VIOLENCE_PATTERNS
+        ]
+        self.crime_violence_exceptions_regex = [
+            re.compile(p, re.IGNORECASE) for p in self.CRIME_VIOLENCE_EXCEPTIONS
+        ]
+
     def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """
         Determine if article should pass to oracle for scoring.
@@ -210,6 +254,11 @@ class UpliftingPreFilterV5(BasePreFilter):
         if self._has_pattern(combined_text, self.military_security_regex):
             if not self._has_pattern(combined_text, self.military_security_exceptions_regex):
                 return False, "military_security"
+
+        # Check crime/violence
+        if self._has_pattern(combined_text, self.crime_violence_regex):
+            if not self._has_pattern(combined_text, self.crime_violence_exceptions_regex):
+                return False, "crime_violence"
 
         # Check heavy speculation (only block if NO outcome evidence)
         speculation_count = self._count_matches(combined_text, self.speculation_regex)
@@ -267,6 +316,8 @@ class UpliftingPreFilterV5(BasePreFilter):
             'corporate_finance_exceptions': len(self.CORPORATE_FINANCE_EXCEPTIONS),
             'military_security_patterns': len(self.MILITARY_SECURITY_PATTERNS),
             'military_security_exceptions': len(self.MILITARY_SECURITY_EXCEPTIONS),
+            'crime_violence_patterns': len(self.CRIME_VIOLENCE_PATTERNS),
+            'crime_violence_exceptions': len(self.CRIME_VIOLENCE_EXCEPTIONS),
             'speculation_patterns': len(self.SPECULATION_PATTERNS),
             'outcome_evidence_patterns': len(self.OUTCOME_EVIDENCE_PATTERNS),
         }
@@ -373,6 +424,30 @@ def test_prefilter():
             'text': 'After 25 years of armed conflict that claimed over 50,000 lives, former combatants signed a comprehensive peace agreement in a historic ceremony. The peace process includes provisions for disarmament of all armed groups, establishment of a truth commission to document wartime atrocities, and reconciliation programs for affected communities. Both sides committed to demilitarization of border regions and the peaceful resolution of remaining disputes. International observers praised the agreement as a model for conflict resolution.',
             'expected': (True, 'passed'),
             'description': 'Peace process (exception)'
+        },
+
+        # Should BLOCK - Crime/Violence
+        {
+            'title': 'Man uit Enschede krijgt cel en tbs voor verkrachten kinderen',
+            'text': 'Een 45-jarige man uit Enschede is veroordeeld tot 8 jaar gevangenisstraf en tbs met dwangverpleging voor het jarenlang seksueel misbruiken van kinderen van een gastouder. De rechtbank achtte bewezen dat de verdachte zich schuldig heeft gemaakt aan verkrachting en ontucht met minderjarigen. De slachtoffers waren tussen de 4 en 12 jaar oud toen het misbruik plaatsvond. Het Openbaar Ministerie had een celstraf van 10 jaar en tbs geëist.',
+            'expected': (False, 'crime_violence'),
+            'description': 'Crime news (Dutch child abuse case)'
+        },
+
+        # Should BLOCK - Crime/Violence (English)
+        {
+            'title': 'Serial Killer Sentenced to Life Without Parole',
+            'text': 'A jury found the defendant guilty of multiple counts of murder after a six-week trial that captivated the nation. The convicted killer showed no remorse as the judge handed down the sentence. Prosecutors presented evidence that the perpetrator had targeted victims over a three-year period. Family members of the victims expressed relief at the conviction and life sentence. The incarceration marks the end of a decade-long investigation by state authorities.',
+            'expected': (False, 'crime_violence'),
+            'description': 'Crime news (murder conviction)'
+        },
+
+        # Should PASS - Prison Reform (exception)
+        {
+            'title': 'Prison Reform Program Reduces Recidivism by 40%',
+            'text': 'A comprehensive rehabilitation program implemented across 12 state prisons has resulted in a documented 40% reduction in recidivism rates over five years. The program focuses on education, job training, and restorative justice practices rather than punitive measures. Former incarcerated individuals who completed the program showed significantly higher employment rates and lower rates of re-arrest. Criminal justice reform advocates hailed the results as proof that rehabilitation works better than punishment alone.',
+            'expected': (True, 'passed'),
+            'description': 'Prison reform (exception)'
         },
 
         # Should BLOCK - Pure Speculation
