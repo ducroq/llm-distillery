@@ -124,6 +124,7 @@ python -m filters.uplifting.v5.inference
 The v5 prefilter blocks:
 - Corporate finance (unless worker coop/public benefit/open source)
 - Military/security buildups (unless peace/demilitarization)
+- Crime/violence news (unless reform, survivor stories, or positive resolution)
 - Pure speculation (3+ speculative phrases with no outcome evidence)
 - Academic preprints (arxiv, biorxiv, etc.)
 - VC/startup news domains (TechCrunch, etc.)
