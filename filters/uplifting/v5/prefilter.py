@@ -64,25 +64,26 @@ class UpliftingPreFilterV5(BasePreFilter):
     # === CRIME/VIOLENCE INDICATORS ===
 
     CRIME_VIOLENCE_PATTERNS = [
-        # Violent crimes
-        r'\b(murder|murdered|murderer|homicide|killing|killed|manslaughter)\b',
+        # Violent crimes - specific terms only
+        r'\b(murder|murdered|murderer|homicide|manslaughter)\b',
         r'\b(rape|raped|rapist|sexual assault|sexually assaulted|molest|molestation)\b',
-        r'\b(assault|assaulted|battery|stabbing|stabbed|shooting|shot dead)\b',
-        r'\b(abuse|abused|abuser|child abuse|domestic violence|trafficking)\b',
+        r'\b(assault|assaulted|stabbing|stabbed|shot dead)\b',  # removed 'battery' (solar), 'shooting' (photo)
+        r'\b(child abuse|domestic violence|human trafficking)\b',  # more specific
 
-        # Criminal justice (perpetrator focus)
-        r'\b(sentenced|sentenced to|conviction|convicted|guilty verdict|prison sentence)\b',
-        r'\b(arrested|charged with|indicted|defendant|perpetrator|offender)\b',
-        r'\b(jail|prison|incarceration|life sentence|death penalty|execution)\b',
-        r'\b(tbs|forensic psychiatric|criminally insane)\b',  # Dutch: terbeschikkingstelling
+        # Criminal justice (perpetrator focus) - require context
+        r'\b(sentenced to|guilty verdict|prison sentence)\b',  # more specific than just 'sentenced'
+        r'\b(convicted of|charged with murder|charged with rape|charged with assault)\b',
+        r'\b(perpetrator|sex offender|violent offender)\b',
+        r'\b(life sentence|death penalty|death row)\b',
+        r'\b(tbs met|terbeschikkingstelling)\b',  # Dutch: more specific
 
-        # Crime events
-        r'\b(robbery|burglary|theft|fraud|embezzlement|kidnapping|abduction)\b',
-        r'\b(terrorist|terrorism|extremist|mass shooting|massacre|atrocity)\b',
-        r'\b(victim|victims|survivor of crime|crime victim)\b',
+        # Specific crime events
+        r'\b(armed robbery|violent robbery|kidnapping|abduction)\b',  # removed generic 'theft', 'fraud'
+        r'\b(terrorist attack|terrorism|mass shooting|massacre)\b',
 
-        # Dutch crime terms
-        r'\b(verkracht|verkrachting|misbruik|mishandel|moord|doodslag|cel|gevangenis)\b',
+        # Dutch crime terms - more specific
+        r'\b(verkracht|verkrachting|mishandeling|doodslag)\b',  # removed 'misbruik' (too broad), 'cel' (biology)
+        r'\b(gevangenisstraf|levenslang)\b',
     ]
 
     CRIME_VIOLENCE_EXCEPTIONS = [
@@ -95,6 +96,20 @@ class UpliftingPreFilterV5(BasePreFilter):
         # Policy/systemic reform
         r'\b(prison reform|criminal justice reform|decarceration|abolition)\b',
         r'\b(diversion program|alternative sentencing|community service)\b',
+
+        # Positive outcomes from addressing past wrongs
+        r'\b(law reform|legal reform|revamp.{0,10}law|new legislation)\b',
+        r'\b(accountability|justice served|landmark ruling)\b',
+        r'\b(survivor|survivors|overcame|healing from|reclaim)\b',
+
+        # Fighting/combating issues (not perpetrating)
+        r'\b(combat.{0,15}trafficking|fight.{0,15}trafficking|anti-trafficking)\b',
+        r'\b(combat.{0,15}violence|fight.{0,15}violence|end.{0,15}violence)\b',
+        r'\b(changemaker|women empowerment|silent revolution)\b',
+
+        # Positive resolution
+        r'\b(released|freed|liberated|rescued)\b',
+        r'\b(vrijgelaten|bevrijd)\b',  # Dutch: released/freed
     ]
 
     CODE_HOSTING_DOMAINS = [
