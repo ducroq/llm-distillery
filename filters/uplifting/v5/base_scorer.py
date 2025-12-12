@@ -59,9 +59,9 @@ class BaseUpliftingScorer(ABC):
 
     # Tier thresholds: (tier_name, min_score, description)
     TIER_THRESHOLDS = [
-        ("high_impact", 7.0, "Verified, broadly beneficial, lasting positive change"),
-        ("moderate_uplift", 4.0, "Documented benefits with moderate reach or durability"),
-        ("not_uplifting", 0.0, "Speculation, elite-only benefits, or no documented impact"),
+        ("high", 7.0, "Verified, broadly beneficial, lasting positive change"),
+        ("medium", 4.0, "Documented benefits with moderate reach or durability"),
+        ("low", 0.0, "Speculation, elite-only benefits, or no documented impact"),
     ]
 
     # Gatekeeper: Evidence < 3 caps overall at 3.0
@@ -159,7 +159,7 @@ class BaseUpliftingScorer(ABC):
                 return (tier_name, description)
 
         # Fallback (should not reach here)
-        return ("not_uplifting", "No tier matched")
+        return ("low", "No tier matched")
 
     def _process_raw_scores(self, raw_scores, result: Dict) -> Dict:
         """

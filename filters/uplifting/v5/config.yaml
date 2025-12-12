@@ -112,15 +112,15 @@ scoring:
       evidence_focus: "Timeframe mentioned, structural vs symptomatic, sustainability indicators"
 
   tiers:
-    high_impact:
+    high:
       threshold: 7.0
       description: "Verified, broadly beneficial, lasting positive change"
 
-    moderate_uplift:
+    medium:
       threshold: 4.0
       description: "Documented benefits with moderate reach or durability"
 
-    not_uplifting:
+    low:
       threshold: 0.0
       description: "Speculation, elite-only benefits, or no documented wellbeing impact"
 

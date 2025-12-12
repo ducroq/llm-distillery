@@ -42,7 +42,7 @@ class UpliftingScorer(BaseUpliftingScorer):
     - Optional prefiltering for efficiency
     - Per-dimension scores (6 orthogonal dimensions)
     - Evidence gatekeeper logic
-    - Tier assignment (high_impact/moderate_uplift/not_uplifting)
+    - Tier assignment (high/medium/low)
 
     For loading from HuggingFace Hub, use UpliftingScorerHub instead.
     """

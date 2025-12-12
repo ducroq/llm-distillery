@@ -94,7 +94,7 @@ result = scorer.score_article({
 })
 
 print(result['weighted_average'])  # 6.5
-print(result['tier'])              # "moderate_uplift"
+print(result['tier'])              # "medium"
 ```
 
 ### HuggingFace Hub Inference
