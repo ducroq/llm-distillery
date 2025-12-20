@@ -31,21 +31,20 @@ scoring:
       description: "Systemic disruption potential"
 
   tier_thresholds:
-    high_sustainability:
-      threshold: 7.0
-      description: "Mass deployed, proven sustainable, competitive"
-
-    medium_high:
-      threshold: 5.0
-      description: "Commercial deployment, good sustainability performance"
+    high:
+      threshold: 6.0
+      description: "Commercial deployment, proven sustainable, strong performance"
+      translate: true
 
     medium:
-      threshold: 3.0
-      description: "Pilot/early commercial, mixed sustainability profile"
+      threshold: 4.0
+      description: "Pilot/early commercial, promising sustainability profile"
+      translate: true
 
     low:
       threshold: 0.0
       description: "Lab stage or poor sustainability performance"
+      translate: false
 
   gatekeepers:
     - dimension: technology_readiness_level
