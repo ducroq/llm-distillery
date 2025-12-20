@@ -1,7 +1,14 @@
 ---
 license: mit
-language: en
+language:
+- en
+- fr
+- es
+- de
+- nl
+- it
 tags:
+- multilingual
 - text-classification
 - content-filtering
 - multi-dimensional-scoring
@@ -110,7 +117,7 @@ Speculation without documented outcomes cannot be truly uplifting.
 
 ## Limitations
 
-- Trained on English news articles only
+- Trained on multilingual news articles (61% English, 31% French, 7% Spanish, <1% German/Dutch/Italian)
 - MAE of ~0.68 means predictions within ±0.7 of oracle on average
 - `benefit_distribution` dimension has highest error (0.79 MAE)
 - Model focuses on documented outcomes, not emotional tone

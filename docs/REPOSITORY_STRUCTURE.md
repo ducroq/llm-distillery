@@ -11,6 +11,10 @@ This document explains the LLM Distillery repository organization.
 ```
 llm-distillery/
 ├── filters/                    # Self-contained filter packages (versioned)
+│   ├── common/                 # Shared filter utilities
+│   │   ├── __init__.py
+│   │   ├── base_prefilter.py   # Base prefilter class
+│   │   └── text_cleaning.py    # Text sanitization utilities
 │   ├── {filter_name}/
 │   │   └── v{version}/
 │   │       ├── config.yaml              # Filter configuration
@@ -27,7 +31,7 @@ llm-distillery/
 │   │           ├── config.json
 │   │           ├── model.safetensors
 │   │           └── tokenizer files
-│   └── base_prefilter.py       # Base prefilter class
+│   └── base_prefilter.py       # Backward compat (re-exports from common)
 │
 ├── datasets/                   # Generated datasets (gitignored)
 │   ├── raw/                    # Raw article collections
@@ -99,6 +103,19 @@ llm-distillery/
 │       ├── filter_specific/    # Filter-specific validation scripts
 │       ├── one_off/            # One-time analysis scripts
 │       └── sandbox/            # Experimental scripts
+│
+├── tests/                      # Test suite
+│   ├── conftest.py             # Shared pytest fixtures
+│   ├── unit/                   # Unit tests
+│   │   ├── test_base_prefilter.py
+│   │   ├── test_batch_scorer.py
+│   │   └── test_prepare_data.py
+│   ├── integration/            # Integration tests
+│   │   └── test_filter_loading.py
+│   └── ml/                     # ML-focused tests
+│       ├── test_data_pipeline.py   # Training data validation
+│       ├── test_inference.py       # Model inference tests
+│       └── test_reproducibility.py # Determinism tests
 │
 ├── config/                     # Configuration
 │   └── credentials/            # API keys (git-ignored)
