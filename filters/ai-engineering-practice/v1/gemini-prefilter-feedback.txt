@@ -1,0 +1,211 @@
+-----------------------
+
+general observations on the core challenge of maintaining a long-term filter
+
+Engineering foundations are "Low-Entropy" (stable), while AI technology is "High-Entropy" (volatile).The engineering terms like FEA, CAD, and V-model haven't changed in decades. However, the AI tools you're filtering for will likely be obsolete or rebranded within 18 months.Based on 2025 trends, here is how to "future-proof" your filter so you don't have to rewrite it every month:1. Shift from "Noun" tools to "Verb" patternsInstead of just listing tool names (like GitHub Copilot), filter for the architectural patterns that are emerging. In 2025, the industry is moving from "Chat" to "Agents."Instead of: ChatGPT, Claude, GeminiAdd Patterns: * agentic workflowautonomous agentmulti-agent systeminference-time compute (a new 2025 term for "reasoning" models like O1/DeepSeek)2. The 2025 "Physics-AI" ConvergenceFor your non-software domains (Mechanical/Electrical), the terminology is shifting from "Generative Design" to more specific AI-Physics hybrids.New 2025 High-Signal Terms:Physics-Informed Machine Learning (PIML)Neural PDE solvers (AI that solves physics equations)Surrogate modeling (using AI to replace slow simulations)Reduced Order Model (ROM) / ROM AI3. The "Hardware-Defined" ShiftIn the Electrical and Embedded space, we are seeing a move toward Software-Defined Hardware.New Patterns to Watch: * AI-driven EDA (Electronic Design Automation)Auto-routing agentsHardware-software co-design (AI balancing chip power vs. code speed)4. Updated 2025 AI Tool AdditionsAdd these to your AI_TOOL_KEYWORDS to capture the current "state-of-the-art" as of late 2025:Software: Windsurf, Cursor, Qodo, Bolt.new, Replit Agent, Claude Code.Mechanical/Physical: Bananaz AI, Monolith AI, Neural Concept, Ansys SimAI.Robotics: DeepFleet, End-to-end learning, Embodied AI.Comparison: Stable vs. Volatile KeywordsStable (Engineering)Volatile (AI Technology)StrategyTopology OptimizationGenerative DesignKeep both; use the stable term as the "Anchor."Regression TestingAI-Generated Test SuiteFilter for the action (Testing) + agent.PCB LayoutAI Auto-routerLook for the domain tool name (Altium/Cadence).FirmwareTinyML / Edge AIUse the Hardware target as the filter.
+
+
+----------------------
+
+Your list is very strong and provides a great foundation. To make it truly "professional grade" for 2025, you should refine it to capture the shift from simple chatbots to agentic workflows and domain-specific deep tech.
+
+In 2025, engineers are moving beyond just "using ChatGPT" toward using "Agents" that live inside their specialized software.
+
+1. Missing "High-Signal" AI Tools
+Your list has the big names, but adding these niche/emerging tools will catch much better "engineering practice" articles:
+
+Software/Coding: Add Windsurf, Zed, Cline (formerly Devins), Qodo (formerly Codium), Augment Code, and Claude Code. These are the "pro" tools currently favored over basic Copilot for complex refactoring.
+
+Mechanical/Electrical: Add bananaz AI, Leo AI, Monolith AI (for CFD/Testing), and PhysicsAI.
+
+EDA (Chip Design): This is a huge missing category. Add DSO.ai (Synopsys), Cadence Cerebrus, and AgentEngineer.
+
+2. Suggested Additions to AI_TOOL_KEYWORDS
+I recommend adding these specific terms to ensure you don't miss the "Agentic" shift:
+
+
+# Add these to your list
+'agentic ai', 'ai agents', 'autonomous agents', 
+'physics-ml', 'pinn' (physics-informed neural networks),
+'surrogate model', 'reduced order model', 'romai',
+'dso.ai', 'cerebrus', 'verdi ai', 'simai',
+'vibe coding', 'prompt-to-cad'
+
+
+
+that list is currently very software-heavy. To capture the "All Engineering Domains" goal (Mechanical, Electrical, Embedded, Civil), we need to shift from "coding" terms to "technical physical system" terms.
+
+In non-software engineering, AI isn't just "writing code"; it’s optimizing geometry, predicting thermal loads, or routing traces.
+
+Here is an expanded and categorized set of keywords and patterns to balance the domains:
+
+1. Expanded ENGINEERING_KEYWORDS
+Python
+
+    # === REQUIRED: MULTI-DOMAIN ENGINEERING CONTEXT ===
+    ENGINEERING_KEYWORDS += [
+        # --- Physical/Mechanical ---
+        'cad', 'cam', 'cae', 'fea', 'cfd', 'pdm', 'plm',
+        'solidworks', 'ansys', 'autodesk', 'fusion 360', 'creo', 'nx',
+        'topology optimization', 'finite element analysis', 'fluid dynamics',
+        'structural engineering', 'thermal analysis', 'manufacturing', 
+
+        # --- Electrical/Hardware ---
+        'pcb', 'schematic', 'vlsi', 'eda', 'fpga', 'asic',
+        'hdl', 'verilog', 'vhdl', 'systemverilog', 
+        'circuit design', 'signal integrity', 'chip design',
+        'spice', 'kicad', 'altium', 'cadence', 'synopsys',
+
+        # --- Embedded/Systems ---
+        'embedded systems', 'firmware', 'microcontroller', 'rtos',
+        'soc', 'system-on-chip', 'hmi', 'iot', 'robotics',
+        'mechatronics', 'control systems', 'plc', 'sensors',
+        'mbse', 'systems engineering', 'v-model',
+
+        # --- Professional Technical Artifacts ---
+        'documentation', 'requirements', 'specification', 'bill of materials', 'bom',
+        'compliance', 'safety-critical', 'technical debt', 'legacy system',
+        'prototype', 'benchmarking', 'standardization', 'iso', 'iec'
+    ]
+2. Expanded ENGINEERING_PATTERNS
+These patterns focus on the technical rigor that separates a "hobbyist" AI article from a "professional practice" insight.
+
+Python
+
+    ENGINEERING_PATTERNS += [
+        # Design & Simulation
+        r'\b(design|simulation|modeling)\s+(workflow|verification|validation)\b',
+        r'\b(structural|thermal|fluid|mechanical)\s+analysis\b',
+        
+        # Hardware/Firmware specifics
+        r'\b(pcb|chip|circuit)\s+(layout|routing|design)\b',
+        r'\b(embedded|firmware|hardware)\s+development\b',
+        
+        # Industrial Scale
+        r'\b(manufacturing|production|industrial)\s+(automation|process)\b',
+        r'\b(safety|mission|life|security)-critical\b',
+        
+        # Methodology
+        r'\b(digital\s+twin|predictive\s+maintenance)\b',
+        r'\b(requirements|systems)\s+engineering\b',
+        r'\b(technical|engineering)\s+specification\b'
+    ]
+Why these additions matter:
+FEA/CFD/EDA: These are the "IDEs" of mechanical and electrical engineers. If an article mentions "AI" and "CFD" (Computational Fluid Dynamics), it is almost certainly a high-signal article about AI-augmented engineering.
+
+Safety-Critical: AI in engineering often hits a wall regarding safety standards (ISO 26262 for automotive, DO-171C for aero). Insights on how engineers navigate this are pure gold for your research.
+
+MBSE (Model-Based Systems Engineering): This is how complex domains (like aerospace or defense) manage complexity. AI-augmented MBSE is a massive emerging trend.
+
+
+
+This blocklist is exceptionally well-structured for a pre-filter. It effectively targets the two biggest "noise" factors in this space: academic paper spam (which is high volume but low practical insight) and tangential industries (finance/medical) that dominate the "AI" keyword.
+
+However, since your goal is All Engineering Domains, there is one critical adjustment needed. Currently, some of your IRRELEVANT_PATTERNS might accidentally "kill" high-value articles in Mechanical, Aerospace, or Civil engineering.
+
+Recommended Refinements
+1. The "Physics" Trap (Mechanical/Aerospace)
+In mechanical and aerospace engineering, AI is heavily used for Fluid Dynamics (CFD) and Thermodynamics. If you block these, you will miss articles about how engineers are using AI to speed up jet engine simulations or car aerodynamics.
+
+Adjustment: Remove fluid dynamics and thermodynamics from the blocklist.
+
+Why: These are core engineering contexts. Instead, let your ML_RESEARCH_PATTERNS handle the "pure science" by blocking academic-style abstracts.
+
+2. The "Military" Nuance
+You correctly want to avoid "AI as a weapon" news. However, the military often funds the most advanced AI-augmented engineering practices (e.g., "Digital Twins" for the F-35).
+
+Adjustment: Keep your current blocklist but add a "Bridge" term to your Allowlist Exceptions: Digital Twin, Predictive Maintenance, Fleet Management.
+
+Rationale: This allows the "engineering practice" content through while still blocking the "battlefield/warfare" hype.
+
+3. Strengthening the "Pure ML" Blocklist
+You can make the ML_RESEARCH_PATTERNS even more effective by targeting the "Academic Persona" which differs from the "Engineering Practitioner Persona."
+
+Add these to ML_RESEARCH_PATTERNS:
+
+r'\bet\s+al\.' (Standard academic citation style)
+
+r'\b(Figure|Table)\s+\d+:\s' (Common in paper abstracts/RSS summaries of papers)
+
+r'\b(open-source\s+dataset|pre-training\s+data|parameters|weights)\b' (Focuses on the making of the model rather than the using of the tool)
+
+Revised Blocklist Strategy
+Here is how I would tweak your code to ensure you don't lose the "Physical Engineering" side:
+
+Python
+
+    # === BLOCKLIST: Irrelevant topics ===
+    IRRELEVANT_PATTERNS = [
+        # Pure Science (Keep specific, allow engineering physics)
+        r'\b(quantum|molecular|cellular|protein folding|gene expression|neural pathway)\b',
+        
+        # Finance/Business (Existing is perfect)
+        r'\b(stock|shares|dividend|ipo|acquisition|merger|quarterly earnings|market cap)\b',
+
+        # Politics/General News (Existing is perfect)
+        r'\b(election|parliament|congress|legislation|vote|president|minister)\b',
+
+        # Military (Focus on the 'Action', not the 'Industry')
+        r'\b(battlefield|combat|warfare|target engagement|lethal autonomous)\b',
+
+        # Medical (Existing is perfect)
+        r'\b(cardiovascular|patient outcomes|clinical trial|diagnosis|drug discovery)\b',
+    ]
+
+    # === BLOCKLIST: Academic "Paper" Noise ===
+    ML_RESEARCH_PATTERNS += [
+        r'\bet\s+al\.',                          # Citations
+        r'\b(SOTA|state-of-the-art)\b',           # Benchmarking hype
+        r'\b(novel|proposed)\s+architecture\b',  # Creating vs. Using
+        r'\b(loss\s+function|backpropagation)\b', # Implementation math
+        r'arXiv:\d+',                            # Direct paper links
+    ]
+The "Bridge" Diagram
+To visualize why we are keeping "Fluid Dynamics" but blocking "Gene Expression," think of the filter as a Venn diagram.
+
+
+This exception list is the "Gold Mine" of your filter. It prevents your strict Blocklist from accidentally killing the very best articles—those that bridge the gap between academic theory and real-world engineering results.
+
+However, to capture the full breadth of professional engineering (ME, EE, Embedded) and not just software, we need to broaden these patterns. In 2025, a mechanical engineer's "study" looks very different from a software developer's "survey."
+
+1. Refined EXCEPTION_PATTERNS
+I recommend adding these categories to catch the "High-Signal" professional insights:
+
+Python
+
+    EXCEPTION_PATTERNS = [
+        # --- Human-Tool Interaction Studies ---
+        r'\b(developer|programmer|engineer)\s+(survey|study|interview|observation)\b',
+        r'\b(pair\s+programming|collaborative\s+design|human-ai)\s+(workflow|experiment)\b',
+        
+        # --- Adoption & Productivity Metrics ---
+        r'\b(copilot|chatgpt|claude|gemini|cursor|llm)\s+(usage|adoption|productivity|velocity|efficiency)\b',
+        r'\b(benchmarking|evaluation)\s+of\s+AI\s+in\s+(engineering|design|production)\b',
+        
+        # --- Practice-Based "How-To" Insights ---
+        r'\b(lessons\s+learned|best\s+practices|case\s+study|post-mortem)\s+from\s+using\b',
+        r'\bhow\s+we\s+integrated\s+(ai|llm)\s+into\s+our\s+(pipeline|workflow|toolchain)\b',
+        
+        # --- Technical Implementation (The "V-Model" Bridge) ---
+        r'\b(verification|validation|unit\s+test|quality\s+assurance)\s+(with|using)\s+AI\b',
+        r'\bAI-assisted\s+(topology\s+optimization|circuit\s+design|code\s+refactoring)\b',
+    ]
+2. Why these exceptions are critical for 2025
+The "Workflow" Keyword: Pure ML papers focus on models; practitioners focus on pipelines. Including toolchain and pipeline in exceptions ensures you get the "plumbing" articles.
+
+"Benchmarking" vs "Benchmarks": Academic papers use "Benchmarks" (as a noun for a dataset). Professionals use "Benchmarking" (as a verb for measuring tool performance). This is a subtle but powerful semantic distinction.
+
+Safety & QA: For mechanical and electrical engineering, AI usage is often gated by safety standards. An exception for verification or validation will surface the critical "how to use AI safely" articles that your blocklist might otherwise hide.
+
+Summary of the Stage 1 Filter Logic
+Now that we have all three components, your filter logic should follow this flow:
+
+MUST HAVE: One term from AI_TOOL_KEYWORDS AND one term from ENGINEERING_KEYWORDS.
+
+UNLESS: It matches EXCEPTION_PATTERNS (Pass through immediately).
+
+DROP IF: It matches IRRELEVANT_PATTERNS OR ML_RESEARCH_PATTERNS.
+
+
+
+

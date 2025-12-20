@@ -1,0 +1,11 @@
+{
+  "started_at": "2025-12-19T10:36:01.185582",
+  "articles_attempted": 150,
+  "articles_succeeded": 150,
+  "articles_failed": 0,
+  "total_retries": 6,
+  "errors_by_type": {},
+  "total_processing_time": 625.1655621528625,
+  "ended_at": "2025-12-19T10:47:55.085038",
+  "duration_seconds": 713.9
+}
