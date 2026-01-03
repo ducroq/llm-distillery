@@ -1,12 +1,12 @@
 """
 Sustainability Technology Pre-Filter v1.0
-This module defines a pre-filter for evaluating articles related to sustainability technology.
 
+This module defines a pre-filter for evaluating articles related to sustainability technology.
+Fast keyword-based filtering before model inference.
 """
 
 import re
 from typing import Dict, List, Optional, Tuple
-
 from filters.common.base_prefilter import BasePreFilter
 
 
@@ -36,13 +36,14 @@ class SustainabilityTechnologyPreFilterV1(BasePreFilter):
         if not self._is_sustainability_related(text):
             return (False, "not_sustainability_topic")
 
-        # PASS: Has sustainability keywords - let oracle decide relevance
+        # PASS: Has sustainability evidence AND passed all other checks
         return (True, "passed")
 
     def _is_sustainability_related(self, text: str) -> bool:
         """Check if article is about climate/sustainability/clean energy (WIDEST NET)"""
 
         keywords = [
+            # === ENGLISH ===
             # 1. Climate Core & Mitigation
             'climate', 'carbon', 'emission', 'greenhouse', 'warming',
             'net-zero', 'net zero', 'carbon neutral', 'decarboniz',
@@ -70,6 +71,55 @@ class SustainabilityTechnologyPreFilterV1(BasePreFilter):
             'infrastructure', 'innovation', 'regulations', 'mandate',
             'investments', 'subsidies', 'resilience', 'adaptation',
             'climate risk', 'stranded asset', 'supply chain',
+
+            # === DUTCH (NL) ===
+            'klimaat', 'koolstof', 'uitstoot', 'broeikasgas', 'opwarming',
+            'duurzaam', 'hernieuwbaar', 'zonne-energie', 'zonnepane', 'windenergie',
+            'elektrisch', 'elektrische auto', 'waterstof', 'batterij',
+            'kernenergie', 'kerncentrale', 'circulair', 'recycl',
+            'energie-transitie', 'energietransitie', 'groene energie',
+
+            # === GERMAN (DE) ===
+            'klima', 'kohlenstoff', 'treibhausgas', 'erwärmung', 'emissionen',
+            'nachhaltig', 'erneuerbar', 'solarenergie', 'windkraft', 'wasserstoff',
+            'elektroauto', 'elektrofahrzeug', 'elektromobil', 'batterie',
+            'kernkraft', 'atomkraft', 'kreislaufwirtschaft', 'energiewende',
+            'photovoltaik', 'wärmepumpe', 'grüne energie',
+
+            # === FRENCH (FR) ===
+            'climat', 'carbone', 'émission', 'gaz à effet de serre', 'réchauffement',
+            'durable', 'renouvelable', 'solaire', 'éolien', 'hydrogène',
+            'véhicule électrique', 'voiture électrique', 'batterie',
+            'nucléaire', 'économie circulaire', 'transition énergétique',
+            'photovoltaïque', 'énergie verte', 'décarbonation',
+
+            # === SPANISH (ES) ===
+            'clima', 'carbono', 'emisión', 'efecto invernadero', 'calentamiento',
+            'sostenible', 'renovable', 'solar', 'eólica', 'hidrógeno',
+            'vehículo eléctrico', 'coche eléctrico', 'batería',
+            'nuclear', 'economía circular', 'transición energética',
+            'fotovoltaica', 'energía verde', 'descarbonización',
+
+            # === PORTUGUESE (PT) ===
+            'clima', 'carbono', 'emissão', 'efeito estufa', 'aquecimento',
+            'sustentável', 'renovável', 'solar', 'eólica', 'hidrogénio', 'hidrogênio',
+            'veículo elétrico', 'carro elétrico', 'bateria',
+            'nuclear', 'economia circular', 'transição energética',
+            'fotovoltaica', 'energia verde', 'descarbonização',
+
+            # === ITALIAN (IT) ===
+            'clima', 'carbonio', 'emissione', 'effetto serra', 'riscaldamento',
+            'sostenibile', 'rinnovabile', 'solare', 'eolico', 'idrogeno',
+            'veicolo elettrico', 'auto elettrica', 'batteria',
+            'nucleare', 'economia circolare', 'transizione energetica',
+            'fotovoltaico', 'energia verde', 'decarbonizzazione',
+
+            # === CHINESE (ZH) ===
+            '气候', '碳', '排放', '温室气体', '变暖',
+            '可持续', '可再生', '太阳能', '风能', '氢能',
+            '电动汽车', '电动车', '电池', '新能源',
+            '核能', '循环经济', '能源转型',
+            '光伏', '绿色能源', '脱碳',
         ]
 
         # Very permissive - just needs ONE keyword mention
