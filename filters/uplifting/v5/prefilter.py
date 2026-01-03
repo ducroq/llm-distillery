@@ -84,6 +84,35 @@ class UpliftingPreFilterV5(BasePreFilter):
         # Dutch crime terms - more specific
         r'\b(verkracht|verkrachting|mishandeling|doodslag)\b',  # removed 'misbruik' (too broad), 'cel' (biology)
         r'\b(gevangenisstraf|levenslang)\b',
+        # === DUTCH (NL) ===
+        r'(moord|vermoord|doodslag|levensdelict)',
+        r'(verkracht|verkrachting|aanranding|zedendelict)',
+        r'(mishandeling|steekpartij|neergeschoten)',
+        r'(kindermishandeling|huiselijk geweld|mensenhandel)',
+        r'(veroordeeld tot|gevangenisstraf|levenslang)',
+        r'(tbs met|terbeschikkingstelling|dader|zedendelinquent)',
+        r'(gewapende overval|gijzeling|ontvoering)',
+        r'(terroristische aanslag|schietpartij|bloedbad)',
+
+        # === GERMAN (DE) ===
+        r'(mord|ermordet|totschlag|tötungsdelikt)',
+        r'(vergewaltigung|vergewaltigt|sexuelle nötigung)',
+        r'(körperverletzung|messerstecherei|erschossen)',
+        r'(kindesmisshandlung|häusliche gewalt|menschenhandel)',
+        r'(verurteilt zu|gefängnisstrafe|lebenslänglich)',
+        r'(täter|sexualstraftäter|gewalttäter)',
+        r'(bewaffneter überfall|entführung|geiselnahme)',
+        r'(terroranschlag|amoklauf|massaker)',
+
+        # === FRENCH (FR) ===
+        r'(meurtre|assassinat|homicide|tué)',
+        r'(viol|violée|agression sexuelle)',
+        r'(agression|poignardé|abattu)',
+        r'(maltraitance|violence domestique|traite des êtres humains)',
+        r'(condamné à|peine de prison|perpétuité)',
+        r'(auteur|agresseur sexuel|délinquant violent)',
+        r"(braquage|enlèvement|prise d'otage)",
+        r'(attentat terroriste|fusillade|massacre)',
     ]
 
     CRIME_VIOLENCE_EXCEPTIONS = [
@@ -110,6 +139,22 @@ class UpliftingPreFilterV5(BasePreFilter):
         # Positive resolution
         r'\b(released|freed|liberated|rescued)\b',
         r'\b(vrijgelaten|bevrijd)\b',  # Dutch: released/freed
+        # === DUTCH (NL) ===
+        r'(rehabilitatie|resocialisatie|re-integratie|hervorming)',
+        r'(gevangenishervorming|strafrechtshervorming)',
+        r'(slachtofferhulp|slachtofferondersteuning)',
+
+        # === GERMAN (DE) ===
+        r'(freigelassen|befreit|gerettet)',
+        r'(rehabilitation|resozialisierung|wiedereingliederung|reform)',
+        r'(gefängnisreform|strafrechtsreform)',
+        r'(opferhilfe|opferunterstützung)',
+
+        # === FRENCH (FR) ===
+        r'(libéré|libérée|sauvé|sauvée)',
+        r'(réhabilitation|réinsertion|réforme)',
+        r'(réforme pénitentiaire|réforme judiciaire)',
+        r'(aide aux victimes|soutien aux victimes)',
     ]
 
     CODE_HOSTING_DOMAINS = [
@@ -137,7 +182,24 @@ class UpliftingPreFilterV5(BasePreFilter):
         # Corporate events
         r'\b(ipo|initial public offering|going public|public listing)\b',
         r'\b(m&a|merger|acquisition|buyout|takeover|acqui-?hire)\b',
-        r'\b(investor relations|shareholder value|dividend|stock buyback)\b',
+        r'(investor relations|shareholder value|dividend|stock buyback)',
+        # === DUTCH (NL) ===
+        r'(aandelenkoers|beurskoers|marktkapitalisatie)',
+        r'(kwartaalcijfers|kwartaalresultaten|boekjaar)',
+        r'(investeringsronde|durfkapitaal|risicokapitaal)',
+        r'(beursgang|fusie|overname)',
+
+        # === GERMAN (DE) ===
+        r'(aktienkurs|börsenkurs|marktkapitalisierung)',
+        r'(quartalszahlen|geschäftsjahr|finanzperformance)',
+        r'(finanzierungsrunde|risikokapital|wagniskapital)',
+        r'(börsengang|fusion|übernahme)',
+
+        # === FRENCH (FR) ===
+        r'(cours de bourse|capitalisation boursière)',
+        r'(résultats trimestriels|exercice fiscal)',
+        r'(levée de fonds|capital-risque)',
+        r'(introduction en bourse|fusion|acquisition)',
     ]
 
     CORPORATE_FINANCE_EXCEPTIONS = [
@@ -145,7 +207,18 @@ class UpliftingPreFilterV5(BasePreFilter):
         r'\b(public benefit|b corp|benefit corporation|social enterprise)\b',
         r'\b(open source|open access|freely available|creative commons)\b',
         r'\b(affordable access|community ownership|commons|mutual aid)\b',
-        r'\b(non-?profit|nonprofit|ngo|charity|foundation)\b',
+        r'(non-?profit|nonprofit|ngo|charity|foundation)',
+        # === DUTCH (NL) ===
+        r'(werknemerscoöperatie|coöperatie|sociaal ondernemen)',
+        r'(maatschappelijke onderneming|stichting|goed doel)',
+
+        # === GERMAN (DE) ===
+        r'(genossenschaft|sozialunternehmen|gemeinnützig)',
+        r'(stiftung|wohltätigkeit)',
+
+        # === FRENCH (FR) ===
+        r'(coopérative|entreprise sociale|économie sociale)',
+        r'(association|fondation|but non lucratif)',
     ]
 
     # === MILITARY/SECURITY INDICATORS ===
@@ -160,7 +233,24 @@ class UpliftingPreFilterV5(BasePreFilter):
         r'\b(border defense|border security|border wall|border patrol)\b',
         r'\b(surveillance|military exercise|war games|defense budget)\b',
         r'\b(troops|soldiers|battalion|regiment|special forces)\b',
-        r'\b(military spending|arms procurement|defense contract)\b',
+        r'(military spending|arms procurement|defense contract)',
+        # === DUTCH (NL) ===
+        r'(militaire opbouw|defensie-uitgaven|krijgsmacht|troepenmacht)',
+        r'(wapensysteem|wapenhandel|munitie|raketten|gevechtsvliegtuigen)',
+        r'(navo-uitbreiding|militaire alliantie|defensieverdrag)',
+        r'(grensbeveiliging|grensbewaking|militaire oefening)',
+
+        # === GERMAN (DE) ===
+        r'(militärischer aufbau|verteidigungsausgaben|streitkräfte)',
+        r'(waffensystem|waffenhandel|munition|raketen|kampfflugzeuge)',
+        r'(nato-erweiterung|militärbündnis|verteidigungspakt)',
+        r'(grenzschutz|militärübung|verteidigungshaushalt)',
+
+        # === FRENCH (FR) ===
+        r'(renforcement militaire|dépenses de défense|forces armées)',
+        r"(système d'armes|vente d'armes|munitions|missiles)",
+        r"(élargissement de l'otan|alliance militaire|pacte de défense)",
+        r'(sécurité aux frontières|exercice militaire|budget de la défense)',
     ]
 
     MILITARY_SECURITY_EXCEPTIONS = [
@@ -169,7 +259,24 @@ class UpliftingPreFilterV5(BasePreFilter):
         r'\b(conflict resolution|reconciliation|ceasefire|armistice)\b',
         r'\b(peacekeeping|peace keeping|un peace|humanitarian)\b',
         r'\b(truth commission|war crimes tribunal|justice|accountability)\b',
-        r'\b(veterans? (support|services|care|mental health))\b',
+        r'(veterans? (support|services|care|mental health))',
+        # === DUTCH (NL) ===
+        r'(vrede|vredesproces|vredesakkoord|vredesbesprekingen)',
+        r'(demilitarisering|ontwapening|wapenreductie)',
+        r'(conflictoplossing|verzoening|staakt-het-vuren|wapenstilstand)',
+        r'(vredesmissie|humanitair)',
+
+        # === GERMAN (DE) ===
+        r'(frieden|friedensprozess|friedensabkommen|friedensgespräche)',
+        r'(demilitarisierung|abrüstung|waffenreduzierung)',
+        r'(konfliktlösung|versöhnung|waffenstillstand)',
+        r'(friedensmission|humanitär)',
+
+        # === FRENCH (FR) ===
+        r'(paix|processus de paix|accord de paix|négociations de paix)',
+        r'(démilitarisation|désarmement|réduction des armes)',
+        r'(résolution des conflits|réconciliation|cessez-le-feu|armistice)',
+        r'(maintien de la paix|humanitaire)',
     ]
 
     # === SPECULATION INDICATORS ===
