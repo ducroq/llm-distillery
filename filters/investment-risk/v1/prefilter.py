@@ -46,7 +46,14 @@ class InvestmentRiskPreFilterV1:
         r'\b(banking sector|financial system|contagion|leverage)\b',
         r'\b(credit spread|credit market|bond market)\b',
         r'\b(unemployment|gdp|inflation|pmi|leading indicators)\b',
-        r'\b(portfolio|asset allocation|diversification|risk management)\b',
+        r'(portfolio|asset allocation|diversification|risk management)',
+        # === DUTCH/GERMAN/FRENCH (common financial terms) ===
+        r'(systemisch risico|recessie|kredietcrisis|rentecurve)',  # NL
+        r'(werkloosheid|inflatie|economische groei|centrale bank)',  # NL
+        r'(systemisches risiko|rezession|kreditkrise|zinsstruktur)',  # DE
+        r'(arbeitslosigkeit|inflation|wirtschaftswachstum|zentralbank)',  # DE
+        r'(risque systémique|récession|crise du crédit|courbe des taux)',  # FR
+        r'(chômage|inflation|croissance économique|banque centrale)',  # FR
     ]
 
     # Affiliate and conflict patterns (block)
