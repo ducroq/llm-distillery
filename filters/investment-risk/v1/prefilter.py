@@ -12,7 +12,7 @@ import re
 from typing import Dict, Tuple
 
 
-class InvestmentRiskPreFilterV1:
+class InvestmentRiskPreFilterV5:
     """Fast rule-based pre-filter for investment risk content"""
 
     VERSION = "1.0"
@@ -120,7 +120,7 @@ class InvestmentRiskPreFilterV1:
 # Test the pre-filter
 def test_prefilter():
     """Test investment risk pre-filter"""
-    prefilter = InvestmentRiskPreFilterV1()
+    prefilter = InvestmentRiskPreFilterV5()
 
     test_cases = [
         # PASS: Macro risk analysis
@@ -181,7 +181,7 @@ def test_prefilter():
         },
     ]
 
-    print(f"\nTesting Investment Risk Pre-filter v{InvestmentRiskPreFilterV1.VERSION}\n")
+    print(f"\nTesting Investment Risk Pre-filter v{InvestmentRiskPreFilterV5.VERSION}\n")
     print("=" * 80)
 
     passed = 0
