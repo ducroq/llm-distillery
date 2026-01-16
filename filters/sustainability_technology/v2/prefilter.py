@@ -1,8 +1,14 @@
 """
-Sustainability Technology Pre-Filter v2.0
+Sustainability Technology Pre-Filter v2.1
 
 This module defines a pre-filter for evaluating articles related to sustainability technology.
 Fast keyword-based filtering before model inference.
+
+v2.1 Changes:
+- Added product deals exclusion (shopping/price content)
+- Added trade show patterns (CES, IFA, MWC) with sustainability override
+- Expanded consumer electronics brands and product types
+- Expanded sustainability override keywords
 
 v2.0 Changes:
 - Added explicit exclusion patterns for off-topic content
@@ -18,55 +24,107 @@ from filters.common.base_prefilter import BasePreFilter
 class SustainabilityTechnologyPreFilterV2(BasePreFilter):
     """
     Pre-filter to evaluate articles on sustainability technology.
-    v2.0: Enhanced with explicit exclusion patterns.
+    v2.1: Enhanced exclusions + expanded override protection.
     """
-    VERSION = "2.0"
+    VERSION = "2.1"
 
     # Exclusion patterns - these block articles before sustainability check
+    # NOTE: Articles with SUSTAINABILITY_OVERRIDE keywords bypass these exclusions
+    # PHILOSOPHY: When in doubt, let it through - the LLM oracle handles edge cases
     EXCLUSION_PATTERNS = {
         # AI/ML infrastructure without sustainability application
+        # REMOVED: transformer (electrical transformers), benchmark (ESG benchmarks)
         'ai_ml_infrastructure': [
-            r'\b(transformer|attention mechanism|SOTA|state.of.the.art|benchmark)\b',
+            r'\b(attention mechanism|SOTA|state.of.the.art)\b',
             r'\b(diffusion model|GAN|VAE|autoencoder|neural network architecture)\b',
-            r'\b(LLM|language model|GPT-|BERT|Llama|Claude|Gemini|Mistral)\b',
+            r'\b(LLM|language model|GPT-\d|BERT|Llama|Claude|Gemini|Mistral)\b',
             r'\b(fine.?tun|pretrain|inference optimization|token generation)\b',
             r'\b(image classification|object detection|segmentation|computer vision)\b',
         ],
         # Consumer electronics reviews/shopping
+        # REMOVED: Dyson (makes sustainable products), GPU (data center efficiency)
         'consumer_electronics': [
+            # Smartphones
             r'\b(Galaxy S\d|iPhone \d|Pixel \d|OnePlus|Xiaomi Mi|Oppo Find|Vivo X|Redmi)\b',
-            r'\b(smartphone review|tablet review|phone deal|price drop|best phone)\b',
-            r'\b(GPU|RTX|gaming laptop|gaming PC|console)\b',
+            r'\b(smartphone review|tablet review|phone deal|best phone)\b',
+            # Gaming hardware (specific)
+            r'\b(RTX \d{4}|gaming laptop|gaming PC|PlayStation|Xbox)\b',
+            # Audio equipment
+            r'\b(soundbar|earbuds|headphones|wireless speaker|subwoofer|AirPods)\b',
+            # TV/Display (non-efficiency focused)
+            r'\b(OLED TV|Mini.?LED TV|QD.?OLED|TV review|television review)\b',
+            # Brands (removed Dyson)
+            r'\b(TCL|JLab|Anker|Narwal|Roborock|iRobot|Bose|Sony WH-|Sonos)\b',
+        ],
+        # Product deals/shopping - only obvious shopping content
+        # REMOVED: "lowest price", "best deal" (could be sustainability milestones)
+        # REMOVED: "buying guide" (could be "best EVs to buy")
+        'product_deals': [
+            r'\b(Black Friday|Prime Day|Cyber Monday|holiday deal)\b',
+            r'\b(discount code|coupon code|promo code)\b',
+            r'\b(save \$\d+|percent off|\d+% off)\b',
+            r'\bgift guide\b',
+        ],
+        # Trade shows - only block gadget-focused coverage
+        'trade_shows': [
+            r'\b(hands.on|first look).{0,20}(CES|IFA|MWC)\b',
+            r'\b(CES|IFA|MWC).{0,20}(hands.on|first look)\b',
+        ],
+        # Home appliances - only obviously non-sustainable
+        # REMOVED: smart refrigerator/fridge (energy efficiency!)
+        'home_appliances': [
+            r'\b(mattress vacuum|air fryer|instant pot|coffee maker|espresso machine)\b',
         ],
         # Programming/developer content
+        # REMOVED: tutorial, how to build (DIY sustainability is valid)
         'programming': [
-            r'\b(tutorial|how to build|getting started|step.by.step guide)\b',
-            r'\b(REST API|GraphQL|microservice|docker|kubernetes)\b',
+            r'\b(REST API|GraphQL|microservice)\b',
             r'\bgithub\.com/(?!.*(?:solar|energy|carbon|climate|sustainab))\b',
         ],
         # Military technology
+        # REMOVED: naval (offshore wind, naval renewable energy)
         'military': [
-            r'\b(submarine|fighter jet|missile|tank|warship|stealth|defense system)\b',
-            r'\b(military|weapon|armament|naval|air force)\b',
+            r'\b(fighter jet|missile|warship|stealth bomber|defense system)\b',
+            r'\b(military weapon|armament|air force base)\b',
+            r'\b(battle tank|army tank|military tank)\b',
         ],
         # Travel/tourism
+        # REMOVED: airline (sustainable aviation fuel is important!)
         'travel': [
-            r'\b(travel app|flight deal|vacation|tourism|holiday destination)\b',
-            r'\b(hotel booking|airline|trip planning|world cup trip)\b',
+            r'\b(travel app|flight deal|vacation package|tourism promotion)\b',
+            r'\b(hotel booking|trip planning|world cup trip)\b',
         ],
     }
 
     # Sustainability keywords that override exclusions (context-dependent)
+    # If article contains these, it passes even if exclusion patterns match
     SUSTAINABILITY_OVERRIDE = [
-        'energy efficien', 'carbon footprint', 'emission', 'sustainab',
-        'renewable', 'solar', 'wind', 'climate', 'green energy',
-        'electric vehicle', 'ev charging', 'battery storage', 'grid',
+        # Carbon & emissions
+        'carbon reduction', 'carbon footprint', 'carbon neutral', 'co2 reduction',
+        'emission reduction', 'emissions reduction', 'reduce emission', 'ghg',
+        'decarboni', 'net zero', 'net-zero',
+        # Energy efficiency
+        'energy efficien', 'energy-efficien', 'energy saving', 'energy management',
+        # Renewables - solar
+        'renewable', 'solar power', 'solar panel', 'solar energy', 'photovoltaic',
+        # Renewables - wind (including offshore)
+        'wind power', 'wind energy', 'wind farm', 'wind turbine', 'offshore wind',
+        # Climate
+        'climate change', 'climate action', 'green energy', 'clean energy',
+        # Electric transport (multiple patterns)
+        'electric vehicle', 'electric car', 'electric sedan', 'electric suv',
+        ' ev ', ' evs ', 'ev4', 'ev6', 'ev9',  # Specific EV models
+        'ev charging', 'zero emission', 'e-bike', 'ebike',
+        # Storage & grid
+        'battery storage', 'energy storage', 'grid storage', 'smart grid',
+        # Sustainability general
+        'sustainab', 'circular economy', 'carbon capture',
     ]
 
     def __init__(self):
         super().__init__()
         self.filter_name = "sustainability_technology_v2"
-        self.version = "2.0"
+        self.version = "2.1"
 
     def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """

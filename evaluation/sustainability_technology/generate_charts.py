@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from pathlib import Path
 
-# Data from comparison
+# Data from comparison (v2.1 results)
 data = {
     'v1_pass': 271,
     'v1_block': 0,
-    'v2_pass': 184,
-    'v2_block': 87,
-    'both_pass': 184,
+    'v2_pass': 141,
+    'v2_block': 130,
+    'both_pass': 141,
     'both_block': 0,
-    'v1_pass_v2_block': 87,
+    'v1_pass_v2_block': 130,
     'v1_block_v2_pass': 0
 }
 
@@ -92,8 +92,8 @@ plt.close()
 # Chart 3: False Positive Rate comparison
 fig, ax = plt.subplots(figsize=(8, 5))
 
-versions = ['v1', 'v2']
-fp_rates = [100.0, 67.9]
+versions = ['v1', 'v2.1']
+fp_rates = [100.0, 52.0]
 bar_colors = ['#e74c3c', '#27ae60']
 
 bars = ax.bar(versions, fp_rates, color=bar_colors, width=0.5, alpha=0.8)
@@ -112,9 +112,9 @@ for i, bar in enumerate(bars):
                 ha='center', va='bottom', fontsize=14, fontweight='bold')
 
 # Add improvement annotation
-ax.annotate('', xy=(1, 75), xytext=(0, 95),
+ax.annotate('', xy=(1, 60), xytext=(0, 95),
             arrowprops=dict(arrowstyle='->', color='#3498db', lw=2))
-ax.text(0.5, 88, '-32.1%', ha='center', fontsize=12, fontweight='bold', color='#3498db')
+ax.text(0.5, 80, '-48%', ha='center', fontsize=12, fontweight='bold', color='#3498db')
 
 plt.tight_layout()
 plt.savefig(output_dir / 'chart_fp_rate.png', dpi=150, bbox_inches='tight')
