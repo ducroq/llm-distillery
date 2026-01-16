@@ -2,35 +2,41 @@
 
 Cross-version evaluation and ground truth data for the sustainability_technology filter.
 
+## Key Results
+
+| Metric | Value |
+|--------|-------|
+| **Prefilter v2.1 FP Block Rate** | 88.2% |
+| **Prefilter v2.1 TP Pass Rate** | 89.0% |
+| **Remaining FPs for Oracle** | 32 (12%) |
+
 ## Contents
 
 | Item | Description |
 |------|-------------|
-| `V1_VS_V2_COMPARISON.md` | Comparison report: v2 reduces FPs by 32.1% |
-| `chart_*.png` | Visualization charts |
-| `compare_v1_v2.py` | Comparison script |
-| `generate_charts.py` | Chart generation script |
+| `PREFILTER_EVALUATION_REPORT.md` | Full evaluation report with methodology |
+| `V1_VS_V2_COMPARISON.md` | Historical v1 vs v2 comparison |
+| `compare_prefilters.py` | A/B test script for prefilter versions |
 | `ground_truth/` | 271 manually reviewed false positives |
+| `true_positives/` | 300 frozen true positives for testing |
 
-## Key Results
+## Summary
 
-- **v1 false positive rate:** 100% (on known FPs)
-- **v2 false positive rate:** 67.9%
-- **Improvement:** -32.1% (87 articles now correctly blocked)
-- **Regressions:** 0
+The v2.1 prefilter achieves a good balance:
+- Blocks 88% of false positives at the keyword level
+- Passes 89% of true positives to the scoring model
+- The remaining 12% FPs require oracle judgment (semantic ambiguity)
 
-## Related Documentation
+Attempts to improve FP blocking further (v2.2 with more AI/ML patterns) caused unacceptable TP regression (-12.7%) without improving FP block rate.
 
-For filter-specific reports (training, calibration, validation), see:
-
-**[`filters/sustainability_technology/v2/reports/`](../../filters/sustainability_technology/v2/reports/)**
-
-## Running the Comparison
+## Running Tests
 
 ```bash
 cd llm-distillery
-python evaluation/sustainability_technology/compare_v1_v2.py
-python evaluation/sustainability_technology/generate_charts.py
+python evaluation/sustainability_technology/compare_prefilters.py
 ```
 
-Requires access to filtered data in `I:/Mijn Drive/NexusMind/filtered/sustainability_technology/`.
+## Related Documentation
+
+- **Filter reports:** [`filters/sustainability_technology/v2/reports/`](../../filters/sustainability_technology/v2/reports/)
+- **Prefilter source:** [`filters/sustainability_technology/v2/prefilter.py`](../../filters/sustainability_technology/v2/prefilter.py)

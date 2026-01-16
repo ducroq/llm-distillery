@@ -40,10 +40,12 @@ class SemanticPreFilter:
         print(f"  Device: {'CPU' if device == -1 else f'GPU {device}'}")
         print(f"  Confidence threshold: {confidence_threshold}")
 
+        # Force PyTorch to avoid TensorFlow/Keras issues
         self.classifier = pipeline(
             "zero-shot-classification",
             model=model_name,
-            device=device
+            device=device,
+            framework="pt"
         )
         self.confidence_threshold = confidence_threshold
 
