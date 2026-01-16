@@ -11,15 +11,24 @@ Documentation of v2 filter development, training, and validation.
 | `TRAINING_DATA_PREPARATION.md` | Training data generation process |
 | `TRAINING_REPORT.md` | Model training results and metrics |
 
-## Cross-version Evaluation
+## Prefilter Performance (v2.1)
 
-For v1 vs v2 comparison with production false positives, see:
+| Metric | Value |
+|--------|-------|
+| FP Block Rate | 88.2% |
+| TP Pass Rate | 89.0% |
+
+The prefilter effectively blocks most off-topic content while passing legitimate sustainability articles.
+
+## Evaluation & Ground Truth
+
+For comprehensive evaluation with production data, see:
 
 **[`evaluation/sustainability_technology/`](../../../../evaluation/sustainability_technology/)**
 
 Contains:
-- `V1_VS_V2_COMPARISON.md` - Full comparison report with charts
+- `PREFILTER_EVALUATION_REPORT.md` - Full prefilter evaluation (v2.1 vs v2.2 experiment)
+- `V1_VS_V2_COMPARISON.md` - Historical v1 vs v2 comparison
+- `compare_prefilters.py` - A/B test script for prefilter versions
 - `ground_truth/` - 271 manually reviewed false positives
-- Comparison scripts and generated charts
-
-**Key result:** v2 reduces false positives by 32.1% with zero regressions.
+- `true_positives/` - 300 frozen true positives for testing
