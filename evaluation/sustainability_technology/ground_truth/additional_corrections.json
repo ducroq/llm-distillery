@@ -1,0 +1,292 @@
+[
+  {
+    "num": 501,
+    "article_id": "community_social_reddit_local_llama_a3b4a2c75c27",
+    "title": "XiaomiMiMo/MiMo-V2",
+    "source": "community_social_reddit_local_llama",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "smartphone_review"
+  },
+  {
+    "num": 510,
+    "article_id": "portuguese_canaltech_31ecb6b55db4",
+    "title": "5 coisas inusitadas que a Xiaomi fabrica e você pode comprar",
+    "source": "portuguese_canaltech",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "smartphone_review"
+  },
+  {
+    "num": 527,
+    "article_id": "arxiv_d4bb185785df",
+    "title": "InfiniteVL: Synergizing Linear and Sparse Attention for High",
+    "source": "arxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 577,
+    "article_id": "spanish_xataka_fdbbe34d49c9",
+    "title": "Oppo Find X9, análisis: vivir a la sombra del 'Pro' nunca fu",
+    "source": "spanish_xataka",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "smartphone_review"
+  },
+  {
+    "num": 579,
+    "article_id": "community_social_programming_reddit_ad238009922d",
+    "title": "branch management for AI native workflows?",
+    "source": "community_social_programming_reddit",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 582,
+    "article_id": "community_social_reddit_chatgpt_4d9dadbc0cc8",
+    "title": "After 2 years I am switching over (feedback)",
+    "source": "community_social_reddit_chatgpt",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 583,
+    "article_id": "spanish_xataka_468a1ac8218b",
+    "title": "Una tablet Xiaomi por menos de 95 euros, precio top para el ",
+    "source": "spanish_xataka",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "smartphone_review"
+  },
+  {
+    "num": 597,
+    "article_id": "community_social_reddit_singularity_67452e507fe1",
+    "title": "\"World's first\" scalable DNA Data Storage announced Atlas Eo",
+    "source": "community_social_reddit_singularity",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 601,
+    "article_id": "community_social_reddit_artificial_689dbd878846",
+    "title": "It's been a big week for AI ; Here are 10 massive changes yo",
+    "source": "community_social_reddit_artificial",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 645,
+    "article_id": "italian_wired_italia_c71be3b9b79c",
+    "title": "Il più grande impianto solare industriale d’Italia si trova ",
+    "source": "italian_wired_italia",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "smartphone_review"
+  },
+  {
+    "num": 646,
+    "article_id": "portuguese_canaltech_2f08ce9b4292",
+    "title": "5 presentes de Natal para quem vive viajando",
+    "source": "portuguese_canaltech",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "travel_tourism"
+  },
+  {
+    "num": 674,
+    "article_id": "community_social_reddit_local_llama_1b5ecb714ccd",
+    "title": "We open-sourced LLMRouter: the first unified LLM routing lib",
+    "source": "community_social_reddit_local_llama",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 729,
+    "article_id": "spanish_xataka_253b642b10d0",
+    "title": "\"Xiaomi es la Apple de China\": el CEO de Ford está completam",
+    "source": "spanish_xataka",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "smartphone_review"
+  },
+  {
+    "num": 736,
+    "article_id": "community_social_reddit_chatgpt_a9f08b7cc788",
+    "title": "I asked ChatGPT what the future looks like in 10..20 years. ",
+    "source": "community_social_reddit_chatgpt",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 750,
+    "article_id": "community_social_reddit_local_llama_47c4a4e76e08",
+    "title": "FlashHead: Up to 50% faster token generation on top of other",
+    "source": "community_social_reddit_local_llama",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 762,
+    "article_id": "portuguese_pplware_ae7598e1a2e6",
+    "title": "Capa viral para iPhone tem potencial para conquistar até os ",
+    "source": "portuguese_pplware",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "smartphone_review"
+  },
+  {
+    "num": 828,
+    "article_id": "professional_business_forbes_innovation_034daed03a1f",
+    "title": "Vivo X300 Pro Is An iPhone 17 Pro Rival With A Bigger Batter",
+    "source": "professional_business_forbes_innovation",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "smartphone_review"
+  },
+  {
+    "num": 849,
+    "article_id": "portuguese_canaltech_860e72ccc459",
+    "title": "Samsung Galaxy S26 Ultra vai ganhar recargas mais rápidas, m",
+    "source": "portuguese_canaltech",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "smartphone_review"
+  },
+  {
+    "num": 853,
+    "article_id": "community_social_reddit_local_llama_6b3c22e9ebac",
+    "title": "NobodyWho: the simplest way to run local LLMs in python",
+    "source": "community_social_reddit_local_llama",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 866,
+    "article_id": "portuguese_canaltech_d1f5a69dbcc9",
+    "title": "Quer ver a Copa do Mundo? Skyscanner vai encontrar voos de a",
+    "source": "portuguese_canaltech",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "travel_tourism"
+  },
+  {
+    "num": 894,
+    "article_id": "portuguese_canaltech_3d5dcdf8dad1",
+    "title": "4 apps e sites para planejar uma viagem para a Copa do Mundo",
+    "source": "portuguese_canaltech",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "travel_tourism"
+  },
+  {
+    "num": 898,
+    "article_id": "ai_arxiv_cs_lg_9f9799ac8b31",
+    "title": "SSI-GAN: Semi-Supervised Swin-Inspired Generative Adversaria",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 901,
+    "article_id": "community_social_reddit_local_llama_23668b3e0bde",
+    "title": "I benchmarked 7 Small LLMs on a 16GB Laptop. Here is what is",
+    "source": "community_social_reddit_local_llama",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 904,
+    "article_id": "community_social_reddit_artificial_b5a14d71c4fc",
+    "title": "Are we ignoring \"Data Entropy\" in the race for massive Conte",
+    "source": "community_social_reddit_artificial",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 906,
+    "article_id": "community_social_reddit_local_llama_06264b0c5740",
+    "title": "I made Soprano-80M: Stream ultra-realistic TTS in <15ms, up ",
+    "source": "community_social_reddit_local_llama",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 914,
+    "article_id": "positive_news_the_better_india_31c54b147288",
+    "title": "10 Simple Garden Crafts to Bring Back the Childhood Joy of M",
+    "source": "positive_news_the_better_india",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "travel_tourism"
+  },
+  {
+    "num": 921,
+    "article_id": "community_social_reddit_local_llama_dbcf92964815",
+    "title": "Minimax M2.1 released",
+    "source": "community_social_reddit_local_llama",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 972,
+    "article_id": "community_social_programming_reddit_d6ae4104a624",
+    "title": "Kafka uses OS page buffer cache for optimisations instead of",
+    "source": "community_social_programming_reddit",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  },
+  {
+    "num": 990,
+    "article_id": "community_social_reddit_singularity_68a2b914862c",
+    "title": "Alibaba drops Qwen-Image-2512: New strongest open-source ima",
+    "source": "community_social_reddit_singularity",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "reddit_programming"
+  }
+]

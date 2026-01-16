@@ -1,0 +1,1452 @@
+[
+  {
+    "num": 511,
+    "article_id": "ai_arxiv_cs_lg_42d7ced8d800",
+    "title": "BertsWin: Resolving Topological Sparsity in 3D Masked Autoen",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 512,
+    "article_id": "science_arxiv_cs_9f76a129fc60",
+    "title": "WeDLM: Reconciling Diffusion Language Models with Standard C",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 514,
+    "article_id": "healthcare_medrxiv_b46ca93c1a72",
+    "title": "Data Extraction from Oncology Imaging Reports by Large Langu",
+    "source": "healthcare_medrxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 515,
+    "article_id": "healthcare_medrxiv_e16e3875d473",
+    "title": "A method for lung cancer detection and staging from a drop o",
+    "source": "healthcare_medrxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 516,
+    "article_id": "community_social_dev_to_269155c3d120",
+    "title": "🚀 Terraform Day 26: HashiCorp Cloud Platform (Terraform Clou",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 519,
+    "article_id": "ai_arxiv_cs_ai_9c71e29e8df3",
+    "title": "Parameter-Efficient Fine-Tuning for HAR: Integrating LoRA an",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 528,
+    "article_id": "science_arxiv_cs_1d2c903a658b",
+    "title": "Modality Inflation: Energy Characterization and Optimization",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 530,
+    "article_id": "science_arxiv_cs_5899af9c3b62",
+    "title": "From SAM to DINOv2: Towards Distilling Foundation Models to ",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 531,
+    "article_id": "community_social_dev_to_fdce3410d299",
+    "title": "An Overview of EIP",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 543,
+    "article_id": "ai_arxiv_cs_lg_8735bccb6ec6",
+    "title": "Staggered Batch Scheduling: Co-optimizing Time-to-First-Toke",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 545,
+    "article_id": "ai_arxiv_cs_lg_217e061c7b1d",
+    "title": "Optimized Hybrid Feature Engineering for Resource-Efficient ",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 549,
+    "article_id": "community_social_dev_to_dd650e36c061",
+    "title": "Shopify Scripts Functions: A Practical Migration Playbook",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 551,
+    "article_id": "ai_arxiv_cs_lg_2f3f586bcc17",
+    "title": "Parameter-Efficient and Personalized Federated Training of G",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 552,
+    "article_id": "community_social_dev_to_67e422cbd2de",
+    "title": "AI Photo Enhancer for Developers: APIs, Automation, and Mode",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 561,
+    "article_id": "science_arxiv_cs_f54e4ae0df55",
+    "title": "Low-cost Pyranometer-Based ANN Approach for MPPT in Solar PV",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 564,
+    "article_id": "ai_nvidia_developer_1735380e95c8",
+    "title": "How to Build Privacy",
+    "source": "ai_nvidia_developer",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 572,
+    "article_id": "science_arxiv_cs_40f2a37e447d",
+    "title": "LookWhere? Efficient Visual Recognition by Learning Where to",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 573,
+    "article_id": "arxiv_c7293789f840",
+    "title": "LLM-Empowered Agentic AI for QoE-Aware Network Slicing Manag",
+    "source": "arxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 578,
+    "article_id": "ai_arxiv_cs_lg_bc7bc27c611a",
+    "title": "A Fast Interpretable Fuzzy Tree Learner",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 584,
+    "article_id": "community_social_dev_to_715d8b424cd1",
+    "title": "How I Translated 277 Strings in 5 Minutes (Real-World Case S",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 586,
+    "article_id": "ai_engadget_cd0422ba3340",
+    "title": "Where are Engadget's CES 2025 winners now?",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 588,
+    "article_id": "ai_engadget_2197cc8a1548",
+    "title": "The best noise",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "consumer_electronics"
+  },
+  {
+    "num": 592,
+    "article_id": "science_arxiv_cs_3ad74855e32b",
+    "title": "VersaSlot: Efficient Fine-grained FPGA Sharing with Big.Litt",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 595,
+    "article_id": "healthcare_medrxiv_3e1299762b07",
+    "title": "HPV self-sampling for cervical cancer screening during warti",
+    "source": "healthcare_medrxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 596,
+    "article_id": "pubmed_778cba8bb822",
+    "title": "Disaster Nephrology in Action: A Tech-Augmented Response to ",
+    "source": "pubmed",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 598,
+    "article_id": "ai_engadget_37d5deb8ee51",
+    "title": "Xiaomi's 17 Ultra Leica Edition smartphone comes with a manu",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "consumer_electronics"
+  },
+  {
+    "num": 599,
+    "article_id": "science_arxiv_cs_166b2a19e818",
+    "title": "Trustworthy and Controllable Professional Knowledge Utilizat",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 602,
+    "article_id": "science_arxiv_cs_3070379cb53d",
+    "title": "adF: A Novel System for Measuring Web Fingerprinting through",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 608,
+    "article_id": "healthcare_medrxiv_fd9a8cb3d71a",
+    "title": "IHGAMP: Pan-cancer HRD prediction from routine H&E whole-sli",
+    "source": "healthcare_medrxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 612,
+    "article_id": "science_arxiv_cs_5504e8f2e3a3",
+    "title": "Decentralized Trust for Space AI: Blockchain-Based Federated",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "crypto"
+  },
+  {
+    "num": 614,
+    "article_id": "ai_arxiv_cs_lg_f1581ded2328",
+    "title": "Large Language Models as Generalist Policies for Network Opt",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 621,
+    "article_id": "ai_arxiv_cs_ai_1ee11fe86bf1",
+    "title": "AndesVL Technical Report: An Efficient Mobile-side Multimoda",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 622,
+    "article_id": "ai_engadget_574625943a0a",
+    "title": "Antigravity A1 drone review: FPV flying unlike anything else",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 623,
+    "article_id": "ai_ars_technica_73537f56c892",
+    "title": "I switched to eSIM in 2025, and I am full of regret",
+    "source": "ai_ars_technica",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 629,
+    "article_id": "community_social_dev_to_f7f067278a17",
+    "title": "De acuerdo con la Secretaría de Hacienda y Crédito Público d",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 632,
+    "article_id": "community_social_dev_to_43bb79f056ba",
+    "title": "maph",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 638,
+    "article_id": "ai_engadget_6c8a3d00d7c6",
+    "title": "LG brought back the Wallpaper TV for CES and ditched the com",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 641,
+    "article_id": "portuguese_canaltech_51b7af771e27",
+    "title": "PlayStation 5 Edição Digital com Bundle por R$ 2.689 com cup",
+    "source": "portuguese_canaltech",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "shopping_affiliate"
+  },
+  {
+    "num": 642,
+    "article_id": "ai_arxiv_cs_lg_af125b196c46",
+    "title": "SepsisSuite: Beyond Risk Stratification -",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 647,
+    "article_id": "arxiv_74bcec7e0306",
+    "title": "Recursive Language Models",
+    "source": "arxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 654,
+    "article_id": "arxiv_8598c60c521e",
+    "title": "Beyond Revenue and Welfare: Counterfactual Analysis of Spect",
+    "source": "arxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 656,
+    "article_id": "arxiv_625155f1ae0a",
+    "title": "FuXi-$γ$: Efficient Sequential Recommendation with Exponenti",
+    "source": "arxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 658,
+    "article_id": "science_arxiv_cs_0af12fb41c13",
+    "title": "LIME:Accelerating Collaborative Lossless LLM Inference on Me",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 661,
+    "article_id": "ai_arxiv_cs_lg_251ac539a613",
+    "title": "Dynamic Rebatching for Efficient Early",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 662,
+    "article_id": "science_arxiv_cs_cdfdd4d49ceb",
+    "title": "Robust LLM-based Column Type Annotation via Prompt Augmentat",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 665,
+    "article_id": "ai_arxiv_cs_ai_a8dc89e85b17",
+    "title": "Robust LLM-based Column Type Annotation via Prompt Augmentat",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 670,
+    "article_id": "portuguese_canaltech_731ada940860",
+    "title": "Dock USB transforma qualquer PC em um Super Nintendo",
+    "source": "portuguese_canaltech",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "gaming"
+  },
+  {
+    "num": 671,
+    "article_id": "science_arxiv_cs_4b3c8070595b",
+    "title": "SoDA: An Efficient Interaction Paradigm for the Agentic Web",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 675,
+    "article_id": "science_arxiv_cs_3f0db42c7e6b",
+    "title": "Memory-Efficient Training with In-Place FFT Implementation",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 681,
+    "article_id": "science_arxiv_cs_a1198c9b049d",
+    "title": "Recursive Language Models",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 685,
+    "article_id": "ai_arxiv_cs_lg_8f3f082dbbd6",
+    "title": "Hierarchical Schedule Optimization for Fast and Robust Diffu",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 686,
+    "article_id": "ai_arxiv_cs_ai_e11e74cc48f5",
+    "title": "Multi-Agent Collaborative Framework for Intelligent IT Opera",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 688,
+    "article_id": "science_arxiv_cs_4d55bac8605a",
+    "title": "CATP: Contextually Adaptive Token Pruning for Efficient and ",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 693,
+    "article_id": "ai_engadget_9b67e69f12fc",
+    "title": "Starlink is lowering thousands of satellites' orbits to redu",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "consumer_electronics"
+  },
+  {
+    "num": 697,
+    "article_id": "ai_arxiv_cs_lg_ac1adf82148c",
+    "title": "Fast Jet Tagging with MLP-Mixers on FPGAs",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 701,
+    "article_id": "science_arxiv_cs_d7dd09312996",
+    "title": "ShelfAware: Real-Time Visual-Inertial Semantic Localization ",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 703,
+    "article_id": "science_arxiv_cs_262e0be68d20",
+    "title": "Integrating Delay",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 706,
+    "article_id": "ai_engadget_fb0bb2544d50",
+    "title": "TCL unveils its X11L SQD-Mini LED TVs at CES 2026",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 707,
+    "article_id": "ai_engadget_4adc31cdee32",
+    "title": "GE Appliances' new Smart Refrigerator automates grocery shop",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 715,
+    "article_id": "ai_nvidia_developer_ee06b3596b10",
+    "title": "Next-Generation AI Factory Telemetry with NVIDIA Spectrum",
+    "source": "ai_nvidia_developer",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 719,
+    "article_id": "ai_engadget_42f09b3092d4",
+    "title": "How to pair controllers with the Nintendo Switch 2",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "consumer_electronics"
+  },
+  {
+    "num": 720,
+    "article_id": "science_arxiv_cs_e1e2e931181b",
+    "title": "Adapting Natural Language Processing Models Across Jurisdict",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 721,
+    "article_id": "science_arxiv_cs_7cf6584825c8",
+    "title": "Scheduling for TWDM-EPON-Based Fronthaul Without a Dedicated",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 731,
+    "article_id": "ai_arxiv_cs_lg_b4af9b257ae2",
+    "title": "Tazza: Shuffling Neural Network Parameters for Secure and Pr",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 739,
+    "article_id": "ai_engadget_3caa5d0bc0c4",
+    "title": "The best cameras for 2026",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 741,
+    "article_id": "science_arxiv_cs_23d9c2d19b67",
+    "title": "CienaLLM: Generative Climate-Impact Extraction from News Art",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 744,
+    "article_id": "ai_arxiv_cs_lg_47eefb9019a0",
+    "title": "Lattice: Learning to Efficiently Compress the Memory",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 746,
+    "article_id": "ai_arxiv_cs_ai_6f53b681b205",
+    "title": "MiniScope: A Least Privilege Framework for Authorizing Tool ",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 751,
+    "article_id": "healthcare_medrxiv_47d87a2ced50",
+    "title": "Detection of Malaria Infection from parasite-free blood smea",
+    "source": "healthcare_medrxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 752,
+    "article_id": "science_arxiv_cs_4810928e2819",
+    "title": "OBS-Diff: Accurate Pruning For Diffusion Models in One-Shot",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 754,
+    "article_id": "pubmed_38d68b61d223",
+    "title": "Visible-light promoted late-stage chlorination and brominati",
+    "source": "pubmed",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 755,
+    "article_id": "science_arxiv_cs_d01535a3b2f0",
+    "title": "Alchemist: Unlocking Efficiency in Text-to-Image Model Train",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 757,
+    "article_id": "science_arxiv_cs_52ef8112abc8",
+    "title": "AutoNeural: Co-Designing Vision",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 760,
+    "article_id": "science_arxiv_cs_31387bab8703",
+    "title": "TiCard: Deployable EXPLAIN-only Residual Learning for Cardin",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 763,
+    "article_id": "ai_electronics_weekly_1b684b8733e8",
+    "title": "Camera modules become a multi-pillar growth story",
+    "source": "ai_electronics_weekly",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 764,
+    "article_id": "pubmed_506ba0ef0911",
+    "title": "Factors associated with flexible cystoscope longevity: an an",
+    "source": "pubmed",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 768,
+    "article_id": "science_arxiv_cs_7a3bc97d9381",
+    "title": "Q-KVComm: Efficient Multi-Agent Communication Via Adaptive K",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 773,
+    "article_id": "science_arxiv_cs_267c1b5ad8e0",
+    "title": "Secure and Governed API Gateway Architectures for Multi-Clus",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "networking_infrastructure"
+  },
+  {
+    "num": 774,
+    "article_id": "ai_arxiv_cs_lg_2f75cc8d5bb7",
+    "title": "SuperGen: An Efficient Ultra-high",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 786,
+    "article_id": "ai_engadget_8682e16ac3b2",
+    "title": "1Password deal: Last chance to save 50 percent on our favori",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 787,
+    "article_id": "community_social_dev_to_57e5db9984bf",
+    "title": "structuredClone() â€” The Deep Copy Hero JavaScript Deserved",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 790,
+    "article_id": "ai_engadget_f510b3ff3333",
+    "title": "GE's new Smart Refrigerator automates grocery shopping with ",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 791,
+    "article_id": "ai_arxiv_cs_lg_e03bfbc8ffb7",
+    "title": "MOSS: Efficient and Accurate FP8 LLM Training with Microscal",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 797,
+    "article_id": "ai_arxiv_cs_ai_01ef026d77bb",
+    "title": "From Next-Token to Next",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 801,
+    "article_id": "pubmed_ef29ad53391c",
+    "title": "Advancement in continuous lactate determination in untreated",
+    "source": "pubmed",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 803,
+    "article_id": "ai_Coindesk_9a4fef2d3958",
+    "title": "Sling Money receives approval to offer crypto services in UK",
+    "source": "ai_Coindesk",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 804,
+    "article_id": "science_arxiv_cs_798a63a4e60c",
+    "title": "Encrypted Traffic Detection in Resource Constrained IoT Netw",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 805,
+    "article_id": "semiconductor_hardware_tomshardware_255aa1d3920f",
+    "title": "This RTX 5070 Ti gaming laptop is the cheapest we've seen at",
+    "source": "semiconductor_hardware_tomshardware",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "shopping_affiliate"
+  },
+  {
+    "num": 806,
+    "article_id": "ai_arxiv_cs_ai_0410b1b0a41d",
+    "title": "Grow Up and Merge: Scaling Strategies for Efficient Language",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 807,
+    "article_id": "science_arxiv_cs_e87c4d023114",
+    "title": "VirDA: Reusing Backbone for Unsupervised Domain Adaptation w",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 809,
+    "article_id": "ai_arxiv_cs_ai_cd8abf08ef1f",
+    "title": "GRIT -- Geometry-Aware PEFT with K-FACPreconditioning, Fishe",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 810,
+    "article_id": "ai_engadget_85d68edc62fc",
+    "title": "At CES, Belkin launches a new charging case for the Switch 2",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "consumer_electronics"
+  },
+  {
+    "num": 814,
+    "article_id": "ai_electronics_weekly_c542ed525096",
+    "title": "Mouser shipping PSOC Edge ML MCUs",
+    "source": "ai_electronics_weekly",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 824,
+    "article_id": "ai_engadget_dbb89573289c",
+    "title": "CES 2026: HP says the HyperX Omen Max 16 is the most powerfu",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 827,
+    "article_id": "ai_arxiv_cs_ai_de7964bfedb5",
+    "title": "Efficient Deep Learning for Short-Term Solar Irradiance Time",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 829,
+    "article_id": "energy_utilities_charged_evs_98fb768d83f8",
+    "title": "DP World deploys 12 Kempower MCS EV chargers at London Gatew",
+    "source": "energy_utilities_charged_evs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "networking_infrastructure"
+  },
+  {
+    "num": 831,
+    "article_id": "science_arxiv_cs_5b418b5e0bd9",
+    "title": "SlowFast-SCI: Slow-Fast Deep Unfolding Learning for Spectral",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 834,
+    "article_id": "pubmed_238dc4357e66",
+    "title": "A Physics-Informed Fingerprint for Generalizable Prediction ",
+    "source": "pubmed",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 838,
+    "article_id": "ai_arxiv_cs_lg_91a4c766de30",
+    "title": "Efficient Deep Learning for Short-Term Solar Irradiance Time",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 840,
+    "article_id": "ai_arxiv_cs_lg_5e72dd56b441",
+    "title": "Rethinking Sparse Autoencoders: Select-and",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 842,
+    "article_id": "ai_arxiv_cs_lg_5b8b65916344",
+    "title": "IMBWatch -- a Spatio-Temporal Graph Neural Network approach ",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 855,
+    "article_id": "arxiv_76b291374ae1",
+    "title": "From Points to Coalitions: Hierarchical Contrastive Shapley ",
+    "source": "arxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 859,
+    "article_id": "science_arxiv_cs_7b3c76db4146",
+    "title": "Beyond Citations: A Cross",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 861,
+    "article_id": "science_arxiv_cs_4f8dfdb34085",
+    "title": "From Points to Coalitions: Hierarchical Contrastive Shapley ",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 864,
+    "article_id": "science_arxiv_cs_9e7ed05f25c1",
+    "title": "Automated river gauge plate reading using a hybrid object de",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 871,
+    "article_id": "science_arxiv_physics_da9d7e94be79",
+    "title": "Rethinking massive multiplexing in whispering gallery mode b",
+    "source": "science_arxiv_physics",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 872,
+    "article_id": "community_social_dev_to_f56809ab551a",
+    "title": "Deploying a secure and scalable static website on AWS using ",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 877,
+    "article_id": "community_social_dev_to_4f1a9c17e20a",
+    "title": "How AWS Is Building the Future of AI",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 886,
+    "article_id": "ai_engadget_0e034a8487db",
+    "title": "How to transfer your games to the Nintendo Switch 2",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 889,
+    "article_id": "science_arxiv_cs_4d9f326f11d6",
+    "title": "Robust Federated Fine-Tuning in Heterogeneous Networks with ",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 892,
+    "article_id": "portuguese_canaltech_969d3aabaecc",
+    "title": "Lenovo Legion Go 2 terá versão mais barata com SteamOS",
+    "source": "portuguese_canaltech",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "gaming"
+  },
+  {
+    "num": 896,
+    "article_id": "science_arxiv_cs_cf1bb804b40a",
+    "title": "Towards Fully-fledged GPU Multitasking via Proactive Memory ",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 903,
+    "article_id": "pubmed_6254afccb3eb",
+    "title": "Economic impact of telehealth on maternal and child health i",
+    "source": "pubmed",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 905,
+    "article_id": "ai_arxiv_cs_lg_9f64fb7d3287",
+    "title": "The Quest for Winning Tickets in Low-Rank Adapters",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 907,
+    "article_id": "ai_arxiv_cs_lg_14f264ee1c66",
+    "title": "Amortized Bayesian Meta-Learning for Low",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 908,
+    "article_id": "ai_arxiv_cs_ai_942cdd526902",
+    "title": "Towards Minimal Fine-Tuning of VLMs",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 909,
+    "article_id": "ai_arxiv_cs_lg_baadd1b4e9d3",
+    "title": "Partial Inverse Design of High-Performance Concrete Using Co",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 911,
+    "article_id": "science_arxiv_cs_96b817e69e53",
+    "title": "Collaborative Low-Rank Adaptation for Pre-Trained Vision Tra",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 919,
+    "article_id": "science_arxiv_cs_85bb1202de8f",
+    "title": "Take a Peek: Efficient Encoder Adaptation for Few",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 920,
+    "article_id": "science_arxiv_cs_1cb031135404",
+    "title": "Daily Land Surface Temperature Reconstruction in Landsat Cro",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 922,
+    "article_id": "community_social_dev_to_f465891c2af2",
+    "title": "Inside the UK FPGA Landscape: Insights from the DESN Industr",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 926,
+    "article_id": "ai_arxiv_cs_ai_78599d6c993b",
+    "title": "SwiReasoning: Switch-Thinking in Latent and Explicit for Par",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 931,
+    "article_id": "arxiv_3df4b1c0a848",
+    "title": "Predicting California Bearing Ratio with Ensemble and Neural",
+    "source": "arxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 934,
+    "article_id": "pubmed_caeb3a56d99e",
+    "title": "Efficient Ethanol Dehydrogenation to Acetaldehyde and H2 via",
+    "source": "pubmed",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 939,
+    "article_id": "ai_arxiv_cs_ai_f2f68ad1d871",
+    "title": "A Novel Multimodal RUL Framework for Remaining Useful Life E",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 941,
+    "article_id": "pubmed_c50d4c3d7d04",
+    "title": "Gut health monitoring via intestinal barrier function screen",
+    "source": "pubmed",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 945,
+    "article_id": "ai_arxiv_cs_ai_66fa07f6e18c",
+    "title": "T-SKM-Net: Trainable Neural Network Framework for Linear Con",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 946,
+    "article_id": "science_arxiv_cs_ff233ff34a5b",
+    "title": "A Parametric Framework for Anticipatory Flashflood Warning: ",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 947,
+    "article_id": "portuguese_canaltech_ed0d98b4f42e",
+    "title": "Gift card da PlayStation Store saindo por R$ 240 no Mercado ",
+    "source": "portuguese_canaltech",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "shopping_affiliate"
+  },
+  {
+    "num": 949,
+    "article_id": "science_arxiv_cs_5438e129d990",
+    "title": "Automated Discovery of Parsimonious Spectral Indices via Nor",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 950,
+    "article_id": "ai_arxiv_cs_ai_2028aeb1d0e3",
+    "title": "Sliding Window Attention Adaptation",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 951,
+    "article_id": "ai_arxiv_cs_lg_bb709f72d0f7",
+    "title": "Predicting California Bearing Ratio with Ensemble and Neural",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 952,
+    "article_id": "pubmed_1545aa2d2618",
+    "title": "Photoinduced Ligand-to-Metal Charge Transfer Enables Iron-Ca",
+    "source": "pubmed",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "healthcare"
+  },
+  {
+    "num": 955,
+    "article_id": "science_arxiv_cs_b55085423986",
+    "title": "Training",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 956,
+    "article_id": "science_arxiv_cs_59543ae604ed",
+    "title": "AstroReview: An LLM-driven Multi-Agent Framework for Telesco",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 957,
+    "article_id": "ai_engadget_5e85450109f6",
+    "title": "LG's 'Aerominum' Gram Pro laptops feel impossibly light and ",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 961,
+    "article_id": "science_arxiv_cs_9debab9f5ad5",
+    "title": "Commercial Vehicle Braking Optimization: A Robust SIFT-Traje",
+    "source": "science_arxiv_cs",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 968,
+    "article_id": "ai_arxiv_cs_ai_9c411df003d8",
+    "title": "Meta Hierarchical Reinforcement Learning for Scalable Resour",
+    "source": "ai_arxiv_cs_ai",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 969,
+    "article_id": "arxiv_15b4668cf5e0",
+    "title": "A Kernel-based Resource-efficient Neural Surrogate for Multi",
+    "source": "arxiv",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 977,
+    "article_id": "ai_engadget_cbcbd7df4d02",
+    "title": "Pebble brings its round-faced smartwatch back from the dead",
+    "source": "ai_engadget",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "consumer_electronics"
+  },
+  {
+    "num": 979,
+    "article_id": "science_arxiv_physics_e1000cad8274",
+    "title": "A Kernel-based Resource-efficient Neural Surrogate for Multi",
+    "source": "science_arxiv_physics",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 985,
+    "article_id": "community_social_dev_to_89c2524eca0f",
+    "title": "Level Up Your Infrastructure: Mastering Terraform's Lifecycl",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 988,
+    "article_id": "community_social_dev_to_f2063771cdd3",
+    "title": "Tesla's 4680 battery supply chain collapses as partner write",
+    "source": "community_social_dev_to",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "developer_tutorial"
+  },
+  {
+    "num": 989,
+    "article_id": "ai_arxiv_cs_lg_2974d9c26673",
+    "title": "RollArt: Scaling Agentic RL Training via Disaggregated Infra",
+    "source": "ai_arxiv_cs_lg",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "ai_ml_infrastructure"
+  },
+  {
+    "num": 998,
+    "article_id": "automotive_transport_electrek_e9fbc2de3d59",
+    "title": "EcoFlow Christmas Sale offers up to 68% power station saving",
+    "source": "automotive_transport_electrek",
+    "predicted_tier": "medium",
+    "correct_tier": "low",
+    "reason": "off_topic",
+    "category": "shopping_affiliate"
+  }
+]
