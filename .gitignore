@@ -178,3 +178,7 @@ model_outputs/
 .sync-backups/
 *.ffs_db
 *.ffs_lock
+
+# Claude Code temp files
+tmpclaude-*
+*-cwd

@@ -1,7 +1,9 @@
+# ground_truth/text_cleaning.py
 """
-Comprehensive text cleaning utilities for semantic filters.
+Comprehensive text cleaning utilities for LLM distillery.
 
-Handles:
+Ported from content-aggregator to ensure robust text processing
+for training data generation. Handles:
 - Invalid Unicode (surrogates)
 - Zero-width characters (invisible text)
 - Bidirectional marks (security issue)
@@ -37,6 +39,7 @@ def remove_zero_width_characters(text: str) -> str:
     if not isinstance(text, str):
         return str(text)
 
+    # Remove all zero-width characters
     zero_width_chars = [
         '\u200b',  # Zero-width space
         '\u200c',  # Zero-width non-joiner
@@ -73,6 +76,7 @@ def remove_bidi_marks(text: str) -> str:
     if not isinstance(text, str):
         return str(text)
 
+    # Remove bidirectional formatting characters
     bidi_chars = [
         '\u200e',  # Left-to-right mark
         '\u200f',  # Right-to-left mark
@@ -111,9 +115,16 @@ def normalize_whitespace(text: str) -> str:
     if not isinstance(text, str):
         return str(text)
 
+    # Replace tabs with spaces
     text = text.replace('\t', ' ')
+
+    # Normalize multiple spaces to single space
     text = re.sub(r' {2,}', ' ', text)
+
+    # Normalize excessive newlines (more than 2) to double newline
     text = re.sub(r'\n{3,}', '\n\n', text)
+
+    # Remove spaces at start/end of lines
     text = '\n'.join(line.strip() for line in text.split('\n'))
 
     return text.strip()
@@ -142,8 +153,10 @@ def clean_html_entities(text: str) -> str:
         return str(text)
 
     try:
+        # Use html.unescape for comprehensive entity decoding
         text = html.unescape(text)
     except Exception:
+        # Fallback to manual replacements
         text = text.replace('&nbsp;', ' ')
         text = text.replace('&amp;', '&')
         text = text.replace('&lt;', '<')
@@ -170,9 +183,12 @@ def remove_html_tags(text: str) -> str:
     if not isinstance(text, str):
         return str(text)
 
+    # Remove HTML tags
     text = re.sub(r'<[^>]+>', '', text)
-    text = re.sub(r'&[a-zA-Z]+;', ' ', text)
-    text = re.sub(r'&#\d+;', ' ', text)
+
+    # Clean up common HTML artifacts
+    text = re.sub(r'&[a-zA-Z]+;', ' ', text)  # Named entities we missed
+    text = re.sub(r'&#\d+;', ' ', text)  # Numeric entities
 
     return text
 
@@ -193,6 +209,7 @@ def sanitize_unicode(text: str) -> str:
     if not isinstance(text, str):
         return str(text)
 
+    # Encode with errors='ignore' to drop surrogates, then decode
     return text.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore')
 
 
@@ -216,10 +233,16 @@ def sanitize_text_comprehensive(text: str) -> str:
 
     Returns:
         Comprehensively cleaned text
+
+    Example:
+        >>> text = "Hello&#39;\\ud800\\u200bWorld\\u202e<script>bad</script>"
+        >>> sanitize_text_comprehensive(text)
+        "Hello'World"
     """
     if not isinstance(text, str):
         text = str(text)
 
+    # Apply all cleaning operations in order
     text = sanitize_unicode(text)
     text = clean_html_entities(text)
     text = remove_html_tags(text)
@@ -242,6 +265,18 @@ def clean_article(article: Union[Dict, List, str, Any]) -> Union[Dict, List, str
 
     Returns:
         New structure with all text fields comprehensively cleaned
+
+    Example:
+        >>> article = {
+        ...     'title': 'Test\\ud800Article',
+        ...     'text': 'Content with <b>HTML</b> and \\u200b invisible chars',
+        ...     'metadata': {'author': 'John&#39;s\\ud800'}
+        ... }
+        >>> cleaned = clean_article(article)
+        >>> cleaned['title']
+        'TestArticle'
+        >>> cleaned['text']
+        'Content with HTML and  invisible chars'
     """
     def _clean(obj):
         if isinstance(obj, dict):
@@ -270,9 +305,11 @@ def clean_article_for_labeling(article: Dict) -> Dict:
     """
     cleaned = article.copy()
 
+    # Clean title
     if 'title' in cleaned:
         cleaned['title'] = sanitize_text_comprehensive(cleaned['title'])
 
+    # Clean main content
     if 'text' in cleaned:
         cleaned['text'] = sanitize_text_comprehensive(cleaned['text'])
     elif 'content' in cleaned:

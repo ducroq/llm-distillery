@@ -25,6 +25,11 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 from collections import Counter
 
+# Add project root to path for filter imports
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 
 def load_filter_package(filter_path: Path) -> Tuple:
     """
@@ -44,14 +49,14 @@ def load_filter_package(filter_path: Path) -> Tuple:
     prefilter_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(prefilter_module)
 
-    # Get the prefilter class (assumes naming convention: <FilterName>PreFilterV1)
+    # Get the prefilter class (looks for any class with PreFilter in name)
     prefilter_classes = [
         obj for name, obj in vars(prefilter_module).items()
-        if isinstance(obj, type) and name.endswith('PreFilterV1')
+        if isinstance(obj, type) and 'PreFilter' in name and obj.__module__ == prefilter_module.__name__
     ]
 
     if not prefilter_classes:
-        raise ValueError(f"No PreFilterV1 class found in {prefilter_module_path}")
+        raise ValueError(f"No PreFilter class found in {prefilter_module_path}")
 
     prefilter_class = prefilter_classes[0]
     prefilter = prefilter_class()
@@ -138,7 +143,7 @@ def calibrate_prefilter(
     block_reasons = []
 
     for article in articles:
-        should_label, reason = prefilter.should_label(article)
+        should_label, reason = prefilter.apply_filter(article)
 
         if should_label:
             passed.append(article)
@@ -180,7 +185,7 @@ def calibrate_prefilter(
         'passed_count': len(passed),
         'blocked_count': len(blocked),
         'block_reasons': dict(reason_counts),
-        'prefilter_stats': prefilter.get_statistics()
+        'prefilter_stats': prefilter.get_statistics() if hasattr(prefilter, 'get_statistics') else {}
     }
 
 
