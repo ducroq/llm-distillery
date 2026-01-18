@@ -1,0 +1,12 @@
+{
+  "model": "distilbert-base-multilingual-cased",
+  "device": "CPU (Windows)",
+  "n_samples": 50,
+  "avg_ms": 90.8,
+  "p50_ms": 100.5,
+  "p95_ms": 164.2,
+  "p99_ms": 175.7,
+  "min_ms": 31.9,
+  "max_ms": 175.7,
+  "note": "Acceptable for prefilter use case - below 100ms minimum threshold"
+}

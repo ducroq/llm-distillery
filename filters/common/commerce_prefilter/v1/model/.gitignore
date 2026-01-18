@@ -1,0 +1,6 @@
+# Ignore trained model files (stored locally or on HuggingFace Hub)
+# Keep this .gitignore so the directory exists
+
+*
+!.gitignore
+!README.md

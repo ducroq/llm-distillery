@@ -1,0 +1,4622 @@
+[
+  {
+    "title": "Portable Purifier Helps Make Water Safer & Reduces Plastic Bottle Use",
+    "source": "positive_news_the_better_india",
+    "tier": "high",
+    "distilbert_score": 0.8987,
+    "minilm_score": 0.8956441879272461
+  },
+  {
+    "title": "German company to sell more refurbished appliances",
+    "source": "global_news_deutsche_welle",
+    "tier": "high",
+    "distilbert_score": 0.8002,
+    "minilm_score": 0.351855605840683
+  },
+  {
+    "title": "German company Miele to sell more refurbished appliances",
+    "source": "global_news_deutsche_welle",
+    "tier": "high",
+    "distilbert_score": 0.7725,
+    "minilm_score": 0.8135386109352112
+  },
+  {
+    "title": "Samsung‚Äôs Galaxy Book 6 series launches at CES with Intel‚Äôs newest chips and a refined design",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9118518829345703
+  },
+  {
+    "title": "Shure debuts a USB-C version of its MV88 microphone at CES 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9963,
+    "minilm_score": 0.9119195342063904
+  },
+  {
+    "title": "TCL unveils its X11L SQD-Mini LED TVs at CES 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9135851263999939
+  },
+  {
+    "title": "BYD extends $3,000 cashback offer into 2026",
+    "source": "energy_utilities_the_driven",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8971356749534607
+  },
+  {
+    "title": "Beyond the YAML Hell: Why 2026 is the Year of Platform Engineering",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9291,
+    "minilm_score": 0.07702822238206863
+  },
+  {
+    "title": "Cinco ofertas en tecnolog√≠a y entretenimiento de MediaMarkt durante su campa√±a de Reyes, hoy 4 de ",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.236996129155159
+  },
+  {
+    "title": "LG Sound Suite hands-on at CES 2026: Home theater powered by Dolby Atmos FlexConnect",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9175226092338562
+  },
+  {
+    "title": "Narwal's first mattress vacuum heats, taps, UV-blasts and sucks up all the ick living in your bed",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9167794585227966
+  },
+  {
+    "title": "Rinnovabili | Daily Solar News [05/01/2026]",
+    "source": "italian_rinnovabili",
+    "tier": "medium",
+    "distilbert_score": 0.9748,
+    "minilm_score": 0.09311236441135406
+  },
+  {
+    "title": "I pannelli riflettenti per i termosifoni funzionano davvero per ridurre la bolletta? Solo se li usi ",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.7847,
+    "minilm_score": 0.9032484889030457
+  },
+  {
+    "title": "Are Samsung Phones Better Than Google? What Consumer Reports Data Says - bgr.com",
+    "source": "newsapi_general",
+    "tier": "medium",
+    "distilbert_score": 0.9947,
+    "minilm_score": 0.09563443064689636
+  },
+  {
+    "title": "Samsung HW-QS90H soundbar hands-on: Impressive bass performance without a subwoofer",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9151789546012878
+  },
+  {
+    "title": "Intel lança Core Ultra Series 3 com foco em IA e notebooks mais eficientes",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.9110182523727417
+  },
+  {
+    "title": "Lucid Motors doubled EV output in 2025 after early Gravity SUV struggles",
+    "source": "ai_techcrunch",
+    "tier": "medium",
+    "distilbert_score": 0.9409,
+    "minilm_score": 0.11093997210264206
+  },
+  {
+    "title": "HP foca em eficiência e lança notebooks baratos que ficam até 45 horas ligados",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9187505841255188
+  },
+  {
+    "title": "nukeop/nuclear",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.978,
+    "minilm_score": 0.07606656104326248
+  },
+  {
+    "title": "Amazons Ember Artline: Diese Fernseher sehen aus wie Bilderrahmen",
+    "source": "german_t3n",
+    "tier": "medium",
+    "distilbert_score": 0.9944,
+    "minilm_score": 0.13194076716899872
+  },
+  {
+    "title": "Narwal's first mattress vacuum heats, taps, UV-blasts and sucks up all the ick living in your bed",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9167794585227966
+  },
+  {
+    "title": "This ingenious umbrella just solved a 175-year-old design flaw",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.991,
+    "minilm_score": 0.07739254087209702
+  },
+  {
+    "title": "Bruc Secures â‚¬474 Million Refinancing To Back 858 MW Solar Plants And 650 MW Battery Storage Capac",
+    "source": "energy_utilities_google_news_energy_storage",
+    "tier": "medium",
+    "distilbert_score": 0.8659,
+    "minilm_score": 0.10705530643463135
+  },
+  {
+    "title": "Solo 30€ per queste cuffie SONY, una garanzia di qualità a un prezzo accessibile!",
+    "source": "italian_tom_hardware_italia",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.922231137752533
+  },
+  {
+    "title": "¿Viudo del Blackberry? Este accesorio pone un teclado físico a cualquier smartphone",
+    "source": "spanish_fayerwayer",
+    "tier": "medium",
+    "distilbert_score": 0.9946,
+    "minilm_score": 0.9050033092498779
+  },
+  {
+    "title": "Sony Honda Mobility‚Äôs Afeela Prototype 2026 puts an SUV spin on its too-familiar sedan at CES",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.910567045211792
+  },
+  {
+    "title": "LG resucita su televisor ultrafino: la Wallpaper TV regresa para convertirse en la tele 'sin cables'",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9951,
+    "minilm_score": 0.913744330406189
+  },
+  {
+    "title": "The First Production All-Solid-State Battery Is Here, And It Promises 5-Minute Charging",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9951,
+    "minilm_score": 0.08727642148733139
+  },
+  {
+    "title": "Accuenergy debuts AcuDC 260 Series, revenue-grade DC power meters for EV charging",
+    "source": "energy_utilities_charged_evs",
+    "tier": "medium",
+    "distilbert_score": 0.9809,
+    "minilm_score": 0.7062975168228149
+  },
+  {
+    "title": "Teach Kids Gardening at Home With These Easy DIY Seed Starters",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.9921,
+    "minilm_score": 0.9141630530357361
+  },
+  {
+    "title": "Peacock is expanding Dolby Vision and Atmos availability for live sports",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.8977,
+    "minilm_score": 0.5944728851318359
+  },
+  {
+    "title": "JLab adds ANC to its tiny wireless earbuds for CES 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8914240598678589
+  },
+  {
+    "title": "Ecco quanta CO2 (e soldi) risparmieresti accorciando la doccia di soli 3 minuti in inverno",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.9883,
+    "minilm_score": 0.9195576906204224
+  },
+  {
+    "title": "Brisk It brings its AI cooking tech to an indoor oven at CES 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9138939380645752
+  },
+  {
+    "title": "Anker unveils a new lineup of chargers and docks at CES 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.12843658030033112
+  },
+  {
+    "title": "CES: LG-OLED-TVs: Lichtstark, satte Farben und als Tapete für die Wand",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9946,
+    "minilm_score": 0.9071565270423889
+  },
+  {
+    "title": "The biggest TV announcements at CES 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.8636058568954468
+  },
+  {
+    "title": "Dit is de beste matras, die goed scoort op stevigheid en ondersteuning",
+    "source": "dutch_news_ad_algemeen",
+    "tier": "medium",
+    "distilbert_score": 0.9932,
+    "minilm_score": 0.8554607629776001
+  },
+  {
+    "title": "At CES, Belkin launches a new charging case for the Switch 2 with a screen for checking battery life",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9152319431304932
+  },
+  {
+    "title": "GE Appliances' new Smart Refrigerator automates grocery shopping with a barcode scanner and Instacar",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9123666286468506
+  },
+  {
+    "title": "The HP Omnibook Ultra 14 at CES 2026: Super sleek and surprisingly durable",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9162179827690125
+  },
+  {
+    "title": "Amazons Ember Artline: Diese Fernseher sehen aus wie Bilderrahmen",
+    "source": "german_t3n",
+    "tier": "medium",
+    "distilbert_score": 0.9944,
+    "minilm_score": 0.13194076716899872
+  },
+  {
+    "title": "Apple's latest MagSafe charger is on sale for only $30",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9201379418373108
+  },
+  {
+    "title": "CES 2026: HP says the HyperX Omen Max 16 is the most powerful 16-inch gaming laptop in the world",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9951,
+    "minilm_score": 0.909935712814331
+  },
+  {
+    "title": "The Apple Watch Series 11 is at the lowest price we've ever seen",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9179280996322632
+  },
+  {
+    "title": "BYD extends $3,000 cashback offer into 2026",
+    "source": "energy_utilities_the_driven",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8971356749534607
+  },
+  {
+    "title": "Samsung quer vender 800 milhões de equipamentos com IA em 2026 (e mostra alguns)",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9784,
+    "minilm_score": 0.8886650800704956
+  },
+  {
+    "title": "Fusione nucleare, il Giappone accelera: Helical Fusion trova il primo cliente della sua energia “ill",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.7173,
+    "minilm_score": 0.8958319425582886
+  },
+  {
+    "title": "Acessório transforma qualquer celular em um \"Game Boy\"; conheça",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8197360038757324
+  },
+  {
+    "title": "Xreal updates its entry-level personal cinema glasses at CES",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9156967401504517
+  },
+  {
+    "title": "5rahim/seanime",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9929,
+    "minilm_score": 0.07870316505432129
+  },
+  {
+    "title": "Lockin's everlasting vein-recognizing smart lock doorbell cam combo is peak CES",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9953,
+    "minilm_score": 0.896830677986145
+  },
+  {
+    "title": "Anker unveils a new lineup of chargers and docks at CES 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.12843658030033112
+  },
+  {
+    "title": "BMW Buyers Turned To PHEVs As EV Demand Softened In 2025 In The U.S.",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9923,
+    "minilm_score": 0.849355936050415
+  },
+  {
+    "title": "HP foca em eficiência e lança notebooks baratos que ficam até 45 horas ligados",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9187505841255188
+  },
+  {
+    "title": "The Handy 2 Pro is an 'overclockable' sex toy",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.9009772539138794
+  },
+  {
+    "title": "“En plena producción”: Esto dijo el CEO de Nvidia sobre la siguiente generación de chips",
+    "source": "spanish_fayerwayer",
+    "tier": "medium",
+    "distilbert_score": 0.5751,
+    "minilm_score": 0.09094870090484619
+  },
+  {
+    "title": "usememos/memos",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9921,
+    "minilm_score": 0.07905322313308716
+  },
+  {
+    "title": "Toyota's Most Promising Affordable EV Arrives This Year",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.9137845635414124
+  },
+  {
+    "title": "Ele sabe quando você está no ônibus e liga a música sozinho; esse fone vale?",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.8963496088981628
+  },
+  {
+    "title": "Fim das películas de privacidade? Samsung inova com ecrã que se “esconde” sozinho",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9357,
+    "minilm_score": 0.860836923122406
+  },
+  {
+    "title": "Innenoptik: VW ID. Polo wird zum Design-Vorreiter der ID.-Familie",
+    "source": "german_electrive",
+    "tier": "medium",
+    "distilbert_score": 0.9929,
+    "minilm_score": 0.8810470700263977
+  },
+  {
+    "title": "VW enthüllt ID. Polo-Cockpit: Endlich wieder Knöpfe",
+    "source": "global_news_spiegel",
+    "tier": "medium",
+    "distilbert_score": 0.9542,
+    "minilm_score": 0.9033545255661011
+  },
+  {
+    "title": "General Motors EVs Absolutely Crushed In 2025. But Sales Are Already Slowing Down",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.994,
+    "minilm_score": 0.10524354130029678
+  },
+  {
+    "title": "This ingenious umbrella just solved a 175-year-old design flaw",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.991,
+    "minilm_score": 0.07739254087209702
+  },
+  {
+    "title": "Uber’s Lucid Gravity Robotaxis Are Already On The Streets Of San Francisco",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.992,
+    "minilm_score": 0.07683644443750381
+  },
+  {
+    "title": "Samsung Music Studio 5 and 7 hands-on: Unique speaker designs debut at CES 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9161559343338013
+  },
+  {
+    "title": "Fraimic: KI-Bilderrahmen generiert auf Zuruf eigene „Kunstwerke“",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9927,
+    "minilm_score": 0.07464225590229034
+  },
+  {
+    "title": "Quectel Announces Industry First 5G-Advanced 3GPP R18 Automotive-Grade Cellular Module, Delivering U",
+    "source": "fintech_markets_fintech_news",
+    "tier": "medium",
+    "distilbert_score": 0.6015,
+    "minilm_score": 0.0976441279053688
+  },
+  {
+    "title": "Samsung HW-QS90H soundbar hands-on: Impressive bass performance without a subwoofer",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9151789546012878
+  },
+  {
+    "title": "ğŸ”¥The Real cost of Learning AI and how weâ€™re breaking that barrierğŸ”¥",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9829,
+    "minilm_score": 0.07419995218515396
+  },
+  {
+    "title": "¿Viudo del Blackberry? Este accesorio pone un teclado físico a cualquier smartphone",
+    "source": "spanish_fayerwayer",
+    "tier": "medium",
+    "distilbert_score": 0.9946,
+    "minilm_score": 0.9050033092498779
+  },
+  {
+    "title": "LG desafia Apple com novos notebooks Gram Pro ultraleves na CES 2026",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9151424169540405
+  },
+  {
+    "title": "Na verrassende inhaalrace is dit de meestverkochte auto van 2025",
+    "source": "dutch_news_ad_algemeen",
+    "tier": "medium",
+    "distilbert_score": 0.944,
+    "minilm_score": 0.1463068127632141
+  },
+  {
+    "title": "Análise Kobo Remote: o acessório que faltava para as leituras perfeitas",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9937,
+    "minilm_score": 0.8889859914779663
+  },
+  {
+    "title": "Why I Keep Returning to Pop!_OS",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9912,
+    "minilm_score": 0.10484376549720764
+  },
+  {
+    "title": "Por que o mercado aposta na 3tentos entre as small caps — e no agro — em 2026",
+    "source": "portuguese_exame",
+    "tier": "medium",
+    "distilbert_score": 0.8178,
+    "minilm_score": 0.8557073473930359
+  },
+  {
+    "title": "Kempower deploys MCS electric truck charging in Scandinavia and California",
+    "source": "energy_utilities_charged_evs",
+    "tier": "medium",
+    "distilbert_score": 0.9865,
+    "minilm_score": 0.29098883271217346
+  },
+  {
+    "title": "Fünf Jahre ohne Batteriewechsel: Neue AirTag-Hülle ist vergleichsweise kompakt",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9954,
+    "minilm_score": 0.9113392233848572
+  },
+  {
+    "title": "Amazon's base Kindle is $20 off right now",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9185762405395508
+  },
+  {
+    "title": "Windows 11 Pro e Office: software essencial com poupança real em 2026",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.899376392364502
+  },
+  {
+    "title": "As “baterias de bolha” à escala da rede estarão em breve por todo o lado",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9857,
+    "minilm_score": 0.7678733468055725
+  },
+  {
+    "title": "Tesla Is No Longer the World's Top EV Seller After Q4 Sales Fall",
+    "source": "professional_business_entrepreneur_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.8775,
+    "minilm_score": 0.9157130122184753
+  },
+  {
+    "title": "Renault se dispara, pero Toyota se mantiene como el rey del mercado: estos son los coches y las marc",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9931,
+    "minilm_score": 0.8609869480133057
+  },
+  {
+    "title": "CES 2026: LG promete apresentar o notebook mais fino do mundo; saiba mais",
+    "source": "portuguese_olhar_digital",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.9178018569946289
+  },
+  {
+    "title": "Now's Your Chance to Get a Quality Refurbished MacBook Air for $200",
+    "source": "professional_business_entrepreneur_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9210744500160217
+  },
+  {
+    "title": "Withings' updated Body Scan scale tracks 60 different biomarkers",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9925,
+    "minilm_score": 0.8992623686790466
+  },
+  {
+    "title": "Ele sabe quando você está no ônibus e liga a música sozinho; esse fone vale?",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.8963496088981628
+  },
+  {
+    "title": "'It Has Been A Limiting Factor For Us': Chevy Silverado EV Owner Review After 14,000 Miles Towing",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9928,
+    "minilm_score": 0.9156347513198853
+  },
+  {
+    "title": "usememos/memos",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9921,
+    "minilm_score": 0.07905322313308716
+  },
+  {
+    "title": "Now's Your Chance to Get a Quality Refurbished MacBook Air for $200",
+    "source": "professional_business_entrepreneur_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9210744500160217
+  },
+  {
+    "title": "El mercado del coche en España en 2025 confirma la tendencia: los tres ganadores mientras la electri",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9018,
+    "minilm_score": 0.8978530764579773
+  },
+  {
+    "title": "LG's 'Aerominum' Gram Pro laptops feel impossibly light and strong",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9954,
+    "minilm_score": 0.9112482666969299
+  },
+  {
+    "title": "CES: Vaonis Hyperia: smartes Teleskop für Forschung und Astrofotografie",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9874,
+    "minilm_score": 0.07758109271526337
+  },
+  {
+    "title": "Withings' updated Body Scan scale tracks 60 different biomarkers",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9925,
+    "minilm_score": 0.8992623686790466
+  },
+  {
+    "title": "Narwal's first mattress vacuum heats, taps, UV-blasts and sucks up all the ick living in your bed",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9167794585227966
+  },
+  {
+    "title": "Fender Audio will introduce a new line of Bluetooth speakers and headphones at CES",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9104799032211304
+  },
+  {
+    "title": "Shipping a Scalable AI SaaS: How DeepSeek + Node.js Changed My Workflow",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9271,
+    "minilm_score": 0.09081713110208511
+  },
+  {
+    "title": "The EVs Everyone Will Be Talking About in 2026",
+    "source": "energy_utilities_heatmap_news",
+    "tier": "medium",
+    "distilbert_score": 0.9941,
+    "minilm_score": 0.08597658574581146
+  },
+  {
+    "title": "awslabs/amazon-bedrock-agentcore-samples",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9883,
+    "minilm_score": 0.09204206615686417
+  },
+  {
+    "title": "Los nuevos monitores QD-OLED de Samsung estrenan píxeles verticales para ir más allá del gaming: qui",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9896,
+    "minilm_score": 0.9065947532653809
+  },
+  {
+    "title": "organicmaps/organicmaps",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9939,
+    "minilm_score": 0.08819311112165451
+  },
+  {
+    "title": "The best laptops for gaming and schoolwork in 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9106451272964478
+  },
+  {
+    "title": "LG made up a new word for its next ultralight Gram laptops: 'Aerominum'",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9908,
+    "minilm_score": 0.9111424684524536
+  },
+  {
+    "title": "Rinnovabili | Daily Solar News [02/01/2026]",
+    "source": "italian_rinnovabili",
+    "tier": "medium",
+    "distilbert_score": 0.9787,
+    "minilm_score": 0.0937824621796608
+  },
+  {
+    "title": "Xiaomi termina 2025 com marco histórico de mais de 400.000 carros entregues",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9878,
+    "minilm_score": 0.9004446268081665
+  },
+  {
+    "title": "ğŸ”¥The Real cost of Learning AI and how weâ€™re breaking that barrierğŸ”¥",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9829,
+    "minilm_score": 0.07419995218515396
+  },
+  {
+    "title": "Aventon New Year Sale takes up to $500 off legacy + new e-bikes for lows from $999, Autel 50A smart ",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9240936636924744
+  },
+  {
+    "title": "Enero comienza y Skechers ya ofrece descuentos en las zapatillas más cómodas y funcionales para el d",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9948,
+    "minilm_score": 0.9224653244018555
+  },
+  {
+    "title": "Are Samsung Phones Better Than Google? What Consumer Reports Data Says - bgr.com",
+    "source": "newsapi_general",
+    "tier": "medium",
+    "distilbert_score": 0.9947,
+    "minilm_score": 0.09563443064689636
+  },
+  {
+    "title": "5 carros híbridos que conquistaram o Brasil em 2025",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.995,
+    "minilm_score": 0.11934240907430649
+  },
+  {
+    "title": "'It Has Been A Limiting Factor For Us': Chevy Silverado EV Owner Review After 14,000 Miles Towing",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9928,
+    "minilm_score": 0.9156347513198853
+  },
+  {
+    "title": "Xiaomi termina 2025 com marco histórico de mais de 400.000 carros entregues",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9878,
+    "minilm_score": 0.9004446268081665
+  },
+  {
+    "title": "Recarga de carros elétricos é segura? Saiba mitos e verdades sobre carregamento",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.7328,
+    "minilm_score": 0.8982705473899841
+  },
+  {
+    "title": "El mercado del coche en España en 2025 confirma la tendencia: los tres ganadores mientras la electri",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9018,
+    "minilm_score": 0.8978530764579773
+  },
+  {
+    "title": "[分享创造] [开源] EnsoAI：让多个 Agents 并行开发 [多路智能｜并行穿梭]",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.638,
+    "minilm_score": 0.07427052408456802
+  },
+  {
+    "title": "Los 5 “vampiros” de energía en 2026: Estos electrodomésticos te están robando dinero incluso apagado",
+    "source": "spanish_fayerwayer",
+    "tier": "medium",
+    "distilbert_score": 0.9937,
+    "minilm_score": 0.08366342633962631
+  },
+  {
+    "title": "The EVs Everyone Will Be Talking About in 2026",
+    "source": "energy_utilities_heatmap_news",
+    "tier": "medium",
+    "distilbert_score": 0.9941,
+    "minilm_score": 0.08597658574581146
+  },
+  {
+    "title": "Now's Your Chance to Get a Quality Refurbished MacBook Air for $200",
+    "source": "professional_business_entrepreneur_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9210744500160217
+  },
+  {
+    "title": "See the Sky Like Never Before With a DIY Eyepiece",
+    "source": "science_ieee_spectrum_online",
+    "tier": "medium",
+    "distilbert_score": 0.8532,
+    "minilm_score": 0.9061999917030334
+  },
+  {
+    "title": "Autobatterie macht im Winter schlapp? Was du beim Tausch unbedingt beachten musst",
+    "source": "german_t3n",
+    "tier": "medium",
+    "distilbert_score": 0.9897,
+    "minilm_score": 0.909456729888916
+  },
+  {
+    "title": "Why I Keep Returning to Pop!_OS",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9912,
+    "minilm_score": 0.10484376549720764
+  },
+  {
+    "title": "Amazons Ember Artline: Diese Fernseher sehen aus wie Bilderrahmen",
+    "source": "german_t3n",
+    "tier": "medium",
+    "distilbert_score": 0.9944,
+    "minilm_score": 0.13194076716899872
+  },
+  {
+    "title": "Quectel Announces Industry First 5G-Advanced 3GPP R18 Automotive-Grade Cellular Module, Delivering U",
+    "source": "fintech_markets_fintech_news",
+    "tier": "medium",
+    "distilbert_score": 0.6015,
+    "minilm_score": 0.0976441279053688
+  },
+  {
+    "title": "L’intérieur de la Volkswagen ID. Polo à 25 000 € ne vous rendra plus fou",
+    "source": "french_numerama",
+    "tier": "medium",
+    "distilbert_score": 0.99,
+    "minilm_score": 0.9157543182373047
+  },
+  {
+    "title": "Micro RGB: la nueva v√≠a de Samsung para competir con los televisores OLED sin usar p√≠xeles org√°ni",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9939,
+    "minilm_score": 0.8922446966171265
+  },
+  {
+    "title": "Quanto vale a pena pagar no Galaxy S24 FE em 2026?",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9139773845672607
+  },
+  {
+    "title": "Chuveiro elétrico pesando na conta de luz? Veja 4 soluções segundo especialista",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.909237802028656
+  },
+  {
+    "title": "Kempower deploys MCS electric truck charging in Scandinavia and California",
+    "source": "energy_utilities_charged_evs",
+    "tier": "medium",
+    "distilbert_score": 0.9865,
+    "minilm_score": 0.29098883271217346
+  },
+  {
+    "title": "As “baterias de bolha” à escala da rede estarão em breve por todo o lado",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9857,
+    "minilm_score": 0.7678733468055725
+  },
+  {
+    "title": "Quanto vale a pena pagar no Galaxy S24 em 2026?",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9097643494606018
+  },
+  {
+    "title": "I pannelli riflettenti per i termosifoni funzionano davvero per ridurre la bolletta? Solo se li usi ",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.7847,
+    "minilm_score": 0.9032484889030457
+  },
+  {
+    "title": "Solo 30€ per queste cuffie SONY, una garanzia di qualità a un prezzo accessibile!",
+    "source": "italian_tom_hardware_italia",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.922231137752533
+  },
+  {
+    "title": "LG brought back the Wallpaper TV for CES and ditched the companion sound bar",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.908356249332428
+  },
+  {
+    "title": "Haushaltsroboter mit Armen und Händen: Switchbot will noch dieses Jahr Vorbestellungen annehmen",
+    "source": "german_t3n",
+    "tier": "medium",
+    "distilbert_score": 0.9915,
+    "minilm_score": 0.07761318981647491
+  },
+  {
+    "title": "Fraimic: KI-Bilderrahmen generiert auf Zuruf eigene „Kunstwerke“",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9927,
+    "minilm_score": 0.07464225590229034
+  },
+  {
+    "title": "Die Hupe: 2025 im Rückspiegel, 2026 durch die Windschutzscheibe",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.8211,
+    "minilm_score": 0.07582131773233414
+  },
+  {
+    "title": "nukeop/nuclear",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.978,
+    "minilm_score": 0.07606656104326248
+  },
+  {
+    "title": "Apple's latest MagSafe charger is on sale for only $30",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9201379418373108
+  },
+  {
+    "title": "Accuenergy debuts AcuDC 260 Series, revenue-grade DC power meters for EV charging",
+    "source": "energy_utilities_charged_evs",
+    "tier": "medium",
+    "distilbert_score": 0.9809,
+    "minilm_score": 0.7062975168228149
+  },
+  {
+    "title": "Tesla Is No Longer the World's Top EV Seller After Q4 Sales Fall",
+    "source": "professional_business_entrepreneur_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.8775,
+    "minilm_score": 0.9157130122184753
+  },
+  {
+    "title": "Xiaomi termina 2025 com marco histórico de mais de 400.000 carros entregues",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9878,
+    "minilm_score": 0.9004446268081665
+  },
+  {
+    "title": "[Emoji] Built a free printable coloring pages site for kids and adults (Coloring-page.pro)",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9942,
+    "minilm_score": 0.9164629578590393
+  },
+  {
+    "title": "'It Has Been A Limiting Factor For Us': Chevy Silverado EV Owner Review After 14,000 Miles Towing",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9928,
+    "minilm_score": 0.9156347513198853
+  },
+  {
+    "title": "Koenkk/zigbee2mqtt",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9929,
+    "minilm_score": 0.08372727036476135
+  },
+  {
+    "title": "Algunos de los mejores móviles de 2025 a mínimo histórico, Nintendo Switch 2 con un buen descuento y",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9214295744895935
+  },
+  {
+    "title": "Elegimos los mejores proyectores portátiles para ver películas",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9902,
+    "minilm_score": 0.912204384803772
+  },
+  {
+    "title": "Pebble’s round smartwatch is getting a reboot - The Verge",
+    "source": "newsapi_general",
+    "tier": "medium",
+    "distilbert_score": 0.9953,
+    "minilm_score": 0.9058620929718018
+  },
+  {
+    "title": "Un parcheggio sostenibile costruito con pale eoliche dismesse: il progetto svedese",
+    "source": "italian_rinnovabili",
+    "tier": "medium",
+    "distilbert_score": 0.9836,
+    "minilm_score": 0.07736010104417801
+  },
+  {
+    "title": "ğŸ”¥The Real cost of Learning AI and how weâ€™re breaking that barrierğŸ”¥",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9829,
+    "minilm_score": 0.07419995218515396
+  },
+  {
+    "title": "Amazon's base Kindle is $20 off right now",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9185762405395508
+  },
+  {
+    "title": "El mercado del coche en España en 2025 confirma la tendencia: los tres ganadores mientras la electri",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9018,
+    "minilm_score": 0.8978530764579773
+  },
+  {
+    "title": "Volkswagen is bringing physical buttons back to the dashboard with the ID. Polo EV",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9904,
+    "minilm_score": 0.9112695455551147
+  },
+  {
+    "title": "Como usar o GymRats para você e seus amigos treinarem mais em 2026",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9925,
+    "minilm_score": 0.9077105522155762
+  },
+  {
+    "title": "BYD’s BEV Sales Grew 28% In 2025, But Dropped 8% In December",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.984,
+    "minilm_score": 0.18147535622119904
+  },
+  {
+    "title": "Innenoptik: VWs ID. Polo wird zum Design-Vorreiter der ID.-Familie",
+    "source": "german_electrive",
+    "tier": "medium",
+    "distilbert_score": 0.9933,
+    "minilm_score": 0.8262433409690857
+  },
+  {
+    "title": "Qual foi o melhor lançamento da Motorola em 2025? O que diz o Canaltech",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8983669877052307
+  },
+  {
+    "title": "5 coisas inusitadas que a Xiaomi fabrica e você pode comprar agora",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9167769551277161
+  },
+  {
+    "title": "Renault Megane vs Kia EV4: which electric hatchback is fit for all the family?",
+    "source": "automotive_autoexpress_uk",
+    "tier": "medium",
+    "distilbert_score": 0.9748,
+    "minilm_score": 0.916408896446228
+  },
+  {
+    "title": "Show HN: Griblet – Free browser-based GRIB file viewer",
+    "source": "community_social_hackernews_newest",
+    "tier": "medium",
+    "distilbert_score": 0.9907,
+    "minilm_score": 0.9064106941223145
+  },
+  {
+    "title": "Algunos de los mejores móviles de 2025 a mínimo histórico, Nintendo Switch 2 con un buen descuento y",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9214295744895935
+  },
+  {
+    "title": "Elegimos los mejores proyectores portátiles para ver películas",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9902,
+    "minilm_score": 0.912204384803772
+  },
+  {
+    "title": "CES 2026: o que esperar da maior feira de tecnologia do mundo em janeiro",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8827452659606934
+  },
+  {
+    "title": "[程序员] 求推荐一下 Cursor+Claude 廉价无墙的稳定平替方案",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.882,
+    "minilm_score": 0.8854473829269409
+  },
+  {
+    "title": "Telecamere e Fotocamere in offerta su Amazon il 1° gennaio 2026",
+    "source": "italian_punto_informatico",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9106904864311218
+  },
+  {
+    "title": "Un parcheggio sostenibile costruito con pale eoliche dismesse: il progetto svedese",
+    "source": "italian_rinnovabili",
+    "tier": "medium",
+    "distilbert_score": 0.9836,
+    "minilm_score": 0.07736010104417801
+  },
+  {
+    "title": "Where are Engadget's CES 2025 winners now?",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.4359894096851349
+  },
+  {
+    "title": "Análise Kobo Remote: o acessório que faltava para as leituras perfeitas",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9937,
+    "minilm_score": 0.8889859914779663
+  },
+  {
+    "title": "Pebble brings its round-faced smartwatch back from the dead",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9924,
+    "minilm_score": 0.16647690534591675
+  },
+  {
+    "title": "Developer-Häppchen fürs Wochenende – Kleinere News der Woche",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9353,
+    "minilm_score": 0.9096372127532959
+  },
+  {
+    "title": "Enero comienza y Skechers ya ofrece descuentos en las zapatillas más cómodas y funcionales para el d",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9948,
+    "minilm_score": 0.9224653244018555
+  },
+  {
+    "title": "Novos formatos de 2025: O ano em que o ecrã deixou de ser um limite",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.995,
+    "minilm_score": 0.07876341044902802
+  },
+  {
+    "title": "CES 2026: o que esperar da LG na maior feira de tecnologia do mundo",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.991,
+    "minilm_score": 0.902548611164093
+  },
+  {
+    "title": "Beyond the YAML Hell: Why 2026 is the Year of Platform Engineering",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9291,
+    "minilm_score": 0.07702822238206863
+  },
+  {
+    "title": "Qual é a \"boombox\" mais potente do Brasil? Veja 3 opções por faixa de preço",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9220348000526428
+  },
+  {
+    "title": "How a Young Bengaluru Resident Turned His 300 Sq Ft Home Into a Garden of 500 Plants",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.8957,
+    "minilm_score": 0.18381328880786896
+  },
+  {
+    "title": "Shipping a Scalable AI SaaS: How DeepSeek + Node.js Changed My Workflow",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9271,
+    "minilm_score": 0.09081713110208511
+  },
+  {
+    "title": "La paradoja de que Meta compre Manus: su mayor ventaja es no tener modelo propio",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.8989,
+    "minilm_score": 0.9101004600524902
+  },
+  {
+    "title": "Ruim 388.000 nieuwe personenauto's in Nederland, welke waren in trek?",
+    "source": "dutch_news_nos_algemeen",
+    "tier": "medium",
+    "distilbert_score": 0.9389,
+    "minilm_score": 0.10023604333400726
+  },
+  {
+    "title": "The EVs Everyone Will Be Talking About in 2026",
+    "source": "energy_utilities_heatmap_news",
+    "tier": "medium",
+    "distilbert_score": 0.9941,
+    "minilm_score": 0.08597658574581146
+  },
+  {
+    "title": "Tesla storniert Milliardenauftrag für Kathodenmaterial von L&F",
+    "source": "german_electrive",
+    "tier": "medium",
+    "distilbert_score": 0.692,
+    "minilm_score": 0.07741089165210724
+  },
+  {
+    "title": "Yo también conectaba los cables HDMI en el primer puerto que pillaba: estaba desperdiciando la mitad",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.08636221289634705
+  },
+  {
+    "title": "La paradoja de que Meta compre Manus: su mayor ventaja es no tener modelo propio",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.8989,
+    "minilm_score": 0.9101004600524902
+  },
+  {
+    "title": "BYD Hits Sales Goal, Set to Topple Tesla as Biggest EV Maker",
+    "source": "fintech_markets_bloomberg_technology",
+    "tier": "medium",
+    "distilbert_score": 0.9328,
+    "minilm_score": 0.9166145324707031
+  },
+  {
+    "title": "Developer-Häppchen fürs Wochenende – Kleinere News der Woche",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9353,
+    "minilm_score": 0.9096372127532959
+  },
+  {
+    "title": "CES 2026: o que esperar da LG na maior feira de tecnologia do mundo",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.991,
+    "minilm_score": 0.902548611164093
+  },
+  {
+    "title": "🚀 Multi-Application CI/CD on AWS (Production-Style)",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9785,
+    "minilm_score": 0.08078735321760178
+  },
+  {
+    "title": "Innenoptik: VWs ID. Polo wird zum Design-Vorreiter der ID.-Familie",
+    "source": "german_electrive",
+    "tier": "medium",
+    "distilbert_score": 0.9933,
+    "minilm_score": 0.8262433409690857
+  },
+  {
+    "title": "organicmaps/organicmaps",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9939,
+    "minilm_score": 0.08819311112165451
+  },
+  {
+    "title": "LG made up a new word for its next ultralight Gram laptops: 'Aerominum'",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9908,
+    "minilm_score": 0.9111424684524536
+  },
+  {
+    "title": "VPN, l’offerta del capodanno 2026: Surfshark a -87%",
+    "source": "italian_punto_informatico",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9060254693031311
+  },
+  {
+    "title": "Mouser adds power management resource centre",
+    "source": "ai_electronics_weekly",
+    "tier": "medium",
+    "distilbert_score": 0.65,
+    "minilm_score": 0.08956433832645416
+  },
+  {
+    "title": "[程序员] 求推荐一下 Cursor+Claude 廉价无墙的稳定平替方案",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.882,
+    "minilm_score": 0.8854473829269409
+  },
+  {
+    "title": "BYD’s BEV Sales Grew 28% In 2025, But Dropped 8% In December",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.984,
+    "minilm_score": 0.18147535622119904
+  },
+  {
+    "title": "nocodb/nocodb",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9833,
+    "minilm_score": 0.1531030535697937
+  },
+  {
+    "title": "5 pontos para analisar na hora de escolher a melhor cafeteira para você",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9954,
+    "minilm_score": 0.9193773865699768
+  },
+  {
+    "title": "Roulotte elettrica con impianto fotovoltaico sul tetto: autosufficiente per una settimana",
+    "source": "italian_rinnovabili",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.9028236865997314
+  },
+  {
+    "title": "CES 2026: o que esperar da maior feira de tecnologia do mundo em janeiro",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8827452659606934
+  },
+  {
+    "title": "Xiaomi termina 2025 com marco histórico de mais de 400.000 carros entregues",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.9004446268081665
+  },
+  {
+    "title": "5 carros híbridos que conquistaram o Brasil em 2025",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.995,
+    "minilm_score": 0.11934240907430649
+  },
+  {
+    "title": "Tesla storniert Milliardenauftrag für Kathodenmaterial von L&F",
+    "source": "german_electrive",
+    "tier": "medium",
+    "distilbert_score": 0.692,
+    "minilm_score": 0.07741089165210724
+  },
+  {
+    "title": "[程序员] 求推荐一下 Cursor+Claude 廉价无墙的稳定平替方案",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.882,
+    "minilm_score": 0.8854473829269409
+  },
+  {
+    "title": "Nueve accesorios fitness que todo aficionado al gimnasio agradecerá",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9201,
+    "minilm_score": 0.9092638492584229
+  },
+  {
+    "title": "VPN, l’offerta del capodanno 2026: Surfshark a -87%",
+    "source": "italian_punto_informatico",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9060254693031311
+  },
+  {
+    "title": "[程序员] 让 Cursor/Claude 直接“读懂”钉钉文档： mcp-dingtalk-doc 上手与实战",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.7442,
+    "minilm_score": 0.0810057669878006
+  },
+  {
+    "title": "CES 2026: o que esperar da maior feira de tecnologia do mundo em janeiro",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8827452659606934
+  },
+  {
+    "title": "GE's new Smart Refrigerator automates grocery shopping with a barcode scanner and Instacart",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9137563705444336
+  },
+  {
+    "title": "How a Young Bengaluru Resident Turned His 300 Sq Ft Home Into a Garden of 500 Plants",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.8957,
+    "minilm_score": 0.18381328880786896
+  },
+  {
+    "title": "Windows 11 Pro e Office: software essencial com poupança real em 2026",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.899376392364502
+  },
+  {
+    "title": "BYD’s BEV Sales Grew 28% In 2025, But Dropped 8% In December",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.984,
+    "minilm_score": 0.18147535622119904
+  },
+  {
+    "title": "Mouser adds power management resource centre",
+    "source": "ai_electronics_weekly",
+    "tier": "medium",
+    "distilbert_score": 0.65,
+    "minilm_score": 0.08956433832645416
+  },
+  {
+    "title": "Roulotte elettrica con impianto fotovoltaico sul tetto: autosufficiente per una settimana",
+    "source": "italian_rinnovabili",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.9028236865997314
+  },
+  {
+    "title": "Por que o mercado aposta na 3tentos entre as small caps — e no agro — em 2026",
+    "source": "portuguese_exame",
+    "tier": "medium",
+    "distilbert_score": 0.8178,
+    "minilm_score": 0.8557073473930359
+  },
+  {
+    "title": "5 dicas para aumentar a bateria do seu DualSense",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.9172462821006775
+  },
+  {
+    "title": "GE's new Smart Refrigerator automates grocery shopping with a barcode scanner and Instacart",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9137563705444336
+  },
+  {
+    "title": "Redwood Materials just designed a smarter battery recycling bin",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.9447,
+    "minilm_score": 0.9034057259559631
+  },
+  {
+    "title": "Infinity: trem autossuficiente roda sem combustível",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9635,
+    "minilm_score": 0.8438312411308289
+  },
+  {
+    "title": "Günstige E-Autos: Diese Modelle unter 25.000 Euro stehen in den Startlöchern",
+    "source": "german_t3n",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.9137042164802551
+  },
+  {
+    "title": "El municipio argentino que convierte cada retazo desechado en moda",
+    "source": "global_news_el_pais_america",
+    "tier": "medium",
+    "distilbert_score": 0.9617,
+    "minilm_score": 0.10920049250125885
+  },
+  {
+    "title": "Para encarar o verão: cupom derruba preço de ar-condicionado de 12 mil BTUs",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9170071482658386
+  },
+  {
+    "title": "Carros elétricos crescem no Brasil com foco em custo e tecnologia",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.7912,
+    "minilm_score": 0.9061551690101624
+  },
+  {
+    "title": "How Vadodara’s Smart Poles Are Turning Street Corners Into Urban Safety Hubs",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.7784,
+    "minilm_score": 0.8782119750976562
+  },
+  {
+    "title": "Watch: Inside Bengaluru’s Sustainable Home With No Water, Gas, or Electricity Connections",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.968,
+    "minilm_score": 0.13959363102912903
+  },
+  {
+    "title": "Mobilidade flexível: como escolher entre elétrico, híbrido ou GPL",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9673,
+    "minilm_score": 0.9057563543319702
+  },
+  {
+    "title": "Cattle Waste Powering Village Kitchens",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.9714,
+    "minilm_score": 0.8990102410316467
+  },
+  {
+    "title": "Hora do upgrade baratinho: RTX 5050 da ASUS saindo por R$ 1.799 no KaBuM!",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9963,
+    "minilm_score": 0.9215095043182373
+  },
+  {
+    "title": "Truque pouco conhecido refresca o carro em até 10 ºC sem usar ar-condicionado",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9947,
+    "minilm_score": 0.9171350598335266
+  },
+  {
+    "title": "Híbridos mais vendidos: \"Família Song\" reina em novembro de 2025",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.5676491856575012
+  },
+  {
+    "title": "Una nueva forma de vestir: tejidos a base de ortigas o plátano",
+    "source": "global_news_el_pais_america",
+    "tier": "medium",
+    "distilbert_score": 0.8267,
+    "minilm_score": 0.1272985190153122
+  },
+  {
+    "title": "De zonneklep-truc en meer manieren om je auto razendsnel op te warmen",
+    "source": "dutch_news_welingelichtekringen",
+    "tier": "medium",
+    "distilbert_score": 0.9894,
+    "minilm_score": 0.8863157629966736
+  },
+  {
+    "title": "Pais de 1ª viagem: 5 eletrodomésticos essenciais para quem tem bebê em casa",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9951,
+    "minilm_score": 0.9050877094268799
+  },
+  {
+    "title": "Comparing Cloud AI Platforms in 2025: Bedrock, Azure OpenAI, and Gemini",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9946,
+    "minilm_score": 0.5782877206802368
+  },
+  {
+    "title": "AWS News Feed to Google Chat Notifier",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9584,
+    "minilm_score": 0.2687375843524933
+  },
+  {
+    "title": "TV de 50'' da Samsung sai por menos de R$ 2 mil em queima do Mercado Livre",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9165624976158142
+  },
+  {
+    "title": "El toallero eléctrico con mejor relación calidad-precio de Amazon no necesita instalación",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9942,
+    "minilm_score": 0.9141573905944824
+  },
+  {
+    "title": "Carros elétricos vão ter autonomia para 1.600 km com a descoberta do MIT",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9113,
+    "minilm_score": 0.9120068550109863
+  },
+  {
+    "title": "Si el BMW iX3 es la BMW que est√° por llegar a los pr√≥ximos a√±os, solo tengo una cosa que decir: c",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.09635431319475174
+  },
+  {
+    "title": "Ovens getest op bakresultaten en hoe goed ze zichzelf reinigen: dit zijn de beste",
+    "source": "dutch_news_ad_algemeen",
+    "tier": "medium",
+    "distilbert_score": 0.9911,
+    "minilm_score": 0.07756882160902023
+  },
+  {
+    "title": "5 carros usados que ainda vale comprar em 2025",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.9166784882545471
+  },
+  {
+    "title": "Gráficos de nova geração: MSI RTX 5060 Shadow 2X OC por R$ 1.904 no PIX",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9176613092422485
+  },
+  {
+    "title": "Presentes de Natal para quem tem pets: 5 ideias que donos e bichinhos vão amar",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9953,
+    "minilm_score": 0.9020851254463196
+  },
+  {
+    "title": "Gigabyte RX 9060 XT Gaming OC: a GPU perfeita para começar 2026",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9152870178222656
+  },
+  {
+    "title": "Index 01: Anel inteligente da Pebble grava notas de voz e não precisa de ser carregado",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9954,
+    "minilm_score": 0.17129835486412048
+  },
+  {
+    "title": "[PROJECT] I updated EntropyGuard a CLI tool to deduplicate RAG data locally on CPU before embedding.",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9889,
+    "minilm_score": 0.07618626207113266
+  },
+  {
+    "title": "Bateria que dura: por que a indústria aposta alto em autonomia extrema?",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.8910223245620728
+  },
+  {
+    "title": "Try these 4 Android battery tips to keep your Google Pixel running longer than ever",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9173945188522339
+  },
+  {
+    "title": "Solar Power Is Shaping the Future of Terracotta Pottery",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.9845,
+    "minilm_score": 0.07644060254096985
+  },
+  {
+    "title": "Windows 11 Pro e Microsoft Office: funcionalidades que fazem mesmo a diferença",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9935,
+    "minilm_score": 0.8855656981468201
+  },
+  {
+    "title": "eSIM é mais seguro em casos de roubos de celulares? Veja as diferenças",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9904,
+    "minilm_score": 0.8838648796081543
+  },
+  {
+    "title": "Deploying a Serverless AI Agent with AWS Bedrock, Lambda, and API Gateway",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.5083,
+    "minilm_score": 0.08607818931341171
+  },
+  {
+    "title": "5 presentes de Natal para quem ama organização",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9069486856460571
+  },
+  {
+    "title": "The best microSD cards in 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9137057065963745
+  },
+  {
+    "title": "3 liquidificadores que batem e cozinham a comida no mesmo copo",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9944,
+    "minilm_score": 0.9063834547996521
+  },
+  {
+    "title": "Coming Soon | Solar, Minus the Myths: Can It Truly Cut Your Costs?",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.9881,
+    "minilm_score": 0.09776831418275833
+  },
+  {
+    "title": "How To Decorate Your Home for Christmas — Minus the Waste",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.9947,
+    "minilm_score": 0.9135870337486267
+  },
+  {
+    "title": "5 presentes tech de Natal que parecem caros, mas não são",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9964,
+    "minilm_score": 0.9143548011779785
+  },
+  {
+    "title": "Celular chinês de entrada está autorizado para vendas no Brasil; conheça",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8506075143814087
+  },
+  {
+    "title": "Kia now offers the most affordable EV in Canada",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.9151589870452881
+  },
+  {
+    "title": "Building a Production",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.617,
+    "minilm_score": 0.08568564802408218
+  },
+  {
+    "title": "Porsche Brings Wireless EV Charging to Consumers",
+    "source": "ai_ieee_spectrum",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9088645577430725
+  },
+  {
+    "title": "Amazon ECS Express Mode from an IaC perspective",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.8942338824272156
+  },
+  {
+    "title": "Ferdinand Porsche ideó el primer coche con un motor eléctrico en cada rueda. Hoy un fabricante chino",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9923,
+    "minilm_score": 0.9004350900650024
+  },
+  {
+    "title": "Got Gmail? This is the simple signature tool you’ve been missing",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.16649101674556732
+  },
+  {
+    "title": "General availability of 72GB version of Blackwell",
+    "source": "ai_electronics_weekly",
+    "tier": "medium",
+    "distilbert_score": 0.9852,
+    "minilm_score": 0.811353862285614
+  },
+  {
+    "title": "BYD registra sedan híbrido com autonomia absurda no Brasil",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.07925603538751602
+  },
+  {
+    "title": "Managing your Azure environment using natural language with Azure Copilot",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9851,
+    "minilm_score": 0.09765927493572235
+  },
+  {
+    "title": "Amazon WorkSpaces now supports IPv6",
+    "source": "community_social_aws_news",
+    "tier": "medium",
+    "distilbert_score": 0.949,
+    "minilm_score": 0.8636012673377991
+  },
+  {
+    "title": "10 superventas en distintas categorías de compra que solo encontrarás a este precio en Amazon Haul",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9953,
+    "minilm_score": 0.9218400716781616
+  },
+  {
+    "title": "Apple's AirPods Pro 3 drop to a new record low of $199",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9164092540740967
+  },
+  {
+    "title": "Vídeo mostra carregamento de carro elétrico da BYD em velocidade recorde",
+    "source": "portuguese_olhar_digital",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9026495218276978
+  },
+  {
+    "title": "AirPods Pro 3 drop to a record low of $199",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9138478636741638
+  },
+  {
+    "title": "System Design 0-to-1: Why the World's Biggest Apps Scale Horizontally",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.994,
+    "minilm_score": 0.08343511819839478
+  },
+  {
+    "title": "Água geladinha no calorão? Esse purificador com quase 50% de desconto vai ajudar!",
+    "source": "portuguese_olhar_digital",
+    "tier": "medium",
+    "distilbert_score": 0.9954,
+    "minilm_score": 0.9205670356750488
+  },
+  {
+    "title": "Trump wants tiny cars in America. Do drivers?",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.8906,
+    "minilm_score": 0.08337215334177017
+  },
+  {
+    "title": "Tech transformation isn’t about how many tools you buy",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.7724,
+    "minilm_score": 0.9014641642570496
+  },
+  {
+    "title": "Testing Webhooks Locally: Why I Built a Better Alternative to ngrok",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.986,
+    "minilm_score": 0.09004230797290802
+  },
+  {
+    "title": "Samsung unveils its new $200 Galaxy A17 5G smartphone, arriving in January",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9141925573348999
+  },
+  {
+    "title": "Show HN: I open-sourced my Go and Next B2B SaaS Starter (deploy anywhere, MIT)",
+    "source": "hackernews",
+    "tier": "medium",
+    "distilbert_score": 0.9937,
+    "minilm_score": 0.8945860862731934
+  },
+  {
+    "title": "El Tesla Cybertruck es tal fracaso de ventas que Elon Musk solo ha encontrado una solución: comprárs",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9273,
+    "minilm_score": 0.08529005944728851
+  },
+  {
+    "title": "Las cinco mejores ofertas de Navidad en Kindle dependiendo del precio y uso que vayamos a darle para",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9231187105178833
+  },
+  {
+    "title": "Chinese EV makers slash prices in Thailand to boost sales",
+    "source": "global_south_tech_in_asia",
+    "tier": "medium",
+    "distilbert_score": 0.9651,
+    "minilm_score": 0.9026681780815125
+  },
+  {
+    "title": "Op-Ed: How A $14,000 Electric Kei Car Became Japan’s Best",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9131796360015869
+  },
+  {
+    "title": "The best DACs for Apple Music Lossless in 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9119594693183899
+  },
+  {
+    "title": "Renault percorre 1.008 km a velocidade de autoestrada com uma bateria de 87 kWh",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9935,
+    "minilm_score": 0.9087404012680054
+  },
+  {
+    "title": "Motores de aviões supersónicos vão alimentar centros de dados de inteligência artificial",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.587,
+    "minilm_score": 0.07546260952949524
+  },
+  {
+    "title": "Dubai car free? Arriva la pista ciclabile di 93 Km, climatizzata con l’energia cinetica di chi pedal",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.9933,
+    "minilm_score": 0.9192395806312561
+  },
+  {
+    "title": "Upgrade baratinho: 3 combinações de placa-mãe + CPU para reviver um PC antigo",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9168455004692078
+  },
+  {
+    "title": "Mercedes",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8179120421409607
+  },
+  {
+    "title": "Xiaomi ha conseguido beneficios vendiendo coches en su primer año. El problema es que ha optimizado ",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9682,
+    "minilm_score": 0.8951383233070374
+  },
+  {
+    "title": "39C3: Warum eine Multiple-Sklerose-Erkrankte ihren Rollstuhl hackte",
+    "source": "global_news_spiegel",
+    "tier": "medium",
+    "distilbert_score": 0.9875,
+    "minilm_score": 0.07647905498743057
+  },
+  {
+    "title": "The 10 best vehicles Ars Technica drove in 2025",
+    "source": "ai_ars_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9917,
+    "minilm_score": 0.904592752456665
+  },
+  {
+    "title": "Memória RAM mais barata? Não perca esse cupom de 15% OFF no KaBuM!",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9180092811584473
+  },
+  {
+    "title": "Luxury EV built with Huawei outsells Porsche’s Panamera and BMW’s 7 Series in China",
+    "source": "china_scmp_tech",
+    "tier": "medium",
+    "distilbert_score": 0.9759,
+    "minilm_score": 0.9132881164550781
+  },
+  {
+    "title": "The best budget laptops for 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9141698479652405
+  },
+  {
+    "title": "Apple Watch Series 11 drops $100 to an all",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9964,
+    "minilm_score": 0.9137318730354309
+  },
+  {
+    "title": "Presente para Amigo Secreto; 5 opções criativas por até R$ 100",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9212372899055481
+  },
+  {
+    "title": "AWS re:Invent 2025",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9549,
+    "minilm_score": 0.08074760437011719
+  },
+  {
+    "title": "Teste de bateria | Veja quanto tempo o Google Pixel 10 Pro fica longe da tomada",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9963,
+    "minilm_score": 0.9138747453689575
+  },
+  {
+    "title": "AudioGhost AI: Run Meta's SAM-Audio on 4GB-6GB VRAM with a Windows One-Click Installer 👻🎵",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9951,
+    "minilm_score": 0.915054976940155
+  },
+  {
+    "title": "Amazon ECS now enables you to define weekly event windows for scheduling task retirements on AWS Far",
+    "source": "community_social_aws_news",
+    "tier": "medium",
+    "distilbert_score": 0.9931,
+    "minilm_score": 0.8936164975166321
+  },
+  {
+    "title": "5 celulares bons, bonitos e baratos para dar de presente no Natal",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9963,
+    "minilm_score": 0.9216089248657227
+  },
+  {
+    "title": "Placa de Vídeo RX 7600 XFX é upgrade ideal para jogar em FHD por apenas R$ 1.427",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9203963279724121
+  },
+  {
+    "title": "NVIDIA Nemotron 3 Nano now available on Amazon Bedrock",
+    "source": "community_social_aws_news",
+    "tier": "medium",
+    "distilbert_score": 0.9876,
+    "minilm_score": 0.91591477394104
+  },
+  {
+    "title": "How to find lost AirPods",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.8890286087989807
+  },
+  {
+    "title": "Day 8: Accelerating Spark Joins",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9804,
+    "minilm_score": 0.9008315205574036
+  },
+  {
+    "title": "Como montar um PC gamer barato por R$ 3.000 no fim de 2025?",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9162927865982056
+  },
+  {
+    "title": "AI-Driven Advertising for E-Commerce [2025 Strategy Guide]",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9416,
+    "minilm_score": 0.12927000224590302
+  },
+  {
+    "title": "Mac wird langsam? Dieses Tool zeigt dir, wann Apple heimlich deine CPU drosselt",
+    "source": "german_t3n",
+    "tier": "medium",
+    "distilbert_score": 0.9776,
+    "minilm_score": 0.10281811654567719
+  },
+  {
+    "title": "JBL lança nova torre de som poderosa no Brasil; veja o que ela consegue fazer",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9964,
+    "minilm_score": 0.0805421695113182
+  },
+  {
+    "title": "10 Indian Toy Brands Making Thoughtful, Sustainable Gifts for Kids",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.9889,
+    "minilm_score": 0.9136655330657959
+  },
+  {
+    "title": "Echo Show 11 é a cereja no bolo na nova geração de smart speaker da Amazon",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9134013056755066
+  },
+  {
+    "title": "cjpais/Handy",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9917,
+    "minilm_score": 0.08663521707057953
+  },
+  {
+    "title": "BHP and Rio Tinto to put MASSIVE 240",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9619,
+    "minilm_score": 0.8788222670555115
+  },
+  {
+    "title": "This Tesla Model 3 Has Nearly 240,000 Miles. Here’s What Broke",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9726,
+    "minilm_score": 0.8642801642417908
+  },
+  {
+    "title": "BYD Sealion 7 Premium review: The top",
+    "source": "energy_utilities_the_driven",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9154955744743347
+  },
+  {
+    "title": "Gama alta a precio de gama media para estos Galaxy reacondicionados: tienen 24 meses de garant√≠a y ",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9223597049713135
+  },
+  {
+    "title": "Last Week in Multimodal AI",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9903,
+    "minilm_score": 0.4406571388244629
+  },
+  {
+    "title": "Streaming is the killer of Microservices architecture.",
+    "source": "community_social_programming_reddit",
+    "tier": "medium",
+    "distilbert_score": 0.556,
+    "minilm_score": 0.12958519160747528
+  },
+  {
+    "title": "Snapsun introduces rooftop mounting system made of recycled plastic",
+    "source": "energy_utilities_pv_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.9796,
+    "minilm_score": 0.22252537310123444
+  },
+  {
+    "title": "What Falling Sales? BEVs Jump 37% YoY in November in Europe!",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9084666967391968
+  },
+  {
+    "title": "Atonemo’s Streamplayer Will Turn Older Audio Systems Into AirPlay Or Google Cast Speakers",
+    "source": "professional_business_forbes_innovation",
+    "tier": "medium",
+    "distilbert_score": 0.9914,
+    "minilm_score": 0.9014061093330383
+  },
+  {
+    "title": "Presentes de Natal para esposa: 6 ideias certeiras para surpreender",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9954,
+    "minilm_score": 0.9036762714385986
+  },
+  {
+    "title": "🚀 Terraform Day 26: HashiCorp Cloud Platform (Terraform Cloud)",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.6248,
+    "minilm_score": 0.10770507901906967
+  },
+  {
+    "title": "Why high-speed rail may not work the best in the U.S.",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.6846,
+    "minilm_score": 0.16726399958133698
+  },
+  {
+    "title": "Vai fazer festa no ano novo? 3 apps para dividir os gastos com facilidade",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9181385040283203
+  },
+  {
+    "title": "Review Alienware 16 Aurora | Notebook de entrada com RTX 5050 que peca na tela",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9178552627563477
+  },
+  {
+    "title": "The Epomaker RT82 Is A Mechanical Keyboard Where Retro Design Meets Modern Technology",
+    "source": "professional_business_forbes_innovation",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.8926641941070557
+  },
+  {
+    "title": "tempoxyz/tempo",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9911,
+    "minilm_score": 0.08919975906610489
+  },
+  {
+    "title": "Shopify Scripts Functions: A Practical Migration Playbook",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.6686,
+    "minilm_score": 0.09127825498580933
+  },
+  {
+    "title": "BYD wins approval for lower cost variant of its best",
+    "source": "energy_utilities_the_driven",
+    "tier": "medium",
+    "distilbert_score": 0.9941,
+    "minilm_score": 0.8275113105773926
+  },
+  {
+    "title": "awslabs/amazon-bedrock-agentcore-samples",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9883,
+    "minilm_score": 0.09204206615686417
+  },
+  {
+    "title": "Fotovoltaico: i prezzi delle batterie sono scesi a tal punto che l’energia solare è diventata conven",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.9712,
+    "minilm_score": 0.9038941860198975
+  },
+  {
+    "title": "Oppo Find X9, análisis: vivir a la sombra del 'Pro' nunca fue tan dulce. Ni tan recomendable",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9954,
+    "minilm_score": 0.8454012274742126
+  },
+  {
+    "title": "branch management for AI native workflows?",
+    "source": "community_social_programming_reddit",
+    "tier": "medium",
+    "distilbert_score": 0.9909,
+    "minilm_score": 0.07985492795705795
+  },
+  {
+    "title": "After 2 years I am switching over (feedback)",
+    "source": "community_social_reddit_chatgpt",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.09894025325775146
+  },
+  {
+    "title": "Una tablet Xiaomi por menos de 95 euros, precio top para el MacBook Air M4 y más en el último Cazand",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9963,
+    "minilm_score": 0.9222643971443176
+  },
+  {
+    "title": "Un scooter chino ha hecho entrar en pánico a los más vendidos de España. Y esto es solo el comienzo",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9919,
+    "minilm_score": 0.11069631576538086
+  },
+  {
+    "title": "The best noise",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.13971389830112457
+  },
+  {
+    "title": "A 15-Ton Rooftop Heat Pump Is Coming For Your Fossil Fuels",
+    "source": "climate_solutions_cleantechnica",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.8812435269355774
+  },
+  {
+    "title": "Questa gigantesca cupola gonfiabile in Sardegna è in realtà una batteria a CO2 progettata per immaga",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.9944,
+    "minilm_score": 0.4274634122848511
+  },
+  {
+    "title": "Xiaomi's 17 Ultra Leica Edition smartphone comes with a manual zoom ring",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9166749715805054
+  },
+  {
+    "title": "Hoe bamboe bouwers, betonfabrikanten en boeren helpt CO2-uitstoot te verminderen",
+    "source": "dutch_news_change_inc",
+    "tier": "medium",
+    "distilbert_score": 0.5289,
+    "minilm_score": 0.074809230864048
+  },
+  {
+    "title": "It's been a big week for AI ; Here are 10 massive changes you might've missed:",
+    "source": "community_social_reddit_artificial",
+    "tier": "medium",
+    "distilbert_score": 0.9907,
+    "minilm_score": 0.9136832356452942
+  },
+  {
+    "title": "B3 lança app para você monitorar todos os seus investimentos no mesmo lugar",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9921,
+    "minilm_score": 0.9053660035133362
+  },
+  {
+    "title": "Deutsche Bahn: Wo künftig mehr Züge fahren – und wo sie das Angebot zusammenstreicht",
+    "source": "global_news_spiegel",
+    "tier": "medium",
+    "distilbert_score": 0.6073,
+    "minilm_score": 0.6019068956375122
+  },
+  {
+    "title": "organicmaps/organicmaps",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9939,
+    "minilm_score": 0.08819311112165451
+  },
+  {
+    "title": "Antigravity A1 drone review: FPV flying unlike anything else",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.10134772956371307
+  },
+  {
+    "title": "I switched to eSIM in 2025, and I am full of regret",
+    "source": "ai_ars_technica",
+    "tier": "medium",
+    "distilbert_score": 0.995,
+    "minilm_score": 0.07844477891921997
+  },
+  {
+    "title": "maph",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.5746,
+    "minilm_score": 0.09146104007959366
+  },
+  {
+    "title": "Frugal people share the 20 money-saving habits they picked up by accident",
+    "source": "positive_news_upworthy",
+    "tier": "medium",
+    "distilbert_score": 0.9797,
+    "minilm_score": 0.08560056984424591
+  },
+  {
+    "title": "EVs At 35.2% Share In Germany – Incentives Reboot?",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9953,
+    "minilm_score": 0.08048875629901886
+  },
+  {
+    "title": "PlayStation 5 Edição Digital com Bundle por R$ 2.689 com cupom no App da Amazon",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9174832701683044
+  },
+  {
+    "title": "Il più grande impianto solare industriale d’Italia si trova a Osoppo. No, non è a terra ma sfrutta i",
+    "source": "italian_wired_italia",
+    "tier": "medium",
+    "distilbert_score": 0.9795,
+    "minilm_score": 0.4245721101760864
+  },
+  {
+    "title": "5 presentes de Natal para quem vive viajando",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.8999974727630615
+  },
+  {
+    "title": "O Papa é pop? Leão XIV agora tem SUV de luxo como papamóvel",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9938,
+    "minilm_score": 0.8968067169189453
+  },
+  {
+    "title": "TwelveLabs’ Pegasus 1.2 model now in 23 new AWS regions via Global cross",
+    "source": "community_social_aws_news",
+    "tier": "medium",
+    "distilbert_score": 0.7493,
+    "minilm_score": 0.8885378837585449
+  },
+  {
+    "title": "AWS Elastic Beanstalk now supports Node.js 24 on Amazon Linux 2023",
+    "source": "community_social_aws_news",
+    "tier": "medium",
+    "distilbert_score": 0.9901,
+    "minilm_score": 0.9007748365402222
+  },
+  {
+    "title": "Huawei y SMIC dan con la clave para crear chips de 7 nm: hacer un 'Ikea hack' a las máquinas de ASML",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.8818,
+    "minilm_score": 0.9072861671447754
+  },
+  {
+    "title": "This literal lava lamp looks nothing like your lamp from the ’70s",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.8965,
+    "minilm_score": 0.9081124663352966
+  },
+  {
+    "title": "Dock USB transforma qualquer PC em um Super Nintendo",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9014599919319153
+  },
+  {
+    "title": "Meet The Affordable EV Beating Tesla And BYD At Their Own Game",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9876,
+    "minilm_score": 0.08250464498996735
+  },
+  {
+    "title": "[分享创造] [开源] Mac 用 vChangelog：从 Git 历史一键生成版本间 Changelog（支持 AI 总结 / Markdown / 一键复制）",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9122,
+    "minilm_score": 0.09010004997253418
+  },
+  {
+    "title": "Renovar consola, tablet o reloj es m√°s f√°cil (y barato) con la promo de Navidad de AliExpress",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9230400919914246
+  },
+  {
+    "title": "Pebble Index 01 Is A Smart Ring With One Job And 2",
+    "source": "professional_business_forbes_innovation",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9116357564926147
+  },
+  {
+    "title": "Anti-smartphone? Esse modelo ‘retrô’ já rendeu US$ 280 mil ao desafiar a lógica do mercado",
+    "source": "portuguese_exame",
+    "tier": "medium",
+    "distilbert_score": 0.9935,
+    "minilm_score": 0.9153352379798889
+  },
+  {
+    "title": "Quer personalizar o Windows? Microsoft Store estreia secção com mais de 400 temas",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9927,
+    "minilm_score": 0.9106580018997192
+  },
+  {
+    "title": "E-quipment highlight: Zamboni 552AC electric ice surfacer",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.8793,
+    "minilm_score": 0.4745597839355469
+  },
+  {
+    "title": "simstudioai/sim",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9858,
+    "minilm_score": 0.10421301424503326
+  },
+  {
+    "title": "Vai comprar um carro usado? Há uma app que ajuda a descobrir o seu passado “secreto”",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9026,
+    "minilm_score": 0.911897599697113
+  },
+  {
+    "title": "NIO’s New ES8 Tops 30,000 Deliveries in 89 Days, Setting a Record for Premium Electric Vehicles",
+    "source": "china_pandaily",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.9209197163581848
+  },
+  {
+    "title": "How to pair controllers with the Nintendo Switch 2",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.9043741822242737
+  },
+  {
+    "title": "Frugal people share the 19 ways they save money on heating their homes during winter",
+    "source": "positive_news_upworthy",
+    "tier": "medium",
+    "distilbert_score": 0.9788,
+    "minilm_score": 0.8375332951545715
+  },
+  {
+    "title": "Nano Banana Pro: 5 prompts para criar um cartão de ano novo no Gemini",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9944,
+    "minilm_score": 0.9163049459457397
+  },
+  {
+    "title": "This New Tesla Supercharger Extension Cable Fixes All Of Its Predecessor’s Problems",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9948,
+    "minilm_score": 0.3176617920398712
+  },
+  {
+    "title": "Conheça 4 pilares do planejamento logístico que resultam em economia",
+    "source": "portuguese_exame",
+    "tier": "medium",
+    "distilbert_score": 0.8894,
+    "minilm_score": 0.09852316230535507
+  },
+  {
+    "title": "The best cameras for 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.911066472530365
+  },
+  {
+    "title": "4 brinquedos tecnológicos para dar de presente no Natal",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.9032586216926575
+  },
+  {
+    "title": "5 presentes de Natal para quem “já tem tudo”",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9057353138923645
+  },
+  {
+    "title": "EVs Take 32.9% Share In France – Renault 5 Record Volume",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9059717655181885
+  },
+  {
+    "title": "FlashHead: Up to 50% faster token generation on top of other techniques like quantization",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9911,
+    "minilm_score": 0.0756630226969719
+  },
+  {
+    "title": "[分享创造] 拒绝糊涂账：白嫖飞书多维表格做了一个“资产仪表盘”，计算每日成本(附开源模版)",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9718,
+    "minilm_score": 0.08617409318685532
+  },
+  {
+    "title": "Capa viral para iPhone tem potencial para conquistar até os utilizadores de Android",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.9016726016998291
+  },
+  {
+    "title": "louislam/uptime-kuma",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9943,
+    "minilm_score": 0.07952871173620224
+  },
+  {
+    "title": "Fotovoltaico: con Enel Solare Italiano by 3SUN, i panelli solari Made in Italy della Gigafactory 3SU",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.9381,
+    "minilm_score": 0.9111667275428772
+  },
+  {
+    "title": "Kenworth expands zero-emission lineup with new medium",
+    "source": "energy_utilities_charged_evs",
+    "tier": "medium",
+    "distilbert_score": 0.9905,
+    "minilm_score": 0.08959352970123291
+  },
+  {
+    "title": "Ar-condicionado no calor: como evitar sobrecarga e reduzir a conta de energia",
+    "source": "portuguese_exame",
+    "tier": "medium",
+    "distilbert_score": 0.899,
+    "minilm_score": 0.10527180880308151
+  },
+  {
+    "title": "[iDev] 我做了一款“断网”也能用的 AI 笔记助手，为了让 Mac 用户免折腾，我借钱充了苹果开发者年费 😂",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9771,
+    "minilm_score": 0.909745454788208
+  },
+  {
+    "title": "This $7,000 mini EV ‘mibot’ is already a hit in Japan as deliveries kick off",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.9169535040855408
+  },
+  {
+    "title": "1Password deal: Last chance to save 50 percent on our favorite password manager",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.9097477197647095
+  },
+  {
+    "title": "EVs At 65.4% Share In Sweden – Incentive Scheme Incoming",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.08005067706108093
+  },
+  {
+    "title": "Más rápido, más rentable, más arriesgado: a qué se debe el auge en la venta de coches de segunda man",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.9201083183288574
+  },
+  {
+    "title": "CopilotKit/CopilotKit",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9823,
+    "minilm_score": 0.08679839968681335
+  },
+  {
+    "title": "This RTX 5070 Ti gaming laptop is the cheapest we've seen at $700 off — Get MSI's Vector 16 with a R",
+    "source": "semiconductor_hardware_tomshardware",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9227913618087769
+  },
+  {
+    "title": "Mouser shipping PSOC Edge ML MCUs",
+    "source": "ai_electronics_weekly",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.9091812372207642
+  },
+  {
+    "title": "Chip do Galaxy S26 com GPU AMD tem detalhes técnicos vazados",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.9036880135536194
+  },
+  {
+    "title": "5 Of The Best Electric Vehicles Under $50k, According To Consumer Reports - bgr.com",
+    "source": "newsapi_general",
+    "tier": "medium",
+    "distilbert_score": 0.9728,
+    "minilm_score": 0.19877293705940247
+  },
+  {
+    "title": "Tecno Spark 40 review: TDV certification, price and full specs",
+    "source": "global_south_techcabal",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.9161213636398315
+  },
+  {
+    "title": "Vivo X300 Pro Is An iPhone 17 Pro Rival With A Bigger Battery And Zeiss",
+    "source": "professional_business_forbes_innovation",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9170433282852173
+  },
+  {
+    "title": "DP World deploys 12 Kempower MCS EV chargers at London Gateway container port",
+    "source": "energy_utilities_charged_evs",
+    "tier": "medium",
+    "distilbert_score": 0.9905,
+    "minilm_score": 0.869515597820282
+  },
+  {
+    "title": "Nvidia launches open models for building agentic AI",
+    "source": "ai_electronics_weekly",
+    "tier": "medium",
+    "distilbert_score": 0.9452,
+    "minilm_score": 0.6793041825294495
+  },
+  {
+    "title": "Windows 11 Pro por apenas 21,8€: uma oportunidade a não perder neste final de ano",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9954,
+    "minilm_score": 0.9149607419967651
+  },
+  {
+    "title": "Fiat derruba preços e picape \"queridinha\" fica mais em conta que rival da VW",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.916261613368988
+  },
+  {
+    "title": "Kia cuts EV prices with new deals across its full lineup",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9931,
+    "minilm_score": 0.9179224967956543
+  },
+  {
+    "title": "Samsung Galaxy S26 Ultra vai ganhar recargas mais rápidas, mostra certificação",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9157320261001587
+  },
+  {
+    "title": "Japão apresentou um submarino diferente de tudo o que já vimos",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.8368,
+    "minilm_score": 0.8766515851020813
+  },
+  {
+    "title": "Show HN: Cover letter generator with Ollama/local LLMs (Open source)",
+    "source": "community_social_hacker_news",
+    "tier": "medium",
+    "distilbert_score": 0.9869,
+    "minilm_score": 0.18346311151981354
+  },
+  {
+    "title": "Gigabyte abandona gel térmico que vazava e lança nova versão da RTX 5070 Ti",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.994,
+    "minilm_score": 0.8962430953979492
+  },
+  {
+    "title": "LoRa, BLE, and GNSS tracker supports open-source software, solar charging, outdoor and indoor tracki",
+    "source": "semiconductor_hardware_cnx_software",
+    "tier": "medium",
+    "distilbert_score": 0.993,
+    "minilm_score": 0.8923219442367554
+  },
+  {
+    "title": "Quer ver a Copa do Mundo? Skyscanner vai encontrar voos de acordo com cada jogo",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9883,
+    "minilm_score": 0.9129384756088257
+  },
+  {
+    "title": "winapps",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.962,
+    "minilm_score": 0.8699908256530762
+  },
+  {
+    "title": "Deploying a secure and scalable static website on AWS using Terraform",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.8731,
+    "minilm_score": 0.6533905267715454
+  },
+  {
+    "title": "Novo celular gamer tem joystick integrado e tela de 165 Hz; conheça",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.9061504602432251
+  },
+  {
+    "title": "How to transfer your games to the Nintendo Switch 2",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9947,
+    "minilm_score": 0.9081231951713562
+  },
+  {
+    "title": "TV e videogame em standby: veja quanto de energia eles gastam exatamente",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9953,
+    "minilm_score": 0.44887298345565796
+  },
+  {
+    "title": "Lenovo Legion Go 2 terá versão mais barata com SteamOS",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9132080674171448
+  },
+  {
+    "title": "4 apps e sites para planejar uma viagem para a Copa do Mundo de 2026",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9926,
+    "minilm_score": 0.9116518497467041
+  },
+  {
+    "title": "Traducci√≥n en tiempo real con los AirPods: c√≥mo usarla para que traduzcan lo que alguien te dice e",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9927,
+    "minilm_score": 0.0844135582447052
+  },
+  {
+    "title": "I benchmarked 7 Small LLMs on a 16GB Laptop. Here is what is actually usable.",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.9093359708786011
+  },
+  {
+    "title": "I made Soprano-80M: Stream ultra-realistic TTS in <15ms, up to 2000x realtime, and <1 GB VRAM, relea",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9936,
+    "minilm_score": 0.9129668474197388
+  },
+  {
+    "title": "10 Simple Garden Crafts to Bring Back the Childhood Joy of Making Things by Hand",
+    "source": "positive_news_the_better_india",
+    "tier": "medium",
+    "distilbert_score": 0.9869,
+    "minilm_score": 0.9086669683456421
+  },
+  {
+    "title": "Instant database clones with PostgreSQL 18",
+    "source": "community_social_hacker_news",
+    "tier": "medium",
+    "distilbert_score": 0.8222,
+    "minilm_score": 0.10708362609148026
+  },
+  {
+    "title": "Minimax M2.1 released",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9831,
+    "minilm_score": 0.8817623257637024
+  },
+  {
+    "title": "[分享创造] [开源] 写了个基于 WebRTC 的 P2P 传档 CLI (ffl) - 单文件无依赖直跑 Win/ Linux /Mac/Termux, 接收方免安装",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9534,
+    "minilm_score": 0.15227307379245758
+  },
+  {
+    "title": "stan-smith/FossFLOW",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.8619,
+    "minilm_score": 0.21210020780563354
+  },
+  {
+    "title": "Microsoft Confirms New Upgrade Decision For All Windows Users",
+    "source": "professional_business_forbes_innovation",
+    "tier": "medium",
+    "distilbert_score": 0.7672,
+    "minilm_score": 0.34622034430503845
+  },
+  {
+    "title": "Gift card da PlayStation Store saindo por R$ 240 no Mercado Livre com cupom",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9204027652740479
+  },
+  {
+    "title": "[分享创造] CattoPic 纯 serverless 的图床和 API 综合方案",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9405,
+    "minilm_score": 0.5377330780029297
+  },
+  {
+    "title": "[分享创造] https://copyunicode.com",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.7613,
+    "minilm_score": 0.588502049446106
+  },
+  {
+    "title": "Ola Electric opens first Bengaluru hyperservice center",
+    "source": "global_south_tech_in_asia",
+    "tier": "medium",
+    "distilbert_score": 0.9609,
+    "minilm_score": 0.8981273174285889
+  },
+  {
+    "title": "The 27 best new apps of 2025",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.8952210545539856
+  },
+  {
+    "title": "Fast GPU Interconnect over Radio",
+    "source": "community_social_hacker_news",
+    "tier": "medium",
+    "distilbert_score": 0.8663,
+    "minilm_score": 0.8176912665367126
+  },
+  {
+    "title": "Alibaba drops Qwen-Image-2512: New strongest open-source image model that rivals Gemini 3 Pro and Im",
+    "source": "community_social_reddit_singularity",
+    "tier": "medium",
+    "distilbert_score": 0.8571,
+    "minilm_score": 0.8806478977203369
+  },
+  {
+    "title": "Gokin Solar launches new back",
+    "source": "energy_utilities_pv_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.7157,
+    "minilm_score": 0.8263255953788757
+  },
+  {
+    "title": "EcoFlow Christmas Sale offers up to 68% power station savings + flash sale, Aventon e",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9230180978775024
+  },
+  {
+    "title": "[分享创造] [开源自荐] 派奇绘画，通用型 AI 图片生成服务，合理白嫖各大平台的算力资源，免费，无限生成，无登陆，无后端，注重隐私，最高 8k 画质",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9916,
+    "minilm_score": 0.4873640537261963
+  },
+  {
+    "title": "[程序员] 这可能是下一个周经帖：国产大模型哪个编程能力最顶？",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.864,
+    "minilm_score": 0.09979736804962158
+  },
+  {
+    "title": "Record Month for EV Sales in China!",
+    "source": "climate_solutions_cleantechnica",
+    "tier": "medium",
+    "distilbert_score": 0.9909,
+    "minilm_score": 0.894794762134552
+  },
+  {
+    "title": "Alexa+ can now answer your Ring doorbell and talk to people",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9828,
+    "minilm_score": 0.8737503290176392
+  },
+  {
+    "title": "I Built an MCP Server to Create HubSpot Marketing Emails with Claude",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9741,
+    "minilm_score": 0.15872056782245636
+  },
+  {
+    "title": "Jeep surpreende com SUV perfeito para quem ama observar estrelas",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9934,
+    "minilm_score": 0.9132144451141357
+  },
+  {
+    "title": "Microsoft promete jogos rodando lisos e carregando na hora em 2026; veja mais",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9883,
+    "minilm_score": 0.9063990116119385
+  },
+  {
+    "title": "YouTuber MKBHD praises the Chinese Xiaomi SU7 EV after testing: 'This is a $42,000 car that feels li",
+    "source": "professional_business_business_insider",
+    "tier": "medium",
+    "distilbert_score": 0.7036,
+    "minilm_score": 0.9094921350479126
+  },
+  {
+    "title": "tinySA is a low-cost handheld spectrum analyzer with built",
+    "source": "semiconductor_hardware_cnx_software",
+    "tier": "medium",
+    "distilbert_score": 0.9892,
+    "minilm_score": 0.7637404799461365
+  },
+  {
+    "title": "[分享创造] 我用 DuckDB 搓了个“本地” Excel As Chat BI 工具",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9266,
+    "minilm_score": 0.10484632104635239
+  },
+  {
+    "title": "Why I'm Removing \"Magic\" From My Apps (Building a Private Reddit Client)",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9306,
+    "minilm_score": 0.10467825829982758
+  },
+  {
+    "title": "CES 2026: LG transforma o carro num \"copiloto\" com IA Generativa",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.6036,
+    "minilm_score": 0.8927066326141357
+  },
+  {
+    "title": "AWS Application Migration Service supports IPv6",
+    "source": "community_social_aws_news",
+    "tier": "medium",
+    "distilbert_score": 0.6337,
+    "minilm_score": 0.10358204692602158
+  },
+  {
+    "title": "Lege accu en geen startkabels? Met dit paardenmiddel krijg je je auto weer aan de gang",
+    "source": "dutch_news_ad_algemeen",
+    "tier": "medium",
+    "distilbert_score": 0.9596,
+    "minilm_score": 0.8806779384613037
+  },
+  {
+    "title": "A ceia ficou cara? Veja como dividir as contas com IA",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9904,
+    "minilm_score": 0.0837407335639
+  },
+  {
+    "title": "The 2026 Cadillac Optiq Is An Incredible Luxury EV Value",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9947,
+    "minilm_score": 0.8935955762863159
+  },
+  {
+    "title": "Ola Electric begins mass deliveries of 4680 Bharat Cell",
+    "source": "global_south_yourstory",
+    "tier": "medium",
+    "distilbert_score": 0.7351,
+    "minilm_score": 0.07817906141281128
+  },
+  {
+    "title": "Fim do jogo ilimitado: NVIDIA limita GeForce Now a 100 horas mensais",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9111168384552002
+  },
+  {
+    "title": "Como ouvir sua retrospectiva do Spotify em outros streamings",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9951,
+    "minilm_score": 0.8941975235939026
+  },
+  {
+    "title": "Here’s what’s next from the creator of the Pebble smartwatch",
+    "source": "industry_intelligence_fast_company",
+    "tier": "medium",
+    "distilbert_score": 0.9862,
+    "minilm_score": 0.10552455484867096
+  },
+  {
+    "title": "TCL introduces its own take on a color Kindle Scribe",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9031656384468079
+  },
+  {
+    "title": "QNX Self-Hosted Developer Desktop",
+    "source": "community_social_hacker_news",
+    "tier": "medium",
+    "distilbert_score": 0.9932,
+    "minilm_score": 0.8876208066940308
+  },
+  {
+    "title": "First savings hits Navee XT5 Pro long-range off-road e",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9177358150482178
+  },
+  {
+    "title": "flowsurface-rs/flowsurface",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9931,
+    "minilm_score": 0.07666361331939697
+  },
+  {
+    "title": "AWS End User Messaging SMS launches a Generative AI Registration Reviewer (Preview)",
+    "source": "community_social_aws_news",
+    "tier": "medium",
+    "distilbert_score": 0.987,
+    "minilm_score": 0.08143322169780731
+  },
+  {
+    "title": "The New Mercedes GLB EV Is Insanely Efficient And Can Go Over 300 Miles",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.9079586267471313
+  },
+  {
+    "title": "EVs Take 38.4% Share Of The UK – Ford Makes Push",
+    "source": "climate_solutions_cleantechnica",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9149853587150574
+  },
+  {
+    "title": "LayaCodec: Breakthrough for Audio AI",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9933,
+    "minilm_score": 0.1286834478378296
+  },
+  {
+    "title": "Developer Meetup Badges Made Simple with BadgeFlow",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9874,
+    "minilm_score": 0.9152445197105408
+  },
+  {
+    "title": "O truque oficial do Google para dar um gás no Android que está engasgando",
+    "source": "portuguese_olhar_digital",
+    "tier": "medium",
+    "distilbert_score": 0.9948,
+    "minilm_score": 0.7129774689674377
+  },
+  {
+    "title": "Quanto custa montar um PC gamer igual ao do Neymar Jr?",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.906737744808197
+  },
+  {
+    "title": "letta-ai/letta",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.5898,
+    "minilm_score": 0.09929461032152176
+  },
+  {
+    "title": "World’s First HarmonyOS-Powered Gasoline Car: Dongfeng Nissan Teana Surpasses 10,000 Orders in Its F",
+    "source": "china_pandaily",
+    "tier": "medium",
+    "distilbert_score": 0.9933,
+    "minilm_score": 0.9192050099372864
+  },
+  {
+    "title": "Built a Visual Docker Compose Editor",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9926,
+    "minilm_score": 0.6421157717704773
+  },
+  {
+    "title": "EDP Renováveis vende projeto solar em Itália por 300 milhões",
+    "source": "portuguese_eco_pt",
+    "tier": "medium",
+    "distilbert_score": 0.6397,
+    "minilm_score": 0.8352868556976318
+  },
+  {
+    "title": "Presente para Amigo Secreto homem; 6 opções por faixa de preço",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9203388690948486
+  },
+  {
+    "title": "Mini-PC Trycoo WO4 5600H im Test: Ryzen 5, 16 GB RAM & Windows 11",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9934,
+    "minilm_score": 0.9181457161903381
+  },
+  {
+    "title": "La mer du Nord, dernière demeure pour une partie du CO2 européen",
+    "source": "french_sciences_et_avenir",
+    "tier": "medium",
+    "distilbert_score": 0.9326,
+    "minilm_score": 0.07822716981172562
+  },
+  {
+    "title": "LG announces new line of xboom speakers ahead of CES",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.8867881298065186
+  },
+  {
+    "title": "\"Companheiros para a vida com IA\": Samsung mostra prévia de lançamentos da CES",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.9027622938156128
+  },
+  {
+    "title": "Realme prepara novo celular intermediário com recargas muito rápidas; veja",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9100725054740906
+  },
+  {
+    "title": "[分享创造] 全量/增量/定时 下载小米云服务中的 相册/录音 到本地",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9612,
+    "minilm_score": 0.8207409977912903
+  },
+  {
+    "title": "Create Your Own Bash Computer Use Agent with NVIDIA Nemotron in One Hour",
+    "source": "ai_nvidia_developer",
+    "tier": "medium",
+    "distilbert_score": 0.9917,
+    "minilm_score": 0.895362377166748
+  },
+  {
+    "title": "Allye Energy wins order for five MAX500 battery storage systems for charging electric construction v",
+    "source": "energy_utilities_charged_evs",
+    "tier": "medium",
+    "distilbert_score": 0.8144,
+    "minilm_score": 0.9114296436309814
+  },
+  {
+    "title": "Comprar la baliza V16 en un supermercado sale mucho más cara: aquí puedes comprarla por menos de 30 ",
+    "source": "spanish_hipertextual",
+    "tier": "medium",
+    "distilbert_score": 0.9947,
+    "minilm_score": 0.9213188290596008
+  },
+  {
+    "title": "GreenSketch AI 3.0 fast tracks solar and battery install design and business",
+    "source": "energy_utilities_pv_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.9921,
+    "minilm_score": 0.9027963876724243
+  },
+  {
+    "title": "ReScribe: O \"detetive\" que encontra as subscrições esquecidas que lhe estão a tirar dinheiro",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.983,
+    "minilm_score": 0.07701151072978973
+  },
+  {
+    "title": "Passive income / farming",
+    "source": "community_social_reddit_artificial",
+    "tier": "medium",
+    "distilbert_score": 0.9047,
+    "minilm_score": 0.08150583505630493
+  },
+  {
+    "title": "Hyundai Motor & Healthy Seas Celebrate 5 Years of Global Ocean Conservation & Education Leadership",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.8021,
+    "minilm_score": 0.08925098180770874
+  },
+  {
+    "title": "Anker SOLIX New Year Sale takes up to 65% off power stations, Navee XT5 Pro e-scooter at new $1,300 ",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9963,
+    "minilm_score": 0.9236405491828918
+  },
+  {
+    "title": "aichat: Claude-Code/Codex-CLI tool for fast full-text session search, and continue work without comp",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9531,
+    "minilm_score": 0.8840240240097046
+  },
+  {
+    "title": "Got tired of copy-pasting LICENSE files, so I built a tiny CLI for it (Homebrew)",
+    "source": "community_social_programming_reddit",
+    "tier": "medium",
+    "distilbert_score": 0.9899,
+    "minilm_score": 0.7739050984382629
+  },
+  {
+    "title": "GPT 5.2 vs. Gemini 3: The \"Internal Code Red\" at OpenAI and the Shocking Truth Behind the New Models",
+    "source": "community_social_reddit_deeplearning",
+    "tier": "medium",
+    "distilbert_score": 0.8021,
+    "minilm_score": 0.07584407925605774
+  },
+  {
+    "title": "BeehiveInnovations/pal-mcp",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9183,
+    "minilm_score": 0.07633157074451447
+  },
+  {
+    "title": "iOS 26.2 is here with another Liquid Glass tweak, new Podcasts features and more",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9941,
+    "minilm_score": 0.9147838354110718
+  },
+  {
+    "title": "This tiny EV that’s selling for under $12,000 in Europe is coming to the US",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9385,
+    "minilm_score": 0.7331661581993103
+  },
+  {
+    "title": "Xiaomi 17 Ultra chega ao mercado com novo sensor de uma polegada, telefoto de 200 MP e uma bateria d",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9174840450286865
+  },
+  {
+    "title": "Chinese quality: BYD launches ‘Zero Defects’ as it crosses 113 GWh in Q3",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.7013,
+    "minilm_score": 0.14386729896068573
+  },
+  {
+    "title": "EcoFlow December EcoCredits Madness sale with up to 68% power station savings from $48, Lectric exte",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9216620922088623
+  },
+  {
+    "title": "dyad",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9929,
+    "minilm_score": 0.08350877463817596
+  },
+  {
+    "title": "Convert HEIC Photos to PNG Online – No Install, No Watermark",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9888,
+    "minilm_score": 0.9014620184898376
+  },
+  {
+    "title": "CSS Multiple Columns: Modern Magazine Layouts Without JavaScript",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9898,
+    "minilm_score": 0.8507600426673889
+  },
+  {
+    "title": "Questo proprietario di Tesla Model S ha montato dei pannelli solari sul tettino e ora non deve più r",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.979,
+    "minilm_score": 0.1147671565413475
+  },
+  {
+    "title": "ExtrudeX machine recycles failed/old 3D prints into new filament (Crowdfunding)",
+    "source": "semiconductor_hardware_cnx_software",
+    "tier": "medium",
+    "distilbert_score": 0.9682,
+    "minilm_score": 0.08806364983320236
+  },
+  {
+    "title": "Show HN: Stickerbox, a kid-safe, AI-powered voice to sticker printer",
+    "source": "community_social_hacker_news",
+    "tier": "medium",
+    "distilbert_score": 0.9724,
+    "minilm_score": 0.8962081074714661
+  },
+  {
+    "title": "Microsoft Issues ‘Critical Update’ For All Windows 11 Users",
+    "source": "professional_business_forbes_innovation",
+    "tier": "medium",
+    "distilbert_score": 0.9568,
+    "minilm_score": 0.4330764412879944
+  },
+  {
+    "title": "Dockerfile - Node with TypeScript",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9902,
+    "minilm_score": 0.08711393177509308
+  },
+  {
+    "title": "Samsung prepara TVs Micro RGB inéditas para a CES, aponta site",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9963,
+    "minilm_score": 0.9054083824157715
+  },
+  {
+    "title": "reTerminal E1001/E1002 Review – B&W and color ePaper displays tested with SenseCraft HMI and Home As",
+    "source": "semiconductor_hardware_cnx_software",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.9189853668212891
+  },
+  {
+    "title": "Yo tambi√©n conectaba los cables HDMI en el primer puerto que pillaba: estaba desperdiciando la mita",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.0784037634730339
+  },
+  {
+    "title": "Huawei’s Maextro S800 leads China ultra-luxury EV sales",
+    "source": "global_south_tech_in_asia",
+    "tier": "medium",
+    "distilbert_score": 0.962,
+    "minilm_score": 0.9084122180938721
+  },
+  {
+    "title": "Puedo encender, controlar y jugar a mi PC desde cualquier lugar del mundo: tres ingredientes que lo ",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9824,
+    "minilm_score": 0.9146507978439331
+  },
+  {
+    "title": "🚀 Multi-Application CI/CD on AWS (Production-Style)",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9785,
+    "minilm_score": 0.08078735321760178
+  },
+  {
+    "title": "Get Tablet-Level Flexibility and Laptop-Level Productivity in One Device — Now $170 Off",
+    "source": "professional_business_entrepreneur_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.9947,
+    "minilm_score": 0.9167278409004211
+  },
+  {
+    "title": "This 1962 Mercury Comet EV Was Born From A Wrecked Nissan Leaf",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9913,
+    "minilm_score": 0.8904764652252197
+  },
+  {
+    "title": "VisionFive 2 Lite SBC Review – Ubuntu 24.04 on a low-cost RISC-V SBC in 2026",
+    "source": "semiconductor_hardware_cnx_software",
+    "tier": "medium",
+    "distilbert_score": 0.9922,
+    "minilm_score": 0.915820300579071
+  },
+  {
+    "title": "$29K Dodge Charger — is this 50% off EV deal too good to miss?",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.9165377616882324
+  },
+  {
+    "title": "Von 6 Millionen Nutzern installiert: Diese Chrome-Erweiterung sammelt laut Experten heimlich deine C",
+    "source": "german_t3n",
+    "tier": "medium",
+    "distilbert_score": 0.919,
+    "minilm_score": 0.09278639405965805
+  },
+  {
+    "title": "Nueve accesorios fitness que todo aficionado al gimnasio agradecerá",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9201,
+    "minilm_score": 0.9092638492584229
+  },
+  {
+    "title": "Show HN: Agentica – 200 reqs/day for free, data not used to train our LLMs",
+    "source": "community_social_hackernews_newest",
+    "tier": "medium",
+    "distilbert_score": 0.9941,
+    "minilm_score": 0.9006194472312927
+  },
+  {
+    "title": "Maxell PSB2032 35 mAh all-solid-state coin cell battery targets industrial IoT devices",
+    "source": "semiconductor_hardware_cnx_software",
+    "tier": "medium",
+    "distilbert_score": 0.899,
+    "minilm_score": 0.9074853658676147
+  },
+  {
+    "title": "Peterbilt takes aim at medium",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9573,
+    "minilm_score": 0.0775708332657814
+  },
+  {
+    "title": "The internet’s curious obsession with incandescent Christmas lights",
+    "source": "climate_solutions_yale_climate_connections",
+    "tier": "medium",
+    "distilbert_score": 0.9455,
+    "minilm_score": 0.09892792254686356
+  },
+  {
+    "title": "Stellar Solar Commercial Wraps Up a Record Year in 2025",
+    "source": "energy_utilities_altenergymag",
+    "tier": "medium",
+    "distilbert_score": 0.8197,
+    "minilm_score": 0.12384059280157089
+  },
+  {
+    "title": "I built a tool to control AI coding sessions from your phone (local WiFi, no cloud)",
+    "source": "community_social_programming_reddit",
+    "tier": "medium",
+    "distilbert_score": 0.9148,
+    "minilm_score": 0.8952018618583679
+  },
+  {
+    "title": "Dalla gestione reattiva a quella predittiva, Schneider Electric ci mostra la rotta verso il 2050",
+    "source": "italian_rinnovabili",
+    "tier": "medium",
+    "distilbert_score": 0.951,
+    "minilm_score": 0.07566099613904953
+  },
+  {
+    "title": "The best budgeting apps for 2025",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.8949099183082581
+  },
+  {
+    "title": "BMW Drivers Now Have Access to Tesla Superchargers, 15th Auto Brand to Gain Access",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9149957895278931
+  },
+  {
+    "title": "vanilla-wiiu/vanilla",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9955,
+    "minilm_score": 0.09520761668682098
+  },
+  {
+    "title": "A maior câmera digital do mundo vai fotografar o céu por 10 anos",
+    "source": "portuguese_exame",
+    "tier": "medium",
+    "distilbert_score": 0.7291,
+    "minilm_score": 0.5424014925956726
+  },
+  {
+    "title": "Tailwind CSS v4 Migration Guide",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9859,
+    "minilm_score": 0.10010941326618195
+  },
+  {
+    "title": "Kia PV5 Earns Global Recognition Across Performance, Safety, Design and Innovation in 2025",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.8832,
+    "minilm_score": 0.48576632142066956
+  },
+  {
+    "title": "Come scegliere l’impianto solare per la casa ed evitare le truffe",
+    "source": "italian_energia_oltre",
+    "tier": "medium",
+    "distilbert_score": 0.9898,
+    "minilm_score": 0.9127012491226196
+  },
+  {
+    "title": "Ionity installe des bornes de 500 kW en Norvège, mais qui va bien pouvoir en profiter pleinement ?",
+    "source": "french_automobile_propre",
+    "tier": "medium",
+    "distilbert_score": 0.9846,
+    "minilm_score": 0.9051602482795715
+  },
+  {
+    "title": "Testamos o RedMagic 11 Pro | O celular mais poderoso que você vai ver hoje",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9961,
+    "minilm_score": 0.9106493592262268
+  },
+  {
+    "title": "XPeng G7 Super Extended-Range SUV Launches With World-Leading 1,704 km Combined Range",
+    "source": "china_pandaily",
+    "tier": "medium",
+    "distilbert_score": 0.9913,
+    "minilm_score": 0.9109318256378174
+  },
+  {
+    "title": "Project Aura: Building an Open",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9924,
+    "minilm_score": 0.08531038463115692
+  },
+  {
+    "title": "Samsung testa bateria gigante de 20.000 mAh para celulares, diz leaker",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9107820987701416
+  },
+  {
+    "title": "ğŸ§® Build a Desktop Word Counter App in Python (Tkinter)",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9817,
+    "minilm_score": 0.5892934203147888
+  },
+  {
+    "title": "Anker’s portable backup battery is an even better investment now that it’s nearly half off",
+    "source": "ai_the_verge",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.9125688076019287
+  },
+  {
+    "title": "Geely confirms top",
+    "source": "energy_utilities_the_driven",
+    "tier": "medium",
+    "distilbert_score": 0.9937,
+    "minilm_score": 0.08370368182659149
+  },
+  {
+    "title": "À -52%, la tablette Honor Pad X8a ne coûte que 95€ : le top rapport qualité-prix en 2025 👌",
+    "source": "french_01net",
+    "tier": "medium",
+    "distilbert_score": 0.995,
+    "minilm_score": 0.9197501540184021
+  },
+  {
+    "title": "Ola Electric launches Hyperservice Centres with same-day service",
+    "source": "global_south_yourstory",
+    "tier": "medium",
+    "distilbert_score": 0.8182,
+    "minilm_score": 0.8993771076202393
+  },
+  {
+    "title": "[分享创造] 开源了一个无云端存储的公众号 Markdown 编辑器，欢迎大家拍砖",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9167,
+    "minilm_score": 0.830086886882782
+  },
+  {
+    "title": "Unreal Engine 5: 2026 pode ser o ano do fotorrealismo sem travamentos?",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9933,
+    "minilm_score": 0.07989124208688736
+  },
+  {
+    "title": "Como resolver 5 problemas do seu ar-condicionado; especialista explica",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9918,
+    "minilm_score": 0.08404791355133057
+  },
+  {
+    "title": "[Windows] 求推荐-当下最好的 Windows 笔记本居然是二手 MacBook i9？",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9942,
+    "minilm_score": 0.9170805215835571
+  },
+  {
+    "title": "Value laptops for Nigerian students and budget users in 2025",
+    "source": "global_south_techcabal",
+    "tier": "medium",
+    "distilbert_score": 0.9934,
+    "minilm_score": 0.09686344861984253
+  },
+  {
+    "title": "Why 2026 Will Be The Best Year Yet To Buy A Used EV",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9942,
+    "minilm_score": 0.9133050441741943
+  },
+  {
+    "title": "Fast deploy solar canopy EV charger secures UK distribution deal",
+    "source": "energy_utilities_pv_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.994,
+    "minilm_score": 0.8780751824378967
+  },
+  {
+    "title": "Como a Motorola quer liderar o mercado B2B \"do bolso à nuvem\"",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9704,
+    "minilm_score": 0.6462292671203613
+  },
+  {
+    "title": "This Startup’s New Product Is Targeting Plastic Pollution With a Novel Kind of Recyclable Packaging",
+    "source": "professional_business_inc_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.7805,
+    "minilm_score": 0.6594995856285095
+  },
+  {
+    "title": "Xiaomi colpisce ancora (grazie anche ad Amazon)! Questo robot scende sotto i 100€",
+    "source": "italian_tom_hardware_italia",
+    "tier": "medium",
+    "distilbert_score": 0.9925,
+    "minilm_score": 0.9186908006668091
+  },
+  {
+    "title": "XIAO Soil Moisture Sensor review with Home Assistant",
+    "source": "semiconductor_hardware_cnx_software",
+    "tier": "medium",
+    "distilbert_score": 0.9905,
+    "minilm_score": 0.8890313506126404
+  },
+  {
+    "title": "All new ChargePoint hardware now supports the Plug & Charge seamless EV charging standard",
+    "source": "energy_utilities_charged_evs",
+    "tier": "medium",
+    "distilbert_score": 0.6549,
+    "minilm_score": 0.9113529920578003
+  },
+  {
+    "title": "So.. slightly off topic, but does anyone else here see that the emperor has no clothes?",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.8717,
+    "minilm_score": 0.2295200079679489
+  },
+  {
+    "title": "Telefoni cordless: l’idea regalo di fine anno che i nonni potrebbero amare",
+    "source": "italian_tom_hardware_italia",
+    "tier": "medium",
+    "distilbert_score": 0.995,
+    "minilm_score": 0.10132662206888199
+  },
+  {
+    "title": "Nvidia DGX Station GB300 784GB available now! 95,000 USD / 80,000 EUR",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.917153000831604
+  },
+  {
+    "title": "La baliza V-16 tiene muchos problemas: que el fabricante apague sus servidores y te deje sin conexi√",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.6529,
+    "minilm_score": 0.091253861784935
+  },
+  {
+    "title": "Largest Utah Coal Plant Goes Quiet as Los Angeles Goes Coal",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9762,
+    "minilm_score": 0.36295458674430847
+  },
+  {
+    "title": "Saatvik Green commissions 2 GW EPE film manufacturing plant",
+    "source": "energy_utilities_renewable_watch_india",
+    "tier": "medium",
+    "distilbert_score": 0.6566,
+    "minilm_score": 0.10325709730386734
+  },
+  {
+    "title": "Airbags mortais: como está a situação dos carros apreendidos?",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9918,
+    "minilm_score": 0.0827014148235321
+  },
+  {
+    "title": "TCL Sunpower unveils residential battery",
+    "source": "energy_utilities_pv_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.9821,
+    "minilm_score": 0.8869411945343018
+  },
+  {
+    "title": "For those with a 6700XT GPU (gfx1031) - ROCM - Openweb UI",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9902,
+    "minilm_score": 0.900102436542511
+  },
+  {
+    "title": "WhatsApp obriga utilizadores do Windows 11 a atualizar para nova app que ninguém quer",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9943,
+    "minilm_score": 0.7175973057746887
+  },
+  {
+    "title": "Salva le tue bollette dall’inverno: luce e gas a prezzi bloccati con Octopus Energy",
+    "source": "italian_punto_informatico",
+    "tier": "medium",
+    "distilbert_score": 0.9951,
+    "minilm_score": 0.9190185070037842
+  },
+  {
+    "title": "As inovações tecnológicas mais curiosas de 2025",
+    "source": "portuguese_olhar_digital",
+    "tier": "medium",
+    "distilbert_score": 0.9925,
+    "minilm_score": 0.08388085663318634
+  },
+  {
+    "title": "GoodWe launches new hybrid inverters for C&I solar",
+    "source": "energy_utilities_pv_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.9888,
+    "minilm_score": 0.8441290259361267
+  },
+  {
+    "title": "Pebble is making a weird little smart ring for recording thoughts",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9857,
+    "minilm_score": 0.6096891164779663
+  },
+  {
+    "title": "AmpUp launches EV charging pricing recommendation engine",
+    "source": "energy_utilities_charged_evs",
+    "tier": "medium",
+    "distilbert_score": 0.9879,
+    "minilm_score": 0.8978211879730225
+  },
+  {
+    "title": "How to use a VPN",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.994,
+    "minilm_score": 0.10399085283279419
+  },
+  {
+    "title": "Jackery Christmas Sale takes up to 57% off power stations, Rad Power e",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9200087189674377
+  },
+  {
+    "title": "Como criar uma playlist do Apple Music com seus amigos para o ano novo",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9948,
+    "minilm_score": 0.9102396965026855
+  },
+  {
+    "title": "GWM unveils Ora 5 EV for around $20,000, could be headed to Australia",
+    "source": "energy_utilities_the_driven",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.8893430233001709
+  },
+  {
+    "title": "China mall installs glass windows on men’s toilet doors that turn transparent when users smoke",
+    "source": "global_south_south_china_morning_post",
+    "tier": "medium",
+    "distilbert_score": 0.909,
+    "minilm_score": 0.8882209062576294
+  },
+  {
+    "title": "From Idea to MVP: Building a SaaS in 30 Days as a Solo Developer",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9934,
+    "minilm_score": 0.9132199287414551
+  },
+  {
+    "title": "Kindle vai usar IA para tirar dúvidas sobre seus livros sem dar spoilers",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9517,
+    "minilm_score": 0.9165633916854858
+  },
+  {
+    "title": "Old but still gold",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.9947,
+    "minilm_score": 0.10111497342586517
+  },
+  {
+    "title": "E os destaques tecnológicos da semana que passou foram…",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.7404,
+    "minilm_score": 0.860664963722229
+  },
+  {
+    "title": "This Tesla-Crushing EV Was The Best Car I Drove In 2025. Here's Why",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.9928,
+    "minilm_score": 0.9059392809867859
+  },
+  {
+    "title": "ZOUPW 450W Portable Solar Panel — CleanTechnica Tested",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9948,
+    "minilm_score": 0.9022731781005859
+  },
+  {
+    "title": "Lightning-1.7B: A Qwen3 finetune focused on creative auto-titling and short",
+    "source": "community_social_reddit_local_llama",
+    "tier": "medium",
+    "distilbert_score": 0.8953,
+    "minilm_score": 0.8452987670898438
+  },
+  {
+    "title": "GM startet Produktion von Elektroautos in Brasilien",
+    "source": "german_electrive",
+    "tier": "medium",
+    "distilbert_score": 0.5777,
+    "minilm_score": 0.1081208810210228
+  },
+  {
+    "title": "Robotáxi da Volkswagen avança na Europa e está em testes em Wolfsburg",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.7219,
+    "minilm_score": 0.8945602178573608
+  },
+  {
+    "title": "Quer queimar os excessos de Natal sem sair de casa e sem gastar dinheiro? Darebee ajuda",
+    "source": "portuguese_tek",
+    "tier": "medium",
+    "distilbert_score": 0.9869,
+    "minilm_score": 0.7241250872612
+  },
+  {
+    "title": "Show HN: EZTest – open",
+    "source": "community_social_hackernews_newest",
+    "tier": "medium",
+    "distilbert_score": 0.978,
+    "minilm_score": 0.8476884365081787
+  },
+  {
+    "title": "Zambia Wants To Add 2.3MW Of Solar Coupled With A 4.16MWh Battery To Each One Of The Country’s 156 C",
+    "source": "climate_solutions_cleantechnica",
+    "tier": "medium",
+    "distilbert_score": 0.9861,
+    "minilm_score": 0.9069635272026062
+  },
+  {
+    "title": "Clean energy is still winning. These 10 charts prove it. - Canary Media",
+    "source": "newsapi_general",
+    "tier": "medium",
+    "distilbert_score": 0.7951,
+    "minilm_score": 0.1016632467508316
+  },
+  {
+    "title": "Prompt-Shortcuts: So sparst du Zeit bei der Arbeit mit KI",
+    "source": "german_t3n",
+    "tier": "medium",
+    "distilbert_score": 0.9831,
+    "minilm_score": 0.08163382858037949
+  },
+  {
+    "title": "Fortescue debuts second battery electric locomotive in push to real zero",
+    "source": "energy_utilities_the_driven",
+    "tier": "medium",
+    "distilbert_score": 0.9735,
+    "minilm_score": 0.7996458411216736
+  },
+  {
+    "title": "[加密货币] 「境外支付」胎教级 Fiat24 注册教程",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9826,
+    "minilm_score": 0.08532704412937164
+  },
+  {
+    "title": "Chinese and Korean EV pickup sales are surging, so what’s wrong with the US?",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9547,
+    "minilm_score": 0.377159982919693
+  },
+  {
+    "title": "Diptyx E-Reader – An open-source, ESP32-powered, dual-screen e",
+    "source": "semiconductor_hardware_cnx_software",
+    "tier": "medium",
+    "distilbert_score": 0.9951,
+    "minilm_score": 0.895060658454895
+  },
+  {
+    "title": "La Navidad se adelanta en AliExpress: hay buenas ofertas en móviles Xiaomi, Realme y más",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9963,
+    "minilm_score": 0.9215537309646606
+  },
+  {
+    "title": "CES 2026: o que esperar da maior feira de tecnologia do mundo em janeiro",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.9959,
+    "minilm_score": 0.8827452659606934
+  },
+  {
+    "title": "Sony's first EV with Honda will let you remotely play PS5 in your car",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.992,
+    "minilm_score": 0.9164084792137146
+  },
+  {
+    "title": "[问与答] 公司不想花钱买打印机盒子，请问有没有免费软件，在 WIN 使用的啊？",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.5589,
+    "minilm_score": 0.8924767971038818
+  },
+  {
+    "title": "Test Driving The Polestar 3: Sporty EV SUV Surprises On Range And Fun",
+    "source": "professional_business_forbes_innovation",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.912208080291748
+  },
+  {
+    "title": "Argentina's Genneia opens $180 million solar park in Mendoza - TradingView — Track All Markets",
+    "source": "global_news_reuters",
+    "tier": "medium",
+    "distilbert_score": 0.9898,
+    "minilm_score": 0.8878324031829834
+  },
+  {
+    "title": "CES: CES 2026: LG präsentiert Gaming-Monitore einer neuen Premiumklasse",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.9147862195968628
+  },
+  {
+    "title": "Tesla Semi finalmente in strada con le insegne DHL. In produzione dal 2026",
+    "source": "italian_vaielettrico",
+    "tier": "medium",
+    "distilbert_score": 0.9548,
+    "minilm_score": 0.8744403123855591
+  },
+  {
+    "title": "RosettaCommons/foundry",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.7265,
+    "minilm_score": 0.08979383111000061
+  },
+  {
+    "title": "sst/opencode",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9389,
+    "minilm_score": 0.09380693733692169
+  },
+  {
+    "title": "XCharge NA just launched New England’s fastest charging site",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9835,
+    "minilm_score": 0.6760896444320679
+  },
+  {
+    "title": "[写周报] 独立开发周记 147：苹果开发者第十年",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.9747,
+    "minilm_score": 0.0775298997759819
+  },
+  {
+    "title": "The AI boom could soon send GPU prices soaring, so now's a good time to buy one",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9878,
+    "minilm_score": 0.9178383946418762
+  },
+  {
+    "title": "C√≥mo hacer una felicitaci√≥n de Navidad creando una foto familiar o grupal a partir de fotograf√≠as",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.86,
+    "minilm_score": 0.08334298431873322
+  },
+  {
+    "title": "China’s First Fully Autonomous Gas Turbine Power Generation Control System Goes Live",
+    "source": "china_pandaily",
+    "tier": "medium",
+    "distilbert_score": 0.532,
+    "minilm_score": 0.09829162061214447
+  },
+  {
+    "title": "Stop Charging Your Android Watch Daily. Here Are 7 Tips for Longer Battery Life - CNET",
+    "source": "newsapi_general",
+    "tier": "medium",
+    "distilbert_score": 0.9952,
+    "minilm_score": 0.9196641445159912
+  },
+  {
+    "title": "Refactoring a Mature Airflow Project: A Practical Guide to Scaling from Solo Development to Team Col",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9706,
+    "minilm_score": 0.08064291626214981
+  },
+  {
+    "title": "iFixit’s FixBot helps with repairs ‘the way a master technician would’ - The Verge",
+    "source": "newsapi_general",
+    "tier": "medium",
+    "distilbert_score": 0.9911,
+    "minilm_score": 0.39125144481658936
+  },
+  {
+    "title": "Show HN: Brick Starter – .NET SaaS starter kit to ship production apps faster",
+    "source": "community_social_hackernews_newest",
+    "tier": "medium",
+    "distilbert_score": 0.9929,
+    "minilm_score": 0.9107210636138916
+  },
+  {
+    "title": "Windows 11: Smart App Control si attiva senza reinstallare tutto",
+    "source": "italian_punto_informatico",
+    "tier": "medium",
+    "distilbert_score": 0.9931,
+    "minilm_score": 0.9051703214645386
+  },
+  {
+    "title": "[TextMate] bold text generator free, no install, try now",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.8877,
+    "minilm_score": 0.9091467261314392
+  },
+  {
+    "title": "Seeing through the microservices hype",
+    "source": "community_social_programming_reddit",
+    "tier": "medium",
+    "distilbert_score": 0.9894,
+    "minilm_score": 0.09192079305648804
+  },
+  {
+    "title": "A Londra il primo marciapiede al mondo che produce energia trasformando i passi in elettricità",
+    "source": "italian_greenme",
+    "tier": "medium",
+    "distilbert_score": 0.9007,
+    "minilm_score": 0.0770246759057045
+  },
+  {
+    "title": "TelegramMessenger/Telegram",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9753,
+    "minilm_score": 0.2036542445421219
+  },
+  {
+    "title": "This Rivian R1T Has Over 600 Miles Of Range",
+    "source": "automotive_insideevs",
+    "tier": "medium",
+    "distilbert_score": 0.994,
+    "minilm_score": 0.8974392414093018
+  },
+  {
+    "title": "Tencent releases Hunyuan 2.0, its next",
+    "source": "china_technode",
+    "tier": "medium",
+    "distilbert_score": 0.9887,
+    "minilm_score": 0.1150965765118599
+  },
+  {
+    "title": "Bring Bitcoin Mining into Your Office Without Noise, Heat, or Hassle",
+    "source": "professional_business_entrepreneur_magazine",
+    "tier": "medium",
+    "distilbert_score": 0.9903,
+    "minilm_score": 0.10206733644008636
+  },
+  {
+    "title": "Dragonfly Energy Expands Marine OEM Footprint with World’s Largest Power Catamaran Manufacturer, Wor",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9336,
+    "minilm_score": 0.8926827907562256
+  },
+  {
+    "title": "32k token context window",
+    "source": "community_social_reddit_chatgpt",
+    "tier": "medium",
+    "distilbert_score": 0.995,
+    "minilm_score": 0.08173929899930954
+  },
+  {
+    "title": "Kia’s small EV drops its camo, plus a sneak peek at the interior [Video]",
+    "source": "automotive_transport_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9141493439674377
+  },
+  {
+    "title": "Panasonic to Supply Batteries for Zoox",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9924,
+    "minilm_score": 0.8827273845672607
+  },
+  {
+    "title": "The new Kia Seltos has EV vibes, but it’s not actually electric",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.864717960357666
+  },
+  {
+    "title": "Meta's latest acquisition suggests hardware plans beyond glasses and headsets",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.6633,
+    "minilm_score": 0.8798163533210754
+  },
+  {
+    "title": "Video Friday: Biorobotics Turns Lobster Tails Into Gripper",
+    "source": "ai_ieee_spectrum",
+    "tier": "medium",
+    "distilbert_score": 0.968,
+    "minilm_score": 0.9112824201583862
+  },
+  {
+    "title": "Aventon New Year Sale takes up to $500 off legacy + new e-bikes for lows from $999, Autel 50A smart ",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9240936636924744
+  },
+  {
+    "title": "LG, speaker karaoke con AI rimuove la voce e regola tonalità",
+    "source": "italian_punto_informatico",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.8774639368057251
+  },
+  {
+    "title": "Rinnovabili | Daily Solar News [02/01/2026]",
+    "source": "italian_rinnovabili",
+    "tier": "medium",
+    "distilbert_score": 0.9787,
+    "minilm_score": 0.0937824621796608
+  },
+  {
+    "title": "Adeus ao carregador do smartphone? Samsung prepara bateria de 20.000 mAh",
+    "source": "portuguese_pplware",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9146056175231934
+  },
+  {
+    "title": "Mouser adds power management resource centre",
+    "source": "ai_electronics_weekly",
+    "tier": "medium",
+    "distilbert_score": 0.65,
+    "minilm_score": 0.08956433832645416
+  },
+  {
+    "title": "Renault Megane vs Kia EV4: which electric hatchback is fit for all the family?",
+    "source": "automotive_autoexpress_uk",
+    "tier": "medium",
+    "distilbert_score": 0.9748,
+    "minilm_score": 0.916408896446228
+  },
+  {
+    "title": "La paradoja de que Meta compre Manus: su mayor ventaja es no tener modelo propio",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.8989,
+    "minilm_score": 0.9101004600524902
+  },
+  {
+    "title": "heise+ | Ladetarife für Elektroautos im Vergleich",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9786,
+    "minilm_score": 0.8966642618179321
+  },
+  {
+    "title": "Qual é a \"boombox\" mais potente do Brasil? Veja 3 opções por faixa de preço",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.9220348000526428
+  },
+  {
+    "title": "ğŸ”¥The Real cost of Learning AI and how weâ€™re breaking that barrierğŸ”¥",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9829,
+    "minilm_score": 0.07419995218515396
+  },
+  {
+    "title": "CES 2026: o que esperar da LG na maior feira de tecnologia do mundo",
+    "source": "portuguese_canaltech",
+    "tier": "medium",
+    "distilbert_score": 0.991,
+    "minilm_score": 0.902548611164093
+  },
+  {
+    "title": "Ar-condicionado Inverter Samsung WindFree AI cai 22% com cupom no Mercado Livre",
+    "source": "portuguese_tecnoblog",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9161810874938965
+  },
+  {
+    "title": "Mouser shipping PSOC Edge ML MCUs",
+    "source": "ai_electronics_weekly",
+    "tier": "medium",
+    "distilbert_score": 0.9945,
+    "minilm_score": 0.9091812372207642
+  },
+  {
+    "title": "DFRobot HUSKYLENS 2 AI camera review – From built-in AI samples to training a custom model to detect",
+    "source": "semiconductor_hardware_cnx_software",
+    "tier": "medium",
+    "distilbert_score": 0.9913,
+    "minilm_score": 0.8769487142562866
+  },
+  {
+    "title": "Mouser adds power management resource centre",
+    "source": "ai_electronics_weekly",
+    "tier": "medium",
+    "distilbert_score": 0.65,
+    "minilm_score": 0.08956433832645416
+  },
+  {
+    "title": "The EVs Everyone Will Be Talking About in 2026",
+    "source": "energy_utilities_heatmap_news",
+    "tier": "medium",
+    "distilbert_score": 0.9941,
+    "minilm_score": 0.08597658574581146
+  },
+  {
+    "title": "The best cameras for 2026",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.996,
+    "minilm_score": 0.911066472530365
+  },
+  {
+    "title": "Tesla cede el trono del coche eléctrico mundial a BYD en otro año marcado por el retroceso de ventas",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.6624,
+    "minilm_score": 0.8977252840995789
+  },
+  {
+    "title": "Aventon New Year Sale takes up to $500 off legacy + new e-bikes for lows from $999, Autel 50A smart ",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9240936636924744
+  },
+  {
+    "title": "Part 1: Creating Databricks Workspace and Enabling Unity Catalog",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.8006,
+    "minilm_score": 0.09015385806560516
+  },
+  {
+    "title": "Por que o mercado aposta na 3tentos entre as small caps — e no agro — em 2026",
+    "source": "portuguese_exame",
+    "tier": "medium",
+    "distilbert_score": 0.8178,
+    "minilm_score": 0.8557073473930359
+  },
+  {
+    "title": "Más rápido, más rentable, más arriesgado: a qué se debe el auge en la venta de coches de segunda man",
+    "source": "global_news_el_pais",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.9201083183288574
+  },
+  {
+    "title": "[程序员] 让 Cursor/Claude 直接“读懂”钉钉文档： mcp-dingtalk-doc 上手与实战",
+    "source": "china_v2ex",
+    "tier": "medium",
+    "distilbert_score": 0.7442,
+    "minilm_score": 0.0810057669878006
+  },
+  {
+    "title": "Yo también conectaba los cables HDMI en el primer puerto que pillaba: estaba desperdiciando la mitad",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.08636221289634705
+  },
+  {
+    "title": "Shipping a Scalable AI SaaS: How DeepSeek + Node.js Changed My Workflow",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.9271,
+    "minilm_score": 0.09081713110208511
+  },
+  {
+    "title": "What Falling Sales? BEVs Jump 37% YoY in November in Europe!",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.9958,
+    "minilm_score": 0.9084666967391968
+  },
+  {
+    "title": "awslabs/amazon-bedrock-agentcore-samples",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9883,
+    "minilm_score": 0.09204206615686417
+  },
+  {
+    "title": "BYD New Global BEV Sales Leader, Displacing Tesla",
+    "source": "climate_solutions_cleantechnica",
+    "tier": "medium",
+    "distilbert_score": 0.7608,
+    "minilm_score": 0.09992100298404694
+  },
+  {
+    "title": "LG made up a new word for its next ultralight Gram laptops: 'Aerominum'",
+    "source": "ai_engadget",
+    "tier": "medium",
+    "distilbert_score": 0.9908,
+    "minilm_score": 0.9111424684524536
+  },
+  {
+    "title": "BYD’s BEV Sales Grew 28% In 2025, But Dropped 8% In December",
+    "source": "energy_utilities_clean_technica",
+    "tier": "medium",
+    "distilbert_score": 0.984,
+    "minilm_score": 0.18147535622119904
+  },
+  {
+    "title": "CES: Schwebende Projektion: The FreeStyle+ braucht keine glatten Flächen",
+    "source": "german_heise_online",
+    "tier": "medium",
+    "distilbert_score": 0.9949,
+    "minilm_score": 0.8508186936378479
+  },
+  {
+    "title": "Aventon New Year Sale takes up to $500 off legacy + new e-bikes for lows from $999, Autel 50A smart ",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9962,
+    "minilm_score": 0.9240936636924744
+  },
+  {
+    "title": "nocodb/nocodb",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9833,
+    "minilm_score": 0.1531030535697937
+  },
+  {
+    "title": "Yo también conectaba los cables HDMI en el primer puerto que pillaba: estaba desperdiciando la mitad",
+    "source": "spanish_xataka",
+    "tier": "medium",
+    "distilbert_score": 0.9957,
+    "minilm_score": 0.08636221289634705
+  },
+  {
+    "title": "cjpais/Handy",
+    "source": "community_social_github_trending",
+    "tier": "medium",
+    "distilbert_score": 0.9917,
+    "minilm_score": 0.08663521707057953
+  },
+  {
+    "title": "Ar-condicionado Inverter Samsung 12.000 BTUs com Wi-Fi tem 22% OFF em oferta",
+    "source": "portuguese_tecnoblog",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9198524355888367
+  },
+  {
+    "title": "Anker SOLIX New Year Sale takes up to 65% off power stations, Navee XT5 Pro e-scooter at new $1,300 ",
+    "source": "automotive_electrek",
+    "tier": "medium",
+    "distilbert_score": 0.9963,
+    "minilm_score": 0.9236405491828918
+  },
+  {
+    "title": "Shopify Scripts Functions: A Practical Migration Playbook",
+    "source": "community_social_dev_to",
+    "tier": "medium",
+    "distilbert_score": 0.6686,
+    "minilm_score": 0.09127825498580933
+  },
+  {
+    "title": "Ar-condicionado Inverter Samsung WindFree AI cai 22% com cupom no Mercado Livre",
+    "source": "portuguese_tecnoblog",
+    "tier": "medium",
+    "distilbert_score": 0.9956,
+    "minilm_score": 0.9161810874938965
+  }
+]

@@ -1,0 +1,216 @@
+=== MEDIUM tier, scores 0.85-0.95 (71 articles) ===
+These would be blocked at threshold 0.85 but pass at 0.95
+
+[0.949] Amazon WorkSpaces now supports IPv6
+         src: community_social_aws_news
+
+[0.946] The internet’s curious obsession with incandescent Christmas lights
+         src: climate_solutions_yale_climate_connections
+
+[0.945] Nvidia launches open models for building agentic AI
+         src: ai_electronics_weekly
+
+[0.945] Redwood Materials just designed a smarter battery recycling bin
+         src: industry_intelligence_fast_company
+
+[0.944] Na verrassende inhaalrace is dit de meestverkochte auto van 2025
+         src: dutch_news_ad_algemeen
+
+[0.942] AI-Driven Advertising for E-Commerce [2025 Strategy Guide]
+         src: community_social_dev_to
+
+[0.941] Lucid Motors doubled EV output in 2025 after early Gravity SUV struggles
+         src: ai_techcrunch
+
+[0.941] [分享创造] CattoPic 纯 serverless 的图床和 API 综合方案
+         src: china_v2ex
+
+[0.939] Ruim 388.000 nieuwe personenauto's in Nederland, welke waren in trek?
+         src: dutch_news_nos_algemeen
+
+[0.939] sst/opencode
+         src: community_social_github_trending
+
+[0.939] This tiny EV that’s selling for under $12,000 in Europe is coming to the US
+         src: automotive_electrek
+
+[0.938] Fotovoltaico: con Enel Solare Italiano by 3SUN, i panelli solari Made in Italy d
+         src: italian_greenme
+
+[0.936] Fim das películas de privacidade? Samsung inova com ecrã que se “esconde” sozinh
+         src: portuguese_pplware
+
+[0.935] Developer-Häppchen fürs Wochenende – Kleinere News der Woche
+         src: german_heise_online
+
+[0.935] Developer-Häppchen fürs Wochenende – Kleinere News der Woche
+         src: german_heise_online
+
+[0.934] Dragonfly Energy Expands Marine OEM Footprint with World’s Largest Power Catamar
+         src: energy_utilities_clean_technica
+
+[0.933] BYD Hits Sales Goal, Set to Topple Tesla as Biggest EV Maker
+         src: fintech_markets_bloomberg_technology
+
+[0.933] La mer du Nord, dernière demeure pour une partie du CO2 européen
+         src: french_sciences_et_avenir
+
+[0.931] Why I'm Removing "Magic" From My Apps (Building a Private Reddit Client)
+         src: community_social_dev_to
+
+[0.929] Beyond the YAML Hell: Why 2026 is the Year of Platform Engineering
+         src: community_social_dev_to
+
+[0.929] Beyond the YAML Hell: Why 2026 is the Year of Platform Engineering
+         src: community_social_dev_to
+
+[0.927] El Tesla Cybertruck es tal fracaso de ventas que Elon Musk solo ha encontrado un
+         src: spanish_xataka
+
+[0.927] Shipping a Scalable AI SaaS: How DeepSeek + Node.js Changed My Workflow
+         src: community_social_dev_to
+
+[0.927] Shipping a Scalable AI SaaS: How DeepSeek + Node.js Changed My Workflow
+         src: community_social_dev_to
+
+[0.927] Shipping a Scalable AI SaaS: How DeepSeek + Node.js Changed My Workflow
+         src: community_social_dev_to
+
+[0.927] [分享创造] 我用 DuckDB 搓了个“本地” Excel As Chat BI 工具
+         src: china_v2ex
+
+[0.920] Nueve accesorios fitness que todo aficionado al gimnasio agradecerá
+         src: global_news_el_pais
+
+[0.920] Nueve accesorios fitness que todo aficionado al gimnasio agradecerá
+         src: global_news_el_pais
+
+[0.919] Von 6 Millionen Nutzern installiert: Diese Chrome-Erweiterung sammelt laut Exper
+         src: german_t3n
+
+[0.918] BeehiveInnovations/pal-mcp
+         src: community_social_github_trending
+
+[0.917] [分享创造] 开源了一个无云端存储的公众号 Markdown 编辑器，欢迎大家拍砖
+         src: china_v2ex
+
+[0.915] I built a tool to control AI coding sessions from your phone (local WiFi, no clo
+         src: community_social_programming_reddit
+
+[0.912] [分享创造] [开源] Mac 用 vChangelog：从 Git 历史一键生成版本间 Changelog（支持 AI 总结 / Markdown / 一键复
+         src: china_v2ex
+
+[0.911] Carros elétricos vão ter autonomia para 1.600 km com a descoberta do MIT
+         src: portuguese_pplware
+
+[0.909] China mall installs glass windows on men’s toilet doors that turn transparent wh
+         src: global_south_south_china_morning_post
+
+[0.905] Passive income / farming
+         src: community_social_reddit_artificial
+
+[0.903] Vai comprar um carro usado? Há uma app que ajuda a descobrir o seu passado “secr
+         src: portuguese_tek
+
+[0.902] El mercado del coche en España en 2025 confirma la tendencia: los tres ganadores
+         src: spanish_xataka
+
+[0.902] El mercado del coche en España en 2025 confirma la tendencia: los tres ganadores
+         src: spanish_xataka
+
+[0.902] El mercado del coche en España en 2025 confirma la tendencia: los tres ganadores
+         src: spanish_xataka
+
+[0.901] A Londra il primo marciapiede al mondo che produce energia trasformando i passi 
+         src: italian_greenme
+
+[0.899] Ar-condicionado no calor: como evitar sobrecarga e reduzir a conta de energia
+         src: portuguese_exame
+
+[0.899] Maxell PSB2032 35 mAh all-solid-state coin cell battery targets industrial IoT d
+         src: semiconductor_hardware_cnx_software
+
+[0.899] La paradoja de que Meta compre Manus: su mayor ventaja es no tener modelo propio
+         src: spanish_xataka
+
+[0.899] La paradoja de que Meta compre Manus: su mayor ventaja es no tener modelo propio
+         src: spanish_xataka
+
+[0.899] La paradoja de que Meta compre Manus: su mayor ventaja es no tener modelo propio
+         src: spanish_xataka
+
+[0.898] Peacock is expanding Dolby Vision and Atmos availability for live sports
+         src: ai_engadget
+
+[0.896] This literal lava lamp looks nothing like your lamp from the ’70s
+         src: industry_intelligence_fast_company
+
+[0.896] How a Young Bengaluru Resident Turned His 300 Sq Ft Home Into a Garden of 500 Pl
+         src: positive_news_the_better_india
+
+[0.896] How a Young Bengaluru Resident Turned His 300 Sq Ft Home Into a Garden of 500 Pl
+         src: positive_news_the_better_india
+
+[0.895] Lightning-1.7B: A Qwen3 finetune focused on creative auto-titling and short
+         src: community_social_reddit_local_llama
+
+[0.891] Trump wants tiny cars in America. Do drivers?
+         src: industry_intelligence_fast_company
+
+[0.889] Conheça 4 pilares do planejamento logístico que resultam em economia
+         src: portuguese_exame
+
+[0.888] [TextMate] bold text generator free, no install, try now
+         src: china_v2ex
+
+[0.883] Kia PV5 Earns Global Recognition Across Performance, Safety, Design and Innovati
+         src: energy_utilities_clean_technica
+
+[0.882] [程序员] 求推荐一下 Cursor+Claude 廉价无墙的稳定平替方案
+         src: china_v2ex
+
+[0.882] [程序员] 求推荐一下 Cursor+Claude 廉价无墙的稳定平替方案
+         src: china_v2ex
+
+[0.882] [程序员] 求推荐一下 Cursor+Claude 廉价无墙的稳定平替方案
+         src: china_v2ex
+
+[0.882] Huawei y SMIC dan con la clave para crear chips de 7 nm: hacer un 'Ikea hack' a 
+         src: spanish_xataka
+
+[0.879] E-quipment highlight: Zamboni 552AC electric ice surfacer
+         src: automotive_electrek
+
+[0.877] Tesla Is No Longer the World's Top EV Seller After Q4 Sales Fall
+         src: professional_business_entrepreneur_magazine
+
+[0.877] Tesla Is No Longer the World's Top EV Seller After Q4 Sales Fall
+         src: professional_business_entrepreneur_magazine
+
+[0.873] Deploying a secure and scalable static website on AWS using Terraform
+         src: community_social_dev_to
+
+[0.872] So.. slightly off topic, but does anyone else here see that the emperor has no c
+         src: community_social_reddit_local_llama
+
+[0.866] Fast GPU Interconnect over Radio
+         src: community_social_hacker_news
+
+[0.866] Bruc Secures â‚¬474 Million Refinancing To Back 858 MW Solar Plants And 650 MW B
+         src: energy_utilities_google_news_energy_storage
+
+[0.864] [程序员] 这可能是下一个周经帖：国产大模型哪个编程能力最顶？
+         src: china_v2ex
+
+[0.862] stan-smith/FossFLOW
+         src: community_social_github_trending
+
+[0.860] C√≥mo hacer una felicitaci√≥n de Navidad creando una foto familiar o grupal a pa
+         src: spanish_xataka
+
+[0.857] Alibaba drops Qwen-Image-2512: New strongest open-source image model that rivals
+         src: community_social_reddit_singularity
+
+[0.853] See the Sky Like Never Before With a DIY Eyepiece
+         src: science_ieee_spectrum_online
+

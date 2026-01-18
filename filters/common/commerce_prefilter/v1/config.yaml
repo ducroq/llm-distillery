@@ -1,0 +1,92 @@
+# Commerce Prefilter SLM v1 Configuration
+
+version: "1.0"
+description: "ML-based commerce/promotional content detector"
+
+# Model candidates for benchmarking
+# Run: python -m filters.common.commerce_prefilter.training.benchmark_models
+model_candidates:
+  distilbert-multilingual:
+    name: "distilbert-base-multilingual-cased"
+    params: 135M
+    type: encoder
+    languages: 104
+
+  multilingual-minilm:
+    name: "microsoft/Multilingual-MiniLM-L12-H384"
+    params: 118M
+    type: encoder
+    languages: 100
+
+  xlm-roberta:
+    name: "xlm-roberta-base"
+    params: 270M
+    type: encoder
+    languages: 100
+
+  qwen-0.5b:
+    name: "Qwen/Qwen2.5-0.5B"
+    params: 500M
+    type: decoder
+    languages: multilingual
+
+# Selected model (update after benchmarking)
+model:
+  base_model: "microsoft/Multilingual-MiniLM-L12-H384"  # Default, TBD after benchmark
+  num_labels: 1  # Binary classification with sigmoid
+  max_length: 512
+
+# Inference configuration
+inference:
+  default_threshold: 0.7  # Score >= threshold = commerce
+  batch_size: 32
+
+# Training configuration (for reference)
+training:
+  epochs: 3
+  batch_size: 16
+  learning_rate: 2.0e-5
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  eval_strategy: "epoch"
+  save_strategy: "epoch"
+  load_best_model_at_end: true
+  metric_for_best_model: "f1"
+
+# Data targets
+data:
+  min_commerce_examples: 1000
+  min_journalism_examples: 1000
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+
+# Commerce content sources
+commerce_sources:
+  - name: "electrek_deals"
+    description: "Electrek Green Deals column"
+    url_pattern: "electrek.co/.*deals"
+  - name: "affiliate_content"
+    description: "Articles with discount/promo codes"
+    keywords: ["discount code", "promo code", "coupon", "affiliate"]
+  - name: "pr_newswire"
+    description: "PR Newswire product announcements"
+    url_pattern: "prnewswire.com"
+  - name: "shopping_events"
+    description: "Black Friday, Prime Day, Cyber Monday"
+    keywords: ["Black Friday", "Prime Day", "Cyber Monday", "holiday deal"]
+
+# Journalism sources (negative examples)
+journalism_sources:
+  - name: "reuters"
+    description: "Reuters news articles"
+    url_pattern: "reuters.com"
+  - name: "nature"
+    description: "Nature journal"
+    url_pattern: "nature.com"
+  - name: "epa"
+    description: "EPA reports"
+    url_pattern: "epa.gov"
+  - name: "existing_high_tier"
+    description: "High-tier articles from existing filters"
+    filter: "tier in ['high_sustainability', 'medium_high']"

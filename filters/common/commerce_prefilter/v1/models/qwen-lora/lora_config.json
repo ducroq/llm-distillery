@@ -1,0 +1,6 @@
+{
+  "base_model": "Qwen/Qwen2.5-0.5B",
+  "lora_rank": 16,
+  "lora_alpha": 32,
+  "max_length": 512
+}
