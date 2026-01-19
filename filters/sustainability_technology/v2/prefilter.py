@@ -1,8 +1,13 @@
 """
-Sustainability Technology Pre-Filter v2.1
+Sustainability Technology Pre-Filter v2.2
 
 This module defines a pre-filter for evaluating articles related to sustainability technology.
 Fast keyword-based filtering before model inference.
+
+v2.2 Changes:
+- Enhanced product deals detection (Jackery case study)
+- Added: "Green Deals" column detection, "$X savings/discount", urgency language
+- Added: "exclusive/limited + price", "new low price", "starting from $X"
 
 v2.1 Changes:
 - Added product deals exclusion (shopping/price content)
@@ -26,7 +31,7 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
     Pre-filter to evaluate articles on sustainability technology.
     v2.1: Enhanced exclusions + expanded override protection.
     """
-    VERSION = "2.1"
+    VERSION = "2.2"
 
     # Exclusion patterns - these block articles before sustainability check
     # NOTE: Articles with SUSTAINABILITY_OVERRIDE keywords bypass these exclusions
@@ -64,6 +69,13 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
             r'\b(discount code|coupon code|promo code)\b',
             r'\b(save \$\d+|percent off|\d+% off)\b',
             r'\bgift guide\b',
+            # v2.2: Enhanced deal detection (Jackery case)
+            r'\bGreen Deals\b',                                      # Electrek's deals column
+            r'\$\d[\d,]*\s*(savings|discount|off)\b',                # "$700 savings", "$500 off"
+            r'\bdeals?\b.{0,30}(ending|expire|tonight|today only)',  # "deals ending tonight"
+            r'\b(exclusive|limited).{0,15}(low|price|deal|offer)\b', # "exclusive new lows"
+            r'\b(new|all.time|record)\s+low.{0,10}(price|from|\$)',  # "new low price"
+            r'\bstarting\s+(at|from)\s+\$\d',                        # "starting from $1,219"
         ],
         # Trade shows - only block gadget-focused coverage
         'trade_shows': [
@@ -122,9 +134,10 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
     ]
 
     def __init__(self):
+        """Initialize the sustainability technology prefilter."""
         super().__init__()
         self.filter_name = "sustainability_technology_v2"
-        self.version = "2.1"
+        self.version = "2.2"
 
     def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """
@@ -135,6 +148,9 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
             - (True, "passed"): Send to LLM
             - (False, reason): Block from LLM
         """
+        # NOTE: Commerce prefilter integration point TBD
+        # Decision postponed until model performance is validated
+
         text = self._get_combined_clean_text(article)
         title = article.get('title', '').lower()
 
