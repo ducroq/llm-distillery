@@ -1,0 +1,257 @@
+# Resilience Filter Configuration v1.0
+# Detects evidence of systems responding and recovering from adverse events
+
+filter:
+  name: resilience
+  version: "1.0"
+  created: "2026-01-17"
+  description: "Evidence-gated filter for systemic resilience and recovery signals"
+  philosophy: |
+    Bad things happen. What matters is how systems respond.
+    This filter surfaces evidence of resilience - institutions learning,
+    communities recovering, problems being addressed. Not doom, not toxic
+    positivity, but documented evidence that response and recovery happen.
+
+  design_rationale: |
+    Constructive journalism isn't about ignoring problems. It's about
+    complete coverage: problem + response + outcome. Most news covers
+    the problem. This filter finds the response and recovery evidence.
+
+    Complements existing filters:
+    - nature_recovery: ecosystems recovering (environmental)
+    - uplifting: positive human outcomes (broad)
+    - resilience: systems responding to adversity (institutional/social)
+
+    Distinct from investment_risk:
+    - investment_risk asks: "Should I move my money?"
+    - resilience asks: "Is the system learning and adapting?"
+
+# Scoring dimensions (6 orthogonal dimensions)
+scoring:
+  dimensions:
+    # ADVERSITY BASELINE (What went wrong)
+
+    adversity_severity:
+      weight: 0.15
+      description: "HOW significant was the original problem?"
+      scale:
+        0-2: "Minor inconvenience, routine issue"
+        3-4: "Notable problem affecting a community or sector"
+        5-6: "Serious crisis with significant harm"
+        7-8: "Major disaster or systemic failure"
+        9-10: "Catastrophic event with widespread devastation"
+      orthogonal_note: "High severity + high response = remarkable resilience"
+      scoring_note: "Score the ORIGINAL problem, not current state"
+
+    # RESPONSE CHARACTERIZATION (How it's being addressed)
+
+    response_initiated:
+      weight: 0.20
+      description: "HAS meaningful response action been taken?"
+      scale:
+        0-2: "No response, denial, or continued harm"
+        3-4: "Acknowledgment but minimal action"
+        5-6: "Active response underway, resources committed"
+        7-8: "Comprehensive response with coordination"
+        9-10: "Exceptional mobilization, multi-stakeholder action"
+      orthogonal_note: "Response can be initiated even if not yet effective"
+
+    response_effectiveness:
+      weight: 0.20
+      description: "IS the response actually working?"
+      scale:
+        0-2: "No measurable improvement, or making things worse"
+        3-4: "Limited improvement, early signs"
+        5-6: "Clear progress, measurable positive change"
+        7-8: "Substantial recovery, problem significantly reduced"
+        9-10: "Full recovery or better-than-before outcome"
+      orthogonal_note: "Can have high initiative but low effectiveness (and vice versa)"
+
+    # LEARNING & TRANSFER (Systemic value)
+
+    institutional_learning:
+      weight: 0.15
+      description: "ARE lessons being captured and institutionalized?"
+      scale:
+        0-2: "No reflection, same mistakes likely to repeat"
+        3-4: "Informal lessons, individual learning only"
+        5-6: "Documented lessons, some policy changes"
+        7-8: "Formal reviews, new protocols, training updates"
+        9-10: "Systemic reforms, new standards, published case studies"
+      orthogonal_note: "Learning can happen even with incomplete recovery"
+
+    replication_potential:
+      weight: 0.10
+      description: "CAN others copy this response approach?"
+      scale:
+        0-2: "Unique circumstances, not transferable"
+        3-4: "Some elements transferable with adaptation"
+        5-6: "Clear methodology others could follow"
+        7-8: "Documented playbook, actively being shared"
+        9-10: "Becoming a model, influencing standards globally"
+      orthogonal_note: "Local solutions can have global replication value"
+
+    # EVIDENCE QUALITY (Gatekeeper)
+
+    evidence_quality:
+      weight: 0.20
+      description: "HOW well documented is this resilience signal?"
+      gatekeeper: true
+      gatekeeper_threshold: 3.5
+      gatekeeper_rule: "Evidence < 3.5 caps overall score at 3.0 (speculation penalty)"
+      scale:
+        0-2: "Anecdote, PR spin, unverified claims"
+        3-4: "Journalism with some data, quotes from involved parties"
+        5-6: "Multiple sources, before/after comparisons, timelines"
+        7-8: "Official reports, independent verification, metrics"
+        9-10: "Academic studies, longitudinal data, peer review"
+      orthogonal_note: "High-evidence failures to recover are also valuable (cautionary)"
+
+  # Correlation targets
+  correlation_targets:
+    max_pairwise: 0.75
+    pairs_above_70: 0
+    pc1_variance: 0.60
+
+  # Tier classification
+  tier_thresholds:
+    high:
+      description: "Verified resilience - documented recovery with learning"
+      min_score: 6.5
+      condition: "response_effectiveness >= 6 AND evidence_quality >= 5 AND (institutional_learning >= 5 OR replication_potential >= 6)"
+
+    medium:
+      description: "Emerging resilience - response underway, early positive signs"
+      min_score: 4.5
+      condition: "response_initiated >= 5 AND evidence_quality >= 4"
+
+    low:
+      description: "Weak signal - problem acknowledged, response unclear or struggling"
+      min_score: 2.5
+      condition: "adversity_severity >= 3 AND response_initiated >= 3"
+
+    not_resilience:
+      description: "Not a resilience story - pure problem reporting or unrelated"
+      condition: "adversity_severity < 3 OR response_initiated < 2 OR evidence_quality < 2"
+
+  # Content type flags
+  content_flags:
+    pr_spin:
+      description: "Corporate/government PR without independent verification"
+      cap_evidence: 3
+
+    premature_celebration:
+      description: "Declaring victory before outcomes verified"
+      cap_response_effectiveness: 4
+
+    single_source:
+      description: "Only one perspective, no corroboration"
+      cap_evidence: 4
+
+    pure_adversity:
+      description: "Problem reporting without response coverage"
+      tier_override: "not_resilience"
+      note: "These belong in a different filter, not resilience"
+
+# Prefilter configuration
+prefilter:
+  version: "1.0"
+  target_pass_rate: "30-50%"
+  strategy: "keyword + structure"
+
+  include_signals:
+    # Response language
+    - "recovery"
+    - "rebuild"
+    - "restore"
+    - "reform"
+    - "lesson"
+    - "learn"
+    - "adapt"
+    - "respond"
+    - "address"
+    - "solve"
+    - "fix"
+    - "improve"
+    # Outcome language
+    - "after the"
+    - "in the wake of"
+    - "following the"
+    - "since the"
+    - "recovered from"
+    - "bounced back"
+    # Institutional language
+    - "new protocol"
+    - "policy change"
+    - "commission"
+    - "inquiry"
+    - "review found"
+    - "report recommends"
+
+  exclude_signals:
+    # Pure doom
+    - "could cause"
+    - "may lead to"
+    - "threatens to"
+    - "warns of"
+    - "fears of"
+    # Pure positivity (no adversity baseline)
+    - "new product"
+    - "launches"
+    - "announces"
+    - "celebrates"
+
+# Example articles (for oracle calibration)
+examples:
+  high_tier:
+    - title: "How Japan rebuilt Tohoku: 10 years after the tsunami"
+      why: "Catastrophic event (9), major response (8), documented effectiveness (7), extensive institutional learning (8), replication studied globally (8), academic evidence (8)"
+
+    - title: "Rwanda's healthcare transformation: from genocide to model system"
+      why: "Extreme adversity baseline, comprehensive response, measured outcomes, studied as model, peer-reviewed research"
+
+    - title: "New Orleans levee system: engineering lessons from Katrina"
+      why: "Specific institutional learning, documented improvements, replicable engineering standards"
+
+  medium_tier:
+    - title: "California's new wildfire protocols show early promise"
+      why: "Response initiated (7), but effectiveness not yet proven (5), learning happening (6)"
+
+    - title: "Hospital updates procedures after patient safety review"
+      why: "Clear response, institutional learning, but limited replication scope"
+
+  low_tier:
+    - title: "Community begins cleanup after flood"
+      why: "Response initiated but no effectiveness data yet, no institutional learning documented"
+
+  not_resilience:
+    - title: "Hurricane threatens coastal communities"
+      why: "Pure adversity, no response coverage - not a resilience story"
+
+    - title: "Company announces new sustainability initiative"
+      why: "No adversity baseline - this is uplifting filter territory"
+
+# Ground truth generation
+ground_truth:
+  oracle_model: "gemini-flash"
+  target_labeled: 3000
+  sample_strategy: "stratified"
+  stratification:
+    - source_type: ["official_reports", "journalism", "academic"]
+    - adversity_domain: ["environmental", "health", "infrastructure", "economic", "social"]
+
+# Training configuration
+training:
+  model_architecture: "distilbert-base-uncased"
+  target_mae: 0.75
+  correlation_validation: true
+  notes: "Start with DistilBERT for speed, upgrade if needed"
+
+# Deployment
+deployment:
+  target: "NexusMind"
+  pipeline:
+    - prefilter
+    - model
+    - tier_classifier
+  expected_latency_ms: 25

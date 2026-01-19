@@ -1,0 +1,115 @@
+# CLAUDE.md - Project Context for LLM Distillery
+
+## What is this project?
+
+**LLM Distillery** is a framework for distilling knowledge from large foundation models (Gemini Flash) into small, domain-specific classifiers that run locally at 100x lower cost and 50x faster inference.
+
+**Core workflow:** Oracle (Gemini Flash) scores articles on dimensions -> Train student model (Qwen2.5-1.5B) -> Deploy locally
+
+## Project Structure
+
+```
+llm-distillery/
+├── CLAUDE.md              # This file (AI context)
+├── filters/               # Versioned filter packages
+│   ├── uplifting/v5/      # Production ready
+│   ├── sustainability_technology/v1-v2/  # v1 deployed, v2 in progress
+│   ├── investment-risk/v5/  # Production ready
+│   ├── signs_of_wisdom/v1/  # Early development
+│   ├── nature_recovery/v1/  # Early development
+│   ├── ai-engineering-practice/v2/  # Blocked on data
+│   ├── belonging/v1/      # Status unknown
+│   └── todo/              # Planned filters
+├── ground_truth/          # Oracle scoring pipeline (batch_scorer, llm_client)
+├── training/              # Model training pipeline (prepare_data, validate, train)
+├── evaluation/            # Model evaluation tools
+├── datasets/              # Raw, scored, and training datasets
+├── docs/                  # Documentation
+│   ├── TODO.md            # Active task list
+│   ├── IDEAS.md           # Future ideas
+│   ├── OPEN_QUESTIONS.md  # Unresolved questions
+│   ├── ROADMAP.md         # Now/Next/Later roadmap
+│   ├── adr/               # Short ADRs
+│   ├── decisions/         # Detailed decision records
+│   └── templates/         # ADR template
+├── scripts/               # Utility scripts by phase
+└── config/                # Configuration and credentials
+```
+
+## Current Status (January 2025)
+
+### Production Ready Filters
+| Filter | Version | MAE | Training Data | Status |
+|--------|---------|-----|---------------|--------|
+| **uplifting** | v5 | 0.68 | 10K articles | Deployed (HF Hub, private) |
+| **sustainability_technology** | v1 | 0.69 | - | Deployed (HF Hub) |
+| **sustainability_technology** | v2 | 0.71 | 8K articles | Complete |
+| **investment-risk** | v5 | 0.48 | 10K articles | Production ready |
+
+### In Development
+| Filter | Version | Status | Blocker |
+|--------|---------|--------|---------|
+| **ai-engineering-practice** | v2 | Blocked | Needs FluxusSource hardware sources |
+| **signs_of_wisdom** | v1 | Early dev | Need harmonized prompt |
+| **nature_recovery** | v1 | Early dev | Need harmonized prompt |
+| **belonging** | v1 | Unknown | Needs assessment |
+
+### Planned (filters/todo/)
+- future-of-education
+- seece (corporate excellence)
+- sustainability_economic_viability
+- sustainability_policy_effectiveness
+
+## Key Decisions (see docs/adr/ and docs/decisions/)
+
+- **Oracle outputs scores only** - Tier classification happens in postfilter (flexible thresholds)
+- **Dimensional regression** - Student models learn 0-10 scores, not classifications
+- **Qwen2.5-1.5B** - Chosen for speed/quality balance on consumer hardware
+- **Inline filters** - Fast rules embedded in prompts for model compatibility
+
+## Development Workflow
+
+### Filter Development (9 phases)
+1. Planning - Define dimensions, tiers, gatekeepers
+2. Architecture - Harmonize prompt structure
+3. Validation - Oracle calibration
+4. Prefilter - Test false negative/positive rates
+5. Training Data - Score 5K+ articles, validate
+6. Training - Fine-tune student model
+7. Testing - Benchmark vs oracle
+8. Documentation - Complete reports
+9. Deployment - Production release
+
+### Common Commands
+
+```bash
+# Score training data
+python -m ground_truth.batch_scorer --filter filters/uplifting/v5 --source datasets/raw/master_dataset.jsonl
+
+# Prepare training splits
+python training/prepare_data.py --filter filters/uplifting/v5 --data-source datasets/scored/...
+
+# Validate training data
+python training/validate_training_data.py --data-dir datasets/training/uplifting_v5
+
+# Run prefilter evaluation
+python evaluation/sustainability_technology/compare_prefilters.py
+```
+
+## Conventions
+
+- **Filter packages**: `filters/{name}/v{version}/` with config.yaml, prompt-compressed.md, prefilter.py, postfilter.py
+- **ADRs**: Short architectural decisions in `docs/adr/`, detailed ones in `docs/decisions/`
+- **Datasets**: Raw -> Scored -> Training splits (80/10/10)
+
+## Important Files to Read
+
+Before making changes, understand:
+- `docs/TODO.md` - Current tasks and filter status
+- `docs/ROADMAP.md` - What's now/next/later
+- `docs/ARCHITECTURE.md` - System design
+- `docs/adr/` and `docs/decisions/` - Past decisions
+
+---
+
+*Last updated: 2025-01-16*
