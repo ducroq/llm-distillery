@@ -1,0 +1,171 @@
+# Cultural Discovery Filter - Version 1.0
+# Surfaces articles about art, culture, history discoveries and cross-cultural connections
+# Target: ovr.news (Wisdom tab) and Busara
+
+filter:
+  name: cultural-discovery
+  version: "1.0"
+  created: "2025-01-25"
+  description: "Rate content for cultural discovery and cross-cultural connection value"
+  focus: "DISCOVERIES about art, culture, history AND CONNECTIONS between peoples/civilizations"
+
+  target_publications:
+    - ovr.news (Wisdom tab)
+    - Busara
+
+prefilter:
+  enabled: true
+  expected_pass_rate: ~0.15  # Estimated 15% of random articles
+  description: "Blocks political conflict framing, tourism fluff, celebrity news, cultural war content"
+
+oracle:
+  recommended: gemini-flash
+  candidates:
+    - gemini-flash
+    - gemini-pro
+  target_model: "Gemini Flash 2.0"
+
+scoring:
+  dimensions:
+    # === DISCOVERY DIMENSIONS (WHAT kind of insight) ===
+
+    discovery_novelty:
+      weight: 0.25
+      category: discovery
+      description: "New finding, revelation, or insight about art/culture/history"
+      scale: |
+        0-2: No discovery element (routine news, general knowledge)
+        3-4: Minor insight or lesser-known fact surfaced
+        5-6: Meaningful discovery (new interpretation, recovered artifact, revealed connection)
+        7-8: Significant discovery (changes understanding, major find, breakthrough research)
+        9-10: Transformative discovery (rewrites history, paradigm shift, lost civilization found)
+      evidence_focus: "What's new here? What didn't we know before?"
+
+    heritage_significance:
+      weight: 0.20
+      category: discovery
+      description: "Cultural or historical importance of the subject matter"
+      scale: |
+        0-2: Trivial or ephemeral cultural content
+        3-4: Local or niche cultural interest
+        5-6: Regional or community-level heritage significance
+        7-8: National heritage or major artistic/historical importance
+        9-10: World heritage level (UNESCO-worthy, civilization-defining)
+      evidence_focus: "Historical depth, cultural weight, preservation importance"
+
+    # === CONNECTION DIMENSIONS (WHAT bridges are built) ===
+
+    cross_cultural_connection:
+      weight: 0.25
+      category: connection
+      description: "Bridges between different peoples, traditions, or civilizations"
+      scale: |
+        0-2: Single culture focus, no bridging
+        3-4: Mentions other cultures but no meaningful connection
+        5-6: Shows parallels or exchanges between cultures
+        7-8: Reveals deep connections, shared origins, or meaningful dialogue
+        9-10: Transformative cross-cultural understanding (unites divided groups, reveals common humanity)
+      evidence_focus: "What cultures are connected? How deep is the bridge?"
+
+    human_resonance:
+      weight: 0.15
+      category: connection
+      description: "Connects to lived human experience, not just dry facts"
+      scale: |
+        0-2: Purely academic/technical, no human angle
+        3-4: Facts presented but distant from experience
+        5-6: Human stories woven into the cultural content
+        7-8: Strong emotional/experiential connection, relatable across time
+        9-10: Profoundly moving, speaks to universal human experience
+      evidence_focus: "Personal stories, emotional depth, universal themes"
+
+    # === ASSESSMENT DIMENSION ===
+
+    evidence_quality:
+      weight: 0.15
+      category: assessment
+      description: "How well-researched and documented is the content?"
+      gatekeeper: true
+      gatekeeper_threshold: 3
+      gatekeeper_max_score: 3.0
+      scale: |
+        0-2: Speculation, clickbait, unsourced claims
+        3-4: Basic journalism, some sources mentioned
+        5-6: Well-researched with expert quotes, institutional sources
+        7-8: Scholarly depth, primary sources, multiple perspectives
+        9-10: Authoritative (peer-reviewed, archival research, definitive)
+      evidence_focus: "Sources cited, expert involvement, research depth"
+
+  tiers:
+    high:
+      threshold: 7.0
+      description: "Significant discovery or deep cross-cultural insight, well-documented"
+
+    medium:
+      threshold: 4.0
+      description: "Meaningful cultural content with some discovery or connection value"
+
+    low:
+      threshold: 0.0
+      description: "Superficial, speculative, or single-culture content without insight"
+
+  gatekeepers:
+    evidence_gatekeeper:
+      dimension: evidence_quality
+      threshold: 3
+      max_score: 3.0
+      reason: "Poorly sourced cultural content spreads misinformation"
+
+  content_type_caps:
+    political_conflict:
+      max_score: 3.0
+      triggers:
+        - "Cultural wars, identity politics, us-vs-them framing"
+      exceptions:
+        - "reconciliation"
+        - "peace process"
+        - "dialogue"
+        - "healing"
+
+    tourism_fluff:
+      max_score: 2.0
+      triggers:
+        - "Top 10 destinations, must-see attractions, travel tips"
+      exceptions:
+        - "UNESCO heritage"
+        - "preservation effort"
+        - "archaeological site"
+
+    celebrity_art:
+      max_score: 2.0
+      triggers:
+        - "Celebrity collections, auction prices, art market speculation"
+      exceptions:
+        - "philanthropy"
+        - "repatriation"
+        - "public donation"
+
+    cultural_appropriation_debate:
+      max_score: 3.0
+      triggers:
+        - "Appropriation accusations, cancel culture, identity gatekeeping"
+      exceptions:
+        - "respectful exchange"
+        - "collaboration"
+        - "acknowledgment"
+
+training:
+  target_samples: 5000
+  train_val_test_split: [0.8, 0.1, 0.1]
+  quality_threshold: 0.7
+  recommended_model: "Qwen2.5-1.5B"
+  expected_mae: "<1.0 per dimension"
+
+deployment:
+  inference_time: "20-50ms"
+  cost_per_article: "$0.00"
+  use_cases:
+    - "ovr.news Wisdom tab curation"
+    - "Busara content discovery"
+    - "Cultural heritage aggregation"
+    - "Cross-cultural dialogue promotion"
