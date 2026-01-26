@@ -139,10 +139,10 @@ Use LLM to generate synthetic articles with known scores. Could help with rare e
 
 - `research/embedding_vs_finetuning/models/uplifting_v5_1024tok/` - 1024 token model (MAE 0.652)
 - `research/embedding_vs_finetuning/models/uplifting_v5_2048tok/` - 2048 token model (MAE 0.627)
-- `research/embedding_vs_finetuning/models/uplifting_v5_head_tail/` - head+tail model (training in progress)
+- `research/embedding_vs_finetuning/models/uplifting_v5_head_tail/` - head+tail model (MAE 0.655)
 
 ### Head+Tail Extraction Experiment
-**Status:** In Progress (Jan 2025)
+**Status:** Completed (Jan 2025)
 **Origin:** Alternative to full long-context for handling article length
 
 #### Concept
@@ -159,13 +159,30 @@ tail_text = tokenizer.decode(tokens[-256:])
 return head_text + " [...] " + tail_text
 ```
 
-#### Expected Benefits
-- Same 512-token inference speed as baseline
-- Better coverage of article conclusions (where outcomes are stated)
-- 4x faster than 2048-token model with potentially similar quality
-
 #### Results
-Training in progress. Will update with MAE comparison.
+
+| Model | Max Length | Best Val MAE | vs Baseline | Inference Speed |
+|-------|------------|--------------|-------------|-----------------|
+| baseline | 512 | 0.680 | - | 1x |
+| 1024tok | 1024 | 0.652 | -4.1% | 2x slower |
+| **head_tail** | **512 (256+256)** | **0.655** | **-3.7%** | **1x** |
+| 2048tok | 2048 | 0.627 | -7.8% | 4x slower |
+
+#### Key Finding
+
+**Head+tail nearly matches 1024tok performance while keeping baseline inference speed.**
+
+- Head+tail (0.655) vs 1024tok (0.652) = only 0.003 MAE difference
+- Head+tail uses same 512 tokens as baseline = same fast inference
+- Captures intro (context) + conclusion (outcomes) which contain most signal
+- Middle content (detailed explanation) contributes less to scoring
+
+#### Recommendation
+
+**Use head+tail for production.** Best quality-speed tradeoff:
+- 3.7% better than baseline (0.655 vs 0.680)
+- Same inference speed as baseline
+- 4x faster than 2048tok with only 4.3% worse MAE
 
 ---
 
