@@ -62,123 +62,134 @@ filters/<filter-name>/v<version>/
 
 ## Active Filters
 
-### 1. uplifting v4 ✅ Production-Ready
+### Production Ready
+
+#### 1. uplifting v5 ✅ Deployed
 
 **Purpose**: Rate content for uplifting semantic value based on genuine human and planetary wellbeing.
 
-**Philosophy**: "MEANING not TONE"
+**Status**: Deployed on HuggingFace Hub (private)
 
-**Status**: Harmonized, validated (16 samples), ready for training data generation
+**Metrics**: Val MAE 0.68, 10K training articles
 
-**Dimensions (8)**:
-- agency, progress, collective_benefit (gatekeeper), connection, innovation, justice, resilience, wonder
+**Dimensions (6)**: human_wellbeing_impact, social_cohesion_impact, justice_rights_impact, evidence_level (gatekeeper), benefit_distribution, change_durability
 
-**Pre-filter blocks**:
-- Corporate finance (unless worker coop/public benefit)
-- Military buildups (unless peace/demilitarization)
-- Business news without collective benefit
-
-**Oracle Output**: Flat dimensional scores (0-10) + overall reasoning
-
-**Tier Classification** (postfilter):
-- impact, connection, not_uplifting (based on dimensional scores)
-
-**Location**: [filters/uplifting/v4/](uplifting/v4/)
+**Location**: [filters/uplifting/v5/](uplifting/v5/)
 
 ---
 
-### 2. investment-risk v3 ✅ Ready for Training
+#### 2. investment-risk v5 ✅ Production Ready
 
-**Purpose**: Identify investment risk signals for defense-first portfolio management focused on capital preservation.
+**Purpose**: Identify investment risk signals for defense-first portfolio management.
 
-**Philosophy**: "You can't predict crashes, but you can prepare for them."
+**Status**: Production ready
 
-**Status**: Harmonized, ready for training data generation (queued after sustainability_tech_innovation)
+**Metrics**: Test MAE 0.484 (excellent), 10K training articles
 
-**Dimensions (8)**:
-- macro_risk_severity, credit_market_stress, market_sentiment_extremes, valuation_risk, policy_regulatory_risk, systemic_risk, evidence_quality (gatekeeper), actionability
-
-**Pre-filter blocks**:
-- FOMO/speculation (hot stocks, meme stocks, crypto pumping)
-- Stock picking (unless macro context)
-- Affiliate marketing (broker links, promo codes)
-- Clickbait (sensationalist headlines)
-- Academic research papers (unless actionable)
-
-**Oracle Output**: Dimensional scores (0-10) + reasoning + metadata (risk indicators, asset classes, time horizon)
-
-**Tier Classification** (postfilter):
-- 🔴 RED FLAG, 🟡 YELLOW WARNING, 🟢 GREEN OPPORTUNITY, 🔵 BLUE EDUCATIONAL, ⚫ NOISE
-
-**Changes from v2**:
-- v2 → v3: Removed signal_tier from oracle output (moved to postfilter)
-- Clean fork to ensure training data has no classification artifacts
-
-**Location**: [filters/investment-risk/v3/](investment-risk/v3/)
+**Location**: [filters/investment-risk/v5/](investment-risk/v5/)
 
 ---
 
-### 3. sustainability_tech_innovation v1 🔄 Scoring Training Data
+#### 3. sustainability_technology v1 ✅ Deployed
 
-**Purpose**: Rate sustainable technology that WORKS - deployed tech, working pilots, validated research (not theory or vaporware).
+**Purpose**: Rate sustainable technology that WORKS - deployed tech, working pilots, validated research.
 
-**Philosophy**: "Pilots and research need real results, not just theory."
+**Status**: Deployed on HuggingFace Hub
 
-**Status**: Harmonized, validation complete (31/50 articles), scoring 5K training articles (in progress)
+**Metrics**: Test MAE 0.690
 
-**Dimensions (8)**:
-- deployment_maturity (gatekeeper), technology_performance, cost_trajectory, scale_of_deployment, market_penetration, technology_readiness, supply_chain_maturity, proof_of_impact (gatekeeper)
-
-**Pre-filter** (Option D: Minimal Filtering):
-- Block obvious out-of-scope (IT infrastructure, medicine, finance, airline pilots)
-- Block infrastructure disruption (protests, strikes)
-- Require climate/energy mention
-- Pass rate: 68% (vs 16% for v1.0)
-- False negative improvement: 62% reduction (84 → 32 blocked articles)
-
-**Oracle Output**: Dimensional scores (0-10) + per-dimension reasoning + metadata (primary_technology, confidence)
-
-**Tier Classification** (postfilter):
-- breakthrough (8.0+), validated (6.0+), promising (4.0+), early_stage (2.0+), vaporware (<2.0)
-
-**Gatekeeper Enforcement**:
-- IF deployment_maturity < 3.0 OR proof_of_impact < 3.0 → SET all scores = 1.0
-- Status: ✅ Working perfectly (0% violations vs 85.7% in v1.0)
-
-**Key Improvements** (v1.0 → v1.1):
-- Fixed gatekeeper enforcement (85.7% FP → 0% FP)
-- Optimized prefilter (16% → 68% pass rate)
-- Harmonized architecture (dimensional scores only)
-
-**Location**: [filters/sustainability_tech_innovation/v1/](sustainability_tech_innovation/v1/)
+**Location**: [filters/sustainability_technology/v1/](sustainability_technology/v1/)
 
 ---
 
-### 4. sustainability_tech_deployment v3 🔄 Scoring in Progress
+#### 4. sustainability_technology v2 ✅ Complete
 
-**Purpose**: Track deployment at scale (GW-level renewable energy, mass adoption)
+**Purpose**: Updated sustainability technology filter with improved prefilter.
 
-**Status**: Scoring training data (background)
+**Status**: Complete (prefilter + model)
 
-**Focus**: Deployment metrics, scaling evidence, infrastructure buildout
+**Metrics**: Val MAE 0.71, 7,990 training samples, Prefilter FP Block 88.2%, TP Pass 89.0%
 
-**Location**: [filters/sustainability_tech_deployment/v3/](sustainability_tech_deployment/v3/)
+**Location**: [filters/sustainability_technology/v2/](sustainability_technology/v2/)
+
+---
+
+### In Development
+
+#### 5. cultural-discovery v1 🆕 Planning
+
+**Purpose**: Discoveries about art, culture, history + cross-cultural connections.
+
+**Status**: Config created, needs prompt and training data
+
+**Target**: ovr.news (Wisdom tab), Busara
+
+**Dimensions (5)**: discovery_novelty, heritage_significance, cross_cultural_connection, human_resonance, evidence_quality (gatekeeper)
+
+**Location**: [filters/cultural-discovery/v1/](cultural-discovery/v1/)
+
+---
+
+#### 6. belonging v1 📋 Needs Assessment
+
+**Status**: Needs assessment and development
+
+**Location**: [filters/belonging/v1/](belonging/v1/)
+
+---
+
+#### 7. ai-engineering-practice v2 🚫 Blocked
+
+**Status**: Blocked - needs FluxusSource hardware engineering sources
+
+**Location**: [filters/ai-engineering-practice/v2/](ai-engineering-practice/v2/)
+
+---
+
+#### 8. nature_recovery v1 📋 Early Development
+
+**Status**: Concept and README complete, 8 dimensions defined
+
+**Next**: Harmonized prompt, prefilter
+
+**Location**: [filters/nature_recovery/v1/](nature_recovery/v1/)
+
+---
+
+#### 9. signs_of_wisdom v1 📋 Early Development
+
+**Status**: Concept and README complete
+
+**Next**: Harmonized prompt, prefilter
+
+**Challenge**: Wisdom is rare in news
+
+**Location**: [filters/signs_of_wisdom/v1/](signs_of_wisdom/v1/)
+
+---
+
+### Cross-Cutting Components
+
+#### Commerce Prefilter SLM 🔄 Needs Rework
+
+**Purpose**: ML classifier for commerce/promotional content detection.
+
+**Status**: v1 complete but needs redo - concerns about multilingual embeddings and context size
+
+**Location**: [filters/common/commerce_prefilter/](common/commerce_prefilter/)
 
 ---
 
 ## Planned Filters (filters/todo/)
 
-**Future sustainability pillar filters** (design/planning phase):
+**Future filters** (design/planning phase):
 
-1. **ai_augmented_practice** - AI augmentation for professional practice
-2. **future-of-education** - Educational innovation and transformation
-3. **seece** - Social, economic, and environmental corporate excellence
-4. **sustainability_economic_viability** - Economic aspects of sustainability (cost, profitability, jobs)
-5. **sustainability_movement_growth** - Growth of sustainability movement (social momentum, behavior change)
-6. **sustainability_nature_recovery** - Nature restoration and recovery (ecosystem health, pollution reduction)
-7. **sustainability_policy_effectiveness** - Policy impact and effectiveness (outcomes, replicability, durability)
+1. **future-of-education** - Educational innovation and transformation
+2. **seece** - Social, economic, and environmental corporate excellence
+3. **sustainability_economic_viability** - Economic aspects of sustainability
+4. **sustainability_policy_effectiveness** - Policy impact and effectiveness
 
-**Note**: These filters are in early planning stages. Move to active filters (filters/) when development begins.
+**Note**: Move to active filters when development begins.
 
 ---
 
@@ -306,4 +317,4 @@ Every dimension MUST have inline filters:
 
 ---
 
-**Last Updated**: 2025-11-17 (Harmonization milestone)
+**Last Updated**: 2025-01-25

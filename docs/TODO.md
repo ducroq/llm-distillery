@@ -1,17 +1,16 @@
 # LLM Distillery - TODO
 
-## Commerce Prefilter SLM - COMPLETE
+## Commerce Prefilter SLM - NEEDS REWORK
 
 ML classifier for commerce/promotional content detection. Cross-cutting prefilter for all filters.
 
-- [x] **Training data collection** - 2,847 examples (commerce + journalism)
-- [x] **Model training** - DistilBERT, MiniLM, XLM-RoBERTa compared
-- [x] **Backtesting** - 56,336 articles, threshold optimization
-- [x] **Model selection** - DistilBERT @ 0.95 threshold (97.8% F1, 0 false positives on high-tier)
-- [x] **Documentation** - Training report, backtest report, deployment plan
-- [x] **Change request** - CHANGE_REQUEST_NEXUSMIND.md ready for NexusMind team
-- [ ] **NexusMind deployment** - Pending approval from NexusMind team
-- [ ] **Open-source on Huggingface** - Publish model for community use (future)
+**Status:** v1 complete but needs redo - concerns about multilingual embeddings and context size.
+
+- [x] **v1 Training data collection** - 2,847 examples (commerce + journalism)
+- [x] **v1 Model training** - DistilBERT, MiniLM, XLM-RoBERTa compared
+- [x] **v1 Backtesting** - 56,336 articles, threshold optimization
+- [ ] **Redo with proper multilingual embeddings** - Current approach may not handle Dutch/multilingual well
+- [ ] **Redo with proper context size** - May need longer context
 
 See `filters/common/commerce_prefilter/docs/` for full documentation.
 
@@ -45,6 +44,12 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - Next: harmonized prompt, prefilter.py
   - Challenge: wisdom is rare in news
 
+### New Filters (recently created)
+- [ ] **cultural-discovery v1** - Art/culture/history discoveries + cross-cultural connections
+  - Config and README created
+  - Target: ovr.news (Wisdom tab), Busara
+  - Next: harmonized prompt, prefilter, training data
+
 ### Planned (filters/todo/)
 - [ ] **future-of-education** - Educational innovation filter
 - [ ] **seece** - Social, economic, environmental corporate excellence
@@ -55,6 +60,10 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 
 - [x] **Data preparation pipeline** - Stratified splits working
 - [x] **Training script** - Qwen2.5-1.5B + LoRA working
+- [x] **Context length experiments** - 1024/2048/head+tail tested
+  - 1024tok: MAE 0.652, 2048tok: MAE 0.627
+  - head+tail (256+256): Training in progress
+  - See `docs/IDEAS.md` for full results
 - [ ] **Qwen2.5-7B support** - Larger model option for complex filters
 - [ ] **Training monitoring improvements** - Better logging, early stopping
 
@@ -79,4 +88,4 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 
 ---
 
-*Last updated: 2026-01-18*
+*Last updated: 2025-01-25*

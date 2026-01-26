@@ -77,6 +77,193 @@ Train shared encoder across filters, with filter-specific heads. Could reduce tr
 
 Use LLM to generate synthetic articles with known scores. Could help with rare edge cases.
 
+### Context Length Extension
+**Status:** Completed (Jan 2025)
+**Origin:** Discovery that Qwen2.5-1.5B supports 128K tokens but training used only 512
+
+#### Experiment Results
+
+| Context Length | Batch Size | Best Val MAE | vs Baseline | Training Time |
+|----------------|------------|--------------|-------------|---------------|
+| 512 tokens | 8 | 0.6800 | baseline | ~45 min |
+| 1024 tokens | 4 | 0.6520 | **-4.1%** | ~1.5 hrs |
+| 2048 tokens | 1 | 0.6267 | **-7.8%** | ~7.5 hrs |
+
+#### Key Findings
+
+1. **Longer context consistently improves MAE** - each doubling of context reduces error
+2. **Diminishing returns** - 512→1024 gave 4.1%, 1024→2048 gave only 3.7% more
+3. **Training cost scales linearly** - 2048 tokens requires batch_size=1 on 16GB GPU
+4. **Inference cost scales quadratically** - attention is O(n²)
+
+#### Article Length Analysis
+
+| Length Category | % of Articles | % of High-Scorers (>=6) |
+|-----------------|---------------|-------------------------|
+| <= 512 tokens | 77.7% | 43% |
+| 512-1024 tokens | 12.0% | 49% |
+| 1024-2048 tokens | 8.6% | 7.5% |
+| > 2048 tokens | 1.7% | 0% |
+
+**Critical insight:** High-scoring articles tend to be longer. At 512 tokens, 56.9% of high-scorers are truncated.
+
+#### Truncation Impact on High-Scorers
+
+| Context Limit | High-Scorers Truncated |
+|---------------|------------------------|
+| 512 tokens | 56.9% |
+| 1024 tokens | 31.6% |
+| 2048 tokens | 7.5% |
+| 4096 tokens | 0.0% |
+
+#### CPU Inference Cost (Quantized INT8)
+
+| Context | Time per Article | 10K Articles |
+|---------|------------------|--------------|
+| 512 | 1.6s | 4.4 hours |
+| 1024 | 3.5s | 9.7 hours |
+| 2048 | ~7s | ~19 hours |
+| 4096 | ~15s | ~42 hours |
+
+#### Conclusion
+
+**Longer context helps quality but is impractical for production.**
+
+- 2048 tokens gives best MAE (0.6267) but 4x slower inference
+- For cost-effective deployment, need alternative approaches:
+  - **Head+tail extraction** (train with first N + last M tokens)
+  - **Chunk-based training** (train on chunks, aggregate at inference)
+- Recommended: Train with head+tail extraction at 512 total tokens
+
+#### Models Produced
+
+- `research/embedding_vs_finetuning/models/uplifting_v5_1024tok/` - 1024 token model (MAE 0.652)
+- `research/embedding_vs_finetuning/models/uplifting_v5_2048tok/` - 2048 token model (MAE 0.627)
+- `research/embedding_vs_finetuning/models/uplifting_v5_head_tail/` - head+tail model (training in progress)
+
+### Head+Tail Extraction Experiment
+**Status:** In Progress (Jan 2025)
+**Origin:** Alternative to full long-context for handling article length
+
+#### Concept
+Extract first 256 tokens (intro/summary) + last 256 tokens (conclusion/outcome) = 512 total tokens.
+Hypothesis: Most signal is at beginning and end of articles, middle can be skipped.
+
+#### Implementation
+See `research/embedding_vs_finetuning/prepare_head_tail_data.py`
+
+```python
+# Extract head + tail with separator
+head_text = tokenizer.decode(tokens[:256])
+tail_text = tokenizer.decode(tokens[-256:])
+return head_text + " [...] " + tail_text
+```
+
+#### Expected Benefits
+- Same 512-token inference speed as baseline
+- Better coverage of article conclusions (where outcomes are stated)
+- 4x faster than 2048-token model with potentially similar quality
+
+#### Results
+Training in progress. Will update with MAE comparison.
+
+---
+
+### Ranking Loss for Training (Contrastive Training)
+**Status:** Idea
+**Origin:** Suggestion that contrastive training improves Qwen performance (Jan 2025)
+
+#### Concept
+Add a ranking/contrastive loss component to training alongside MSE loss. Currently we only optimize for absolute accuracy (MSE), but relative ordering may matter more for filtering tasks.
+
+#### Current Training
+```python
+# MSE only - optimizes absolute accuracy
+loss = MSE(predicted_scores, ground_truth_scores)
+```
+
+#### Proposed Hybrid Loss
+```python
+def hybrid_loss(predictions, targets):
+    # Absolute accuracy
+    mse = F.mse_loss(predictions, targets)
+
+    # Relative ordering - ensure higher targets → higher predictions
+    # Sample pairs within batch, apply margin ranking loss
+    ranking = margin_ranking_loss(predictions, targets, margin=0.5)
+
+    return mse + lambda * ranking  # lambda ~0.1-0.3
+```
+
+#### Why This Might Help
+- MSE treats all errors equally (2→3 same as 6→7)
+- For filtering, **relative ranking often matters more** than absolute scores
+- Could reduce regression-to-mean effect (predictions clustering toward middle)
+- Enforces that model learns "A is better than B" not just "A ≈ 5.2"
+
+#### Implementation Options
+| Approach | Description | Complexity |
+|----------|-------------|------------|
+| Pairwise margin | Compare pairs within batch | Low |
+| Triplet loss | Anchor + positive + negative | Medium |
+| ListMLE | Full listwise ranking | High |
+
+#### When to Try
+- After context length experiments (512 → 1024 → 2048) complete
+- If longer context doesn't improve MAE
+- If regression-to-mean is identified as key weakness
+
+#### Files to Modify
+- `training/train.py` - Add ranking loss component
+- Need to sample pairs/triplets during training
+- May need to adjust batch size for pair sampling
+
+### Hybrid Embedding + Fine-tuned Pipeline
+**Status:** Idea (validated in research)
+**Origin:** Embedding vs fine-tuning research (Jan 2025)
+
+#### Concept
+Use fast multilingual-e5-large embeddings as a prefilter stage before fine-tuned Qwen scoring.
+
+#### Pipeline Design
+```
+Stage 1: E5-Large Prefilter (132 articles/sec)
+├── Reject articles with predicted avg < 2.5
+├── Expected rejection: 15-20%
+└── False negative rate: < 1%
+
+Stage 2: Fine-tuned Qwen Scoring (remaining 80-85%)
+├── Full 6-dimension scoring
+├── 0.68 MAE accuracy
+└── Final tier assignment
+```
+
+#### Benefits
+- 15-20% compute savings on fine-tuned model inference
+- Faster overall pipeline throughput
+- Minimal quality loss (< 1% good articles rejected)
+- E5-large is multilingual (100+ languages) matching our dataset
+
+#### Challenges
+- Requires maintaining two models in production
+- Need to tune prefilter threshold per filter/dataset
+- Must monitor false negative rate over time
+- Additional complexity in inference pipeline
+
+#### Research Findings
+From the embedding vs fine-tuning research:
+- E5-large MAE: 0.806 (best embedding result)
+- Strong regression to mean effect (predictions cluster 3-5)
+- Works well for rejecting clearly bad content
+- Cannot identify top-tier content reliably
+
+#### Implementation Notes
+- Use conservative threshold (2.0-2.5) to minimize false negatives
+- Consider using e5-large's `benefit_distribution` dimension as primary signal (hardest for embeddings, so low scores are reliable)
+- Could also use embedding distance to known-good articles as additional signal
+
+See: `research/embedding_vs_finetuning/results/Multilingual_Embedding_Research_Report.docx`
+
 ---
 
 ## Template
@@ -100,4 +287,4 @@ Any other context.
 
 ---
 
-*Last updated: 2025-01-16*
+*Last updated: 2025-01-25*
