@@ -1,0 +1,33 @@
+# Commerce Prefilter v2 Configuration
+# Uses embedding + MLP classifier instead of fine-tuned DistilBERT
+
+version: "2.0"
+name: "commerce_prefilter_v2"
+
+# Model configuration
+model:
+  embedder: "paraphrase-multilingual-mpnet-base-v2"
+  embedder_dim: 768
+  embedder_max_tokens: 128  # Note: Articles truncated, but commerce signals are front-loaded
+  classifier: "mlp"
+  classifier_path: "models/mlp_classifier.pkl"
+  scaler_path: "models/scaler.pkl"
+
+# Inference settings
+inference:
+  default_threshold: 0.95
+  batch_size: 32
+
+# Performance (test set)
+metrics:
+  f1: 0.978
+  precision: 0.967
+  recall: 0.989
+  test_samples: 190
+
+# Notes
+notes:
+  - "Context window is 128 tokens - shorter than v1 (512)"
+  - "Commerce signals are front-loaded (title, first paragraph), so truncation doesn't hurt accuracy"
+  - "Same F1 as v1, but simpler architecture (frozen embedder + small MLP)"
+  - "Multilingual support: 50+ languages via paraphrase-multilingual-mpnet-base-v2"

@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import torch
+import yaml
 from transformers import AutoTokenizer
 
 logger = logging.getLogger(__name__)
@@ -96,6 +97,9 @@ class BaseSustainabilityTechnologyScorer(ABC):
         self.model = None
         self.tokenizer = None
 
+        # Load head+tail preprocessing config
+        self._load_preprocessing_config()
+
         if use_prefilter:
             self._load_prefilter()
 
@@ -103,6 +107,33 @@ class BaseSustainabilityTechnologyScorer(ABC):
         """Load the prefilter module."""
         from filters.sustainability_technology.v1.prefilter import SustainabilityTechnologyPreFilterV1
         self.prefilter = SustainabilityTechnologyPreFilterV1()
+
+    def _load_preprocessing_config(self):
+        """Load preprocessing config from config.yaml."""
+        config_path = Path(__file__).parent / "config.yaml"
+
+        # Default: no head+tail preprocessing
+        self.use_head_tail = False
+        self.head_tokens = 256
+        self.tail_tokens = 256
+        self.head_tail_separator = " [...] "
+
+        if config_path.exists():
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+
+            preprocessing = config.get("preprocessing", {})
+            head_tail = preprocessing.get("head_tail", {})
+
+            self.use_head_tail = head_tail.get("enabled", False)
+            self.head_tokens = head_tail.get("head_tokens", 256)
+            self.tail_tokens = head_tail.get("tail_tokens", 256)
+            self.head_tail_separator = head_tail.get("separator", " [...] ")
+
+            if self.use_head_tail:
+                logger.info(
+                    f"Head+tail preprocessing enabled: {self.head_tokens} + {self.tail_tokens} tokens"
+                )
 
     @abstractmethod
     def _load_model(self):
@@ -242,6 +273,18 @@ class BaseSustainabilityTechnologyScorer(ABC):
 
         # Prepare input
         text = f"{article['title']}\n\n{article['content']}"
+
+        # Apply head+tail preprocessing if enabled
+        if self.use_head_tail:
+            from filters.common.text_preprocessing import extract_head_tail
+            text = extract_head_tail(
+                text,
+                self.tokenizer,
+                self.head_tokens,
+                self.tail_tokens,
+                self.head_tail_separator,
+            )
+
         inputs = self.tokenizer(
             text,
             max_length=self.MAX_TOKEN_LENGTH,
@@ -330,8 +373,24 @@ class BaseSustainabilityTechnologyScorer(ABC):
                 batch = articles_to_score[batch_start:batch_end]
                 batch_indices = article_indices[batch_start:batch_end]
 
-                # Tokenize batch
+                # Prepare texts
                 texts = [f"{a['title']}\n\n{a['content']}" for a in batch]
+
+                # Apply head+tail preprocessing if enabled
+                if self.use_head_tail:
+                    from filters.common.text_preprocessing import extract_head_tail
+                    texts = [
+                        extract_head_tail(
+                            t,
+                            self.tokenizer,
+                            self.head_tokens,
+                            self.tail_tokens,
+                            self.head_tail_separator,
+                        )
+                        for t in texts
+                    ]
+
+                # Tokenize batch
                 inputs = self.tokenizer(
                     texts,
                     max_length=self.MAX_TOKEN_LENGTH,

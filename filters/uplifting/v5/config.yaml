@@ -160,6 +160,16 @@ scoring:
         - "documented pilot results"
         - "verified early outcomes"
 
+preprocessing:
+  # Head+tail extraction: keeps first N + last M tokens, discards middle
+  # Improves MAE (0.655 vs 0.680 baseline) by capturing intro and conclusion
+  # Enable when deploying model trained with --use-head-tail flag
+  head_tail:
+    enabled: true  # Head+tail trained model deployed
+    head_tokens: 256
+    tail_tokens: 256
+    separator: " [...] "
+
 training:
   target_samples: 5000
   train_val_test_split: [0.8, 0.1, 0.1]

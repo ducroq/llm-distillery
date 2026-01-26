@@ -20,7 +20,10 @@
   "warmup_steps": 500,
   "train_examples": 7999,
   "val_examples": 1000,
-  "best_val_mae": 0.6807460784912109,
+  "best_val_mae": 0.6878038048744202,
   "include_prompt": false,
-  "training_mode": "knowledge_distillation"
+  "training_mode": "knowledge_distillation",
+  "use_head_tail": true,
+  "head_tokens": 256,
+  "tail_tokens": 256
 }

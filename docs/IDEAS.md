@@ -24,6 +24,32 @@ Identify uncertain predictions and route back to oracle for labeling. Could impr
 
 Output calibrated confidence scores alongside dimensional predictions. Useful for flagging uncertain results for human review.
 
+### Separate Filters Repository
+**Status:** Backlog
+**Origin:** Deployment architecture (Jan 2025)
+
+Extract `filters/` into its own git repository that both llm-distillery and NexusMind depend on.
+
+**Current state:** Manual copy via `scripts/deploy_to_nexusmind.sh`
+
+**Options to explore:**
+1. **Git submodule** - NexusMind includes filters repo as submodule
+2. **Separate filters repo** - Both projects clone/pull from shared filters repo
+3. **Python package** - Publish filters as pip installable packages
+
+**Benefits:**
+- Single source of truth for filter code
+- No manual copy steps
+- Version pinning in NexusMind
+- Cleaner separation of concerns (llm-distillery = training, filters = artifacts, NexusMind = deployment)
+
+**Trade-offs:**
+- Submodules add complexity
+- Separate repo means more repos to manage
+- Python packages require packaging infrastructure
+
+**Decision trigger:** When manual deploy script becomes painful or error-prone.
+
 ---
 
 ## Filter Ideas

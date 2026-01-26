@@ -8,13 +8,9 @@ language:
 - nl
 - it
 tags:
-- multilingual
-- text-classification
-- content-filtering
-- multi-dimensional-scoring
-- knowledge-distillation
-- uplifting-content
-- news-analysis
+- base_model:adapter:Qwen/Qwen2.5-1.5B
+- lora
+- transformers
 library_name: peft
 base_model: Qwen/Qwen2.5-1.5B
 pipeline_tag: text-classification
@@ -136,3 +132,6 @@ MIT
   url={https://huggingface.co/nexusmind/uplifting-filter-v5}
 }
 ```
+### Framework versions
+
+- PEFT 0.17.1

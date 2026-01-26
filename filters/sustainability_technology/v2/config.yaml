@@ -58,3 +58,12 @@ oracle:
 training:
   target_samples: 5000
   recommended_model: "Qwen2.5-1.5B"
+
+preprocessing:
+  # Head+tail extraction: keeps first N + last M tokens, discards middle
+  # Enable when deploying model trained with --use-head-tail flag
+  head_tail:
+    enabled: true  # Head+tail trained model deployed
+    head_tokens: 256
+    tail_tokens: 256
+    separator: " [...] "

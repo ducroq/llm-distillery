@@ -28,13 +28,13 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
-    "v_proj",
-    "gate_proj",
-    "up_proj",
+    "down_proj",
     "o_proj",
-    "q_proj",
+    "v_proj",
+    "up_proj",
     "k_proj",
-    "down_proj"
+    "q_proj",
+    "gate_proj"
   ],
   "target_parameters": null,
   "task_type": "SEQ_CLS",

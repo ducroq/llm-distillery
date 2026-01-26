@@ -45,6 +45,9 @@ class FilterDataset(Dataset):
         tokenizer,
         max_length: int = 512,
         prompt: str = None,
+        use_head_tail: bool = False,
+        head_tokens: int = 256,
+        tail_tokens: int = 256,
     ):
         """
         Args:
@@ -52,10 +55,16 @@ class FilterDataset(Dataset):
             tokenizer: HuggingFace tokenizer
             max_length: Maximum sequence length for tokenization
             prompt: Optional filter prompt to prepend to each example (for instruction tuning)
+            use_head_tail: Whether to apply head+tail extraction
+            head_tokens: Number of tokens to keep from beginning
+            tail_tokens: Number of tokens to keep from end
         """
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.prompt = prompt
+        self.use_head_tail = use_head_tail
+        self.head_tokens = head_tokens
+        self.tail_tokens = tail_tokens
         self.examples = []
 
         # Load examples
@@ -79,6 +88,16 @@ class FilterDataset(Dataset):
 
         # Combine title and content
         article_text = f"{example['title']}\n\n{example['content']}"
+
+        # Apply head+tail extraction if enabled
+        if self.use_head_tail:
+            from filters.common.text_preprocessing import extract_head_tail
+            article_text = extract_head_tail(
+                article_text,
+                self.tokenizer,
+                self.head_tokens,
+                self.tail_tokens,
+            )
 
         # Optionally prepend prompt (instruction tuning mode)
         if self.prompt:
@@ -395,6 +414,24 @@ def main():
         default=42,
         help="Random seed for reproducibility (default: 42)",
     )
+    parser.add_argument(
+        "--use-head-tail",
+        action="store_true",
+        help="Use head+tail extraction: keep first N + last M tokens. "
+             "Matches inference preprocessing when config.yaml has head_tail.enabled=true",
+    )
+    parser.add_argument(
+        "--head-tokens",
+        type=int,
+        default=256,
+        help="Number of tokens to keep from beginning (default: 256)",
+    )
+    parser.add_argument(
+        "--tail-tokens",
+        type=int,
+        default=256,
+        help="Number of tokens to keep from end (default: 256)",
+    )
 
     args = parser.parse_args()
 
@@ -450,17 +487,26 @@ def main():
 
     # Load datasets
     print(f"\nLoading datasets from {args.data_dir}")
+    if args.use_head_tail:
+        print(f"Head+tail extraction enabled: {args.head_tokens} + {args.tail_tokens} tokens")
+
     train_dataset = FilterDataset(
         args.data_dir / "train.jsonl",
         tokenizer,
         max_length=args.max_length,
         prompt=prompt,
+        use_head_tail=args.use_head_tail,
+        head_tokens=args.head_tokens,
+        tail_tokens=args.tail_tokens,
     )
     val_dataset = FilterDataset(
         args.data_dir / "val.jsonl",
         tokenizer,
         max_length=args.max_length,
         prompt=prompt,
+        use_head_tail=args.use_head_tail,
+        head_tokens=args.head_tokens,
+        tail_tokens=args.tail_tokens,
     )
 
     print(f"Train: {len(train_dataset)} examples")
@@ -656,6 +702,9 @@ def main():
         "best_val_mae": best_val_mae,
         "include_prompt": args.include_prompt,
         "training_mode": "instruction_tuning" if args.include_prompt else "knowledge_distillation",
+        "use_head_tail": args.use_head_tail,
+        "head_tokens": args.head_tokens if args.use_head_tail else None,
+        "tail_tokens": args.tail_tokens if args.use_head_tail else None,
     }
 
     metadata_path = args.output_dir / "training_metadata.json"

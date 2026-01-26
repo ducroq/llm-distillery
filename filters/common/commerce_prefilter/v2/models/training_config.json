@@ -1,0 +1,25 @@
+{
+  "embedder_model": "paraphrase-multilingual-mpnet-base-v2",
+  "embedding_dim": 768,
+  "classifier_type": "MLPClassifier",
+  "hidden_layers": [
+    256,
+    128
+  ],
+  "test_f1": 0.9777777777777777,
+  "test_precision": 0.967032967032967,
+  "test_recall": 0.9887640449438202,
+  "confusion_matrix": [
+    [
+      98,
+      3
+    ],
+    [
+      1,
+      88
+    ]
+  ],
+  "train_samples": 1701,
+  "test_samples": 190,
+  "created": "2026-01-23"
+}
