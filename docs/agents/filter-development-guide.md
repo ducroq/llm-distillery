@@ -986,6 +986,7 @@ time python filters/{filter_name}/v1/prefilter.py \
 
 ### Checklist
 
+- [ ] **Screening filter applied** (RECOMMENDED) - Enriched training distribution
 - [ ] **Target size** - 5K+ articles (3K minimum for simple filters)
 - [ ] **Sampling strategy** - Random OR stratified by tier/source
 - [ ] **Oracle scoring** - Batch score all articles
@@ -995,6 +996,84 @@ time python filters/{filter_name}/v1/prefilter.py \
 - [ ] **No classification artifacts** - Oracle not outputting tiers
 - [ ] **Gatekeeper enforcement** - Rules working correctly
 - [ ] **Dataset stats documented** - Distribution, coverage, quality metrics
+
+### Step 0: Apply Screening Filter (RECOMMENDED)
+
+**Why:** Training on random articles creates 85-95% low-scoring data, causing **regression-to-mean**. Models learn to predict ~2.0 for everything because that minimizes overall error. They fail catastrophically on rare high-scoring content (the gems we're trying to find).
+
+**Evidence:** Cultural-discovery v1 showed MAE of 4.12 for articles scoring 8-10, despite overall MAE of 0.82. The model never learned to predict high scores because it rarely saw them.
+
+**When to use:** Any filter where random corpus is >80% low-scoring (most filters!)
+
+**When to skip:** Filter scope matches corpus well (e.g., specialized tech news for tech filter)
+
+#### Process
+
+1. **Create screening filter** (can reuse prefilter patterns, but more aggressive)
+
+   ```python
+   # See docs/templates/screening-filter-template.md for full template
+   SIGNAL_PATTERNS = [
+       (r'\b(keyword1|keyword2)\b', re.IGNORECASE, "Topic signals"),
+       (r'\b(research|study|evidence)\b', re.IGNORECASE, "Quality signals"),
+   ]
+   ```
+
+2. **Screen large corpus** (25K-50K articles)
+
+   ```bash
+   python filters/{filter_name}/v1/screening_filter.py \
+       --input datasets/raw/master_dataset.jsonl \
+       --output sandbox/screened_articles.jsonl \
+       --target 10000 \
+       --stats sandbox/screening_stats.json
+   ```
+
+3. **Validate screening** (100-article sample)
+
+   ```bash
+   # Score sample of screened articles
+   python -m ground_truth.batch_scorer \
+       --filter filters/{filter_name}/v1 \
+       --source sandbox/screened_sample_100.jsonl \
+       --output-dir sandbox/screening_validation
+   ```
+
+   **Target distribution:**
+   - 30-40% scoring >= 4.0 (vs ~6% in random)
+   - 10-20% scoring >= 6.0 (vs ~2% in random)
+
+4. **Check false negatives** (sample rejected articles)
+
+   ```bash
+   python -m ground_truth.batch_scorer \
+       --filter filters/{filter_name}/v1 \
+       --source sandbox/rejected_sample_100.jsonl \
+       --output-dir sandbox/screening_fn_check
+   ```
+
+   **Acceptable:** < 5% of rejected articles score >= 6.0
+
+5. **Proceed to oracle scoring** with screened articles
+
+#### Screening Filter Criteria Examples
+
+| Filter Type | Signal Patterns |
+|-------------|-----------------|
+| Cultural discovery | archaeology, heritage, tradition, ancient, artifact |
+| Tech innovation | breakthrough, patent, prototype, research, pilot |
+| Risk analysis | warning, crisis, risk, exposure, volatility |
+| Sustainability | renewable, emissions, carbon, climate, efficiency |
+
+#### Target Distribution
+
+| Score Range | Random Corpus | After Screening |
+|-------------|---------------|-----------------|
+| Low (0-3) | ~85% | ~50-60% |
+| Medium (4-6) | ~12% | ~30-35% |
+| High (7-10) | ~3% | ~10-15% |
+
+**Key insight:** Screening is NOT cheating - it's acknowledging that our goal is finding needles, not modeling haystacks. See [ADR-003](../adr/003-screening-filter-for-training-data.md) for full rationale.
 
 ### Why Training Data Quality Matters
 

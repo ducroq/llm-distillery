@@ -465,6 +465,66 @@ REQUIRE_KEYWORDS = [
 
 ---
 
+## Screening Filters (Training Data Enrichment)
+
+### Purpose
+
+Screening filters solve the **regression-to-mean problem** in training data collection for needle-in-haystack filters.
+
+**Problem:** When 94% of random articles score low (< 4.0), models learn to predict the mean (~2.0) because that minimizes overall error. This makes them useless for finding rare high-quality content.
+
+**Solution:** Screen articles BEFORE oracle scoring to enrich the training distribution with signal-bearing content.
+
+### Workflow
+
+```
+WITHOUT Screening (Regression-to-Mean):
+Raw articles ─────────────────────→ Oracle ─────→ Training
+                                    (94% zeros)
+                                    Model learns: "predict 2.0 for everything"
+
+WITH Screening (Enriched Distribution):
+Raw articles ──→ Screening Filter ──→ Oracle ──→ Training
+                 (reject 60-80%,      (~50% zeros,
+                  enriches signal)     richer gradient)
+                                    Model learns: "distinguish 3 from 7"
+```
+
+### When to Use
+
+- **Use screening:** When random corpus is >80% low-scoring (weighted avg < 4.0)
+- **Skip screening:** When filter scope matches corpus well (e.g., tech filter on tech news)
+
+### Screening vs Prefilter
+
+| Aspect | Screening Filter | Prefilter |
+|--------|------------------|-----------|
+| **Purpose** | Training data enrichment | Inference noise reduction |
+| **When used** | Before oracle scoring | Before model inference |
+| **Aggressiveness** | Aggressive (reject 60-85%) | Conservative (pass 50-80%) |
+| **False negatives** | Acceptable (10-20%) | Critical failure (< 10%) |
+| **False positives** | Critical failure | Acceptable (oracle catches) |
+| **Location** | `screening_filter.py` | `prefilter.py` |
+
+**Key insight:** A good prefilter is NOT a good screening filter. They optimize for opposite goals.
+
+### Target Distribution After Screening
+
+| Score Range | Random Corpus | After Screening |
+|-------------|---------------|-----------------|
+| Low (0-3) | ~85% | ~50-60% |
+| Medium (4-6) | ~12% | ~30-35% |
+| High (7-10) | ~3% | ~10-15% |
+
+### Implementation
+
+See:
+- [ADR-003: Screening Filter for Training Data Enrichment](adr/003-screening-filter-for-training-data.md)
+- [Screening Filter Template](templates/screening-filter-template.md)
+- [Filter Development Guide - Phase 5](agents/filter-development-guide.md#phase-5-training-data-collection)
+
+---
+
 ## Inline Filters
 
 ### Why Required
