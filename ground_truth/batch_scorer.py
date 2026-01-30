@@ -38,6 +38,8 @@ from typing import Dict, List, Optional, Tuple
 # Third-party imports
 import anthropic
 import google.generativeai as genai
+from google import genai as genai_new
+from google.genai import types as genai_types
 
 # Local imports
 from .secrets_manager import get_secrets_manager
@@ -494,29 +496,24 @@ class GenericBatchScorer:
                 )
             return anthropic.Anthropic(api_key=api_key)
 
-        elif self.llm_provider == "gemini":
+        elif self.llm_provider in ("gemini", "gemini-flash"):
             if not api_key:
                 raise ValueError(
                     "Gemini API key not found. Set GOOGLE_API_KEY or GEMINI_API_KEY in environment or secrets.ini"
                 )
-            genai.configure(api_key=api_key)
-            return genai.GenerativeModel('gemini-2.0-flash')
-
-        elif self.llm_provider == "gemini-flash":
-            if not api_key:
-                raise ValueError(
-                    "Gemini API key not found. Set GOOGLE_API_KEY or GEMINI_API_KEY in environment or secrets.ini"
-                )
-            genai.configure(api_key=api_key)
-            return genai.GenerativeModel('gemini-2.0-flash')
+            # Use new SDK with thinking disabled to reduce costs
+            # Thinking tokens were adding ~80% to output token costs
+            self._gemini_model = 'gemini-2.5-flash'
+            return genai_new.Client(api_key=api_key)
 
         elif self.llm_provider == "gemini-pro":
             if not api_key:
                 raise ValueError(
                     "Gemini API key not found. Set GOOGLE_API_KEY or GEMINI_API_KEY in environment or secrets.ini"
                 )
-            genai.configure(api_key=api_key)
-            return genai.GenerativeModel('gemini-2.5-pro')
+            # Use new SDK with thinking disabled
+            self._gemini_model = 'gemini-2.5-pro'
+            return genai_new.Client(api_key=api_key)
 
         elif self.llm_provider == "gpt4":
             import openai
@@ -712,11 +709,15 @@ class GenericBatchScorer:
                     result[0] = message.content[0].text.strip()
 
                 elif self.llm_provider in ["gemini", "gemini-pro", "gemini-flash"]:
-                    response = self.llm_client.generate_content(
-                        prompt,
-                        generation_config=genai.types.GenerationConfig(
+                    # Use new SDK with thinking disabled to reduce costs
+                    # thinking_budget=0 eliminates ~80% of output tokens (thinking tokens)
+                    response = self.llm_client.models.generate_content(
+                        model=self._gemini_model,
+                        contents=prompt,
+                        config=genai_types.GenerateContentConfig(
                             temperature=0.3,
                             max_output_tokens=4096,
+                            thinking_config=genai_types.ThinkingConfig(thinking_budget=0)
                         )
                     )
                     result[0] = response.text.strip()
