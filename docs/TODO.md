@@ -30,6 +30,10 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [x] **investment-risk v5** - Production ready
   - Test MAE: 0.484 (excellent)
   - 10,000 training articles
+- [x] **cultural-discovery v3** - Production ready
+  - Val MAE: 0.77, merged v1+v2 datasets (7,827 articles)
+  - 39% better on medium-tier, 23% better on high-tier vs v1
+  - Target: ovr.news (Wisdom tab), Busara
 
 ### In Active Development (priority order)
 - [ ] **belonging v1** - Needs assessment
@@ -44,12 +48,6 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - Next: harmonized prompt, prefilter.py
   - Challenge: wisdom is rare in news
 
-### New Filters (recently created)
-- [ ] **cultural-discovery v1** - Art/culture/history discoveries + cross-cultural connections
-  - Config and README created
-  - Target: ovr.news (Wisdom tab), Busara
-  - Next: harmonized prompt, prefilter, training data
-
 ### Planned (filters/todo/)
 - [ ] **future-of-education** - Educational innovation filter
 - [ ] **seece** - Social, economic, environmental corporate excellence
@@ -62,7 +60,7 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [x] **Training script** - Qwen2.5-1.5B + LoRA working
 - [x] **Context length experiments** - 1024/2048/head+tail tested
   - 1024tok: MAE 0.652, 2048tok: MAE 0.627
-  - head+tail (256+256): Training in progress
+  - head+tail (256+256): MAE ~0.69 (deployed to production)
   - See `docs/IDEAS.md` for full results
 - [ ] **Qwen2.5-7B support** - Larger model option for complex filters
 - [ ] **Training monitoring improvements** - Better logging, early stopping
@@ -88,4 +86,4 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 
 ---
 
-*Last updated: 2025-01-25*
+*Last updated: 2026-01-30*

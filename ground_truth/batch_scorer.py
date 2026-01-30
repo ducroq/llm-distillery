@@ -376,7 +376,8 @@ class GenericBatchScorer:
         llm_provider: str = "claude",
         api_key: Optional[str] = None,
         output_dir: str = "datasets",
-        filter_name: Optional[str] = None
+        filter_name: Optional[str] = None,
+        thinking_budget: int = 0
     ):
         """
         Initialize the batch scorer.
@@ -387,17 +388,22 @@ class GenericBatchScorer:
                         filters/<name>/v<N>/prompt.md or prompt-compressed.md
             llm_provider: LLM provider to use. Options:
                         - "claude": Claude 3.7 Sonnet
-                        - "gemini" or "gemini-pro": Gemini 1.5 Pro
-                        - "gemini-flash": Gemini 1.5 Flash (fastest/cheapest)
+                        - "gemini" or "gemini-pro": Gemini 2.5 Pro
+                        - "gemini-flash": Gemini 2.5 Flash (fastest/cheapest)
                         - "gpt4": GPT-4 Turbo
             api_key: API key for the provider. If None, reads from environment
                     variables or config/credentials/secrets.ini
             output_dir: Directory to save scored articles and logs
             filter_name: Name of the filter (e.g., "uplifting"). If None,
                         auto-detected from prompt_path directory structure.
+            thinking_budget: Token budget for Gemini "thinking" mode (0-24576).
+                        Default 0 disables thinking to reduce costs by ~80%.
+                        Set higher (e.g., 1024-8192) for complex reasoning tasks.
+                        Only applies to gemini providers.
         """
         self.prompt_path = Path(prompt_path)
         self.llm_provider = llm_provider.lower()
+        self.thinking_budget = thinking_budget
 
         # Auto-detect filter name from prompt filename
         if filter_name is None:
@@ -709,15 +715,18 @@ class GenericBatchScorer:
                     result[0] = message.content[0].text.strip()
 
                 elif self.llm_provider in ["gemini", "gemini-pro", "gemini-flash"]:
-                    # Use new SDK with thinking disabled to reduce costs
-                    # thinking_budget=0 eliminates ~80% of output tokens (thinking tokens)
+                    # Use new SDK with configurable thinking budget
+                    # thinking_budget=0 (default) eliminates ~80% of output tokens
+                    # Set higher (1024-8192) for complex reasoning if needed
                     response = self.llm_client.models.generate_content(
                         model=self._gemini_model,
                         contents=prompt,
                         config=genai_types.GenerateContentConfig(
                             temperature=0.3,
                             max_output_tokens=4096,
-                            thinking_config=genai_types.ThinkingConfig(thinking_budget=0)
+                            thinking_config=genai_types.ThinkingConfig(
+                                thinking_budget=self.thinking_budget
+                            )
                         )
                     )
                     result[0] = response.text.strip()
@@ -1463,6 +1472,12 @@ if __name__ == '__main__':
         '--api-key',
         help='API key (or set via environment variable)'
     )
+    parser.add_argument(
+        '--thinking-budget',
+        type=int,
+        default=0,
+        help='Token budget for Gemini 2.5 Flash thinking mode (0=disabled, max 24576). Default 0 to minimize costs.'
+    )
 
     args = parser.parse_args()
 
@@ -1515,7 +1530,8 @@ if __name__ == '__main__':
         llm_provider=args.llm,
         api_key=args.api_key,
         output_dir=args.output_dir,
-        filter_name=filter_name
+        filter_name=filter_name,
+        thinking_budget=args.thinking_budget
     )
 
     # Run scoring
