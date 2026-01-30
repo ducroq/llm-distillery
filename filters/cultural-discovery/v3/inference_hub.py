@@ -159,7 +159,7 @@ def main():
             pass
 
     # Note: Replace with actual repo ID when deployed
-    repo_id = os.environ.get("CULTURAL_DISCOVERY_REPO", "username/cultural-discovery-v3")
+    repo_id = os.environ.get("CULTURAL_DISCOVERY_REPO", "jeergrvgreg/cultural-discovery-v3")
 
     print(f"Loading cultural discovery scorer from HuggingFace Hub: {repo_id}")
     scorer = CulturalDiscoveryScorerHub(

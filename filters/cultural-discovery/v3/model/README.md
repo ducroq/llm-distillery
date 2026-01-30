@@ -102,8 +102,8 @@ base_model = AutoModelForSequenceClassification.from_pretrained(
     num_labels=5,
     problem_type="regression"
 )
-model = PeftModel.from_pretrained(base_model, "YOUR_USERNAME/cultural-discovery-v3")
-tokenizer = AutoTokenizer.from_pretrained("YOUR_USERNAME/cultural-discovery-v3")
+model = PeftModel.from_pretrained(base_model, "jeergrvgreg/cultural-discovery-v3")
+tokenizer = AutoTokenizer.from_pretrained("jeergrvgreg/cultural-discovery-v3")
 
 # Score an article
 article = "Title: Ancient Silk Road Temple Reveals Buddhist-Zoroastrian Syncretism\n\nExcavations at a 4th-century temple..."
@@ -190,7 +190,7 @@ MIT
   title={Cultural Discovery Filter v3},
   author={LLM Distillery},
   year={2026},
-  url={https://huggingface.co/YOUR_USERNAME/cultural-discovery-v3}
+  url={https://huggingface.co/jeergrvgreg/cultural-discovery-v3}
 }
 ```
 
