@@ -1,206 +1,201 @@
 ---
-base_model: Qwen/Qwen2.5-1.5B
-library_name: peft
+license: mit
+language:
+- en
+- fr
+- es
+- de
+- nl
+- it
 tags:
 - base_model:adapter:Qwen/Qwen2.5-1.5B
 - lora
 - transformers
+- cultural-discovery
+- content-filter
+library_name: peft
+base_model: Qwen/Qwen2.5-1.5B
+pipeline_tag: text-classification
 ---
 
-# Model Card for Model ID
+# Cultural Discovery Filter v3
 
-<!-- Provide a quick summary of what the model is/does. -->
+## Model Description
 
+A fine-tuned **Qwen2.5-1.5B** model with LoRA adapters for multi-dimensional cultural discovery content scoring.
 
+This model evaluates news articles across **5 dimensions** to identify content about cultural discoveries, cross-cultural connections, and heritage significance - separating meaningful cultural journalism from superficial tourism pieces or speculation.
 
-## Model Details
+**Key Innovation**: Merged training datasets from v1 (random sampling) and v2 (screening filter) to achieve both data quantity AND distribution quality, solving the regression-to-mean problem.
 
-### Model Description
+**Target Applications**: ovr.news (Wisdom tab), Busara
 
-<!-- Provide a longer summary of what this model is. -->
+## Dimensions
 
+The model scores articles on 5 dimensions:
 
+### Discovery Dimensions (50% weight)
+| Dimension | Weight | Question |
+|-----------|--------|----------|
+| **Discovery Novelty** | 25% | How new or unknown is this finding? |
+| **Cross-Cultural Connection** | 25% | How does it bridge different peoples/civilizations? |
 
-- **Developed by:** [More Information Needed]
-- **Funded by [optional]:** [More Information Needed]
-- **Shared by [optional]:** [More Information Needed]
-- **Model type:** [More Information Needed]
-- **Language(s) (NLP):** [More Information Needed]
-- **License:** [More Information Needed]
-- **Finetuned from model [optional]:** [More Information Needed]
+### Heritage & Resonance (35% weight)
+| Dimension | Weight | Question |
+|-----------|--------|----------|
+| **Heritage Significance** | 20% | How culturally/historically important? |
+| **Human Resonance** | 15% | Does it connect to lived human experience? |
 
-### Model Sources [optional]
+### Assessment (15% weight)
+| Dimension | Weight | Question |
+|-----------|--------|----------|
+| **Evidence Quality** | 15% | How well-researched and documented? |
 
-<!-- Provide the basic links for the model. -->
+## Performance
 
-- **Repository:** [More Information Needed]
-- **Paper [optional]:** [More Information Needed]
-- **Demo [optional]:** [More Information Needed]
+| Metric | Value |
+|--------|-------|
+| **Validation MAE** | **0.77** |
+| Training MAE | 0.72 |
+| Validation RMSE | 1.24 |
 
-## Uses
+### Per-Dimension MAE (Validation)
+| Dimension | MAE |
+|-----------|-----|
+| Discovery Novelty | 0.54 |
+| Heritage Significance | 0.58 |
+| Cross-Cultural Connection | 0.62 |
+| Human Resonance | 0.77 |
+| Evidence Quality | 1.36 |
 
-<!-- Address questions around how the model is intended to be used, including the foreseeable users of the model and those affected by the model. -->
-
-### Direct Use
-
-<!-- This section is for the model use without fine-tuning or plugging into a larger ecosystem/app. -->
-
-[More Information Needed]
-
-### Downstream Use [optional]
-
-<!-- This section is for the model use when fine-tuned for a task, or when plugged into a larger ecosystem/app -->
-
-[More Information Needed]
-
-### Out-of-Scope Use
-
-<!-- This section addresses misuse, malicious use, and uses that the model will not work well for. -->
-
-[More Information Needed]
-
-## Bias, Risks, and Limitations
-
-<!-- This section is meant to convey both technical and sociotechnical limitations. -->
-
-[More Information Needed]
-
-### Recommendations
-
-<!-- This section is meant to convey recommendations with respect to the bias, risk, and technical limitations. -->
-
-Users (both direct and downstream) should be made aware of the risks, biases and limitations of the model. More information needed for further recommendations.
-
-## How to Get Started with the Model
-
-Use the code below to get started with the model.
-
-[More Information Needed]
+### Tier-Level Performance (vs v1)
+| Tier | v1 MAE | v3 MAE | Improvement |
+|------|--------|--------|-------------|
+| LOW (0-3.9) | 0.75 | 0.60 | +20% |
+| MEDIUM (4-6.9) | 2.85 | 1.73 | **+39%** |
+| HIGH (7-10) | 3.49 | 2.69 | **+23%** |
 
 ## Training Details
 
-### Training Data
+- **Base Model**: Qwen/Qwen2.5-1.5B
+- **Training Mode**: Knowledge Distillation (from Gemini Flash oracle)
+- **Adapter**: LoRA (r=16, α=32, 18.5M trainable params, 1.2% of model)
+- **Training Samples**: 6,261
+- **Validation Samples**: 783
+- **Test Samples**: 783
+- **Epochs**: 6 (best at epoch 4)
+- **Batch Size**: 8
+- **Learning Rate**: 2e-5
+- **Max Length**: 512 tokens
+- **Preprocessing**: Head+tail (256+256 tokens with " [...] " separator)
 
-<!-- This should link to a Dataset Card, perhaps with a short stub of information on what the training data is all about as well as documentation related to data pre-processing or additional filtering. -->
+## Usage
 
-[More Information Needed]
+```python
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from peft import PeftModel
+import torch
 
-### Training Procedure
+# Load base model and LoRA adapter
+base_model = AutoModelForSequenceClassification.from_pretrained(
+    "Qwen/Qwen2.5-1.5B",
+    num_labels=5,
+    problem_type="regression"
+)
+model = PeftModel.from_pretrained(base_model, "YOUR_USERNAME/cultural-discovery-v3")
+tokenizer = AutoTokenizer.from_pretrained("YOUR_USERNAME/cultural-discovery-v3")
 
-<!-- This relates heavily to the Technical Specifications. Content here should link to that section when it is relevant to the training procedure. -->
+# Score an article
+article = "Title: Ancient Silk Road Temple Reveals Buddhist-Zoroastrian Syncretism\n\nExcavations at a 4th-century temple..."
+inputs = tokenizer(article, return_tensors="pt", max_length=512, truncation=True)
 
-#### Preprocessing [optional]
+with torch.no_grad():
+    outputs = model(**inputs)
+    scores = outputs.logits[0].numpy()
 
-[More Information Needed]
+dimensions = ["discovery_novelty", "heritage_significance", "cross_cultural_connection",
+              "human_resonance", "evidence_quality"]
+weights = [0.25, 0.20, 0.25, 0.15, 0.15]
 
+for dim, weight, score in zip(dimensions, weights, scores):
+    print(f"{dim}: {score:.1f}")
 
-#### Training Hyperparameters
+# Compute weighted average
+weighted_avg = sum(s * w for s, w in zip(scores, weights))
+print(f"\nWeighted Average: {weighted_avg:.2f}")
 
-- **Training regime:** [More Information Needed] <!--fp32, fp16 mixed precision, bf16 mixed precision, bf16 non-mixed precision, fp16 non-mixed precision, fp8 mixed precision -->
+# Assign tier
+if weighted_avg >= 7.0:
+    tier = "HIGH"
+elif weighted_avg >= 4.0:
+    tier = "MEDIUM"
+else:
+    tier = "LOW"
+print(f"Tier: {tier}")
+```
 
-#### Speeds, Sizes, Times [optional]
+## Head+Tail Preprocessing
 
-<!-- This section provides information about throughput, start/end time, checkpoint size if relevant, etc. -->
+**Important**: This model was trained with head+tail preprocessing. For best results, apply the same preprocessing at inference:
 
-[More Information Needed]
+```python
+def extract_head_tail(text, tokenizer, head_tokens=256, tail_tokens=256, separator=" [...] "):
+    """Extract first and last tokens from text."""
+    tokens = tokenizer.encode(text, add_special_tokens=False)
+    if len(tokens) <= head_tokens + tail_tokens:
+        return text
+    head = tokens[:head_tokens]
+    tail = tokens[-tail_tokens:]
+    return tokenizer.decode(head) + separator + tokenizer.decode(tail)
+```
 
-## Evaluation
+## Gatekeeper Rule
 
-<!-- This section describes the evaluation protocols and provides the results. -->
+**Evidence Quality < 3 → Overall score capped at 3.0**
 
-### Testing Data, Factors & Metrics
+Speculation without documentation cannot claim cultural significance.
 
-#### Testing Data
+## Tier Definitions
 
-<!-- This should link to a Dataset Card if possible. -->
+| Tier | Score Range | Description |
+|------|-------------|-------------|
+| **HIGH** | ≥ 7.0 | Significant discovery or deep cross-cultural insight |
+| **MEDIUM** | ≥ 4.0 | Meaningful cultural content with some discovery value |
+| **LOW** | < 4.0 | Superficial, speculative, or single-culture content |
 
-[More Information Needed]
+## Limitations
 
-#### Factors
+- Trained on multilingual news articles (majority English, with French, Spanish, German, Dutch, Italian)
+- MAE of ~0.77 means predictions within ±0.8 of oracle on average
+- `evidence_quality` dimension has highest error (1.36 MAE) - abstract qualities are harder to learn
+- Model still under-predicts high scores (bias -2.27 for articles scoring 7-10)
+- Limited high-tier training data (1.9% of dataset)
 
-<!-- These are the things the evaluation is disaggregating by, e.g., subpopulations or domains. -->
+## Version History
 
-[More Information Needed]
+| Version | MAE | Training Data | Key Change |
+|---------|-----|---------------|------------|
+| v1 | 0.82 | 4,996 (random) | Regression-to-mean problem |
+| v2 | 1.47 | 2,919 (screened) | Insufficient data |
+| **v3** | **0.77** | **7,827 (merged)** | Best of both worlds |
 
-#### Metrics
+## License
 
-<!-- These are the evaluation metrics being used, ideally with a description of why. -->
+MIT
 
-[More Information Needed]
+## Citation
 
-### Results
+```bibtex
+@misc{cultural_discovery_v3,
+  title={Cultural Discovery Filter v3},
+  author={LLM Distillery},
+  year={2026},
+  url={https://huggingface.co/YOUR_USERNAME/cultural-discovery-v3}
+}
+```
 
-[More Information Needed]
-
-#### Summary
-
-
-
-## Model Examination [optional]
-
-<!-- Relevant interpretability work for the model goes here -->
-
-[More Information Needed]
-
-## Environmental Impact
-
-<!-- Total emissions (in grams of CO2eq) and additional considerations, such as electricity usage, go here. Edit the suggested text below accordingly -->
-
-Carbon emissions can be estimated using the [Machine Learning Impact calculator](https://mlco2.github.io/impact#compute) presented in [Lacoste et al. (2019)](https://arxiv.org/abs/1910.09700).
-
-- **Hardware Type:** [More Information Needed]
-- **Hours used:** [More Information Needed]
-- **Cloud Provider:** [More Information Needed]
-- **Compute Region:** [More Information Needed]
-- **Carbon Emitted:** [More Information Needed]
-
-## Technical Specifications [optional]
-
-### Model Architecture and Objective
-
-[More Information Needed]
-
-### Compute Infrastructure
-
-[More Information Needed]
-
-#### Hardware
-
-[More Information Needed]
-
-#### Software
-
-[More Information Needed]
-
-## Citation [optional]
-
-<!-- If there is a paper or blog post introducing the model, the APA and Bibtex information for that should go in this section. -->
-
-**BibTeX:**
-
-[More Information Needed]
-
-**APA:**
-
-[More Information Needed]
-
-## Glossary [optional]
-
-<!-- If relevant, include terms and calculations in this section that can help readers understand the model or model card. -->
-
-[More Information Needed]
-
-## More Information [optional]
-
-[More Information Needed]
-
-## Model Card Authors [optional]
-
-[More Information Needed]
-
-## Model Card Contact
-
-[More Information Needed]
 ### Framework versions
 
 - PEFT 0.18.1
+- Transformers 4.47.0
+- PyTorch 2.5.1
