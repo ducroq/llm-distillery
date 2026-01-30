@@ -75,8 +75,9 @@ filters/cultural-discovery/v3/
 ├── config.yaml               # Filter configuration
 ├── prompt-compressed.md      # Oracle prompt (calibrated)
 ├── prefilter.py              # Keyword-based prefilter
-├── base_scorer.py            # Shared scoring logic
-├── inference.py              # Production inference module
+├── base_scorer.py            # Shared scoring logic (with head+tail preprocessing)
+├── inference.py              # Local model inference
+├── inference_hub.py          # HuggingFace Hub inference
 ├── training_metadata.json    # Training configuration
 ├── training_history.json     # Training curves
 └── model/                    # Trained LoRA adapter
