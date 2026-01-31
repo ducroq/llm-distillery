@@ -13,10 +13,17 @@ A parking lot for project ideas worth exploring later.
 Could train multiple smaller models and ensemble their predictions. Trade-off: complexity vs marginal accuracy gain.
 
 ### Active Learning Loop
-**Status:** Idea
+**Status:** Implemented (ADR-005)
 **Origin:** Training efficiency
 
-Identify uncertain predictions and route back to oracle for labeling. Could improve training data quality with less oracle cost.
+Use production model predictions to guide oracle labeling. Implemented for uplifting v6 and sustainability_technology:
+- Screen production output by prediction threshold (≥5.0)
+- Oracle score candidates
+- Merge with training data, retrain
+
+See `docs/adr/005-active-learning-for-filter-improvement.md` for full methodology.
+
+**Results:** MEDIUM-tier enrichment works (31.5% → 34.6%). HIGH-tier needle search ongoing.
 
 ### Confidence Calibration
 **Status:** Idea
