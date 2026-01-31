@@ -2,25 +2,27 @@
 
 ## Now (Current Sprint)
 
-- **Context Length Experiments** - Testing 1024/2048/head+tail token strategies
-  - 1024tok: MAE 0.652 (complete)
-  - 2048tok: MAE 0.627 (complete)
-  - head+tail (256+256): Training in progress
-  - See `docs/IDEAS.md` for full results
+- **belonging v1** - Assess existing work and develop
 
 ## Next (Coming Soon)
-
-- **cultural-discovery v1** - Art, culture, history discoveries + cross-cultural connections
-  - Target: ovr.news (Wisdom tab), Busara
-  - Config created, needs prompt and training data
-- **belonging v1** - Assess and develop
 - **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
 - **nature_recovery v1** - Develop harmonized prompt and prefilter
 - **signs_of_wisdom v1** - Develop harmonized prompt and prefilter
 
 ## Later (Backlog)
 
-- **Commerce Prefilter SLM** - Redo with proper multilingual embeddings and context size
+- **uplifting v6** - Train model on enriched dataset (10,495 articles: v5 + 495 active learning)
+  - Training data ready: `datasets/training/uplifting_v6/`
+  - MEDIUM tier increased from 31.5% to 34.6%
+  - Still only 8 HIGH articles (0.1%) - need targeted collection
+- **Active Learning for HIGH-tier articles** - Continue using production filter to find high-scoring candidates
+  - Method: Filter production output, screen predicted >= 5.5, oracle score, repeat
+  - Target sources: positive_news_the_better_india, positive_news_upworthy, etc.
+  - Goal: Collect 50+ HIGH-tier (7+) articles for v7
+- **Prefilter strategy documented** - ADR-004: Commerce is only universal noise; filter-specific noise handled by trained model
+  - Commerce prefilter v2 already deployed
+  - Accept ~30-40% oracle waste during training (zeros = valuable negative examples)
+  - No new universal prefilter needed
 - **future-of-education filter** - Educational innovation (in filters/todo/)
 - **seece filter** - Corporate excellence (in filters/todo/)
 - **Batch processing pipeline** - High-volume scoring infrastructure
@@ -30,6 +32,10 @@
 ## Completed
 
 ### Filters
+- [x] **cultural-discovery v3** - Production ready, deployed HuggingFace Hub - 2026-01
+  - Val MAE: 0.77, 7,827 training articles (merged random+screened)
+  - 39% improvement on medium-tier, 23% on high-tier vs v1
+  - Key learning: screen+merge strategy for needle-in-haystack filters
 - [x] **uplifting v5** - Production ready, deployed HuggingFace Hub (private) - 2024-11
   - Val MAE: 0.68, 10K training articles
 - [x] **sustainability_technology v1** - Deployed HuggingFace Hub - 2024-11
@@ -39,6 +45,11 @@
   - Prefilter: FP Block 88.2%, TP Pass 89.0%
 - [x] **investment-risk v5** - Production ready - 2024-12
   - Test MAE: 0.484, 10K training articles
+
+### Research
+- [x] **Context length experiments** - 1024/2048/head+tail strategies - 2025-01
+  - head+tail (256+256) deployed to production
+  - See `docs/IDEAS.md` for full results
 
 ### Infrastructure
 - [x] **Ground truth generation pipeline** - 2024-11
@@ -50,4 +61,4 @@
 
 ---
 
-*Last updated: 2025-01-25*
+*Last updated: 2026-01-31*

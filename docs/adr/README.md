@@ -13,6 +13,8 @@ ADRs are short documents that capture important architectural decisions along wi
 
 - [ADR-001: Moderate Dimension Correlations Are Acceptable](001-moderate-correlation-acceptable.md) - Clarifies when dimension correlations reflect real domain relationships vs problematic redundancy
 - [ADR-002: Modern Prompt Format Support](002-modern-prompt-format.md) - Introduces flexible prompt format without wrapper sections, supports JSON examples and custom structures
+- [ADR-003: Screening Filter for Training Data](003-screening-filter-for-training-data.md) - Enriches training data with signal-bearing content before oracle scoring
+- [ADR-004: Commerce Prefilter as Universal Noise Filter](004-universal-noise-prefilter.md) - Only commerce is universal noise; filter-specific noise handled by model (PROPOSED)
 
 ## Format
 
