@@ -77,6 +77,7 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [ ] **Generalize prefilter evaluation** - Apply to all filters
 - [ ] **Dataset QA pipeline** - Automated quality checks
 - [ ] **Cost tracking** - Monitor API usage for oracle scoring
+- [ ] **Hub scorers: add torch_dtype parameter** - `inference_hub.py` files don't specify `torch_dtype` in `from_pretrained()`, so they inherit the base model default (bfloat16 for Qwen2.5). This breaks on hardware that doesn't support bfloat16. Fix: accept optional `torch_dtype` param and pass it through. Workaround: `.half()` after loading on gpu-server.
 
 ## Documentation
 
