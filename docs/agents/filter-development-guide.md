@@ -1075,6 +1075,54 @@ time python filters/{filter_name}/v1/prefilter.py \
 
 **Key insight:** Screening is NOT cheating - it's acknowledging that our goal is finding needles, not modeling haystacks. See [ADR-003](../adr/003-screening-filter-for-training-data.md) for full rationale.
 
+#### Merging Strategy: When Screening Alone Isn't Enough
+
+**Problem:** Screening can produce too few articles if acceptance rate is low. Cultural-discovery v2 screened aggressively, getting only 2,919 articles vs v1's 4,996. Despite better distribution, v2 performed WORSE (MAE 1.47 vs 0.82) because the model couldn't learn the harder distribution with less data.
+
+**Solution:** Merge random + screened datasets for best of both worlds:
+
+| Dataset Type | Provides | Example |
+|--------------|----------|---------|
+| Random data | Sufficient negatives (low-scoring coverage) | v1: 4,996 articles |
+| Screened data | Enriched positives (medium/high signal) | v2: 2,919 articles |
+| **Merged** | **Both volume AND distribution** | v3: 7,827 articles |
+
+**When to use merging:**
+
+| Scenario | Approach |
+|----------|----------|
+| **New filter** | Screen → Score → Train (single pass) |
+| **Existing filter with poor high-tier** | Merge existing + screened |
+| **Screening produces <3K articles** | Merge with random sample |
+| **Existing filter performing well** | No change needed |
+
+**Results from cultural-discovery:**
+
+| Version | Data Size | HIGH tier % | MAE | Medium-tier MAE |
+|---------|-----------|-------------|-----|-----------------|
+| v1 (random) | 4,996 | 0.7% | 0.82 | 2.85 |
+| v2 (screened) | 2,919 | 3.0% | 1.47 | - |
+| **v3 (merged)** | **7,827** | **1.9%** | **0.77** | **1.73 (-39%)** |
+
+**Merging workflow:**
+
+```bash
+# 1. Keep existing random data (provides negatives)
+# 2. Screen and score additional articles
+python -m ground_truth.batch_scorer \
+  --filter filters/{filter_name}/v1 \
+  --source sandbox/screened_articles.jsonl \
+  --output-dir ground_truth/labeled/{filter_name}/v1_screened
+
+# 3. Merge datasets (deduplicate by article ID)
+python training/merge_datasets.py \
+  --base ground_truth/labeled/{filter_name}/v1 \
+  --additional ground_truth/labeled/{filter_name}/v1_screened \
+  --output datasets/training/{filter_name}_v2
+```
+
+**Key metric:** If HIGH tier (≥7.0) is <1% of training data, model likely under-predicts high scores. Consider screen+merge.
+
 ### Why Training Data Quality Matters
 
 **Good data:** Model learns to score like oracle

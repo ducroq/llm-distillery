@@ -150,6 +150,79 @@ This approach is established in ML under several names:
 - Hard to maintain consistency
 - Doesn't generalize to new filters
 
+## Lessons Learned: The Merging Strategy (2026-01-30)
+
+### The v2 Failure
+
+Cultural-discovery v2 applied screening successfully, enriching the distribution:
+- v1 (random): 94% low, 5% medium, 1% high
+- v2 (screened): 80% low, 17% medium, 3% high
+
+**But v2 performed WORSE (MAE 1.47 vs v1's 0.82)!**
+
+**Root cause:** Screening produced only 2,919 articles (vs v1's 4,996). The enriched distribution was harder to learn, and with 42% less data, the model couldn't converge.
+
+### The v3 Solution: Merge Datasets
+
+**Key insight:** You need BOTH sufficient volume AND better distribution. The solution is **additive, not reductive**.
+
+```
+Random data (v1)     →  Provides negatives (low-scoring coverage)
+        +
+Screened data (v2)   →  Provides positives (medium/high signal)
+        =
+Merged dataset (v3)  →  Best of both worlds
+```
+
+**Results:**
+
+| Version | Data Size | Distribution | MAE | Medium-tier MAE | High-tier MAE |
+|---------|-----------|--------------|-----|-----------------|---------------|
+| v1 (random) | 4,996 | 94% low | 0.82 | 2.85 | 3.49 |
+| v2 (screened) | 2,919 | 80% low | 1.47 | - | - |
+| v3 (merged) | 7,827 | 88% low | **0.77** | **1.73** (-39%) | **2.69** (-23%) |
+
+### Updated Workflow
+
+```
+RECOMMENDED (merged approach):
+
+1. Existing data (random)  ──→  Keep as-is (provides negatives)
+
+2. New screening pass      ──→  Screen 30K articles
+         │
+         ▼
+   Screened articles (~5K) ──→  Score with oracle
+         │
+         ▼
+3. Merge datasets          ──→  Deduplicate and combine
+         │
+         ▼
+   Training dataset        ──→  ~8-10K articles with enriched distribution
+```
+
+### When to Use Merging vs Fresh Screening
+
+| Scenario | Approach |
+|----------|----------|
+| **New filter** | Screen → Score → Train (single pass) |
+| **Existing filter with poor high-tier** | Merge existing + screened |
+| **Existing filter performing well** | No change needed |
+| **Screening produces <3K articles** | Merge with random sample |
+
+### Implications for Other Filters
+
+Analysis of production filters (2026-01-30):
+
+| Filter | LOW | MED | HIGH | Recommendation |
+|--------|-----|-----|------|----------------|
+| uplifting v5 | 68% | 31% | 0.1% (7) | **Screen+merge for v6** |
+| investment-risk v5 | 86% | 14% | 0.1% (12) | Consider screen+merge |
+| sustainability-tech v2 | - | - | - | Check distribution |
+| cultural-discovery v3 | 88% | 10% | 2% | ✅ Already merged |
+
+**Key metric:** If HIGH tier < 1% of training data, model likely under-predicts high scores.
+
 ## Implementation
 
 See:
