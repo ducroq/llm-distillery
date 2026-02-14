@@ -269,50 +269,17 @@ def hybrid_loss(predictions, targets):
 - May need to adjust batch size for pair sampling
 
 ### Hybrid Embedding + Fine-tuned Pipeline
-**Status:** Idea (validated in research)
+**Status:** Implemented (Feb 2025)
 **Origin:** Embedding vs fine-tuning research (Jan 2025)
 
-#### Concept
-Use fast multilingual-e5-large embeddings as a prefilter stage before fine-tuned Qwen scoring.
+Implemented as two-stage hybrid inference pipeline. See `docs/adr/006-hybrid-inference-pipeline.md`.
 
-#### Pipeline Design
-```
-Stage 1: E5-Large Prefilter (132 articles/sec)
-├── Reject articles with predicted avg < 2.5
-├── Expected rejection: 15-20%
-└── False negative rate: < 1%
+- `filters/common/embedding_stage.py` - Stage 1: embedding + MLP probe
+- `filters/common/hybrid_scorer.py` - Two-stage orchestrator
+- `filters/uplifting/v5/inference_hybrid.py` - First filter integration
+- `evaluation/calibrate_hybrid_threshold.py` - Threshold calibration
 
-Stage 2: Fine-tuned Qwen Scoring (remaining 80-85%)
-├── Full 6-dimension scoring
-├── 0.68 MAE accuracy
-└── Final tier assignment
-```
-
-#### Benefits
-- 15-20% compute savings on fine-tuned model inference
-- Faster overall pipeline throughput
-- Minimal quality loss (< 1% good articles rejected)
-- E5-large is multilingual (100+ languages) matching our dataset
-
-#### Challenges
-- Requires maintaining two models in production
-- Need to tune prefilter threshold per filter/dataset
-- Must monitor false negative rate over time
-- Additional complexity in inference pipeline
-
-#### Research Findings
-From the embedding vs fine-tuning research:
-- E5-large MAE: 0.806 (best embedding result)
-- Strong regression to mean effect (predictions cluster 3-5)
-- Works well for rejecting clearly bad content
-- Cannot identify top-tier content reliably
-
-#### Implementation Notes
-- Use conservative threshold (2.0-2.5) to minimize false negatives
-- Consider using e5-large's `benefit_distribution` dimension as primary signal (hardest for embeddings, so low scores are reliable)
-- Could also use embedding distance to known-good articles as additional signal
-
-See: `research/embedding_vs_finetuning/results/Multilingual_Embedding_Research_Report.docx`
+Threshold set at 3.0 (not 2.5 as originally proposed) — gives ~1.0 safety margin below MEDIUM tier (4.0), targeting <2% FN rate. ~68% of articles skip Stage 2.
 
 ---
 
@@ -337,4 +304,4 @@ Any other context.
 
 ---
 
-*Last updated: 2025-01-25*
+*Last updated: 2026-02-14*

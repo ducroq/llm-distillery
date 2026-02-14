@@ -177,8 +177,17 @@ training:
   recommended_model: "Qwen2.5-1.5B"
   expected_mae: "<1.0 per dimension"
 
+hybrid_inference:
+  stage1:
+    embedding_model: "intfloat/multilingual-e5-large"
+    probe_path: "probe/embedding_probe.pkl"
+    threshold: 3.0  # weighted_avg below this -> skip Stage 2
+  stage2:
+    model: "current"  # Uses existing inference.py UpliftingScorer
+
 deployment:
   inference_time: "20-50ms"
+  inference_time_hybrid: "~14ms avg"
   cost_per_article: "$0.00"
   use_cases:
     - "Positive news aggregation"

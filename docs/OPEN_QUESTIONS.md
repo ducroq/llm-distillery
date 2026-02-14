@@ -12,7 +12,7 @@
 
 ## Nice to Know (Can Work Around)
 
-- [ ] **Qwen2.5-0.5B viability** - Would smaller model work for simpler filters? Could reduce inference cost further.
+- [ ] **Qwen2.5-0.5B viability** - Would smaller model work for simpler filters? Could reduce inference cost further. Planned: evaluate alongside Gemma-3-1B as part of hybrid pipeline Stage 2 model comparison.
 - [ ] **Oracle model comparison** - Is Gemini Flash always best? Worth testing Claude Haiku for some filters?
 - [ ] **Batch size optimization** - Current default is 4. Worth tuning per-filter or per-hardware?
 

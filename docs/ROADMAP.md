@@ -3,11 +3,16 @@
 ## Now (Current Sprint)
 
 - **belonging v1** - Assess existing work and develop
+- **Hybrid inference pipeline** - Two-stage scoring (embedding probe + fine-tuned model)
+  - Infrastructure complete (ADR-006)
+  - Uplifting v5 integrated, needs threshold calibration and benchmarking
+  - Stage 2 model comparison planned: Gemma-3-1B, Qwen2.5-0.5B vs Qwen2.5-1.5B baseline
 
 ## Next (Coming Soon)
 - **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
 - **nature_recovery v1** - Develop harmonized prompt and prefilter
 - **signs_of_wisdom v1** - Develop harmonized prompt and prefilter
+- **Hybrid inference: generalize** - Add to sustainability_technology, investment-risk, cultural-discovery
 
 ## Later (Backlog)
 
@@ -51,6 +56,8 @@
 - [x] **Context length experiments** - 1024/2048/head+tail strategies - 2025-01
   - head+tail (256+256) deployed to production
   - See `docs/IDEAS.md` for full results
+- [x] **Embedding vs fine-tuning** - Confirmed fine-tuning beats probes by ~18% MAE
+  - Probes fast enough for Stage 1 screening in hybrid pipeline
 
 ### Infrastructure
 - [x] **Ground truth generation pipeline** - 2024-11
@@ -62,4 +69,4 @@
 
 ---
 
-*Last updated: 2026-01-31*
+*Last updated: 2026-02-14*

@@ -63,8 +63,21 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - 1024tok: MAE 0.652, 2048tok: MAE 0.627
   - head+tail (256+256): MAE ~0.69 (deployed to production)
   - See `docs/IDEAS.md` for full results
+- [ ] **Qwen2.5-0.5B evaluation** - Smaller/faster model, evaluate alongside Gemma-3-1B in hybrid pipeline effort
 - [ ] **Qwen2.5-7B support** - Larger model option for complex filters
 - [ ] **Training monitoring improvements** - Better logging, early stopping
+
+## Hybrid Inference Pipeline (ADR-006)
+
+Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
+
+- [x] **Shared infrastructure** - `filters/common/embedding_stage.py`, `hybrid_scorer.py`
+- [x] **Uplifting v5 integration** - `inference_hybrid.py` + MLP probe
+- [x] **Calibration script** - `evaluation/calibrate_hybrid_threshold.py`
+- [ ] **Threshold calibration** - Run calibration on uplifting v5 validation set
+- [ ] **Speed benchmark** - Measure actual speedup on 1000+ articles
+- [ ] **Stage 2 model evaluation** - Train Gemma-3-1B and Qwen2.5-0.5B on uplifting v5, compare MAE and speed vs Qwen2.5-1.5B baseline
+- [ ] **Generalize to other filters** - sustainability_technology, investment-risk, cultural-discovery
 
 ## Deployment
 
@@ -78,7 +91,7 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [ ] **Generalize prefilter evaluation** - Apply to all filters
 - [ ] **Dataset QA pipeline** - Automated quality checks
 - [ ] **Cost tracking** - Monitor API usage for oracle scoring
-- [ ] **Hub scorers: add torch_dtype parameter** - `inference_hub.py` files don't specify `torch_dtype` in `from_pretrained()`, so they inherit the base model default (bfloat16 for Qwen2.5). This breaks on hardware that doesn't support bfloat16. Fix: accept optional `torch_dtype` param and pass it through. Workaround: `.half()` after loading on gpu-server.
+- [x] **Hub scorers: add torch_dtype parameter** - All 5 `inference_hub.py` files now accept optional `torch_dtype` param and pass it to `from_pretrained()`. Use `torch_dtype=torch.float16` on hardware without bfloat16 support.
 
 ## Documentation
 
@@ -88,4 +101,4 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 
 ---
 
-*Last updated: 2026-01-30*
+*Last updated: 2026-02-14*

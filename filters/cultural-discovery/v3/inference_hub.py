@@ -54,6 +54,7 @@ class CulturalDiscoveryScorerHub(BaseCulturalDiscoveryScorer):
         token: Optional[str] = None,
         device: Optional[str] = None,
         use_prefilter: bool = True,
+        torch_dtype=None,
     ):
         """
         Initialize scorer from HuggingFace Hub.
@@ -63,9 +64,13 @@ class CulturalDiscoveryScorerHub(BaseCulturalDiscoveryScorer):
             token: HuggingFace token (required for private repos)
             device: Device to use ('cuda', 'cpu', or None for auto)
             use_prefilter: Whether to apply prefilter
+            torch_dtype: Model dtype (e.g., torch.float16). If None, uses model
+                default (bfloat16 for Qwen2.5 — may fail on hardware without
+                bfloat16 support). Use torch.float16 as workaround.
         """
         self.repo_id = repo_id
         self.token = token
+        self.torch_dtype = torch_dtype
 
         # Initialize base class (sets device, loads prefilter)
         super().__init__(device=device, use_prefilter=use_prefilter)
@@ -111,10 +116,15 @@ class CulturalDiscoveryScorerHub(BaseCulturalDiscoveryScorer):
             # Load base model
             logger.info("Loading base model...")
             print("Loading base model...")
+            dtype_kwargs = {}
+            if self.torch_dtype is not None:
+                dtype_kwargs["torch_dtype"] = self.torch_dtype
+
             base_model = AutoModelForSequenceClassification.from_pretrained(
                 base_model_name,
                 num_labels=len(self.DIMENSION_NAMES),
                 problem_type="regression",
+                **dtype_kwargs,
             )
 
             if base_model.config.pad_token_id is None:
