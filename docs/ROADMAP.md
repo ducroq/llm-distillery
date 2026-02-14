@@ -11,11 +11,11 @@
 
 ## Later (Backlog)
 
-- **uplifting v6** - Train model on enriched dataset (10,495 articles: v5 + 495 active learning)
-  - Training data ready: `datasets/training/uplifting_v6/`
-  - MEDIUM tier increased from 31.5% to 34.6%
-  - Still only 8 HIGH articles (0.1%) - need targeted collection
-  - **Prompt fix:** Add content-type cap for individual criminal cases (sensational crime news leaks into medium tier). See `filters/uplifting/v6/PLAN.md`
+- **uplifting v6** - BLOCKED on HIGH-tier data collection
+  - 10,495 articles ready but only 8 HIGH-tier (0.08%) — model can't learn upper range
+  - **Before training:** Collect 50-100 HIGH articles from targeted sources (Better India, Upworthy, Reasons to be Cheerful, Solutions Journalism Network)
+  - **Prompt fix queued:** Content-type cap for individual criminal cases
+  - See `filters/uplifting/v6/PLAN.md` for full collection strategy
 - **Active Learning for HIGH-tier articles** - Continue using production filter to find high-scoring candidates
   - Method: Filter production output, screen predicted >= 5.5, oracle score, repeat
   - Target sources: positive_news_the_better_india, positive_news_upworthy, etc.

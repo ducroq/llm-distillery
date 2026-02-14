@@ -1,8 +1,8 @@
 # Uplifting v6: Active Learning from Production
 
 **Date:** 2026-01-31
-**Status:** TRAINING DATA READY
-**Approach:** Active learning from production filter output
+**Status:** BLOCKED — Collecting HIGH-tier data (8 articles is not enough)
+**Approach:** Active learning from production filter output + targeted HIGH collection
 
 ---
 
@@ -99,23 +99,52 @@ These are sensational crime news, not solutions journalism. A single criminal ge
 
 ---
 
-## Next Steps
+## Blocker: HIGH-Tier Data Collection (2026-02-14)
 
-### Immediate: Train v6 Model
+**Decision:** Do NOT train v6 until HIGH-tier representation is addressed. With only 8 HIGH articles out of 10,495 (0.08%), the model cannot learn the upper score range. This is the same regression-to-mean problem documented in ADR-003 for cultural-discovery.
 
-```bash
-# Copy v5 architecture, apply prompt fixes above
-# Train on v6 dataset (10,495 articles)
-# Compare tier-level MAE, especially check crime article handling
-```
+### Why This Matters
 
-### Ongoing: Active Learning for HIGH Tier
+- Model learns to never predict above ~6.5 because it almost never sees 7+
+- The 495 active-learning articles enriched MEDIUM but found zero HIGH
+- General news corpus simply doesn't contain enough genuinely uplifting content at the 7+ level
+- Training now would waste compute and produce a model with the same HIGH-tier blind spot as v5
 
-Added to backlog - continue collecting HIGH candidates:
+### Collection Strategy for HIGH-Tier Articles
 
-1. Monitor production filter for predicted ≥6.5
-2. Curate from positive news sources
-3. Goal: 50+ HIGH articles for v7
+**Target:** 50-100 HIGH-tier articles (≥7.0 weighted average) before training.
+
+**Approach 1: Targeted source scraping**
+- Sources that produced v5's 7 HIGH articles (check which sources they came from)
+- Positive news outlets: The Better India, Upworthy, Reasons to be Cheerful, Yes! Magazine, Positive News
+- Solutions Journalism Network tagged stories
+- Score with updated v6 prompt (with crime fix), keep only ≥7.0
+
+**Approach 2: Active learning with higher threshold**
+- Run production filter on new articles, screen predicted ≥6.0
+- Oracle score with v6 prompt
+- These won't all be HIGH, but may catch some near the boundary
+
+**Approach 3: Manual curation + oracle scoring**
+- Manually identify articles that look genuinely transformative
+- Oracle score to confirm ≥7.0
+- Labor-intensive but highest precision
+
+**Recommended:** Start with Approach 1 (targeted sources), supplement with Approach 2.
+
+### Training Plan (once data is collected)
+
+1. Apply v6 prompt fixes (crime cap, etc.)
+2. Re-score existing training data with updated prompt (at least a sample to check impact)
+3. Merge: v5 data + 495 active learning + new HIGH-tier articles
+4. Train on merged dataset
+5. Evaluate tier-level MAE, especially HIGH-tier performance
+
+### Success Criteria
+
+- At least 50 HIGH-tier articles in training set (currently 8)
+- HIGH-tier MAE improvement over v5 (v5 HIGH MAE unknown — measure as baseline)
+- No regression on LOW/MEDIUM performance
 
 ---
 
