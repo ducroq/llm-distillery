@@ -1,0 +1,127 @@
+# Embedding vs Fine-Tuning Research Configuration
+# Experiment: Can frozen embeddings + probes match fine-tuned Qwen2.5-1.5B?
+# NOTE: All models must be MULTILINGUAL - dataset contains multiple languages
+
+embedding_models:
+  # ============================================
+  # MULTILINGUAL MODELS ONLY
+  # ============================================
+
+  # Fast multilingual baseline (50+ languages)
+  multilingual-MiniLM-L12-v2:
+    source: sentence-transformers
+    model_name: paraphrase-multilingual-MiniLM-L12-v2
+    dimensions: 384
+    max_tokens: 128
+
+  # Quality multilingual baseline (50+ languages)
+  multilingual-mpnet-base-v2:
+    source: sentence-transformers
+    model_name: paraphrase-multilingual-mpnet-base-v2
+    dimensions: 768
+    max_tokens: 128
+
+  # Strong MTEB multilingual (100+ languages)
+  multilingual-e5-large:
+    source: sentence-transformers
+    model_name: intfloat/multilingual-e5-large
+    dimensions: 1024
+    max_tokens: 512
+    prefix: "query: "  # E5 models expect this prefix
+
+  # Best multilingual + long context (100+ languages, 8K context)
+  bge-m3:
+    source: sentence-transformers
+    model_name: BAAI/bge-m3
+    dimensions: 1024
+    max_tokens: 8192
+    trust_remote_code: true
+
+  # Direct comparison to fine-tuned model (Qwen is multilingual)
+  qwen2.5-1.5b-frozen:
+    source: transformers
+    model_name: Qwen/Qwen2.5-1.5B
+    dimensions: 1536
+    max_tokens: 512
+    pooling: mean  # Mean pool last hidden states
+
+datasets:
+  # Primary dataset - start here
+  uplifting_v5:
+    path: datasets/training/uplifting_v5
+    dimensions: 6
+    baseline_mae: 0.68
+    articles: 10000
+
+  # Follow-up datasets (if results promising)
+  sustainability_technology_v2:
+    path: datasets/training/sustainability_technology_v2
+    dimensions: 8
+    baseline_mae: 0.71
+    articles: 7990
+
+  investment_risk_v5:
+    path: datasets/training/investment_risk_v5
+    dimensions: 8
+    baseline_mae: 0.48
+    articles: 10000
+
+probe_methods:
+  ridge:
+    type: linear
+    alpha: [0.01, 0.1, 1.0, 10.0, 100.0]  # Cross-validate
+
+  mlp:
+    type: neural
+    hidden_sizes: [256, 128]
+    dropout: 0.2
+    learning_rate: 0.001
+    epochs: 100
+    patience: 10
+
+  lightgbm:
+    type: tree
+    n_estimators: 500
+    learning_rate: 0.05
+    max_depth: 6
+    num_leaves: 31
+    early_stopping_rounds: 50
+
+chunking:
+  # Chunking settings for chunk+aggregate approach
+  chunk_size: 256  # tokens per chunk
+  overlap: 128     # 50% overlap
+  min_chunks: 1    # minimum chunks per article
+  max_chunks: 32   # maximum chunks per article
+
+  # Chunk scoring methods
+  scoring_methods:
+    - variance        # Chunks with highest embedding variance
+    - centroid_distance  # Chunks furthest from mean
+    - random          # Random selection (baseline)
+
+  # Top-K selection
+  top_k_values: [3, 5, 8, 12]
+
+  # Aggregation methods
+  aggregation_methods:
+    mean:
+      type: simple
+    attention:
+      type: learned
+      hidden_dim: 128
+    gru:
+      type: rnn
+      hidden_dim: 128
+      num_layers: 1
+
+evaluation:
+  metrics:
+    - mae
+    - rmse
+    - spearman_correlation
+  per_dimension: true
+
+random_seed: 42
+batch_size: 32
+device: cuda  # or cpu

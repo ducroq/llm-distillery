@@ -1,0 +1,92 @@
+[
+  {
+    "model_name": "multilingual-MiniLM-L12-v2",
+    "source": "sentence-transformers",
+    "articles_per_second": 1954.7765072876389,
+    "total_time_seconds": 0.5120790004730225,
+    "num_articles": 1001,
+    "batch_size": 32,
+    "max_tokens": 128,
+    "model_load_time_seconds": 3.0232465267181396,
+    "peak_gpu_memory_mb": 532.1806640625,
+    "memory_after_load_mb": 448.8212890625
+  },
+  {
+    "model_name": "multilingual-mpnet-base-v2",
+    "source": "sentence-transformers",
+    "articles_per_second": 893.5800348791129,
+    "total_time_seconds": 1.1202130317687988,
+    "num_articles": 1001,
+    "batch_size": 32,
+    "max_tokens": 128,
+    "model_load_time_seconds": 3.051389455795288,
+    "peak_gpu_memory_mb": 1216.6962890625,
+    "memory_after_load_mb": 1070.4775390625
+  },
+  {
+    "model_name": "multilingual-e5-large",
+    "source": "sentence-transformers",
+    "articles_per_second": 131.9121492693789,
+    "total_time_seconds": 7.588383674621582,
+    "num_articles": 1001,
+    "batch_size": 32,
+    "max_tokens": 512,
+    "model_load_time_seconds": 3.1031131744384766,
+    "peak_gpu_memory_mb": 2945.5712890625,
+    "memory_after_load_mb": 2144.9462890625
+  },
+  {
+    "probe_type": "ridge",
+    "training_time_seconds": 0.5651106834411621,
+    "num_samples": 900,
+    "embedding_dim": 768,
+    "output_dim": 6,
+    "peak_gpu_memory_mb": 0.0,
+    "benchmark_type": "training"
+  },
+  {
+    "probe_type": "ridge",
+    "num_samples": 1001,
+    "predictions_per_second": 3401797.3618538324,
+    "avg_latency_ms": 0.29425621032714844,
+    "std_latency_ms": 0.14852313276194742,
+    "num_runs": 5,
+    "benchmark_type": "inference"
+  },
+  {
+    "probe_type": "mlp",
+    "training_time_seconds": 0.22513723373413086,
+    "num_samples": 900,
+    "embedding_dim": 768,
+    "output_dim": 6,
+    "peak_gpu_memory_mb": 21.84033203125,
+    "benchmark_type": "training"
+  },
+  {
+    "probe_type": "mlp",
+    "num_samples": 1001,
+    "predictions_per_second": 10300535.58390579,
+    "avg_latency_ms": 0.09717941284179688,
+    "std_latency_ms": 0.07995346343595357,
+    "num_runs": 5,
+    "benchmark_type": "inference"
+  },
+  {
+    "probe_type": "lightgbm",
+    "training_time_seconds": 0.7845358848571777,
+    "num_samples": 900,
+    "embedding_dim": 768,
+    "output_dim": 6,
+    "peak_gpu_memory_mb": 0.0,
+    "benchmark_type": "training"
+  },
+  {
+    "probe_type": "lightgbm",
+    "num_samples": 1001,
+    "predictions_per_second": 4592538.070444104,
+    "avg_latency_ms": 0.21796226501464844,
+    "std_latency_ms": 0.03762133370636997,
+    "num_runs": 5,
+    "benchmark_type": "inference"
+  }
+]

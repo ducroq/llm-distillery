@@ -1,0 +1,9 @@
+# Cached embeddings (large binary files)
+embeddings/*.npz
+
+# Trained probe models
+results/*.pkl
+
+# Keep directory structure
+!embeddings/.gitkeep
+!results/.gitkeep

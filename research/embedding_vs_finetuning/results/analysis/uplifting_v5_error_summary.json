@@ -1,0 +1,90 @@
+{
+  "baseline_mae": 0.68,
+  "models": {
+    "multilingual-MiniLM-L12-v2": {
+      "overall_mae": 0.9415496405247565,
+      "overall_rmse": 1.2140479186771918,
+      "mae_std": 0.5168267381886984,
+      "mae_median": 0.8152491648991903,
+      "mae_q25": 0.5884158611297607,
+      "mae_q75": 1.1683786710103352,
+      "per_dimension_mae": {
+        "human_wellbeing_impact": 0.9703683441097324,
+        "social_cohesion_impact": 0.9619690604083664,
+        "justice_rights_impact": 0.8437128303708373,
+        "evidence_level": 0.9135048760996236,
+        "benefit_distribution": 1.05096543073416,
+        "change_durability": 0.9087773014258195
+      },
+      "gap_to_baseline": 0.2615496405247565
+    },
+    "multilingual-mpnet-base-v2": {
+      "overall_mae": 0.8867582453218175,
+      "overall_rmse": 1.1410908361967358,
+      "mae_std": 0.4768785273015998,
+      "mae_median": 0.7742342154184977,
+      "mae_q25": 0.5454639395078024,
+      "mae_q75": 1.1076913674672444,
+      "per_dimension_mae": {
+        "human_wellbeing_impact": 0.8753021860813404,
+        "social_cohesion_impact": 0.9175268481601845,
+        "justice_rights_impact": 0.8324100577331089,
+        "evidence_level": 0.8256426214814543,
+        "benefit_distribution": 1.0068563518228826,
+        "change_durability": 0.8628114066519342
+      },
+      "gap_to_baseline": 0.2067582453218174
+    },
+    "multilingual-e5-large": {
+      "overall_mae": 0.8063357032207779,
+      "overall_rmse": 1.0439124084159592,
+      "mae_std": 0.42147305045771033,
+      "mae_median": 0.7163011233011881,
+      "mae_q25": 0.496224045753479,
+      "mae_q75": 1.0309244394302368,
+      "per_dimension_mae": {
+        "human_wellbeing_impact": 0.8248358348032812,
+        "social_cohesion_impact": 0.8230856974701305,
+        "justice_rights_impact": 0.7487503980155235,
+        "evidence_level": 0.7121429131343052,
+        "benefit_distribution": 0.9348144541968118,
+        "change_durability": 0.7943849217046153
+      },
+      "gap_to_baseline": 0.1263357032207778
+    },
+    "bge-m3": {
+      "overall_mae": 0.8210438266799692,
+      "overall_rmse": 1.063582682696604,
+      "mae_std": 0.41469662596903195,
+      "mae_median": 0.7413788239161173,
+      "mae_q25": 0.5149869322776794,
+      "mae_q75": 1.0322097937266033,
+      "per_dimension_mae": {
+        "human_wellbeing_impact": 0.8628850576879976,
+        "social_cohesion_impact": 0.844912773781604,
+        "justice_rights_impact": 0.7507508781056602,
+        "evidence_level": 0.7262566067002989,
+        "benefit_distribution": 0.9436834726657544,
+        "change_durability": 0.7977741711385005
+      },
+      "gap_to_baseline": 0.14104382667996918
+    },
+    "qwen2.5-1.5b-frozen": {
+      "overall_mae": 0.813868243566085,
+      "overall_rmse": 1.063380993910348,
+      "mae_std": 0.4432284233037421,
+      "mae_median": 0.7066617409388224,
+      "mae_q25": 0.4972281754016876,
+      "mae_q75": 1.0268861651420593,
+      "per_dimension_mae": {
+        "human_wellbeing_impact": 0.8395308733105541,
+        "social_cohesion_impact": 0.8320257816162262,
+        "justice_rights_impact": 0.7425942756793835,
+        "evidence_level": 0.7347719544297332,
+        "benefit_distribution": 0.9443933887557907,
+        "change_durability": 0.7898931876048222
+      },
+      "gap_to_baseline": 0.13386824356608495
+    }
+  }
+}

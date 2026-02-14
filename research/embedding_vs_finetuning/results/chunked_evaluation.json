@@ -1,0 +1,74 @@
+{
+  "baseline_mae": 0.68,
+  "dataset": "uplifting_v5",
+  "models": {
+    "multilingual-MiniLM-L12-v2": {
+      "strategies": {
+        "mean": {
+          "mae": 1.0598464256677873,
+          "rmse": 1.3295921068589809,
+          "spearman": 0.5185752587367447,
+          "embedding_dim": 384
+        },
+        "max": {
+          "mae": 1.020482293594054,
+          "rmse": 1.2785982990953566,
+          "spearman": 0.5575192213805149,
+          "embedding_dim": 384
+        },
+        "mean_max": {
+          "mae": 0.9807643562039257,
+          "rmse": 1.2342996041115075,
+          "spearman": 0.595798415647654,
+          "embedding_dim": 768
+        },
+        "first_last": {
+          "mae": 1.0054029274981218,
+          "rmse": 1.263639043668338,
+          "spearman": 0.5775705639042716,
+          "embedding_dim": 768
+        }
+      },
+      "truncated": {
+        "mae": 1.067501745103321,
+        "rmse": 1.3406820822500753,
+        "spearman": 0.5050702242396296,
+        "embedding_dim": 384
+      }
+    },
+    "multilingual-mpnet-base-v2": {
+      "strategies": {
+        "mean": {
+          "mae": 0.9689900361366205,
+          "rmse": 1.2227457665289567,
+          "spearman": 0.6123991088244761,
+          "embedding_dim": 768
+        },
+        "max": {
+          "mae": 0.9739564558961891,
+          "rmse": 1.231165109340654,
+          "spearman": 0.6021533967034561,
+          "embedding_dim": 768
+        },
+        "mean_max": {
+          "mae": 0.9362037419439195,
+          "rmse": 1.1866084273699349,
+          "spearman": 0.6347326810736307,
+          "embedding_dim": 1536
+        },
+        "first_last": {
+          "mae": 0.9432727771622318,
+          "rmse": 1.193926213437726,
+          "spearman": 0.635860845605927,
+          "embedding_dim": 1536
+        }
+      },
+      "truncated": {
+        "mae": 0.9935530122323629,
+        "rmse": 1.2541037250168066,
+        "spearman": 0.5779867950233543,
+        "embedding_dim": 768
+      }
+    }
+  }
+}

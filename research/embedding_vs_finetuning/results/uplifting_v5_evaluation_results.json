@@ -1,0 +1,606 @@
+{
+  "baseline_mae": 0.68,
+  "dataset": "uplifting_v5",
+  "models": {
+    "multilingual-MiniLM-L12-v2": {
+      "ridge": {
+        "overall_mae": 0.9684891494123133,
+        "overall_rmse": 1.211283143069957,
+        "overall_spearman": 0.6103265919741482,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 1.0334848502537348,
+            "rmse": 1.2797707602556512,
+            "spearman": 0.5887932479793448
+          },
+          "social_cohesion_impact": {
+            "mae": 0.9698013821086445,
+            "rmse": 1.2316472176475386,
+            "spearman": 0.635171968161659
+          },
+          "justice_rights_impact": {
+            "mae": 0.89247427501164,
+            "rmse": 1.140906785867811,
+            "spearman": 0.6685800277187883
+          },
+          "evidence_level": {
+            "mae": 0.8613930120096578,
+            "rmse": 1.0825122449170999,
+            "spearman": 0.653521264341898
+          },
+          "benefit_distribution": {
+            "mae": 1.1175598952915524,
+            "rmse": 1.3578176137548608,
+            "spearman": 0.5402585390092589
+          },
+          "change_durability": {
+            "mae": 0.9362214817986503,
+            "rmse": 1.1538211828141884,
+            "spearman": 0.5756345046339398
+          }
+        },
+        "inference_time_seconds": 0.0010690689086914062,
+        "inference_time_per_article_ms": 0.0010680009077836225
+      },
+      "mlp": {
+        "overall_mae": 0.9415496405247565,
+        "overall_rmse": 1.2140479186771918,
+        "overall_spearman": 0.6280112651033827,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.9703683441097324,
+            "rmse": 1.263604428069256,
+            "spearman": 0.6269195417628468
+          },
+          "social_cohesion_impact": {
+            "mae": 0.9619690604083664,
+            "rmse": 1.2354523083877684,
+            "spearman": 0.6443102694239461
+          },
+          "justice_rights_impact": {
+            "mae": 0.8437128303708373,
+            "rmse": 1.111951646334,
+            "spearman": 0.6975930516588199
+          },
+          "evidence_level": {
+            "mae": 0.9135048760996236,
+            "rmse": 1.153214179524209,
+            "spearman": 0.611450515970175
+          },
+          "benefit_distribution": {
+            "mae": 1.05096543073416,
+            "rmse": 1.3510739025543164,
+            "spearman": 0.5783103669028731
+          },
+          "change_durability": {
+            "mae": 0.9087773014258195,
+            "rmse": 1.1526905214868781,
+            "spearman": 0.6094838449016354
+          }
+        },
+        "inference_time_seconds": 0.058001041412353516,
+        "inference_time_per_article_ms": 0.05794309831403947
+      },
+      "lightgbm": {
+        "overall_mae": 0.94656587286049,
+        "overall_rmse": 1.193696831593325,
+        "overall_spearman": 0.6271138259352372,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 1.0122365889537472,
+            "rmse": 1.2596353036757248,
+            "spearman": 0.6115574668776432
+          },
+          "social_cohesion_impact": {
+            "mae": 0.9380772257503046,
+            "rmse": 1.2072794772105049,
+            "spearman": 0.6583550347391371
+          },
+          "justice_rights_impact": {
+            "mae": 0.8494517429486846,
+            "rmse": 1.1051474293354366,
+            "spearman": 0.6964680775452784
+          },
+          "evidence_level": {
+            "mae": 0.8696118533201124,
+            "rmse": 1.0993797442737883,
+            "spearman": 0.6316175687785555
+          },
+          "benefit_distribution": {
+            "mae": 1.0951892620314163,
+            "rmse": 1.3336060723760288,
+            "spearman": 0.5681356383027713
+          },
+          "change_durability": {
+            "mae": 0.9148285641586749,
+            "rmse": 1.138760774355752,
+            "spearman": 0.5965491693680383
+          }
+        },
+        "inference_time_seconds": 0.016939401626586914,
+        "inference_time_per_article_ms": 0.016922479147439475
+      },
+      "embedding_dim": 384
+    },
+    "multilingual-mpnet-base-v2": {
+      "ridge": {
+        "overall_mae": 0.8838487105531531,
+        "overall_rmse": 1.1265687231540706,
+        "overall_spearman": 0.6774747236439863,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.910396897709453,
+            "rmse": 1.1646549357777638,
+            "spearman": 0.684693290307878
+          },
+          "social_cohesion_impact": {
+            "mae": 0.9019565887146301,
+            "rmse": 1.164192712343263,
+            "spearman": 0.6825678430332239
+          },
+          "justice_rights_impact": {
+            "mae": 0.8122111957866353,
+            "rmse": 1.0385400401126745,
+            "spearman": 0.7294087900235343
+          },
+          "evidence_level": {
+            "mae": 0.7966973931639345,
+            "rmse": 1.021049145143163,
+            "spearman": 0.7008413271706279
+          },
+          "benefit_distribution": {
+            "mae": 1.0317616778296548,
+            "rmse": 1.2767101627149091,
+            "spearman": 0.6088506682255586
+          },
+          "change_durability": {
+            "mae": 0.8500685101146107,
+            "rmse": 1.073350420755001,
+            "spearman": 0.6584864231030959
+          }
+        },
+        "inference_time_seconds": 0.0019497871398925781,
+        "inference_time_per_article_ms": 0.0019478393005919862
+      },
+      "mlp": {
+        "overall_mae": 0.8867582453218175,
+        "overall_rmse": 1.1410908361967358,
+        "overall_spearman": 0.6698487471728769,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.8753021860813404,
+            "rmse": 1.1343922261803374,
+            "spearman": 0.6942456215920075
+          },
+          "social_cohesion_impact": {
+            "mae": 0.9175268481601845,
+            "rmse": 1.1877579332755774,
+            "spearman": 0.6713162153127853
+          },
+          "justice_rights_impact": {
+            "mae": 0.8324100577331089,
+            "rmse": 1.0626703956657744,
+            "spearman": 0.729795304919542
+          },
+          "evidence_level": {
+            "mae": 0.8256426214814543,
+            "rmse": 1.0547895188500185,
+            "spearman": 0.6687345448047478
+          },
+          "benefit_distribution": {
+            "mae": 1.0068563518228826,
+            "rmse": 1.2902901900757044,
+            "spearman": 0.6243292808677696
+          },
+          "change_durability": {
+            "mae": 0.8628114066519342,
+            "rmse": 1.0991892804834107,
+            "spearman": 0.6306715155404089
+          }
+        },
+        "inference_time_seconds": 0.0030295848846435547,
+        "inference_time_per_article_ms": 0.0030265583263172375
+      },
+      "lightgbm": {
+        "overall_mae": 0.9002049806258713,
+        "overall_rmse": 1.1399116549854935,
+        "overall_spearman": 0.6658634510640061,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.9305416512718552,
+            "rmse": 1.1833183131078053,
+            "spearman": 0.6660939118213165
+          },
+          "social_cohesion_impact": {
+            "mae": 0.9065830816639363,
+            "rmse": 1.1707719914509713,
+            "spearman": 0.6736336249958014
+          },
+          "justice_rights_impact": {
+            "mae": 0.8305176863503648,
+            "rmse": 1.0764855154549515,
+            "spearman": 0.7080150124162944
+          },
+          "evidence_level": {
+            "mae": 0.8173749831884342,
+            "rmse": 1.0371889237618044,
+            "spearman": 0.6857301011969501
+          },
+          "benefit_distribution": {
+            "mae": 1.0498209671321486,
+            "rmse": 1.279742896664298,
+            "spearman": 0.6046565222431906
+          },
+          "change_durability": {
+            "mae": 0.8663915141484887,
+            "rmse": 1.0738335023675756,
+            "spearman": 0.6570515337104849
+          }
+        },
+        "inference_time_seconds": 0.017276525497436523,
+        "inference_time_per_article_ms": 0.017259266231205318
+      },
+      "embedding_dim": 768
+    },
+    "multilingual-e5-large": {
+      "ridge": {
+        "overall_mae": 0.8392840921382606,
+        "overall_rmse": 1.0662508381557096,
+        "overall_spearman": 0.7214537125197582,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.875582526375602,
+            "rmse": 1.128486599902688,
+            "spearman": 0.7037623505026298
+          },
+          "social_cohesion_impact": {
+            "mae": 0.8442722661392791,
+            "rmse": 1.077655147379013,
+            "spearman": 0.737553940171346
+          },
+          "justice_rights_impact": {
+            "mae": 0.7806814630310257,
+            "rmse": 0.9970440965498858,
+            "spearman": 0.7710917603189615
+          },
+          "evidence_level": {
+            "mae": 0.7349679982150114,
+            "rmse": 0.9423339759563181,
+            "spearman": 0.7541684007991167
+          },
+          "benefit_distribution": {
+            "mae": 0.9790859170012421,
+            "rmse": 1.2136549714351763,
+            "spearman": 0.661245912225101
+          },
+          "change_durability": {
+            "mae": 0.8211143820674032,
+            "rmse": 1.015615002832357,
+            "spearman": 0.7008999111013937
+          }
+        },
+        "inference_time_seconds": 0.0061304569244384766,
+        "inference_time_per_article_ms": 0.0061243325918466296
+      },
+      "mlp": {
+        "overall_mae": 0.8063357032207779,
+        "overall_rmse": 1.0439124084159592,
+        "overall_spearman": 0.733962021066719,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.8248358348032812,
+            "rmse": 1.0698832379141658,
+            "spearman": 0.7282630644451386
+          },
+          "social_cohesion_impact": {
+            "mae": 0.8230856974701305,
+            "rmse": 1.0632555955104195,
+            "spearman": 0.7442109160604201
+          },
+          "justice_rights_impact": {
+            "mae": 0.7487503980155235,
+            "rmse": 0.9724767647536456,
+            "spearman": 0.7790703031420824
+          },
+          "evidence_level": {
+            "mae": 0.7121429131343052,
+            "rmse": 0.9292530430448118,
+            "spearman": 0.757993592285037
+          },
+          "benefit_distribution": {
+            "mae": 0.9348144541968118,
+            "rmse": 1.2057227911120527,
+            "spearman": 0.686376722837324
+          },
+          "change_durability": {
+            "mae": 0.7943849217046153,
+            "rmse": 1.0001831679818127,
+            "spearman": 0.7078575276303121
+          }
+        },
+        "inference_time_seconds": 0.0036575794219970703,
+        "inference_time_per_article_ms": 0.00365392549650057
+      },
+      "lightgbm": {
+        "overall_mae": 0.8403992852580374,
+        "overall_rmse": 1.0732007212417658,
+        "overall_spearman": 0.7242195122427987,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.875470727601297,
+            "rmse": 1.1188130615833154,
+            "spearman": 0.7128015909195458
+          },
+          "social_cohesion_impact": {
+            "mae": 0.8460527572676798,
+            "rmse": 1.0935799987458643,
+            "spearman": 0.737013957701709
+          },
+          "justice_rights_impact": {
+            "mae": 0.8007833046383998,
+            "rmse": 1.0442636006637893,
+            "spearman": 0.7614903692768022
+          },
+          "evidence_level": {
+            "mae": 0.7103895090363217,
+            "rmse": 0.9295983402253665,
+            "spearman": 0.7663011371470487
+          },
+          "benefit_distribution": {
+            "mae": 0.9911976570526226,
+            "rmse": 1.2206436764977573,
+            "spearman": 0.6555946457369366
+          },
+          "change_durability": {
+            "mae": 0.8185017559519031,
+            "rmse": 1.0091027307571911,
+            "spearman": 0.7121153726747499
+          }
+        },
+        "inference_time_seconds": 0.018948078155517578,
+        "inference_time_per_article_ms": 0.018929149006511065
+      },
+      "embedding_dim": 1024
+    },
+    "bge-m3": {
+      "ridge": {
+        "overall_mae": 0.8406367208455111,
+        "overall_rmse": 1.069995022386293,
+        "overall_spearman": 0.7173584555582861,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.8858247006927932,
+            "rmse": 1.1233072929033998,
+            "spearman": 0.7082148817106754
+          },
+          "social_cohesion_impact": {
+            "mae": 0.8826181250256854,
+            "rmse": 1.1241205789994653,
+            "spearman": 0.7092216045810423
+          },
+          "justice_rights_impact": {
+            "mae": 0.7711536224548157,
+            "rmse": 1.0062312523958277,
+            "spearman": 0.7643376435564584
+          },
+          "evidence_level": {
+            "mae": 0.7391059851193881,
+            "rmse": 0.936302446880048,
+            "spearman": 0.7604842450527333
+          },
+          "benefit_distribution": {
+            "mae": 0.9480544866977276,
+            "rmse": 1.1907703483987246,
+            "spearman": 0.6726731713207867
+          },
+          "change_durability": {
+            "mae": 0.817063405082657,
+            "rmse": 1.0182200691458323,
+            "spearman": 0.6892191871280208
+          }
+        },
+        "inference_time_seconds": 0.0011675357818603516,
+        "inference_time_per_article_ms": 0.0011663694124479035
+      },
+      "mlp": {
+        "overall_mae": 0.8210438266799692,
+        "overall_rmse": 1.063582682696604,
+        "overall_spearman": 0.7377641560261078,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.8628850576879976,
+            "rmse": 1.1041246016229738,
+            "spearman": 0.7410974850224156
+          },
+          "social_cohesion_impact": {
+            "mae": 0.844912773781604,
+            "rmse": 1.1086007748382916,
+            "spearman": 0.7284383003736424
+          },
+          "justice_rights_impact": {
+            "mae": 0.7507508781056602,
+            "rmse": 0.9791325655555285,
+            "spearman": 0.7700473193746903
+          },
+          "evidence_level": {
+            "mae": 0.7262566067002989,
+            "rmse": 0.9347918205526246,
+            "spearman": 0.7661207098621059
+          },
+          "benefit_distribution": {
+            "mae": 0.9436834726657544,
+            "rmse": 1.2227780898905143,
+            "spearman": 0.713907155294471
+          },
+          "change_durability": {
+            "mae": 0.7977741711385005,
+            "rmse": 1.0057034045342303,
+            "spearman": 0.7069739662293217
+          }
+        },
+        "inference_time_seconds": 0.002535581588745117,
+        "inference_time_per_article_ms": 0.002533048540204912
+      },
+      "lightgbm": {
+        "overall_mae": 0.8557027785204439,
+        "overall_rmse": 1.0851092477397593,
+        "overall_spearman": 0.7130068257066441,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.8725889601027235,
+            "rmse": 1.1179968398874727,
+            "spearman": 0.7158240770948897
+          },
+          "social_cohesion_impact": {
+            "mae": 0.8739427586276551,
+            "rmse": 1.1214270068058356,
+            "spearman": 0.7178527347081031
+          },
+          "justice_rights_impact": {
+            "mae": 0.8100909009623456,
+            "rmse": 1.060326082928254,
+            "spearman": 0.7424793012328668
+          },
+          "evidence_level": {
+            "mae": 0.7463075202380077,
+            "rmse": 0.9531427531028105,
+            "spearman": 0.7452250725892507
+          },
+          "benefit_distribution": {
+            "mae": 0.9989552362167397,
+            "rmse": 1.2080051556600282,
+            "spearman": 0.6695158417423862
+          },
+          "change_durability": {
+            "mae": 0.832331294975191,
+            "rmse": 1.032089165507815,
+            "spearman": 0.6871439268723688
+          }
+        },
+        "inference_time_seconds": 0.0226747989654541,
+        "inference_time_per_article_ms": 0.022652146818635466
+      },
+      "embedding_dim": 1024
+    },
+    "qwen2.5-1.5b-frozen": {
+      "ridge": {
+        "overall_mae": 0.8387246298821736,
+        "overall_rmse": 1.0603437809776184,
+        "overall_spearman": 0.7268581892072435,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.8767268178941725,
+            "rmse": 1.1083738396064364,
+            "spearman": 0.7161749351144782
+          },
+          "social_cohesion_impact": {
+            "mae": 0.8392128629998846,
+            "rmse": 1.0700860426202503,
+            "spearman": 0.7450422351669377
+          },
+          "justice_rights_impact": {
+            "mae": 0.7974478633968266,
+            "rmse": 1.0123587404934258,
+            "spearman": 0.7622647503262209
+          },
+          "evidence_level": {
+            "mae": 0.7306655999068375,
+            "rmse": 0.9287818933129396,
+            "spearman": 0.764127349481043
+          },
+          "benefit_distribution": {
+            "mae": 0.9706631844098513,
+            "rmse": 1.2038242881533476,
+            "spearman": 0.6708649814961744
+          },
+          "change_durability": {
+            "mae": 0.8176314506854687,
+            "rmse": 1.0176924656621802,
+            "spearman": 0.7026748836586065
+          }
+        },
+        "inference_time_seconds": 0.005454063415527344,
+        "inference_time_per_article_ms": 0.005448614800726617
+      },
+      "mlp": {
+        "overall_mae": 0.813868243566085,
+        "overall_rmse": 1.063380993910348,
+        "overall_spearman": 0.7405975678610498,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.8395308733105541,
+            "rmse": 1.105391500387241,
+            "spearman": 0.7430261041945191
+          },
+          "social_cohesion_impact": {
+            "mae": 0.8320257816162262,
+            "rmse": 1.1018161752631777,
+            "spearman": 0.7425601183528562
+          },
+          "justice_rights_impact": {
+            "mae": 0.7425942756793835,
+            "rmse": 0.9928293533999695,
+            "spearman": 0.7841895574860839
+          },
+          "evidence_level": {
+            "mae": 0.7347719544297332,
+            "rmse": 0.9389841057090487,
+            "spearman": 0.7635928884917959
+          },
+          "benefit_distribution": {
+            "mae": 0.9443933887557907,
+            "rmse": 1.2130046413858826,
+            "spearman": 0.6916178665361891
+          },
+          "change_durability": {
+            "mae": 0.7898931876048222,
+            "rmse": 1.0049895722285427,
+            "spearman": 0.7185988721048546
+          }
+        },
+        "inference_time_seconds": 0.014208555221557617,
+        "inference_time_per_article_ms": 0.01419436086069692
+      },
+      "lightgbm": {
+        "overall_mae": 0.8239530303198667,
+        "overall_rmse": 1.0535269357760482,
+        "overall_spearman": 0.7281193572626555,
+        "per_dimension": {
+          "human_wellbeing_impact": {
+            "mae": 0.8704790701419798,
+            "rmse": 1.1204911269760787,
+            "spearman": 0.7103414914212941
+          },
+          "social_cohesion_impact": {
+            "mae": 0.8369864128110005,
+            "rmse": 1.0665754257094737,
+            "spearman": 0.7371431662369317
+          },
+          "justice_rights_impact": {
+            "mae": 0.7644497184284033,
+            "rmse": 1.0032452736535873,
+            "spearman": 0.7702949144219773
+          },
+          "evidence_level": {
+            "mae": 0.7140644638486826,
+            "rmse": 0.9239995688732566,
+            "spearman": 0.7596366504095986
+          },
+          "benefit_distribution": {
+            "mae": 0.9495345137250739,
+            "rmse": 1.1781468048963566,
+            "spearman": 0.6854707752813701
+          },
+          "change_durability": {
+            "mae": 0.8082040029640604,
+            "rmse": 1.009021479355534,
+            "spearman": 0.7058291458047619
+          }
+        },
+        "inference_time_seconds": 0.023422956466674805,
+        "inference_time_per_article_ms": 0.02339955690976504
+      },
+      "embedding_dim": 1536
+    }
+  }
+}

@@ -1,0 +1,200 @@
+[
+  {
+    "name": "all-MiniLM-L6-v2_LogisticRegression",
+    "accuracy": 0.9421052631578948,
+    "f1": 0.9398907103825137,
+    "precision": 0.9148936170212766,
+    "recall": 0.9662921348314607,
+    "confusion_matrix": [
+      [
+        93,
+        8
+      ],
+      [
+        3,
+        86
+      ]
+    ],
+    "inference_time_ms": 0.0034068760118986427,
+    "embedding_model": "all-MiniLM-L6-v2",
+    "classifier": "LogisticRegression",
+    "train_time_seconds": 0.04368305206298828,
+    "embedding_dim": 384
+  },
+  {
+    "name": "all-MiniLM-L6-v2_SVM_RBF",
+    "accuracy": 0.9526315789473684,
+    "f1": 0.9497206703910615,
+    "precision": 0.9444444444444444,
+    "recall": 0.9550561797752809,
+    "confusion_matrix": [
+      [
+        96,
+        5
+      ],
+      [
+        4,
+        85
+      ]
+    ],
+    "inference_time_ms": 0.18957539608604032,
+    "embedding_model": "all-MiniLM-L6-v2",
+    "classifier": "SVM_RBF",
+    "train_time_seconds": 0.7229664325714111,
+    "embedding_dim": 384
+  },
+  {
+    "name": "all-MiniLM-L6-v2_MLP",
+    "accuracy": 0.9421052631578948,
+    "f1": 0.9392265193370166,
+    "precision": 0.9239130434782609,
+    "recall": 0.9550561797752809,
+    "confusion_matrix": [
+      [
+        94,
+        7
+      ],
+      [
+        4,
+        85
+      ]
+    ],
+    "inference_time_ms": 0.006801203677528783,
+    "embedding_model": "all-MiniLM-L6-v2",
+    "classifier": "MLP",
+    "train_time_seconds": 0.44274234771728516,
+    "embedding_dim": 384
+  },
+  {
+    "name": "all-mpnet-base-v2_LogisticRegression",
+    "accuracy": 0.9578947368421052,
+    "f1": 0.9560439560439561,
+    "precision": 0.9354838709677419,
+    "recall": 0.9775280898876404,
+    "confusion_matrix": [
+      [
+        95,
+        6
+      ],
+      [
+        2,
+        87
+      ]
+    ],
+    "inference_time_ms": 0.006424753289473684,
+    "embedding_model": "all-mpnet-base-v2",
+    "classifier": "LogisticRegression",
+    "train_time_seconds": 0.03274178504943848,
+    "embedding_dim": 768
+  },
+  {
+    "name": "all-mpnet-base-v2_SVM_RBF",
+    "accuracy": 0.9789473684210527,
+    "f1": 0.9775280898876404,
+    "precision": 0.9775280898876404,
+    "recall": 0.9775280898876404,
+    "confusion_matrix": [
+      [
+        99,
+        2
+      ],
+      [
+        2,
+        87
+      ]
+    ],
+    "inference_time_ms": 0.24393106761731598,
+    "embedding_model": "all-mpnet-base-v2",
+    "classifier": "SVM_RBF",
+    "train_time_seconds": 1.381225824356079,
+    "embedding_dim": 768
+  },
+  {
+    "name": "all-mpnet-base-v2_MLP",
+    "accuracy": 0.9842105263157894,
+    "f1": 0.9830508474576272,
+    "precision": 0.9886363636363636,
+    "recall": 0.9775280898876404,
+    "confusion_matrix": [
+      [
+        100,
+        1
+      ],
+      [
+        2,
+        87
+      ]
+    ],
+    "inference_time_ms": 0.008731139333624589,
+    "embedding_model": "all-mpnet-base-v2",
+    "classifier": "MLP",
+    "train_time_seconds": 0.7835280895233154,
+    "embedding_dim": 768
+  },
+  {
+    "name": "BAAI/bge-small-en-v1.5_LogisticRegression",
+    "accuracy": 0.9736842105263158,
+    "f1": 0.9720670391061452,
+    "precision": 0.9666666666666667,
+    "recall": 0.9775280898876404,
+    "confusion_matrix": [
+      [
+        98,
+        3
+      ],
+      [
+        2,
+        87
+      ]
+    ],
+    "inference_time_ms": 0.0024055179796720807,
+    "embedding_model": "BAAI/bge-small-en-v1.5",
+    "classifier": "LogisticRegression",
+    "train_time_seconds": 0.02628779411315918,
+    "embedding_dim": 384
+  },
+  {
+    "name": "BAAI/bge-small-en-v1.5_SVM_RBF",
+    "accuracy": 0.9736842105263158,
+    "f1": 0.9720670391061452,
+    "precision": 0.9666666666666667,
+    "recall": 0.9775280898876404,
+    "confusion_matrix": [
+      [
+        98,
+        3
+      ],
+      [
+        2,
+        87
+      ]
+    ],
+    "inference_time_ms": 0.18539554194400185,
+    "embedding_model": "BAAI/bge-small-en-v1.5",
+    "classifier": "SVM_RBF",
+    "train_time_seconds": 0.7658786773681641,
+    "embedding_dim": 384
+  },
+  {
+    "name": "BAAI/bge-small-en-v1.5_MLP",
+    "accuracy": 0.9736842105263158,
+    "f1": 0.9720670391061452,
+    "precision": 0.9666666666666667,
+    "recall": 0.9775280898876404,
+    "confusion_matrix": [
+      [
+        98,
+        3
+      ],
+      [
+        2,
+        87
+      ]
+    ],
+    "inference_time_ms": 0.00518623151277241,
+    "embedding_model": "BAAI/bge-small-en-v1.5",
+    "classifier": "MLP",
+    "train_time_seconds": 0.4746360778808594,
+    "embedding_dim": 384
+  }
+]

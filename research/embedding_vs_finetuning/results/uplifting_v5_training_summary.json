@@ -1,0 +1,38 @@
+{
+  "qwen2.5-1.5b-frozen": {
+    "ridge": {
+      "metrics": {
+        "val_mae": 0.8531480117837589,
+        "val_rmse": 1.0819540088365747,
+        "best_alpha": 100.0,
+        "training_time_seconds": 4.515374422073364
+      },
+      "path": "research/embedding_vs_finetuning/results/uplifting_v5_qwen2.5-1.5b-frozen_ridge.pkl"
+    },
+    "mlp": {
+      "metrics": {
+        "val_mae": 0.8221760392189026,
+        "val_rmse": 1.0984928607940674,
+        "epochs_trained": 22,
+        "training_time_seconds": 2.8934786319732666
+      },
+      "path": "research/embedding_vs_finetuning/results/uplifting_v5_qwen2.5-1.5b-frozen_mlp.pkl"
+    },
+    "lightgbm": {
+      "metrics": {
+        "val_mae": 0.8327443845469281,
+        "val_rmse": 1.0656729281964088,
+        "per_dim_mae": [
+          0.8959553485200545,
+          0.847981897373146,
+          0.7623626509406483,
+          0.7512624029192467,
+          0.9350954554289933,
+          0.8038085520994792
+        ],
+        "training_time_seconds": 41.599628925323486
+      },
+      "path": "research/embedding_vs_finetuning/results/uplifting_v5_qwen2.5-1.5b-frozen_lightgbm.pkl"
+    }
+  }
+}
