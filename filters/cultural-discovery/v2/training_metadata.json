@@ -1,0 +1,28 @@
+{
+  "filter_name": "cultural-discovery",
+  "filter_version": "2.0",
+  "dimension_names": [
+    "discovery_novelty",
+    "heritage_significance",
+    "cross_cultural_connection",
+    "human_resonance",
+    "evidence_quality"
+  ],
+  "num_dimensions": 5,
+  "model_name": "Qwen/Qwen2.5-1.5B",
+  "num_parameters": 1562194432,
+  "num_trainable_parameters": 18472448,
+  "epochs": 3,
+  "batch_size": 8,
+  "learning_rate": 2e-05,
+  "max_length": 512,
+  "warmup_steps": 500,
+  "train_examples": 2333,
+  "val_examples": 292,
+  "best_val_mae": 1.4667679071426392,
+  "include_prompt": false,
+  "training_mode": "knowledge_distillation",
+  "use_head_tail": true,
+  "head_tokens": 256,
+  "tail_tokens": 256
+}
