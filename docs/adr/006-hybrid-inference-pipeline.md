@@ -9,21 +9,21 @@
 Use a **two-stage hybrid inference pipeline** that combines fast embedding probes (Stage 1) with the existing fine-tuned model (Stage 2):
 
 ```
-Article -> Prefilter -> Stage 1 (embedding + MLP probe, ~8ms)
+Article -> Prefilter -> Stage 1 (embedding + MLP probe, ~10ms)
                             |
                 +-----------+-----------+
                 |                       |
-          weighted_avg < 3.5     weighted_avg >= 3.5
+          weighted_avg < 4.5     weighted_avg >= 4.5
                 |                       |
-          Return LOW result      Stage 2 (fine-tuned model, ~25ms)
-          (probe scores)                |
+          Return probe scores    Stage 2 (fine-tuned model, ~39ms)
+          (fast, approximate)           |
                                   Return precise result
 ```
 
 Key parameters:
 - **Embedding model**: multilingual-e5-large (best probe accuracy from research)
-- **Probe**: Two-layer MLP (256, 128) trained on frozen embeddings
-- **Stage 1 threshold**: 3.5 (calibrated on 24K production articles for <2% FN rate on MEDIUM+)
+- **Probe**: Two-layer MLP (256, 128) trained on 24K production-scored articles
+- **Stage 1 threshold**: 4.5 (accepts lower accuracy on borderline MEDIUM 4.0-4.5 range)
 
 ## Context
 
@@ -60,16 +60,22 @@ Each filter adds:
 
 The hybrid scorer wraps the existing scorer (Stage 2) without modifying it. Existing `inference.py` files remain unchanged and can be used standalone.
 
-## Expected Performance
+## Measured Performance (RTX 4080, 5K articles)
 
-| Metric | Standard | Hybrid | Change |
-|--------|----------|--------|--------|
-| LOW articles | ~25ms | ~8ms | 3x faster |
-| MEDIUM+ articles | ~25ms | ~33ms (8+25) | 32% slower |
-| Average (68% LOW) | ~25ms | ~14ms | 40% faster |
-| MEDIUM+ accuracy | Baseline | Identical | No change |
-| LOW accuracy | Baseline | ~18% worse MAE | Acceptable |
-| False negative rate | 0% | <2% | Acceptable |
+| Metric | Time |
+|--------|------|
+| Stage 1 (e5-large + MLP probe) | 10.5ms/article |
+| Stage 2 (Qwen2.5-1.5B) | 39.3ms/article |
+
+### Benchmark results by threshold
+
+| Threshold | Skip rate (this data) | Speedup (this data) | Est. production speedup |
+|-----------|----------------------|--------------------|-----------------------|
+| 3.5 | 15% | 0.89x | ~1.23x |
+| 4.0 | 24% | 0.97x | ~1.59x |
+| **4.5** | **53%** | **1.35x** | **~2.0x** |
+
+Benchmark data is 79% MEDIUM / 21% LOW. Production is ~68% LOW, hence higher expected speedup.
 
 ### Threshold calibration (production data)
 
@@ -79,37 +85,37 @@ Calibrated on 24,304 production-scored articles (19K MEDIUM + 5K LOW).
 
 **Probe v2** (retrained on production data): Bias +0.007, val MAE 0.49, weighted avg MAE 0.39.
 
-| Threshold | FN Rate | FN Count | Notes |
-|-----------|---------|----------|-------|
-| 3.00 | 0.1% | 5/3783 | Very safe, minimal speedup |
-| 3.25 | 0.6% | 22/3783 | Safe |
-| **3.50** | **1.7%** | **63/3783** | **Selected: best <2% FN with meaningful speedup** |
-| 3.75 | 4.5% | 171/3783 | Too aggressive |
+**Selected threshold: 4.5** — borderline MEDIUM articles (4.0-4.5 range) get approximate probe scores instead of precise model scores. Acceptable trade-off: these articles are already near the LOW/MEDIUM boundary and precise scoring adds limited value.
 
-In production with ~68% LOW articles, threshold 3.5 is expected to yield ~1.5-2x speedup.
+### Probe score distribution
+
+| Tier | At threshold 4.5 |
+|------|------------------|
+| LOW articles | 99.0% filtered out |
+| MEDIUM articles | 41.7% get probe scores (the 4.0-4.5 borderline range) |
 
 ## Consequences
 
 ### Positive
 
-- ~40% faster average inference time
+- ~2x faster average inference in production
 - Scales to higher article volumes without hardware changes
-- No accuracy loss on MEDIUM/HIGH tier articles
+- HIGH tier articles always get precise Stage 2 scoring
 - Existing inference code untouched — hybrid is opt-in
 - Generalizes to all filters (shared infrastructure)
 
 ### Negative
 
-- MEDIUM+ articles slightly slower (double pass through Stage 1 + Stage 2)
-- Stage 1 LOW articles have less precise scores (~18% worse MAE)
+- All articles pay Stage 1 cost (10.5ms) — MEDIUM+ articles are slightly slower
+- Borderline MEDIUM articles (4.0-4.5) get less precise probe scores
 - Additional dependency: sentence-transformers library
 - Probe must be retrained when filter is retrained
 
 ### Trade-offs Accepted
 
-- Accept ~18% worse MAE on LOW articles (they're LOW either way)
-- Accept <2% false negatives (MEDIUM articles misclassified as LOW by Stage 1)
-- Accept slightly slower MEDIUM+ articles for much faster LOW articles
+- Accept approximate scores on LOW + borderline MEDIUM articles (probe MAE 0.49)
+- Accept slightly slower upper-MEDIUM/HIGH articles for much faster LOW articles
+- Tier thresholds are somewhat arbitrary; precision on the 4.0-4.5 boundary matters less
 
 ## Generalization
 

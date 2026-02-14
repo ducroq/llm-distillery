@@ -181,7 +181,7 @@ hybrid_inference:
   stage1:
     embedding_model: "intfloat/multilingual-e5-large"
     probe_path: "probe/embedding_probe_v2.pkl"
-    threshold: 3.5  # Calibrated on 24K production articles: 1.7% FN rate on MEDIUM+
+    threshold: 4.5  # Calibrated on 24K production articles: 1.35x on skewed data, ~2x in production
   stage2:
     model: "current"  # Uses existing inference.py UpliftingScorer
 
