@@ -12,31 +12,34 @@
 llm-distillery/
 ├── CLAUDE.md              # This file (AI context)
 ├── filters/               # Versioned filter packages
-│   ├── uplifting/v5/      # Production ready
-│   ├── sustainability_technology/v1-v2/  # v1 deployed, v2 in progress
+│   ├── uplifting/v5/      # Production ready, deployed
+│   ├── sustainability_technology/v1-v2/  # v1 deployed, v2 complete
 │   ├── investment-risk/v5/  # Production ready
+│   ├── cultural-discovery/v1-v3/  # v3 production ready, deployed
 │   ├── signs_of_wisdom/v1/  # Early development
 │   ├── nature_recovery/v1/  # Early development
 │   ├── ai-engineering-practice/v2/  # Blocked on data
-│   ├── belonging/v1/      # Status unknown
+│   ├── belonging/v1/      # Needs assessment
 │   └── todo/              # Planned filters
 ├── ground_truth/          # Oracle scoring pipeline (batch_scorer, llm_client)
 ├── training/              # Model training pipeline (prepare_data, validate, train)
 ├── evaluation/            # Model evaluation tools
+├── research/              # Research experiments
+│   └── embedding_vs_finetuning/  # Embedding probes vs fine-tuning comparison
 ├── datasets/              # Raw, scored, and training datasets
 ├── docs/                  # Documentation
 │   ├── TODO.md            # Active task list
 │   ├── IDEAS.md           # Future ideas
 │   ├── OPEN_QUESTIONS.md  # Unresolved questions
 │   ├── ROADMAP.md         # Now/Next/Later roadmap
-│   ├── adr/               # Short ADRs
+│   ├── adr/               # Short ADRs (003: screening filter, 004: commerce, 005: active learning)
 │   ├── decisions/         # Detailed decision records
 │   └── templates/         # ADR template
 ├── scripts/               # Utility scripts by phase
 └── config/                # Configuration and credentials
 ```
 
-## Current Status (January 2025)
+## Current Status (February 2026)
 
 ### Production Ready Filters
 | Filter | Version | MAE | Training Data | Status |
@@ -45,14 +48,15 @@ llm-distillery/
 | **sustainability_technology** | v1 | 0.69 | - | Deployed (HF Hub) |
 | **sustainability_technology** | v2 | 0.71 | 8K articles | Complete |
 | **investment-risk** | v5 | 0.48 | 10K articles | Production ready |
+| **cultural-discovery** | v3 | 0.77 | 7,827 articles | Deployed (HF Hub) |
 
 ### In Development
 | Filter | Version | Status | Blocker |
 |--------|---------|--------|---------|
+| **belonging** | v1 | Needs assessment | Current sprint priority |
 | **ai-engineering-practice** | v2 | Blocked | Needs FluxusSource hardware sources |
-| **signs_of_wisdom** | v1 | Early dev | Need harmonized prompt |
 | **nature_recovery** | v1 | Early dev | Need harmonized prompt |
-| **belonging** | v1 | Unknown | Needs assessment |
+| **signs_of_wisdom** | v1 | Early dev | Need harmonized prompt |
 
 ### Planned (filters/todo/)
 - future-of-education
@@ -60,25 +64,33 @@ llm-distillery/
 - sustainability_economic_viability
 - sustainability_policy_effectiveness
 
+### Backlog
+- **uplifting v6** - Training data ready (10,495 articles), needs training. HIGH tier still underrepresented (8 articles).
+- **Commerce prefilter v2** - v1 needs rework for multilingual embeddings and context size.
+
 ## Key Decisions (see docs/adr/ and docs/decisions/)
 
 - **Oracle outputs scores only** - Tier classification happens in postfilter (flexible thresholds)
 - **Dimensional regression** - Student models learn 0-10 scores, not classifications
 - **Qwen2.5-1.5B** - Chosen for speed/quality balance on consumer hardware
 - **Inline filters** - Fast rules embedded in prompts for model compatibility
+- **Screen+merge for needle-in-haystack filters** (ADR-003) - Random data provides negatives, screened data enriches positives; merge both for best results
+- **Commerce is only universal prefilter** (ADR-004) - Filter-specific noise handled by trained model, not additional prefilters
+- **Active learning for rare tiers** (ADR-005) - Use production filter to find high-scoring candidates, oracle score, add to training data
+- **Fine-tuning beats embedding probes** - Research confirmed fine-tuned Qwen2.5-1.5B significantly outperforms frozen embedding + probe approaches
 
 ## Development Workflow
 
 ### Filter Development (9 phases)
 1. Planning - Define dimensions, tiers, gatekeepers
 2. Architecture - Harmonize prompt structure
-3. Validation - Oracle calibration
+3. Validation - Oracle calibration + dimension redundancy analysis
 4. Prefilter - Test false negative/positive rates
-5. Training Data - Score 5K+ articles, validate
-6. Training - Fine-tune student model
+5. Training Data - Score 5K+ articles (screen+merge for needle-in-haystack filters)
+6. Training - Fine-tune Qwen2.5-1.5B with LoRA
 7. Testing - Benchmark vs oracle
 8. Documentation - Complete reports
-9. Deployment - Production release
+9. Deployment - Production release (HuggingFace Hub)
 
 ### Common Commands
 
@@ -112,4 +124,4 @@ Before making changes, understand:
 
 ---
 
-*Last updated: 2025-01-16*
+*Last updated: 2026-02-14*
