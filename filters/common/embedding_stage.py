@@ -132,8 +132,21 @@ class EmbeddingStage:
                 f"Train a probe first with: python research/embedding_vs_finetuning/train_probes.py"
             )
 
-        with open(self.probe_path, "rb") as f:
-            data = pickle.load(f)
+        # Pickle contains torch tensors that may have been saved on CUDA.
+        # Temporarily patch torch storage loading to map everything to CPU.
+        import torch.storage as _ts
+        _original_load = _ts._load_from_bytes
+
+        def _cpu_load_from_bytes(b):
+            import io
+            return torch.load(io.BytesIO(b), map_location="cpu", weights_only=False)
+
+        _ts._load_from_bytes = _cpu_load_from_bytes
+        try:
+            with open(self.probe_path, "rb") as f:
+                data = pickle.load(f)
+        finally:
+            _ts._load_from_bytes = _original_load
 
         # Load scaler
         self.scaler = data["scaler"]
