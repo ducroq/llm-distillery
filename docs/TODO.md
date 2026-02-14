@@ -74,7 +74,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **Shared infrastructure** - `filters/common/embedding_stage.py`, `hybrid_scorer.py`
 - [x] **Uplifting v5 integration** - `inference_hybrid.py` + MLP probe
 - [x] **Calibration script** - `evaluation/calibrate_hybrid_threshold.py`
-- [ ] **Threshold calibration** - Run calibration on uplifting v5 validation set
+- [x] **Threshold calibration** - Calibrated on 24K production articles. Probe retrained (v2): MAE 0.49, bias +0.007. Threshold 3.5 → 1.7% FN rate on MEDIUM+
 - [ ] **Speed benchmark** - Measure actual speedup on 1000+ articles
 - [ ] **Stage 2 model evaluation** - Train Gemma-3-1B and Qwen2.5-0.5B on uplifting v5, compare MAE and speed vs Qwen2.5-1.5B baseline
 - [ ] **Generalize to other filters** - sustainability_technology, investment-risk, cultural-discovery

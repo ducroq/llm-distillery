@@ -13,7 +13,7 @@ Article -> Prefilter -> Stage 1 (embedding + MLP probe, ~8ms)
                             |
                 +-----------+-----------+
                 |                       |
-          weighted_avg < 3.0     weighted_avg >= 3.0
+          weighted_avg < 3.5     weighted_avg >= 3.5
                 |                       |
           Return LOW result      Stage 2 (fine-tuned model, ~25ms)
           (probe scores)                |
@@ -23,7 +23,7 @@ Article -> Prefilter -> Stage 1 (embedding + MLP probe, ~8ms)
 Key parameters:
 - **Embedding model**: multilingual-e5-large (best probe accuracy from research)
 - **Probe**: Two-layer MLP (256, 128) trained on frozen embeddings
-- **Stage 1 threshold**: 3.0 (calibrated for <2% false negative rate on MEDIUM+)
+- **Stage 1 threshold**: 3.5 (calibrated on 24K production articles for <2% FN rate on MEDIUM+)
 
 ## Context
 
@@ -71,9 +71,22 @@ The hybrid scorer wraps the existing scorer (Stage 2) without modifying it. Exis
 | LOW accuracy | Baseline | ~18% worse MAE | Acceptable |
 | False negative rate | 0% | <2% | Acceptable |
 
-### Threshold justification
+### Threshold calibration (production data)
 
-MLP probe RMSE is ~1.044 on the weighted average. MEDIUM tier threshold is 4.0. Setting Stage 1 threshold at 3.0 gives ~1.0 safety margin (~1 standard deviation below MEDIUM threshold), targeting <2% false negative rate.
+Calibrated on 24,304 production-scored articles (19K MEDIUM + 5K LOW).
+
+**Probe v1** (trained on research data): Systematic bias of -0.54, FN rate 9.0% at threshold 3.0. Unusable.
+
+**Probe v2** (retrained on production data): Bias +0.007, val MAE 0.49, weighted avg MAE 0.39.
+
+| Threshold | FN Rate | FN Count | Notes |
+|-----------|---------|----------|-------|
+| 3.00 | 0.1% | 5/3783 | Very safe, minimal speedup |
+| 3.25 | 0.6% | 22/3783 | Safe |
+| **3.50** | **1.7%** | **63/3783** | **Selected: best <2% FN with meaningful speedup** |
+| 3.75 | 4.5% | 171/3783 | Too aggressive |
+
+In production with ~68% LOW articles, threshold 3.5 is expected to yield ~1.5-2x speedup.
 
 ## Consequences
 
