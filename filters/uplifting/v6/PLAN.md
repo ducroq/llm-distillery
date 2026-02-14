@@ -58,14 +58,55 @@ This reveals: TRUE HIGH articles (≥7) are extremely rare in general news corpu
 
 ---
 
+## Prompt Fixes for v6
+
+### Fix: Sensational Crime / Individual Court Cases (2026-02-14)
+
+**Problem:** Articles about individual criminal convictions leak into medium tier as "uplifting" because:
+- `justice_rights_impact` scores 7-8 (conviction = "accountability achieved")
+- `evidence_level` scores high (court rulings are well-documented)
+- `human_wellbeing_impact` scores moderate ("safety improved")
+- `change_durability` scores moderate (sentences are "durable")
+
+These are sensational crime news, not solutions journalism. A single criminal getting convicted is not systemic change.
+
+**Root cause:** No content-type cap for crime reporting, and the justice dimension doesn't distinguish individual sentencing from systemic reform.
+
+**Proposed fix (3 changes to prompt):**
+
+**1. Add to OUT OF SCOPE list:**
+```
+- **Individual criminal cases** (single arrests, sentencing, convictions) unless systemic reform or landmark ruling
+```
+
+**2. Add content-type cap (Section 3: Pre-Classification Step):**
+```
+**E) INDIVIDUAL CRIMINAL CASE?** Single arrest, trial, conviction, sentencing of individual(s)?
+   - If YES and NOT (systemic reform | class action | landmark/precedent-setting ruling | policy change):
+   - → FLAG "individual_crime" → **max_score = 3.0**
+```
+
+**3. Add critical filter to justice_rights_impact dimension:**
+```
+**CRITICAL FILTERS - Score 0-2 if:**
+- Problem identification only (no action toward justice)
+- Corporate accountability theater (PR without consequences)
+- Speculation about future justice ("could lead to reform")
+- Individual criminal sentencing without systemic impact (single convictions, arrests, sentences)
+```
+
+**Distinction preserved:** Landmark rulings, class actions, systemic reform, and policy changes still score normally. Only individual "criminal X convicted" stories are capped.
+
+---
+
 ## Next Steps
 
 ### Immediate: Train v6 Model
 
 ```bash
-# Copy v5 architecture
-# Train on v6 dataset
-# Compare tier-level MAE
+# Copy v5 architecture, apply prompt fixes above
+# Train on v6 dataset (10,495 articles)
+# Compare tier-level MAE, especially check crime article handling
 ```
 
 ### Ongoing: Active Learning for HIGH Tier
@@ -96,4 +137,4 @@ datasets/scored/uplifting_active_learning/
 
 ---
 
-*Updated: 2026-01-31*
+*Updated: 2026-02-14*

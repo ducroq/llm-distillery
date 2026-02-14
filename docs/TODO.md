@@ -22,6 +22,7 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [x] **uplifting v5** - Deployed on HuggingFace Hub (private)
   - Val MAE: 0.68, all dimensions < 0.80
   - 10,000 training articles
+  - **Known issue:** Individual criminal court cases leak into medium tier (no content-type cap for crime news). Fix planned for v6.
 - [x] **sustainability_technology v1** - Deployed on HuggingFace Hub
   - Test MAE: 0.690
 - [x] **sustainability_technology v2** - Complete (prefilter + model)
