@@ -2,7 +2,7 @@
 
 ## Critical (Blocking Progress)
 
-- [ ] **Optimal training data size** - Is 5K enough? When do diminishing returns start? Need experiments to determine sweet spot.
+(None currently)
 
 ## Important (Affects Design)
 
@@ -18,10 +18,12 @@
 
 ## Resolved
 
+- [x] **Optimal training data size** - 2026-01 - 5K minimum, 7-10K ideal. Merged datasets (random + screened) work best for needle-in-haystack filters. See ADR-003 and cultural-discovery v3 results.
+- [x] **Embedding vs fine-tuning** - 2026-01 - Fine-tuned Qwen2.5-1.5B significantly outperforms frozen embedding probes for nuanced dimensional scoring. See `research/embedding_vs_finetuning/`.
 - [x] **Oracle output format** - 2024-11-13 - Scores only, no tier classification (see ADR)
 - [x] **Base model selection** - 2024-11-10 - Qwen2.5-1.5B for speed/quality balance (see `docs/decisions/2025-11-10-model-selection-qwen-1.5b.md`)
 - [x] **Content truncation** - 2024-11-09 - 4K token limit with smart truncation (see `docs/decisions/2025-11-09-content-truncation-strategy.md`)
 
 ---
 
-*Last updated: 2025-01-16*
+*Last updated: 2026-02-14*

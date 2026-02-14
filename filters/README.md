@@ -10,7 +10,7 @@ This directory contains versioned filter packages for LLM Distillery. Each filte
 
 ---
 
-## Harmonized Architecture (November 2025)
+## Harmonized Architecture
 
 All filters follow consistent structure to enable flexible deployment and retraining:
 
@@ -116,17 +116,23 @@ filters/<filter-name>/v<version>/
 
 ### In Development
 
-#### 5. cultural-discovery v1 🆕 Planning
+#### 5. cultural-discovery v3 ✅ Production Ready
 
 **Purpose**: Discoveries about art, culture, history + cross-cultural connections.
 
-**Status**: Config created, needs prompt and training data
+**Status**: Production ready, deployed on HuggingFace Hub
 
 **Target**: ovr.news (Wisdom tab), Busara
 
+**Metrics**: Val MAE 0.77, 7,827 training articles (merged random + screened datasets)
+
+**Key achievement**: 39% improvement on medium-tier, 23% on high-tier vs v1 (screen+merge strategy per ADR-003)
+
+**Versions**: v1 (baseline, MAE 0.82) → v2 (screening experiment) → v3 (merged, production)
+
 **Dimensions (5)**: discovery_novelty, heritage_significance, cross_cultural_connection, human_resonance, evidence_quality (gatekeeper)
 
-**Location**: [filters/cultural-discovery/v1/](cultural-discovery/v1/)
+**Location**: [filters/cultural-discovery/v3/](cultural-discovery/v3/) (v1, v2 also available)
 
 ---
 
@@ -249,9 +255,9 @@ Use the filter-harmonizer agent to:
 - Split into train/val sets (90/10)
 
 ### 5. Training Phase
-- Fine-tune Qwen2.5-7B on oracle scores
+- Fine-tune Qwen2.5-1.5B on oracle scores (LoRA)
 - Validate model performance
-- Target: 92-96% accuracy
+- Target MAE < 0.80
 
 ### 6. Deployment Phase
 - Production testing
@@ -317,4 +323,4 @@ Every dimension MUST have inline filters:
 
 ---
 
-**Last Updated**: 2025-01-25
+**Last Updated**: 2026-02-14
