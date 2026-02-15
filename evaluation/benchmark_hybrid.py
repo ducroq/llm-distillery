@@ -120,6 +120,7 @@ def main():
     parser.add_argument("--batch-size", type=int, default=16, help="Batch size")
     parser.add_argument("--threshold", type=float, default=3.5, help="Stage 1 threshold")
     parser.add_argument("--repo-id", default="jeergrvgreg/uplifting-filter-v5", help="HF Hub repo")
+    parser.add_argument("--embedding-model", default="intfloat/multilingual-e5-large", help="Embedding model for Stage 1")
     args = parser.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -150,8 +151,8 @@ def main():
     from sentence_transformers import SentenceTransformer
 
     t0 = time.time()
-    embedder = SentenceTransformer("intfloat/multilingual-e5-large", device=device)
-    print(f"  Embedding model loaded in {time.time()-t0:.1f}s")
+    embedder = SentenceTransformer(args.embedding_model, device=device)
+    print(f"  Embedding model loaded in {time.time()-t0:.1f}s ({args.embedding_model})")
 
     probe, scaler, probe_config = load_probe(args.probe, device)
     print(f"  Probe loaded: {probe_config['input_dim']}d -> {probe_config['output_dim']}d")

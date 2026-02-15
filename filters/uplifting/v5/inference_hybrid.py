@@ -4,7 +4,7 @@ Uplifting Content Filter v5 - Hybrid Inference Pipeline
 Two-stage scorer that uses embedding + MLP probe for fast screening (Stage 1)
 and the trained Qwen2.5-1.5B model for precise scoring (Stage 2).
 
-Stage 1 (~10ms): Embedding probe estimates scores. Articles with weighted_avg < 4.5
+Stage 1 (~1.3ms): Embedding probe estimates scores. Articles with weighted_avg < 4.5
 are classified as LOW/borderline without running the expensive model.
 
 Stage 2 (~25ms): Full fine-tuned model scoring for articles that pass Stage 1.
@@ -68,7 +68,7 @@ class UpliftingHybridScorer(HybridScorer):
         """
         self._model_path = model_path
         self._probe_path = probe_path or (
-            Path(__file__).parent / "probe" / "embedding_probe_v2.pkl"
+            Path(__file__).parent / "probe" / "embedding_probe_e5small.pkl"
         )
         self._threshold = threshold
 
@@ -85,7 +85,7 @@ class UpliftingHybridScorer(HybridScorer):
     def _get_embedding_stage_config(self) -> Dict:
         """Return EmbeddingStage configuration for uplifting v5."""
         return {
-            "embedding_model_name": "intfloat/multilingual-e5-large",
+            "embedding_model_name": "intfloat/multilingual-e5-small",
             "probe_path": str(self._probe_path),
             "threshold": self._threshold,
         }

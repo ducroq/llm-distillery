@@ -9,7 +9,7 @@
 Use a **two-stage hybrid inference pipeline** that combines fast embedding probes (Stage 1) with the existing fine-tuned model (Stage 2):
 
 ```
-Article -> Prefilter -> Stage 1 (embedding + MLP probe, ~10ms)
+Article -> Prefilter -> Stage 1 (embedding + MLP probe, ~1.3ms)
                             |
                 +-----------+-----------+
                 |                       |
@@ -21,7 +21,7 @@ Article -> Prefilter -> Stage 1 (embedding + MLP probe, ~10ms)
 ```
 
 Key parameters:
-- **Embedding model**: multilingual-e5-large (best probe accuracy from research)
+- **Embedding model**: multilingual-e5-small (1.3ms/article, 100 languages, 384d)
 - **Probe**: Two-layer MLP (256, 128) trained on 24K production-scored articles
 - **Stage 1 threshold**: 4.5 (accepts lower accuracy on borderline MEDIUM 4.0-4.5 range)
 
@@ -60,22 +60,28 @@ Each filter adds:
 
 The hybrid scorer wraps the existing scorer (Stage 2) without modifying it. Existing `inference.py` files remain unchanged and can be used standalone.
 
-## Measured Performance (RTX 4080, 5K articles)
+## Measured Performance (RTX 4080, 5K articles, 79% MEDIUM / 21% LOW)
 
-| Metric | Time |
-|--------|------|
-| Stage 1 (e5-large + MLP probe) | 10.5ms/article |
-| Stage 2 (Qwen2.5-1.5B) | 39.3ms/article |
+### Embedding model comparison
 
-### Benchmark results by threshold
+| Model | Params | Dim | Speed | Probe MAE | Recall@4.5 |
+|-------|--------|-----|-------|-----------|------------|
+| e5-small | 118M | 384 | **1.3ms** | 0.451 | 72.3% |
+| e5-base | 278M | 768 | 3.0ms | 0.404 | 73.8% |
+| e5-large | 560M | 1024 | 9.2ms | 0.391 | 75.0% |
 
-| Threshold | Skip rate (this data) | Speedup (this data) | Est. production speedup |
-|-----------|----------------------|--------------------|-----------------------|
-| 3.5 | 15% | 0.89x | ~1.23x |
-| 4.0 | 24% | 0.97x | ~1.59x |
-| **4.5** | **53%** | **1.35x** | **~2.0x** |
+**Selected: e5-small** — 7x faster than e5-large, only 2.7% less recall. All models support 100 languages.
 
-Benchmark data is 79% MEDIUM / 21% LOW. Production is ~68% LOW, hence higher expected speedup.
+### Benchmark results (threshold=4.5, e5-small)
+
+| Metric | Standard | Hybrid | Change |
+|--------|----------|--------|--------|
+| Time per article | 37.9ms | **18.1ms** | **2.09x faster** |
+| Stage 1 (embed+probe) | — | 1.3ms | all articles |
+| Stage 2 (Qwen model) | 37.9ms | 37.9ms | 44% of articles |
+| Skip rate | 0% | 56% | — |
+
+Production (~68% LOW) expected speedup: ~2.5-3x.
 
 ### Threshold calibration (production data)
 
