@@ -63,7 +63,7 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - 1024tok: MAE 0.652, 2048tok: MAE 0.627
   - head+tail (256+256): MAE ~0.69 (deployed to production)
   - See `docs/IDEAS.md` for full results
-- [ ] **Qwen2.5-0.5B evaluation** - Smaller/faster model, evaluate alongside Gemma-3-1B in hybrid pipeline effort
+- [x] **Stage 2 model comparison** - Gemma-3-1B wins: MAE 0.652, 19.8ms (vs Qwen-1.5B: 0.660, 21.5ms). Qwen-0.5B: MAE 0.760, 10.1ms (too inaccurate)
 - [ ] **Qwen2.5-7B support** - Larger model option for complex filters
 - [ ] **Training monitoring improvements** - Better logging, early stopping
 
@@ -76,7 +76,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **Calibration script** - `evaluation/calibrate_hybrid_threshold.py`
 - [x] **Threshold calibration** - Calibrated on 24K production articles. Probe retrained (v2): MAE 0.49, bias +0.007. Threshold 3.5 → 1.7% FN rate on MEDIUM+
 - [x] **Speed benchmark** - RTX 4080: e5-small 1.3ms + Qwen 37.9ms. Threshold 4.5 → 2.09x on skewed data, ~2.5-3x in production
-- [ ] **Stage 2 model evaluation** - Train Gemma-3-1B and Qwen2.5-0.5B on uplifting v5, compare MAE and speed vs Qwen2.5-1.5B baseline
+- [x] **Stage 2 model evaluation** - Gemma-3-1B beats Qwen-1.5B: better MAE (0.652 vs 0.660), better tier accuracy (86.6% vs 85.4%), 8% faster (19.8ms vs 21.5ms). Qwen-0.5B rejected (MAE 0.760). Next: decide whether to adopt Gemma-3-1B as default Stage 2
 - [ ] **Generalize to other filters** - sustainability_technology, investment-risk, cultural-discovery
 
 ## Deployment
@@ -101,4 +101,4 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-02-14*
+*Last updated: 2026-02-16*

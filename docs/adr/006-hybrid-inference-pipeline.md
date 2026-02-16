@@ -100,6 +100,31 @@ Calibrated on 24,304 production-scored articles (19K MEDIUM + 5K LOW).
 | LOW articles | 99.0% filtered out |
 | MEDIUM articles | 41.7% get probe scores (the 4.0-4.5 borderline range) |
 
+### Stage 2 model comparison (2026-02-16)
+
+Trained Gemma-3-1B and Qwen2.5-0.5B on uplifting v5 data (8K train / 1K val), compared against Qwen2.5-1.5B baseline.
+
+| Model | Params | MAE | W-MAE | Tier Acc | Speed (ms) |
+|-------|--------|-----|-------|----------|------------|
+| Qwen2.5-0.5B | 494M | 0.760 | 0.570 | 83.9% | **10.1** |
+| **Gemma-3-1B** | **1B** | **0.652** | **0.487** | **86.6%** | **19.8** |
+| Qwen2.5-1.5B | 1.5B | 0.660 | 0.495 | 85.4% | 21.5 |
+
+Per-dimension MAE (Gemma-3-1B vs Qwen-1.5B):
+
+| Dimension | Gemma-3-1B | Qwen-1.5B | Winner |
+|-----------|-----------|-----------|--------|
+| human_wellbeing | 0.668 | 0.664 | Qwen |
+| social_cohesion | 0.651 | 0.685 | Gemma |
+| justice_rights | 0.586 | 0.597 | Gemma |
+| evidence_level | 0.625 | 0.619 | Qwen |
+| benefit_distribution | 0.758 | 0.767 | Gemma |
+| change_durability | 0.621 | 0.631 | Gemma |
+
+**Result:** Gemma-3-1B is the best Stage 2 candidate — 1.2% better MAE, 1.2% better tier accuracy, and 8% faster than Qwen-1.5B despite having fewer parameters. Qwen-0.5B is too inaccurate (MAE 0.760 > 0.75 threshold).
+
+**Decision pending:** Whether to adopt Gemma-3-1B as default Stage 2 model. Considerations: requires `transformers >= 5.1.0`, gated model on HuggingFace (requires license acceptance), but offers better accuracy with smaller model.
+
 ## Consequences
 
 ### Positive

@@ -157,6 +157,10 @@ class QwenFilterModel(torch.nn.Module):
         # Only use FP16 if explicitly requested (can cause NaN issues)
         if use_fp16:
             load_kwargs["torch_dtype"] = torch.float16
+        else:
+            # Force float32 for training stability (some models like Gemma 3
+            # default to bfloat16 which causes dtype mismatches during backward)
+            load_kwargs["torch_dtype"] = torch.float32
 
         self.base_model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
