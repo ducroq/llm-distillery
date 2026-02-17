@@ -121,9 +121,41 @@ Per-dimension MAE (Gemma-3-1B vs Qwen-1.5B):
 | benefit_distribution | 0.758 | 0.767 | Gemma |
 | change_durability | 0.621 | 0.631 | Gemma |
 
-**Result:** Gemma-3-1B is the best Stage 2 candidate — 1.2% better MAE, 1.2% better tier accuracy, and 8% faster than Qwen-1.5B despite having fewer parameters. Qwen-0.5B is too inaccurate (MAE 0.760 > 0.75 threshold).
+**Result (uplifting):** Gemma-3-1B is the best Stage 2 candidate — 1.2% better MAE, 1.2% better tier accuracy, and 8% faster than Qwen-1.5B despite having fewer parameters. Qwen-0.5B is too inaccurate (MAE 0.760 > 0.75 threshold).
 
-**Decision pending:** Whether to adopt Gemma-3-1B as default Stage 2 model. Considerations: requires `transformers >= 5.1.0`, gated model on HuggingFace (requires license acceptance), but offers better accuracy with smaller model.
+### Cross-filter validation: cultural-discovery v3 (2026-02-16)
+
+Trained Gemma-3-1B and Qwen2.5-1.5B on cultural-discovery v3 data (6,261 train / 783 val) with identical settings (6 epochs, batch_size=4, head+tail).
+
+| Model | MAE | W-MAE | Tier Acc | Speed (ms) |
+|-------|-----|-------|----------|------------|
+| **Gemma-3-1B** | **0.7427** | **0.4804** | **94.6%** | **20.2** |
+| Qwen2.5-1.5B | 0.7548 | 0.4899 | 94.5% | 21.3 |
+
+Per-dimension MAE (Gemma-3-1B vs Qwen-1.5B):
+
+| Dimension | Gemma-3-1B | Qwen-1.5B | Winner |
+|-----------|-----------|-----------|--------|
+| discovery_novelty | 0.4738 | 0.4970 | Gemma |
+| heritage_significance | 0.5746 | 0.5582 | Qwen |
+| cross_cultural_connection | 0.5827 | 0.5984 | Gemma |
+| human_resonance | 0.7777 | 0.7666 | Qwen |
+| evidence_quality | 1.3046 | 1.3537 | Gemma |
+
+**Result (cultural-discovery):** Gemma-3-1B wins again — 1.6% better MAE, 0.1% better tier accuracy, 5% faster. Wins 3 of 5 dimensions.
+
+### Decision: Adopt Gemma-3-1B as default Stage 2 model
+
+Gemma-3-1B beats Qwen-1.5B on **both** filters tested:
+
+| Filter | Gemma MAE | Qwen MAE | Gemma Tier% | Qwen Tier% |
+|--------|-----------|----------|-------------|------------|
+| uplifting v5 | **0.652** | 0.660 | **86.6%** | 85.4% |
+| cultural-discovery v3 | **0.743** | 0.755 | **94.6%** | 94.5% |
+
+Consistently better accuracy with 8% faster inference and fewer parameters (1B vs 1.5B). Adopting as default Stage 2 model for all new filter training.
+
+**Trade-offs accepted:** Requires `transformers >= 5.1.0`, gated model on HuggingFace (requires license acceptance).
 
 ## Consequences
 
