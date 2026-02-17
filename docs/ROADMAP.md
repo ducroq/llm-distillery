@@ -3,16 +3,15 @@
 ## Now (Current Sprint)
 
 - **belonging v1** - Assess existing work and develop
-- **Hybrid inference pipeline** - Two-stage scoring (embedding probe + fine-tuned model)
-  - Infrastructure complete (ADR-006)
-  - Uplifting v5 integrated, needs threshold calibration and benchmarking
-  - Stage 2 model comparison planned: Gemma-3-1B, Qwen2.5-0.5B vs Qwen2.5-1.5B baseline
+- **Hybrid inference: generalize to other filters** - Add probe + hybrid scorer to sustainability_technology, investment-risk, cultural-discovery
+  - Infrastructure complete, uplifting v5 integrated (ADR-006)
+  - Stage 2 model decided: Gemma-3-1B (default for all new training)
 
 ## Next (Coming Soon)
 - **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
 - **nature_recovery v1** - Develop harmonized prompt and prefilter
 - **signs_of_wisdom v1** - Develop harmonized prompt and prefilter
-- **Hybrid inference: generalize** - Add to sustainability_technology, investment-risk, cultural-discovery
+- **Retrain deployed models with Gemma-3-1B** - Uplifting v5, cultural-discovery v3 (modest MAE gain, faster inference)
 
 ## Later (Backlog)
 
@@ -33,7 +32,7 @@
 - **seece filter** - Corporate excellence (in filters/todo/)
 - **Batch processing pipeline** - High-volume scoring infrastructure
 - **Production monitoring** - Accuracy drift detection
-- **Qwen2.5-7B support** - Larger model option
+- **Qwen2.5-7B support** - Larger model option (lower priority given Gemma-3-1B results)
 
 ## Completed
 
@@ -58,6 +57,15 @@
   - See `docs/IDEAS.md` for full results
 - [x] **Embedding vs fine-tuning** - Confirmed fine-tuning beats probes by ~18% MAE
   - Probes fast enough for Stage 1 screening in hybrid pipeline
+- [x] **Stage 2 model comparison** - Gemma-3-1B adopted as default - 2026-02
+  - Beats Qwen-1.5B on both uplifting (MAE 0.652 vs 0.660) and cultural-discovery (0.743 vs 0.755)
+  - 8% faster inference, 38% faster training, fewer parameters (1B vs 1.5B)
+
+### Hybrid Inference Pipeline
+- [x] **Shared infrastructure** - embedding_stage.py, hybrid_scorer.py - 2026-02
+- [x] **Uplifting v5 integration** - probe + inference_hybrid.py - 2026-02
+- [x] **Threshold calibration** - 24K articles, threshold 4.5, 2.09x speedup - 2026-02
+- [x] **Stage 2 model decision** - Gemma-3-1B adopted as default - 2026-02
 
 ### Infrastructure
 - [x] **Ground truth generation pipeline** - 2024-11
@@ -69,4 +77,4 @@
 
 ---
 
-*Last updated: 2026-02-14*
+*Last updated: 2026-02-17*
