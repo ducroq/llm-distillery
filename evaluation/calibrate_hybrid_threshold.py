@@ -57,22 +57,36 @@ def load_filter_config(filter_name: str, version: str) -> Dict:
 
 
 def extract_dimension_info(config: Dict) -> Tuple[List[str], Dict[str, float], float]:
-    """Extract dimension names, weights, and MEDIUM tier threshold from config."""
+    """Extract dimension names, weights, and MEDIUM tier threshold from config.
+
+    Supports both config formats:
+    - `tiers:` with simple threshold values (uplifting, cultural-discovery)
+    - `tier_thresholds:` with threshold or min_score (sustainability_technology)
+    - `tier_thresholds:` with compound conditions (investment-risk)
+    """
     dimensions = config["scoring"]["dimensions"]
     dim_names = list(dimensions.keys())
     dim_weights = {name: dim["weight"] for name, dim in dimensions.items()}
 
-    # Find MEDIUM tier threshold
-    medium_threshold = 4.0  # default
-    for tier in config["scoring"]["tiers"].values():
-        if "medium" in str(tier.get("description", "")).lower() or tier.get("threshold") == 4.0:
-            medium_threshold = tier["threshold"]
-            break
+    # Support both config key formats
+    tiers = config["scoring"].get("tiers") or config["scoring"].get("tier_thresholds", {})
 
-    # More robust: look for the tier named "medium"
-    tiers = config["scoring"]["tiers"]
+    # Find MEDIUM tier threshold (the cutoff for "interesting" articles)
+    medium_threshold = 4.0  # default fallback
+
+    # Try direct "medium" key first (most filters)
     if "medium" in tiers:
-        medium_threshold = tiers["medium"]["threshold"]
+        tier_def = tiers["medium"]
+        medium_threshold = tier_def.get("threshold", tier_def.get("min_score", 4.0))
+    else:
+        # For filters without "medium" tier (e.g. investment-risk uses RED/YELLOW/GREEN/BLUE/NOISE),
+        # find the lowest min_score among actionable tiers as the "interesting" threshold
+        actionable_scores = []
+        for tier_name, tier_def in tiers.items():
+            if isinstance(tier_def, dict) and "min_score" in tier_def:
+                actionable_scores.append(tier_def["min_score"])
+        if actionable_scores:
+            medium_threshold = min(actionable_scores)
 
     return dim_names, dim_weights, medium_threshold
 
@@ -219,14 +233,22 @@ def run_model_calibration(
 
     # Load Stage 2 (the fine-tuned model)
     logger.info("Loading Stage 2 model for comparison...")
-    if filter_name == "uplifting":
-        from filters.uplifting.v5.inference import UpliftingScorer
-        stage2_scorer = UpliftingScorer(device=device, use_prefilter=False)
-    else:
+    scorer_map = {
+        "uplifting": ("filters.uplifting.v5.inference", "UpliftingScorer"),
+        "sustainability_technology": ("filters.sustainability_technology.v2.inference", "SustainabilityTechnologyScorer"),
+        "investment-risk": ("filters.investment-risk.v5.inference", "InvestmentRiskScorer"),
+        "cultural-discovery": ("filters.cultural-discovery.v3.inference", "CulturalDiscoveryScorer"),
+    }
+    if filter_name not in scorer_map:
         raise ValueError(
             f"Unknown filter: {filter_name}. "
-            f"Add import for your filter's scorer."
+            f"Known filters: {list(scorer_map.keys())}"
         )
+    module_path, class_name = scorer_map[filter_name]
+    import importlib
+    module = importlib.import_module(module_path)
+    scorer_class = getattr(module, class_name)
+    stage2_scorer = scorer_class(device=device, use_prefilter=False)
 
     # Run Stage 1
     logger.info(f"Running Stage 1 on {len(articles)} articles...")
