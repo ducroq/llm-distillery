@@ -13,6 +13,7 @@ All filter prefilters should inherit from this base class.
 
 import logging
 import re
+import threading
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from filters.common.text_cleaning import sanitize_text_comprehensive, clean_article as clean_article_comprehensive
@@ -41,7 +42,7 @@ class BasePreFilter:
 
     # Singleton commerce detector (shared across all instances)
     _commerce_detector: Optional["CommercePrefilterSLM"] = None
-    _commerce_detector_loading: bool = False
+    _commerce_detector_lock = threading.Lock()
 
     def __init__(
         self,
@@ -70,32 +71,30 @@ class BasePreFilter:
         """
         Lazy load the commerce detector singleton.
 
-        Thread-safe loading with simple flag to prevent multiple loads.
+        Thread-safe loading using double-checked locking pattern.
         """
         if cls._commerce_detector is not None:
             return
 
-        if cls._commerce_detector_loading:
-            # Another instance is loading, wait
-            return
+        with cls._commerce_detector_lock:
+            # Double-check after acquiring lock
+            if cls._commerce_detector is not None:
+                return
 
-        cls._commerce_detector_loading = True
-        try:
-            from filters.common.commerce_prefilter.v1.inference import CommercePrefilterSLM
-            logger.info("Loading commerce prefilter SLM...")
-            cls._commerce_detector = CommercePrefilterSLM()
-            logger.info("Commerce prefilter loaded successfully")
-        except FileNotFoundError:
-            logger.warning(
-                "Commerce prefilter model not found. "
-                "Train it first with: python -m filters.common.commerce_prefilter.training.train"
-            )
-            cls._commerce_detector = None
-        except Exception as e:
-            logger.error(f"Failed to load commerce prefilter: {e}")
-            cls._commerce_detector = None
-        finally:
-            cls._commerce_detector_loading = False
+            try:
+                from filters.common.commerce_prefilter.v1.inference import CommercePrefilterSLM
+                logger.info("Loading commerce prefilter SLM...")
+                cls._commerce_detector = CommercePrefilterSLM()
+                logger.info("Commerce prefilter loaded successfully")
+            except FileNotFoundError:
+                logger.warning(
+                    "Commerce prefilter model not found. "
+                    "Train it first with: python -m filters.common.commerce_prefilter.training.train"
+                )
+                cls._commerce_detector = None
+            except Exception as e:
+                logger.error(f"Failed to load commerce prefilter: {e}")
+                cls._commerce_detector = None
 
     def check_commerce(self, article: Dict) -> Tuple[bool, str, Optional[float]]:
         """
