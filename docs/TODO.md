@@ -77,7 +77,8 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **Threshold calibration** - Calibrated on 24K production articles. Probe retrained (v2): MAE 0.49, bias +0.007. Threshold 3.5 → 1.7% FN rate on MEDIUM+
 - [x] **Speed benchmark** - RTX 4080: e5-small 1.3ms + Qwen 37.9ms. Threshold 4.5 → 2.09x on skewed data, ~2.5-3x in production
 - [x] **Stage 2 model evaluation** - Gemma-3-1B adopted as default Stage 2 model. Confirmed on two filters: uplifting v5 (MAE 0.652 vs 0.660, tier 86.6% vs 85.4%) and cultural-discovery v3 (MAE 0.743 vs 0.755, tier 94.6% vs 94.5%). 8% faster inference, 38% faster training
-- [ ] **Generalize to other filters** - sustainability_technology, investment-risk, cultural-discovery
+- [x] **Generalize to other filters** - Phase A complete: inference_hybrid.py + probe dirs + calibration fix for sustainability_technology v2, investment-risk v5, cultural-discovery v3
+- [ ] **Train probes for remaining filters** - Phase B (GPU): generate embeddings, train MLP probes, calibrate thresholds
 
 ## Deployment
 
@@ -92,6 +93,11 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [ ] **Dataset QA pipeline** - Automated quality checks
 - [ ] **Cost tracking** - Monitor API usage for oracle scoring
 - [x] **Hub scorers: add torch_dtype parameter** - All 5 `inference_hub.py` files now accept optional `torch_dtype` param and pass it to `from_pretrained()`. Use `torch_dtype=torch.float16` on hardware without bfloat16 support.
+- [x] **Harmonize filters: llm-distillery as single source of truth** - Fixed drift between llm-distillery and NexusMind
+  - base_prefilter.py: threading.Lock() for commerce detector (was bool flag)
+  - investment-risk v5: merged source-based + content-pattern approaches, removed academic source blocking
+  - Deployed all production prefilters to NexusMind (sadalsuud + gpu-server)
+  - Verified 0 diff between all three locations
 
 ## Documentation
 

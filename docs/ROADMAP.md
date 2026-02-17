@@ -3,9 +3,10 @@
 ## Now (Current Sprint)
 
 - **belonging v1** - Assess existing work and develop
-- **Hybrid inference: generalize to other filters** - Add probe + hybrid scorer to sustainability_technology, investment-risk, cultural-discovery
-  - Infrastructure complete, uplifting v5 integrated (ADR-006)
-  - Stage 2 model decided: Gemma-3-1B (default for all new training)
+- **Hybrid inference: train probes for remaining filters** - Phase A code complete, Phase B needs GPU
+  - inference_hybrid.py + probe dirs created for sustainability_technology v2, investment-risk v5, cultural-discovery v3
+  - Calibration script fixed for all config formats
+  - **Next:** Generate e5-small embeddings, train MLP probes, calibrate thresholds (GPU required)
 
 ## Next (Coming Soon)
 - **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
@@ -66,6 +67,15 @@
 - [x] **Uplifting v5 integration** - probe + inference_hybrid.py - 2026-02
 - [x] **Threshold calibration** - 24K articles, threshold 4.5, 2.09x speedup - 2026-02
 - [x] **Stage 2 model decision** - Gemma-3-1B adopted as default - 2026-02
+- [x] **Generalize to all filters (Phase A)** - inference_hybrid.py + probe dirs + calibration fix for 3 filters - 2026-02
+
+### Filter Harmonization
+- [x] **Harmonize filters: llm-distillery as single source of truth** - 2026-02
+  - Fixed drift between llm-distillery and NexusMind (sadalsuud + gpu-server)
+  - base_prefilter.py: thread-safe commerce detector loading (threading.Lock)
+  - investment-risk v5: unified source-based + content-pattern prefilter, removed academic blocking
+  - uplifting v5 + cultural-discovery v3: deployed (academic domain exclusion already removed)
+  - All production prefilters verified identical across 3 locations
 
 ### Infrastructure
 - [x] **Ground truth generation pipeline** - 2024-11
