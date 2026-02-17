@@ -5,15 +5,14 @@ Blocks obvious low-value content before LLM labeling:
 - Corporate finance (unless worker coop/public benefit/open source)
 - Military/security buildups (unless peace/demilitarization)
 - Pure speculation articles (no documented outcomes)
-- Academic preprints and research papers
 - Code repositories and developer tutorials
 
 Purpose: Reduce LLM costs and improve training data quality.
 
 Changes from v4:
 - Added speculation detection (heavy "could/might/may" language)
-- Added academic domain filtering
 - Improved pattern matching for corporate finance
+- Removed academic domain filtering (academic sources are valuable)
 """
 
 import re
@@ -28,20 +27,6 @@ class UpliftingPreFilterV5(BasePreFilter):
     VERSION = "5.0"
 
     # === DOMAIN EXCLUSIONS ===
-
-    ACADEMIC_DOMAINS = [
-        'arxiv.org',
-        'biorxiv.org',
-        'medrxiv.org',
-        'ssrn.com',
-        'eprint.iacr.org',
-        'mdpi.com',
-        'journals.plos.org',
-        'frontiersin.org',
-        'link.aps.org',
-        'nature.com/articles',  # Research articles
-        'sciencedirect.com',
-    ]
 
     VC_STARTUP_DOMAINS = [
         'techcrunch.com',
@@ -397,10 +382,6 @@ class UpliftingPreFilterV5(BasePreFilter):
         """Check if URL belongs to an excluded domain. Returns reason or empty string."""
         url_lower = url.lower()
 
-        for domain in self.ACADEMIC_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_academic"
-
         for domain in self.VC_STARTUP_DOMAINS:
             if domain in url_lower:
                 return "excluded_domain_vc_startup"
@@ -430,7 +411,6 @@ class UpliftingPreFilterV5(BasePreFilter):
         """Return filter statistics"""
         return {
             'version': self.VERSION,
-            'academic_domains': len(self.ACADEMIC_DOMAINS),
             'vc_startup_domains': len(self.VC_STARTUP_DOMAINS),
             'defense_domains': len(self.DEFENSE_DOMAINS),
             'code_hosting_domains': len(self.CODE_HOSTING_DOMAINS),
@@ -496,15 +476,6 @@ def test_prefilter():
             'text': 'This is too short to pass the minimum content length filter.',
             'expected': (False, 'content_too_short'),
             'description': 'Content too short'
-        },
-
-        # Should BLOCK - Academic Domain
-        {
-            'title': 'Novel Neural Architecture for Climate Modeling',
-            'url': 'https://arxiv.org/abs/2401.12345',
-            'text': 'We present a novel approach to climate modeling using transformer architectures. Our method achieves state-of-the-art performance on multiple benchmark datasets. The model uses attention mechanisms to capture long-range dependencies in climate data. We evaluate on three major climate prediction benchmarks and demonstrate significant improvements over baseline methods. Our code and trained models are available for reproducibility. This work contributes to the growing body of research applying deep learning to environmental science challenges.',
-            'expected': (False, 'excluded_domain_academic'),
-            'description': 'Academic preprint (arxiv)'
         },
 
         # Should BLOCK - VC/Startup Domain

@@ -6,8 +6,7 @@ Blocks obvious low-value content before LLM labeling:
 - Tourism fluff (unless UNESCO/preservation/archaeological)
 - Celebrity art news (unless philanthropy/repatriation/public donation)
 - Cultural appropriation debates (unless respectful exchange/collaboration)
-- Academic preprints and code repositories
-- VC/startup and defense domains
+- Code repositories, VC/startup, and defense domains
 
 Purpose: Reduce LLM costs and improve training data quality for cultural discovery filter.
 Expected pass rate: ~15% of random articles
@@ -25,19 +24,6 @@ class CulturalDiscoveryPreFilterV1(BasePreFilter):
     VERSION = "1.0"
 
     # === DOMAIN EXCLUSIONS ===
-
-    ACADEMIC_DOMAINS = [
-        'arxiv.org',
-        'biorxiv.org',
-        'medrxiv.org',
-        'ssrn.com',
-        'eprint.iacr.org',
-        'mdpi.com',
-        'journals.plos.org',
-        'frontiersin.org',
-        'link.aps.org',
-        'sciencedirect.com',
-    ]
 
     VC_STARTUP_DOMAINS = [
         'techcrunch.com',
@@ -418,10 +404,6 @@ class CulturalDiscoveryPreFilterV1(BasePreFilter):
         """Check if URL belongs to an excluded domain. Returns reason or empty string."""
         url_lower = url.lower()
 
-        for domain in self.ACADEMIC_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_academic"
-
         for domain in self.VC_STARTUP_DOMAINS:
             if domain in url_lower:
                 return "excluded_domain_vc_startup"
@@ -451,7 +433,6 @@ class CulturalDiscoveryPreFilterV1(BasePreFilter):
         """Return filter statistics"""
         return {
             'version': self.VERSION,
-            'academic_domains': len(self.ACADEMIC_DOMAINS),
             'vc_startup_domains': len(self.VC_STARTUP_DOMAINS),
             'defense_domains': len(self.DEFENSE_DOMAINS),
             'code_hosting_domains': len(self.CODE_HOSTING_DOMAINS),
@@ -523,15 +504,6 @@ def test_prefilter():
             'text': 'This is too short to pass the minimum content length filter.',
             'expected': (False, 'content_too_short'),
             'description': 'Content too short'
-        },
-
-        # Should BLOCK - Academic Domain
-        {
-            'title': 'Analysis of Maya Ceramic Patterns',
-            'url': 'https://arxiv.org/abs/2401.12345',
-            'text': 'We present a novel approach to analyzing Maya ceramic patterns using machine learning. Our method achieves state-of-the-art performance on archaeological classification benchmarks. The analysis reveals previously unknown connections between regional pottery styles across Mesoamerica. This research contributes to understanding of ancient trade networks and cultural exchange in the pre-Columbian period.',
-            'expected': (False, 'excluded_domain_academic'),
-            'description': 'Academic preprint (arxiv)'
         },
 
         # Should BLOCK - Political Conflict
