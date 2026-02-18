@@ -115,6 +115,14 @@ training:
   recommended_model: "Qwen2.5-1.5B"
   expected_mae: "<0.75"
 
+hybrid_inference:
+  stage1:
+    embedding_model: "intfloat/multilingual-e5-small"
+    probe_path: "probe/embedding_probe_e5small.pkl"
+    threshold: 1.25  # 0.0% FN on MEDIUM+, 1.52x speedup on val data
+  stage2:
+    model: "current"  # Uses existing inference.py CulturalDiscoveryScorer
+
 deployment:
   inference_time: "20-50ms"
   cost_per_article: "$0.00"

@@ -31,8 +31,8 @@ from filters.sustainability_technology.v2.inference import SustainabilityTechnol
 logger = logging.getLogger(__name__)
 
 # Default Stage 1 threshold: articles below this skip Stage 2
-# To be calibrated after probe training (Phase B)
-DEFAULT_THRESHOLD = 4.0
+# Calibrated on 1,003 val articles: 1.2% FN on MEDIUM+, 1.25x speedup
+DEFAULT_THRESHOLD = 1.25
 
 
 class SustainabilityTechnologyHybridScorer(HybridScorer):

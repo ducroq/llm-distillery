@@ -67,3 +67,11 @@ preprocessing:
     head_tokens: 256
     tail_tokens: 256
     separator: " [...] "
+
+hybrid_inference:
+  stage1:
+    embedding_model: "intfloat/multilingual-e5-small"
+    probe_path: "probe/embedding_probe_e5small.pkl"
+    threshold: 1.25  # 1.2% FN on MEDIUM+, 1.25x speedup on val data
+  stage2:
+    model: "current"  # Uses existing inference.py SustainabilityTechnologyScorer

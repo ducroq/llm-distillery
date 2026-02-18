@@ -30,8 +30,8 @@ from filters.common.hybrid_scorer import HybridScorer
 logger = logging.getLogger(__name__)
 
 # Default Stage 1 threshold: articles below this skip Stage 2
-# To be calibrated after probe training (Phase B)
-DEFAULT_THRESHOLD = 4.0
+# Calibrated on 783 val articles: 0.0% FN on MEDIUM+, 1.52x speedup
+DEFAULT_THRESHOLD = 1.25
 
 
 class CulturalDiscoveryHybridScorer(HybridScorer):

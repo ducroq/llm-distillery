@@ -177,6 +177,15 @@ training:
   target_mae: 0.80
   correlation_validation: true
 
+# Hybrid inference (two-stage pipeline)
+hybrid_inference:
+  stage1:
+    embedding_model: "intfloat/multilingual-e5-small"
+    probe_path: "probe/embedding_probe_e5small.pkl"
+    threshold: 1.50  # 0.8% FN on actionable tiers, 1.07x speedup on val data
+  stage2:
+    model: "current"  # Uses existing inference.py InvestmentRiskScorer
+
 # Deployment
 deployment:
   pipeline:

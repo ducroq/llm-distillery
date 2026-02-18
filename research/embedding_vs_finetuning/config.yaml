@@ -21,6 +21,14 @@ embedding_models:
     dimensions: 768
     max_tokens: 128
 
+  # Fast multilingual e5 (100+ languages, used for hybrid Stage 1 probes)
+  intfloat/multilingual-e5-small:
+    source: sentence-transformers
+    model_name: intfloat/multilingual-e5-small
+    dimensions: 384
+    max_tokens: 512
+    prefix: "query: "  # E5 models expect this prefix
+
   # Strong MTEB multilingual (100+ languages)
   multilingual-e5-large:
     source: sentence-transformers
@@ -53,18 +61,24 @@ datasets:
     baseline_mae: 0.68
     articles: 10000
 
-  # Follow-up datasets (if results promising)
-  sustainability_technology_v2:
-    path: datasets/training/sustainability_technology_v2
-    dimensions: 8
+  # Follow-up datasets
+  sustainability_technology_v3:
+    path: datasets/training/sustainability_technology_v3
+    dimensions: 6
     baseline_mae: 0.71
-    articles: 7990
+    articles: 10039
 
   investment_risk_v5:
     path: datasets/training/investment_risk_v5
-    dimensions: 8
+    dimensions: 6
     baseline_mae: 0.48
-    articles: 10000
+    articles: 10198
+
+  cultural-discovery_v3:
+    path: datasets/training/cultural-discovery_v3
+    dimensions: 5
+    baseline_mae: 0.77
+    articles: 7827
 
 probe_methods:
   ridge:

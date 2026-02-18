@@ -30,9 +30,8 @@ from filters.common.hybrid_scorer import HybridScorer
 logger = logging.getLogger(__name__)
 
 # Default Stage 1 threshold: articles below this skip Stage 2
-# Investment-risk uses GREEN min_score=4.0 as lowest actionable tier
-# To be calibrated after probe training (Phase B)
-DEFAULT_THRESHOLD = 4.0
+# Calibrated on 1,020 val articles: 0.8% FN on actionable tiers, 1.07x speedup
+DEFAULT_THRESHOLD = 1.50
 
 
 class InvestmentRiskHybridScorer(HybridScorer):
