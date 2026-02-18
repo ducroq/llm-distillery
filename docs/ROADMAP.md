@@ -3,10 +3,7 @@
 ## Now (Current Sprint)
 
 - **belonging v1** - Assess existing work and develop
-- **Hybrid inference: train probes for remaining filters** - Phase A code complete, Phase B needs GPU
-  - inference_hybrid.py + probe dirs created for sustainability_technology v2, investment-risk v5, cultural-discovery v3
-  - Calibration script fixed for all config formats
-  - **Next:** Generate e5-small embeddings, train MLP probes, calibrate thresholds (GPU required)
+- **Deploy hybrid inference to NexusMind** - Probes trained and calibrated, need to sync to production
 
 ## Next (Coming Soon)
 - **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
@@ -68,6 +65,10 @@
 - [x] **Threshold calibration** - 24K articles, threshold 4.5, 2.09x speedup - 2026-02
 - [x] **Stage 2 model decision** - Gemma-3-1B adopted as default - 2026-02
 - [x] **Generalize to all filters (Phase A)** - inference_hybrid.py + probe dirs + calibration fix for 3 filters - 2026-02
+- [x] **Train probes + calibrate (Phase B)** - e5-small MLP probes for all 3 filters - 2026-02
+  - sustainability_technology v2: MAE 0.707, threshold 1.25, 1.2% FN, 1.25x
+  - investment-risk v5: MAE 0.497, threshold 1.50, 0.8% FN, 1.07x
+  - cultural-discovery v3: MAE 0.609, threshold 1.25, 0.0% FN, 1.52x
 
 ### Filter Harmonization
 - [x] **Harmonize filters: llm-distillery as single source of truth** - 2026-02
@@ -87,4 +88,4 @@
 
 ---
 
-*Last updated: 2026-02-17*
+*Last updated: 2026-02-18*
