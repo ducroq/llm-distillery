@@ -55,22 +55,25 @@ secrets.ini
 
 # Model checkpoints (large files)
 inference/models/*/
-filters/*/model/
+filters/**/model/
+filters/**/probe/
 *.pt
 *.pth
 *.onnx
 *.safetensors
 *.bin
+*.pkl
 # But track model metadata
-!filters/*/training_*.json
+!filters/**/training_*.json
 
-# Datasets (large files - track metadata only)
+# Datasets and data (large files - track metadata only)
 datasets/
 datasets/*.jsonl
 datasets/raw/
 datasets/processed/
 datasets/splits/
 datasets/test/
+data/
 
 # Track metadata files for documentation
 !datasets/*_metadata.json
@@ -125,6 +128,15 @@ temp/
 cache/
 nul
 
+
+# Node.js
+node_modules/
+package-lock.json
+package.json
+
+# Research artifacts
+research/**/models/
+research/**/embeddings/
 
 # Sandbox/Experimental - NOT committed (safe space for prototyping)
 # General experimentation, prototypes
