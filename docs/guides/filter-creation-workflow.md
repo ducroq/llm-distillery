@@ -167,6 +167,18 @@ PYTHONPATH=. python scripts/deployment/upload_to_huggingface.py \
 
 ---
 
+## Version upgrade (existing filter, new base model)
+
+For retraining an existing filter with a new base model (e.g., Qwen2.5-1.5B → Gemma-3-1B), skip steps 1-6 and start from step 7. The dimensions, oracle prompt, prefilter, and training data carry forward unchanged.
+
+1. Create new version dir: `filters/<name>/v<new>/`
+2. Copy from previous version: `config.yaml`, `prompt-compressed.md`, `prefilter.py`
+3. Update `config.yaml`: version number, `recommended_model`, add any new config sections (e.g., `head_tail` preprocessing if missing)
+4. Follow steps 7-12 above (train, inference code, calibration, probe, deploy, document)
+5. Compare MAE and tier accuracy against previous version baseline
+
+---
+
 ## Shared libraries
 
 These live in `filters/common/` and are used by all filters:
