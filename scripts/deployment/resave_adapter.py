@@ -1,22 +1,21 @@
 """
 Resave LoRA adapter in current PEFT format.
 
-This script loads a LoRA adapter saved with an older PEFT version and resaves it
-in the current PEFT format. This fixes compatibility issues when loading via
-PeftModel.from_pretrained() on systems with newer PEFT versions.
+WARNING: This script is for LOCAL inference compatibility only!
+Do NOT run this before uploading to HuggingFace Hub.
 
-The issue: Older PEFT saved state dict keys as:
-  - .lora_A.weight, .lora_B.weight
-  - base_model.model.score.weight
+PeftModel.from_pretrained() (used by Hub inference) expects the ORIGINAL
+key format (.lora_A.weight, score.weight) and handles remapping internally.
+Resaving to the new format (.lora_A.default.weight) will BREAK Hub loading.
 
-Current PEFT expects:
-  - .lora_A.default.weight, .lora_B.default.weight
-  - base_model.model.score.modules_to_save.default.weight
+See ADR-007 for details on the two loading paths and their format requirements.
 
-Usage:
+If you need Hub-compatible loading, use the original training output directly.
+Local inference.py handles key remapping at load time for either format.
+
+Usage (for LOCAL inference fixes only):
     python scripts/deployment/resave_adapter.py --filter filters/sustainability_technology/v1
     python scripts/deployment/resave_adapter.py --filter filters/uplifting/v5
-    python scripts/deployment/resave_adapter.py --filter filters/investment-risk/v5
 """
 
 import argparse
@@ -179,7 +178,24 @@ def main():
         help="Don't backup original model directory",
     )
 
+    parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="Skip confirmation prompt",
+    )
+
     args = parser.parse_args()
+
+    if not args.yes:
+        print("WARNING: Resaving adapter keys changes the format from OLD (.lora_A.weight)")
+        print("to NEW (.lora_A.default.weight). This BREAKS PeftModel.from_pretrained()")
+        print("used by Hub inference. Only do this if you need local-only inference.")
+        print("See ADR-007 for details.")
+        print()
+        response = input("Continue? [y/N] ").strip().lower()
+        if response != "y":
+            print("Aborted.")
+            exit(0)
 
     success = resave_adapter(args.filter, backup=not args.no_backup)
     exit(0 if success else 1)

@@ -73,9 +73,9 @@ This model scores articles across {training_metadata['num_dimensions']} semantic
 
 - **Base model**: {training_metadata['model_name']}
 - **Parameters**: {training_metadata['num_parameters']:,}
-- **Task**: Multi-dimensional regression (8 outputs)
+- **Task**: Multi-dimensional regression ({training_metadata['num_dimensions']} outputs)
 - **Input**: Article title + content (max {training_metadata['max_length']} tokens)
-- **Output**: 8 continuous scores (0-10 range)
+- **Output**: {training_metadata['num_dimensions']} continuous scores (0-10 range)
 
 ### Training Configuration
 
@@ -165,7 +165,7 @@ If you use this model, please cite:
 @misc{{{filter_config['filter']['name']}_filter_v{filter_config['filter']['version']},
   title={{{filter_config['filter']['name'].title()} Content Filter}},
   author={{Your Name}},
-  year={{2025}},
+  year={{{filter_config['filter'].get('created', '2026')[:4]}}},
   url={{https://huggingface.co/{repo_name}}}
 }}
 ```
@@ -342,6 +342,40 @@ def main():
     except Exception as e:
         print(f"\nError during upload: {e}")
         return
+
+    # Post-upload verification: try loading from Hub
+    print("\n--- Post-upload verification ---")
+    try:
+        from peft import PeftModel
+
+        from filters.common.model_loading import load_base_model_for_seq_cls
+
+        num_dims = training_metadata["num_dimensions"]
+        print(f"Loading base model ({training_metadata['model_name']})...")
+        base_model = load_base_model_for_seq_cls(
+            training_metadata["model_name"],
+            num_labels=num_dims,
+            problem_type="regression",
+        )
+        if base_model.config.pad_token_id is None:
+            from transformers import AutoTokenizer
+
+            tok = AutoTokenizer.from_pretrained(training_metadata["model_name"])
+            if tok.pad_token is None:
+                tok.pad_token = tok.eos_token
+            base_model.config.pad_token_id = tok.pad_token_id
+
+        print(f"Loading adapter from Hub ({args.repo_name})...")
+        model = PeftModel.from_pretrained(
+            base_model, args.repo_name, token=token
+        )
+        model.eval()
+        print("[OK] Hub verification passed - model loads via PeftModel.from_pretrained()")
+    except Exception as e:
+        print(f"[WARN] Hub verification FAILED: {e}")
+        print("The adapter may not load correctly from Hub.")
+        print("Common cause: adapter was resaved with .default keys (see ADR-007).")
+        print("Fix: use the original training output adapter, do NOT run resave_adapter.py before upload.")
 
 
 if __name__ == "__main__":

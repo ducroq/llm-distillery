@@ -2,6 +2,7 @@
 
 ## Now (Current Sprint)
 
+- **Retrain cultural-discovery with Gemma-3-1B** - Same approach as uplifting v6
 - **belonging v1** - Assess existing work and develop
 - **Deploy hybrid inference to NexusMind** - Probes trained and calibrated, need to sync to production
 
@@ -9,15 +10,13 @@
 - **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
 - **nature_recovery v1** - Develop harmonized prompt and prefilter
 - **signs_of_wisdom v1** - Develop harmonized prompt and prefilter
-- **Retrain deployed models with Gemma-3-1B** - Uplifting v5, cultural-discovery v3 (modest MAE gain, faster inference)
 
 ## Later (Backlog)
 
-- **uplifting v6** - BLOCKED on HIGH-tier data collection
-  - 10,495 articles ready but only 8 HIGH-tier (0.08%) — model can't learn upper range
-  - **Before training:** Collect 50-100 HIGH articles from targeted sources (Better India, Upworthy, Reasons to be Cheerful, Solutions Journalism Network)
-  - **Prompt fix queued:** Content-type cap for individual criminal cases
-  - See `filters/uplifting/v6/PLAN.md` for full collection strategy
+- **uplifting v7** - HIGH-tier data collection
+  - v6 has only 8 HIGH articles (0.08%) — model can't learn upper score range
+  - Collect 50-100 HIGH articles from targeted sources (Better India, Upworthy, Reasons to be Cheerful, Solutions Journalism Network)
+  - Apply crime content-type cap to oracle prompt (fix is designed, not yet in prompt-compressed.md)
 - **Active Learning for HIGH-tier articles** - Continue using production filter to find high-scoring candidates
   - Method: Filter production output, screen predicted >= 5.5, oracle score, repeat
   - Target sources: positive_news_the_better_india, positive_news_upworthy, etc.
@@ -35,6 +34,10 @@
 ## Completed
 
 ### Filters
+- [x] **uplifting v6** - Deployed on HuggingFace Hub (private) - 2026-02
+  - Val MAE: 0.673 (v5 was 0.688), Gemma-3-1B, 12% faster inference
+  - Data sculpting: active learning (495 MEDIUM enrichment) + label correction (57 crime articles capped)
+  - See `filters/uplifting/v6/README.md` for full documentation
 - [x] **cultural-discovery v3** - Production ready, deployed HuggingFace Hub - 2026-01
   - Val MAE: 0.77, 7,827 training articles (merged random+screened)
   - 39% improvement on medium-tier, 23% on high-tier vs v1
@@ -88,4 +91,4 @@
 
 ---
 
-*Last updated: 2026-02-18*
+*Last updated: 2026-02-19*

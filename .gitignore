@@ -164,12 +164,12 @@ notebooks/exploratory/
 **/model/vocab.json
 **/model/merges.txt
 
-# Large datasets (sync via FreeFileSync)
+# Large datasets
 *.parquet
 *.feather
 *.arrow
 
-# Checkpoints and training outputs (sync via FreeFileSync)
+# Checkpoints and training outputs
 checkpoints/
 training_outputs/
 model_outputs/
@@ -178,6 +178,11 @@ model_outputs/
 .sync-backups/
 *.ffs_db
 *.ffs_lock
+
+# Deployment artifacts
+model_backup/
+**/model_backup/
+README_MODEL.md
 
 # Claude Code temp files
 tmpclaude-*

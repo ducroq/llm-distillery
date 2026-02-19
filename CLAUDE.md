@@ -4,7 +4,7 @@
 
 **LLM Distillery** is a framework for distilling knowledge from large foundation models (Gemini Flash) into small, domain-specific classifiers that run locally at 100x lower cost and 50x faster inference.
 
-**Core workflow:** Oracle (Gemini Flash) scores articles on dimensions -> Train student model (Qwen2.5-1.5B) -> Deploy locally
+**Core workflow:** Oracle (Gemini Flash) scores articles on dimensions -> Train student model (Gemma-3-1B) -> Deploy locally
 
 ## Project Structure
 
@@ -12,7 +12,7 @@
 llm-distillery/
 ├── CLAUDE.md              # This file (AI context)
 ├── filters/               # Versioned filter packages
-│   ├── uplifting/v5/      # Production ready, deployed
+│   ├── uplifting/v6/      # Production ready, deployed
 │   ├── sustainability_technology/v1-v2/  # v1 deployed, v2 complete
 │   ├── investment-risk/v5/  # Production ready
 │   ├── cultural-discovery/v1-v3/  # v3 production ready, deployed
@@ -44,7 +44,7 @@ llm-distillery/
 ### Production Ready Filters
 | Filter | Version | MAE | Training Data | Status |
 |--------|---------|-----|---------------|--------|
-| **uplifting** | v5 | 0.68 | 10K articles | Deployed (HF Hub, private) |
+| **uplifting** | v6 | 0.67 | 10.5K articles | Deployed (HF Hub, private) |
 | **sustainability_technology** | v1 | 0.69 | - | Deployed (HF Hub) |
 | **sustainability_technology** | v2 | 0.71 | 8K articles | Complete |
 | **investment-risk** | v5 | 0.48 | 10K articles | Production ready |
@@ -65,19 +65,18 @@ llm-distillery/
 - sustainability_policy_effectiveness
 
 ### Backlog
-- **uplifting v6** - Training data ready (10,495 articles), needs training. HIGH tier still underrepresented (8 articles).
 - **Commerce prefilter v2** - v1 needs rework for multilingual embeddings and context size.
 
 ## Key Decisions (see docs/adr/ and docs/decisions/)
 
 - **Oracle outputs scores only** - Tier classification happens in postfilter (flexible thresholds)
 - **Dimensional regression** - Student models learn 0-10 scores, not classifications
-- **Qwen2.5-1.5B** - Chosen for speed/quality balance on consumer hardware
+- **Gemma-3-1B** - Default student model (replaced Qwen2.5-1.5B), better MAE and faster inference
 - **Inline filters** - Fast rules embedded in prompts for model compatibility
 - **Screen+merge for needle-in-haystack filters** (ADR-003) - Random data provides negatives, screened data enriches positives; merge both for best results
 - **Commerce is only universal prefilter** (ADR-004) - Filter-specific noise handled by trained model, not additional prefilters
 - **Active learning for rare tiers** (ADR-005) - Use production filter to find high-scoring candidates, oracle score, add to training data
-- **Fine-tuning beats embedding probes** - Research confirmed fine-tuned Qwen2.5-1.5B significantly outperforms frozen embedding + probe approaches
+- **Fine-tuning beats embedding probes** - Research confirmed fine-tuned models significantly outperform frozen embedding + probe approaches
 
 ## Development Workflow
 
@@ -87,7 +86,7 @@ llm-distillery/
 3. Validation - Oracle calibration + dimension redundancy analysis
 4. Prefilter - Test false negative/positive rates
 5. Training Data - Score 5K+ articles (screen+merge for needle-in-haystack filters)
-6. Training - Fine-tune Qwen2.5-1.5B with LoRA
+6. Training - Fine-tune Gemma-3-1B with LoRA
 7. Testing - Benchmark vs oracle
 8. Documentation - Complete reports
 9. Deployment - Production release (HuggingFace Hub)
@@ -108,6 +107,12 @@ python training/validate_training_data.py --data-dir datasets/training/uplifting
 python evaluation/sustainability_technology/compare_prefilters.py
 ```
 
+## Deployment Gotchas (see ADR-007)
+
+- **Do NOT run `resave_adapter.py` before Hub upload** — it changes key format and breaks `PeftModel.from_pretrained()`. Local `inference.py` handles remapping at load time.
+- **Use `load_base_model_for_seq_cls()`** from `filters/common/model_loading.py` instead of `AutoModelForSequenceClassification` directly. Gemma-3-1B (`gemma3_text` config) is not in the Auto mapping.
+- **Upload script verifies Hub loading** automatically after upload. If it fails, check adapter format.
+
 ## Conventions
 
 - **Filter packages**: `filters/{name}/v{version}/` with config.yaml, prompt-compressed.md, prefilter.py, postfilter.py
@@ -124,4 +129,4 @@ Before making changes, understand:
 
 ---
 
-*Last updated: 2026-02-14*
+*Last updated: 2026-02-19*

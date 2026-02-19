@@ -1,0 +1,29 @@
+{
+  "filter_name": "uplifting",
+  "filter_version": "6.0",
+  "dimension_names": [
+    "human_wellbeing_impact",
+    "social_cohesion_impact",
+    "justice_rights_impact",
+    "evidence_level",
+    "benefit_distribution",
+    "change_durability"
+  ],
+  "num_dimensions": 6,
+  "model_name": "google/gemma-3-1b-pt",
+  "num_parameters": 1012945536,
+  "num_trainable_parameters": 13052672,
+  "epochs": 3,
+  "batch_size": 8,
+  "learning_rate": 2e-05,
+  "max_length": 512,
+  "warmup_steps": 500,
+  "train_examples": 8396,
+  "val_examples": 1049,
+  "best_val_mae": 0.6730571389198303,
+  "include_prompt": false,
+  "training_mode": "knowledge_distillation",
+  "use_head_tail": true,
+  "head_tokens": 256,
+  "tail_tokens": 256
+}

@@ -19,10 +19,13 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 ## Filters
 
 ### Production Ready
-- [x] **uplifting v5** - Deployed on HuggingFace Hub (private)
-  - Val MAE: 0.68, all dimensions < 0.80
-  - 10,000 training articles
-  - **Known issue:** Individual criminal court cases leak into medium tier (no content-type cap for crime news). Fix planned for v6.
+- [x] **uplifting v6** - Deployed on HuggingFace Hub (private)
+  - Val MAE: 0.673 (was 0.688 in v5), 12% faster inference
+  - Gemma-3-1B base model (was Qwen2.5-1.5B)
+  - 10,495 training articles with data sculpting: active learning (495 MEDIUM enrichment) + label correction (57 crime articles capped)
+  - v5 crime news issue fixed via manual label correction in training data
+- [x] **uplifting v5** - Superseded by v6
+  - Val MAE: 0.68, 10,000 training articles
 - [x] **sustainability_technology v1** - Deployed on HuggingFace Hub
   - Test MAE: 0.690
 - [x] **sustainability_technology v2** - Complete (prefilter + model)
@@ -110,4 +113,4 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-02-18*
+*Last updated: 2026-02-19*
