@@ -99,8 +99,35 @@ class BaseUpliftingScorer(ABC):
         # Load head+tail preprocessing config
         self._load_preprocessing_config()
 
+        # Load score calibration (isotonic regression) if available
+        self._load_calibration()
+
         if use_prefilter:
             self._load_prefilter()
+
+    def _get_filter_dir(self) -> Path:
+        """Return the filter directory. Override in subclasses if needed."""
+        return Path(__file__).parent
+
+    def _load_calibration(self):
+        """Load score calibration if calibration.json exists in the filter directory."""
+        self.calibration = None
+        cal_path = self._get_filter_dir() / "calibration.json"
+        if cal_path.exists():
+            from filters.common.score_calibration import load_calibration
+            self.calibration = load_calibration(str(cal_path))
+            if self.calibration:
+                dims_in_file = set(self.calibration.get("dimensions", {}).keys())
+                expected_dims = set(self.DIMENSION_NAMES)
+                missing = expected_dims - dims_in_file
+                if missing:
+                    logger.warning(
+                        f"Calibration file missing dimensions: {missing}. "
+                        f"Those dimensions will not be calibrated."
+                    )
+                logger.info(
+                    f"Score calibration loaded ({self.calibration.get('n_samples', '?')} samples)"
+                )
 
     def _load_prefilter(self):
         """Load the prefilter module."""
@@ -203,6 +230,11 @@ class BaseUpliftingScorer(ABC):
         Returns:
             Updated result dict
         """
+        # Apply calibration if loaded (before clamping)
+        if self.calibration is not None:
+            from filters.common.score_calibration import apply_calibration
+            raw_scores = apply_calibration(raw_scores, self.calibration, self.DIMENSION_NAMES)
+
         # Clamp scores to 0-10 range
         scores = {
             dim: float(max(0.0, min(10.0, raw_scores[i])))

@@ -5,6 +5,7 @@
 - **Retrain cultural-discovery with Gemma-3-1B** - Same approach as uplifting v6
 - **belonging v1** - Assess existing work and develop
 - **Deploy hybrid inference to NexusMind** - Probes trained and calibrated, need to sync to production
+- **Fit calibration for other production filters** - Apply isotonic calibration to investment-risk v5, cultural-discovery v3, sustainability_technology v2
 
 ## Next (Coming Soon)
 - **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
@@ -72,6 +73,14 @@
   - sustainability_technology v2: MAE 0.707, threshold 1.25, 1.2% FN, 1.25x
   - investment-risk v5: MAE 0.497, threshold 1.50, 0.8% FN, 1.07x
   - cultural-discovery v3: MAE 0.609, threshold 1.25, 0.0% FN, 1.52x
+
+### Score Calibration
+- [x] **Isotonic regression calibration** (ADR-008) - 2026-02
+  - Per-dimension isotonic regression corrects MSE score compression at inference time
+  - Shared library: `filters/common/score_calibration.py` (fit, apply, save, load)
+  - CLI tool: `scripts/calibration/fit_calibration.py` (works for any filter)
+  - Applied to uplifting v6: val MAE 0.673 -> 0.653, tier distribution closer to oracle
+  - Backwards compatible: scores pass through unchanged if `calibration.json` absent
 
 ### Filter Harmonization
 - [x] **Harmonize filters: llm-distillery as single source of truth** - 2026-02

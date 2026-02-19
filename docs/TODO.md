@@ -70,6 +70,17 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [ ] **Qwen2.5-7B support** - Larger model option for complex filters
 - [ ] **Training monitoring improvements** - Better logging, early stopping
 
+## Score Calibration (ADR-008)
+
+Post-hoc isotonic regression to correct MSE score compression at inference time.
+
+- [x] **Shared calibration library** - `filters/common/score_calibration.py` (fit, apply, save, load)
+- [x] **CLI fitting tool** - `scripts/calibration/fit_calibration.py` (works for any filter)
+- [x] **Uplifting v6 calibration** - Fitted on 1,049 val articles, val MAE 0.673 -> 0.653 (+3.1%)
+- [x] **Base scorer integration** - `_load_calibration()` + `apply_calibration()` in `_process_raw_scores()`
+- [ ] **Fit calibration for other production filters** - investment-risk v5, cultural-discovery v3, sustainability_technology v2
+  - Requires adding `_load_calibration()` to each filter's base_scorer.py (identical 10-line change)
+
 ## Hybrid Inference Pipeline (ADR-006)
 
 Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).

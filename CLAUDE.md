@@ -77,6 +77,7 @@ llm-distillery/
 - **Commerce is only universal prefilter** (ADR-004) - Filter-specific noise handled by trained model, not additional prefilters
 - **Active learning for rare tiers** (ADR-005) - Use production filter to find high-scoring candidates, oracle score, add to training data
 - **Fine-tuning beats embedding probes** - Research confirmed fine-tuned models significantly outperform frozen embedding + probe approaches
+- **Post-hoc isotonic calibration** (ADR-008) - Per-dimension isotonic regression corrects MSE score compression; stored as `calibration.json`, applied at inference via `numpy.interp`
 
 ## Development Workflow
 
@@ -87,9 +88,10 @@ llm-distillery/
 4. Prefilter - Test false negative/positive rates
 5. Training Data - Score 5K+ articles (screen+merge for needle-in-haystack filters)
 6. Training - Fine-tune Gemma-3-1B with LoRA
-7. Testing - Benchmark vs oracle
-8. Documentation - Complete reports
-9. Deployment - Production release (HuggingFace Hub)
+7. Calibration - Fit isotonic regression on val set (`scripts/calibration/fit_calibration.py`)
+8. Testing - Benchmark vs oracle
+9. Documentation - Complete reports
+10. Deployment - Production release (HuggingFace Hub)
 
 ### Common Commands
 
@@ -105,6 +107,12 @@ python training/validate_training_data.py --data-dir datasets/training/uplifting
 
 # Run prefilter evaluation
 python evaluation/sustainability_technology/compare_prefilters.py
+
+# Fit score calibration (after training)
+PYTHONPATH=. python scripts/calibration/fit_calibration.py \
+    --filter filters/uplifting/v6 \
+    --data-dir datasets/training/uplifting_v6 \
+    --test-data datasets/training/uplifting_v6/test.jsonl
 ```
 
 ## Deployment Gotchas (see ADR-007)
@@ -112,10 +120,11 @@ python evaluation/sustainability_technology/compare_prefilters.py
 - **Do NOT run `resave_adapter.py` before Hub upload** — it changes key format and breaks `PeftModel.from_pretrained()`. Local `inference.py` handles remapping at load time.
 - **Use `load_base_model_for_seq_cls()`** from `filters/common/model_loading.py` instead of `AutoModelForSequenceClassification` directly. Gemma-3-1B (`gemma3_text` config) is not in the Auto mapping.
 - **Upload script verifies Hub loading** automatically after upload. If it fails, check adapter format.
+- **Fit `calibration.json` after training** (ADR-008) — the base scorer auto-loads it if present. Run `scripts/calibration/fit_calibration.py` on the val set. Commit `calibration.json` with the filter package.
 
 ## Conventions
 
-- **Filter packages**: `filters/{name}/v{version}/` with config.yaml, prompt-compressed.md, prefilter.py, postfilter.py
+- **Filter packages**: `filters/{name}/v{version}/` with config.yaml, prompt-compressed.md, prefilter.py, postfilter.py, calibration.json
 - **ADRs**: Short architectural decisions in `docs/adr/`, detailed ones in `docs/decisions/`
 - **Datasets**: Raw -> Scored -> Training splits (80/10/10)
 

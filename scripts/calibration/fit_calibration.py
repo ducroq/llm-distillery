@@ -1,0 +1,430 @@
+"""
+Fit post-hoc score calibration (isotonic regression) for any production filter.
+
+Runs the filter's model on the validation set, collects raw (unclamped)
+predictions, and fits per-dimension isotonic regression from student -> oracle.
+Saves calibration.json to the filter directory.
+
+Usage:
+    PYTHONPATH=. python scripts/calibration/fit_calibration.py \
+        --filter filters/uplifting/v6 \
+        --data-dir datasets/training/uplifting_v6
+
+    # Also evaluate on test set (unbiased):
+    PYTHONPATH=. python scripts/calibration/fit_calibration.py \
+        --filter filters/uplifting/v6 \
+        --data-dir datasets/training/uplifting_v6 \
+        --test-data datasets/training/uplifting_v6/test.jsonl
+"""
+
+import argparse
+import importlib
+import json
+import logging
+import sys
+from pathlib import Path
+
+import numpy as np
+import torch
+import yaml
+from transformers import AutoTokenizer
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
+
+# Suppress the "should TRAIN this model" warning
+logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
+
+
+def load_filter_config(filter_dir: Path) -> dict:
+    """Load config.yaml from a filter directory."""
+    config_path = filter_dir / "config.yaml"
+    if not config_path.exists():
+        raise FileNotFoundError(f"No config.yaml found in {filter_dir}")
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def get_dimension_names(config: dict) -> list:
+    """Extract dimension names from config."""
+    scoring = config.get("scoring", {})
+    dims = scoring.get("dimensions", {})
+    return list(dims.keys())
+
+
+def load_data(path: Path) -> list:
+    """Load a JSONL file."""
+    articles = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                articles.append(json.loads(line))
+    return articles
+
+
+def load_scorer(filter_dir: Path):
+    """
+    Dynamically load the scorer from a filter directory.
+
+    Handles hyphenated filter names (investment-risk, cultural-discovery).
+    """
+    filter_dir = filter_dir.resolve()
+    parts = filter_dir.parts
+
+    # Find the filter name and version from path: filters/<name>/<version>/
+    # Walk backwards to find "filters" marker
+    try:
+        filters_idx = list(parts).index("filters")
+    except ValueError:
+        raise ValueError(f"Expected 'filters' in path: {filter_dir}")
+
+    filter_name = parts[filters_idx + 1]
+    version_dir = parts[filters_idx + 2]
+
+    # Build module path: filters.<name>.<version>.inference
+    module_path = f"filters.{filter_name}.{version_dir}.inference"
+    module = importlib.import_module(module_path)
+
+    # Find the scorer class (convention: *Scorer, not *Hub, not *Hybrid)
+    scorer_cls = None
+    for name in dir(module):
+        obj = getattr(module, name)
+        if (
+            isinstance(obj, type)
+            and name.endswith("Scorer")
+            and "Hub" not in name
+            and "Hybrid" not in name
+            and "Base" not in name
+        ):
+            scorer_cls = obj
+            break
+
+    if scorer_cls is None:
+        raise ValueError(f"No scorer class found in {module_path}")
+
+    logger.info(f"Loading scorer: {scorer_cls.__name__} from {module_path}")
+    return scorer_cls(use_prefilter=False)
+
+
+def run_inference_raw(scorer, articles, dimension_names, batch_size=16):
+    """
+    Run inference and collect raw (unclamped) logits.
+
+    Bypasses _process_raw_scores to get the raw model output before
+    clamping or calibration.
+    """
+    model = scorer.model
+    tokenizer = scorer.tokenizer
+    device = scorer.device
+    max_len = scorer.MAX_TOKEN_LENGTH
+
+    all_raw_scores = []
+
+    # Check if head+tail preprocessing is enabled
+    use_head_tail = getattr(scorer, "use_head_tail", False)
+
+    for batch_start in range(0, len(articles), batch_size):
+        batch = articles[batch_start : batch_start + batch_size]
+
+        texts = [f"{a['title']}\n\n{a['content']}" for a in batch]
+
+        if use_head_tail:
+            from filters.common.text_preprocessing import extract_head_tail
+
+            texts = [
+                extract_head_tail(
+                    t,
+                    tokenizer,
+                    scorer.head_tokens,
+                    scorer.tail_tokens,
+                    scorer.head_tail_separator,
+                )
+                for t in texts
+            ]
+
+        inputs = tokenizer(
+            texts,
+            max_length=max_len,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt",
+        )
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+
+        with torch.no_grad():
+            outputs = model(**inputs)
+            batch_scores = outputs.logits.float().cpu().numpy()
+
+        all_raw_scores.append(batch_scores)
+
+        if (batch_start // batch_size + 1) % 10 == 0:
+            done = min(batch_start + batch_size, len(articles))
+            logger.info(f"  Inference progress: {done}/{len(articles)}")
+
+    return np.concatenate(all_raw_scores, axis=0)
+
+
+def compute_tier_distribution(scores, weights, dimension_names, tier_thresholds):
+    """Compute tier distribution from dimension scores."""
+    tiers = {"high": 0, "medium": 0, "low": 0}
+    for i in range(len(scores)):
+        weighted_avg = sum(
+            float(scores[i, j]) * weights.get(dim, 0)
+            for j, dim in enumerate(dimension_names)
+        )
+        if weighted_avg >= tier_thresholds.get("high", 7.0):
+            tiers["high"] += 1
+        elif weighted_avg >= tier_thresholds.get("medium", 4.0):
+            tiers["medium"] += 1
+        else:
+            tiers["low"] += 1
+    return tiers
+
+
+def print_report(cal_data, oracle_scores, student_scores, dimension_names, weights, tier_thresholds, label=""):
+    """Print calibration report."""
+    dims = cal_data["dimensions"]
+    stats = cal_data["stats"]
+
+    header = f"Calibration Report{f' ({label})' if label else ''}"
+    print(f"\n{'=' * 60}")
+    print(f"  {header}")
+    print(f"{'=' * 60}")
+    print(f"  Filter: {cal_data['filter_name']} v{cal_data['filter_version']}")
+    print(f"  Samples: {cal_data['n_samples']}")
+    print(f"  Overall MAE: {stats['mae_before']:.4f} -> {stats['mae_after']:.4f}")
+    improvement = stats["mae_before"] - stats["mae_after"]
+    pct = (improvement / stats["mae_before"]) * 100 if stats["mae_before"] > 0 else 0
+    print(f"  Improvement: {improvement:+.4f} ({pct:+.1f}%)")
+
+    print(f"\n  {'Dimension':<28} {'MAE Before':>10} {'MAE After':>10} {'Change':>10}")
+    print(f"  {'-' * 58}")
+    for dim in dimension_names:
+        ds = stats["per_dimension"][dim]
+        change = ds["mae_before"] - ds["mae_after"]
+        print(f"  {dim:<28} {ds['mae_before']:>10.4f} {ds['mae_after']:>10.4f} {change:>+10.4f}")
+
+    print(f"\n  Score ranges:")
+    print(f"  {'Dimension':<28} {'Student':>16} {'Calibrated':>16} {'Oracle':>16}")
+    print(f"  {'-' * 76}")
+    for dim in dimension_names:
+        ds = stats["per_dimension"][dim]
+        student_range = f"[{ds['student_min']:.1f}, {ds['student_max']:.1f}]"
+        cal_range = f"[{ds['calibrated_min']:.1f}, {ds['calibrated_max']:.1f}]"
+        oracle_range = f"[{ds['oracle_min']:.1f}, {ds['oracle_max']:.1f}]"
+        print(f"  {dim:<28} {student_range:>16} {cal_range:>16} {oracle_range:>16}")
+
+    # Tier distribution comparison
+    n = oracle_scores.shape[0]
+
+    # Oracle tiers
+    oracle_tiers = compute_tier_distribution(oracle_scores, weights, dimension_names, tier_thresholds)
+
+    # Student tiers (clamped)
+    student_clamped = np.clip(student_scores, 0, 10)
+    student_tiers = compute_tier_distribution(student_clamped, weights, dimension_names, tier_thresholds)
+
+    # Calibrated tiers
+    calibrated = student_scores.copy()
+    for i, dim in enumerate(dimension_names):
+        if dim in dims:
+            bp = dims[dim]
+            calibrated[:, i] = np.interp(student_scores[:, i], bp["x"], bp["y"])
+    calibrated_clamped = np.clip(calibrated, 0, 10)
+    cal_tiers = compute_tier_distribution(calibrated_clamped, weights, dimension_names, tier_thresholds)
+
+    print(f"\n  Tier distribution:")
+    print(f"  {'Tier':<10} {'Oracle':>10} {'Student':>10} {'Calibrated':>10}")
+    print(f"  {'-' * 40}")
+    for tier in ["high", "medium", "low"]:
+        print(f"  {tier:<10} {oracle_tiers[tier]:>10} {student_tiers[tier]:>10} {cal_tiers[tier]:>10}")
+
+    print(f"{'=' * 60}")
+
+
+def evaluate_on_data(cal_data, data_path, scorer, dimension_names, weights, tier_thresholds, label):
+    """Evaluate calibration on an arbitrary data split."""
+    articles = load_data(data_path)
+    logger.info(f"Running inference on {label} set ({len(articles)} articles)...")
+
+    student_scores = run_inference_raw(scorer, articles, dimension_names)
+    oracle_scores = np.array([a["labels"] for a in articles], dtype=np.float32)
+
+    # Compute calibrated MAE
+    dims = cal_data["dimensions"]
+    calibrated = student_scores.copy()
+    for i, dim in enumerate(dimension_names):
+        if dim in dims:
+            bp = dims[dim]
+            calibrated[:, i] = np.interp(student_scores[:, i], bp["x"], bp["y"])
+
+    mae_before = float(np.mean(np.abs(oracle_scores - student_scores)))
+    mae_after = float(np.mean(np.abs(oracle_scores - calibrated)))
+
+    # Build a stats dict for the report
+    per_dim_stats = {}
+    for i, dim in enumerate(dimension_names):
+        oracle_col = oracle_scores[:, i]
+        student_col = student_scores[:, i]
+        cal_col = calibrated[:, i]
+        per_dim_stats[dim] = {
+            "mae_before": round(float(np.mean(np.abs(oracle_col - student_col))), 4),
+            "mae_after": round(float(np.mean(np.abs(oracle_col - cal_col))), 4),
+            "student_min": round(float(student_col.min()), 4),
+            "student_max": round(float(student_col.max()), 4),
+            "student_std": round(float(student_col.std()), 4),
+            "calibrated_min": round(float(cal_col.min()), 4),
+            "calibrated_max": round(float(cal_col.max()), 4),
+            "calibrated_std": round(float(cal_col.std()), 4),
+            "oracle_min": round(float(oracle_col.min()), 4),
+            "oracle_max": round(float(oracle_col.max()), 4),
+            "oracle_std": round(float(oracle_col.std()), 4),
+            "n_breakpoints": len(dims.get(dim, {}).get("x", [])),
+        }
+
+    eval_data = dict(cal_data)
+    eval_data["n_samples"] = len(articles)
+    eval_data["stats"] = {
+        "mae_before": round(mae_before, 4),
+        "mae_after": round(mae_after, 4),
+        "per_dimension": per_dim_stats,
+    }
+
+    print_report(eval_data, oracle_scores, student_scores, dimension_names, weights, tier_thresholds, label=label)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Fit post-hoc score calibration (isotonic regression) for a production filter"
+    )
+    parser.add_argument(
+        "--filter", type=Path, required=True,
+        help="Path to filter directory (e.g., filters/uplifting/v6)",
+    )
+    parser.add_argument(
+        "--data-dir", type=Path, required=True,
+        help="Path to training data directory containing val.jsonl",
+    )
+    parser.add_argument(
+        "--test-data", type=Path, default=None,
+        help="Optional path to test.jsonl for unbiased evaluation",
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=16,
+        help="Batch size for inference (default: 16)",
+    )
+    parser.add_argument(
+        "--output", type=Path, default=None,
+        help="Output path for calibration.json (default: <filter-dir>/calibration.json)",
+    )
+    args = parser.parse_args()
+
+    filter_dir = args.filter.resolve()
+    data_dir = args.data_dir.resolve()
+    val_path = data_dir / "val.jsonl"
+
+    if not val_path.exists():
+        print(f"ERROR: val.jsonl not found at {val_path}", file=sys.stderr)
+        sys.exit(1)
+
+    # Load config
+    config = load_filter_config(filter_dir)
+    dimension_names = get_dimension_names(config)
+    filter_name = config.get("filter", {}).get("name", "")
+    filter_version = config.get("filter", {}).get("version", "")
+
+    # Extract weights and tier thresholds
+    scoring = config.get("scoring", {})
+    weights = {}
+    for dim_name, dim_config in scoring.get("dimensions", {}).items():
+        weights[dim_name] = dim_config.get("weight", 0)
+
+    tier_thresholds = {}
+    tiers_config = scoring.get("tiers", {})
+    for tier_name, tier_config in tiers_config.items():
+        tier_thresholds[tier_name] = tier_config.get("threshold", 0)
+    # Fallback for config formats using tier_thresholds key
+    if not tier_thresholds:
+        for item in scoring.get("tier_thresholds", []):
+            if isinstance(item, dict):
+                tier_thresholds[item["name"]] = item["threshold"]
+
+    logger.info(f"Filter: {filter_name} v{filter_version}")
+    logger.info(f"Dimensions: {dimension_names}")
+
+    # Load scorer
+    logger.info("Loading scorer...")
+    scorer = load_scorer(filter_dir)
+
+    # Load validation data
+    val_articles = load_data(val_path)
+    logger.info(f"Loaded {len(val_articles)} validation articles")
+
+    # Verify dimension alignment
+    sample = val_articles[0]
+    if "dimension_names" in sample:
+        data_dims = sample["dimension_names"]
+        if data_dims != dimension_names:
+            logger.warning(
+                f"Dimension order mismatch!\n"
+                f"  Config: {dimension_names}\n"
+                f"  Data:   {data_dims}\n"
+                f"Using data dimension order."
+            )
+            dimension_names = data_dims
+
+    # Run inference to collect raw scores
+    logger.info("Running inference on validation set...")
+    student_scores = run_inference_raw(
+        scorer, val_articles, dimension_names, batch_size=args.batch_size
+    )
+
+    # Collect oracle labels
+    oracle_scores = np.array(
+        [a["labels"] for a in val_articles], dtype=np.float32
+    )
+
+    if oracle_scores.ndim != 2 or oracle_scores.shape[1] != len(dimension_names):
+        print(
+            f"ERROR: Expected oracle_scores shape (n, {len(dimension_names)}), "
+            f"got {oracle_scores.shape}. Check that val.jsonl matches this filter's dimensions.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    logger.info(f"Student scores shape: {student_scores.shape}")
+    logger.info(f"Oracle scores shape: {oracle_scores.shape}")
+
+    # Fit calibration
+    logger.info("Fitting isotonic regression calibration...")
+    from filters.common.score_calibration import fit_calibration, save_calibration
+
+    cal_data = fit_calibration(
+        oracle_scores=oracle_scores,
+        student_scores=student_scores,
+        dimension_names=dimension_names,
+        filter_name=filter_name,
+        filter_version=filter_version,
+    )
+
+    # Save
+    output_path = args.output or (filter_dir / "calibration.json")
+    save_calibration(cal_data, str(output_path))
+
+    # Print report
+    print_report(cal_data, oracle_scores, student_scores, dimension_names, weights, tier_thresholds, label="val")
+
+    # Optionally evaluate on test set
+    if args.test_data:
+        test_path = args.test_data.resolve()
+        if not test_path.exists():
+            print(f"WARNING: test data not found at {test_path}", file=sys.stderr)
+        else:
+            evaluate_on_data(
+                cal_data, test_path, scorer, dimension_names, weights, tier_thresholds, label="test"
+            )
+
+
+if __name__ == "__main__":
+    main()
