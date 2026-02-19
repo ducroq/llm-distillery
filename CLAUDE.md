@@ -81,17 +81,11 @@ llm-distillery/
 
 ## Development Workflow
 
-### Filter Development (9 phases)
-1. Planning - Define dimensions, tiers, gatekeepers
-2. Architecture - Harmonize prompt structure
-3. Validation - Oracle calibration + dimension redundancy analysis
-4. Prefilter - Test false negative/positive rates
-5. Training Data - Score 5K+ articles (screen+merge for needle-in-haystack filters)
-6. Training - Fine-tune Gemma-3-1B with LoRA
-7. Calibration - Fit isotonic regression on val set (`scripts/calibration/fit_calibration.py`)
-8. Testing - Benchmark vs oracle
-9. Documentation - Complete reports
-10. Deployment - Production release (HuggingFace Hub)
+### Filter Development
+
+See `docs/guides/filter-creation-workflow.md` for full step-by-step using uplifting v6 as template.
+
+Phases: Planning -> Architecture -> Validation -> Prefilter -> Training Data -> Training -> Inference Code -> Calibration -> Hybrid Probe -> Deploy -> Document
 
 ### Common Commands
 

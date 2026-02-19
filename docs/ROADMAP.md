@@ -8,6 +8,8 @@
 - **Fit calibration for other production filters** - Apply isotonic calibration to investment-risk v5, cultural-discovery v3, sustainability_technology v2
 
 ## Next (Coming Soon)
+- **Retrain investment-risk with Gemma-3-1B** - New version (v6) using uplifting v6 as template, includes calibration
+- **Retrain sustainability_technology with Gemma-3-1B** - New version (v3) using uplifting v6 as template, includes calibration
 - **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
 - **nature_recovery v1** - Develop harmonized prompt and prefilter
 - **signs_of_wisdom v1** - Develop harmonized prompt and prefilter
