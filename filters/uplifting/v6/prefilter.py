@@ -346,29 +346,29 @@ class UpliftingPreFilterV6(BasePreFilter):
             if domain_result:
                 return False, domain_result
 
-        # Get text content
+        # Get text content (limit for prefilter efficiency)
         title = article.get('title', '')
-        text = article.get('text', article.get('content', ''))
+        text = article.get('text', article.get('content', ''))[:self.MAX_PREFILTER_CONTENT]
         combined_text = f"{title} {text}".lower()
 
         # Check corporate finance
-        if self._has_pattern(combined_text, self.corporate_finance_regex):
-            if not self._has_pattern(combined_text, self.corporate_finance_exceptions_regex):
+        if self.has_any_pattern(combined_text, self.corporate_finance_regex):
+            if not self.has_any_pattern(combined_text, self.corporate_finance_exceptions_regex):
                 return False, "corporate_finance"
 
         # Check military/security
-        if self._has_pattern(combined_text, self.military_security_regex):
-            if not self._has_pattern(combined_text, self.military_security_exceptions_regex):
+        if self.has_any_pattern(combined_text, self.military_security_regex):
+            if not self.has_any_pattern(combined_text, self.military_security_exceptions_regex):
                 return False, "military_security"
 
         # Check crime/violence
-        if self._has_pattern(combined_text, self.crime_violence_regex):
-            if not self._has_pattern(combined_text, self.crime_violence_exceptions_regex):
+        if self.has_any_pattern(combined_text, self.crime_violence_regex):
+            if not self.has_any_pattern(combined_text, self.crime_violence_exceptions_regex):
                 return False, "crime_violence"
 
         # Check heavy speculation (only block if NO outcome evidence)
-        speculation_count = self._count_matches(combined_text, self.speculation_regex)
-        outcome_count = self._count_matches(combined_text, self.outcome_evidence_regex)
+        speculation_count = self.count_pattern_matches(combined_text, self.speculation_regex)
+        outcome_count = self.count_pattern_matches(combined_text, self.outcome_evidence_regex)
 
         # Block if heavy speculation (3+ matches) with no outcomes
         if speculation_count >= 3 and outcome_count == 0:
@@ -394,17 +394,6 @@ class UpliftingPreFilterV6(BasePreFilter):
                 return "excluded_domain_code"
 
         return ""
-
-    def _has_pattern(self, text: str, patterns: List[re.Pattern]) -> bool:
-        """Check if text matches any pattern in the list."""
-        return any(pattern.search(text) for pattern in patterns)
-
-    def _count_matches(self, text: str, patterns: List[re.Pattern]) -> int:
-        """Count total matches across all patterns."""
-        count = 0
-        for pattern in patterns:
-            count += len(pattern.findall(text))
-        return count
 
     def get_statistics(self) -> Dict:
         """Return filter statistics"""
@@ -435,26 +424,26 @@ class UpliftingPreFilterV6(BasePreFilter):
         - "general"
         """
         title = article.get('title', '')
-        text = article.get('text', article.get('content', ''))
+        text = article.get('text', article.get('content', ''))[:self.MAX_PREFILTER_CONTENT]
         combined_text = f"{title} {text}".lower()
 
         # Check peace process first (exception to military)
-        if self._has_pattern(combined_text, self.military_security_exceptions_regex):
-            if self._has_pattern(combined_text, self.military_security_regex):
+        if self.has_any_pattern(combined_text, self.military_security_exceptions_regex):
+            if self.has_any_pattern(combined_text, self.military_security_regex):
                 return "peace_process"
 
         # Check corporate finance
-        if self._has_pattern(combined_text, self.corporate_finance_regex):
-            if not self._has_pattern(combined_text, self.corporate_finance_exceptions_regex):
+        if self.has_any_pattern(combined_text, self.corporate_finance_regex):
+            if not self.has_any_pattern(combined_text, self.corporate_finance_exceptions_regex):
                 return "corporate_finance"
 
         # Check military/security
-        if self._has_pattern(combined_text, self.military_security_regex):
+        if self.has_any_pattern(combined_text, self.military_security_regex):
             return "military_security"
 
         # Check speculation
-        speculation_count = self._count_matches(combined_text, self.speculation_regex)
-        outcome_count = self._count_matches(combined_text, self.outcome_evidence_regex)
+        speculation_count = self.count_pattern_matches(combined_text, self.speculation_regex)
+        outcome_count = self.count_pattern_matches(combined_text, self.outcome_evidence_regex)
         if speculation_count >= 2 and outcome_count <= 1:
             return "speculation"
 

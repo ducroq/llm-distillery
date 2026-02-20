@@ -23,9 +23,11 @@ import shutil
 from pathlib import Path
 
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from transformers import AutoTokenizer
 from peft import PeftConfig, get_peft_model, PeftModel
 from safetensors.torch import load_file
+
+from filters.common.model_loading import load_base_model_for_seq_cls
 
 
 def get_dimension_count(filter_path: Path) -> int:
@@ -75,9 +77,9 @@ def resave_adapter(filter_path: Path, backup: bool = True) -> bool:
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Load base model
+    # Load base model (handles Gemma3Text config gap)
     print("Loading base model...")
-    base_model = AutoModelForSequenceClassification.from_pretrained(
+    base_model = load_base_model_for_seq_cls(
         base_model_name,
         num_labels=num_labels,
         problem_type="regression",
@@ -142,8 +144,8 @@ def resave_adapter(filter_path: Path, backup: bool = True) -> bool:
     # Verify by trying to load with PeftModel.from_pretrained
     print("\nVerifying: Loading with PeftModel.from_pretrained()...")
     try:
-        # Reload base model
-        base_model_verify = AutoModelForSequenceClassification.from_pretrained(
+        # Reload base model (handles Gemma3Text config gap)
+        base_model_verify = load_base_model_for_seq_cls(
             base_model_name,
             num_labels=num_labels,
             problem_type="regression",

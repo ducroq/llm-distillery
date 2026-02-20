@@ -61,6 +61,12 @@ datasets:
     baseline_mae: 0.68
     articles: 10000
 
+  uplifting_v6:
+    path: datasets/training/uplifting_v6
+    dimensions: 6
+    baseline_mae: 0.673
+    articles: 10495
+
   # Follow-up datasets
   sustainability_technology_v3:
     path: datasets/training/sustainability_technology_v3

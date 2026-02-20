@@ -3,6 +3,13 @@ Model loading utilities for filters.
 
 Handles compatibility issues with AutoModelForSequenceClassification not
 supporting all model types (e.g., Gemma3TextConfig in transformers <4.56).
+
+Note: The Gemma3TextForSequenceClassification class is defined inside
+_build_gemma3_text_classifier() because it needs Gemma3PreTrainedModel as its
+base class for from_pretrained() to work. This means it cannot be pickled for
+multiprocessing. This is acceptable for the current inference-only usage, but
+if training or DataLoader workers ever need this class, it should be refactored
+to use module-level imports with a try/except guard.
 """
 
 import logging
@@ -34,6 +41,7 @@ def load_base_model_for_seq_cls(
         problem_type: "regression" or "single_label_classification"
         torch_dtype: Optional dtype override
         **kwargs: Additional kwargs passed to from_pretrained
+            (device_map, revision, trust_remote_code, etc.)
 
     Returns:
         A model compatible with PEFT wrapping
@@ -52,8 +60,13 @@ def load_base_model_for_seq_cls(
         )
         return model
     except (ValueError, KeyError) as e:
-        if "Gemma3TextConfig" not in str(e) and "gemma3_text" not in str(e):
+        err_str = str(e)
+        if "Gemma3TextConfig" not in err_str and "gemma3_text" not in err_str:
             raise
+        logger.debug(
+            f"AutoModelForSequenceClassification raised {type(e).__name__}: {e}. "
+            "Activating Gemma3Text fallback."
+        )
 
     # Fallback: manually build Gemma3Text sequence classifier
     logger.info(
@@ -70,7 +83,11 @@ def _build_gemma3_text_classifier(model_name, num_labels, load_kwargs):
     from transformers.modeling_outputs import SequenceClassifierOutputWithPast
 
     class Gemma3TextForSequenceClassification(Gemma3PreTrainedModel):
-        """Gemma3 text-only model with a sequence classification head."""
+        """Gemma3 text-only model with a sequence classification head.
+
+        Note: This class is NOT in the HF Auto mapping. Always use
+        load_base_model_for_seq_cls() instead of Auto directly. See ADR-007.
+        """
 
         config_class = Gemma3TextConfig
 
@@ -128,9 +145,17 @@ def _build_gemma3_text_classifier(model_name, num_labels, load_kwargs):
                 last_non_pad_token = -1
             elif input_ids is not None:
                 non_pad_mask = (input_ids != self.config.pad_token_id).to(logits.device, torch.int32)
+                # Guard against all-padding sequences (argmax returns 0 = meaningless)
+                non_pad_counts = non_pad_mask.sum(-1)
+                if (non_pad_counts == 0).any():
+                    logger.warning(
+                        "One or more sequences in the batch are entirely padding. "
+                        "Scores for those items will be meaningless."
+                    )
                 token_indices = torch.arange(input_ids.shape[-1], device=logits.device, dtype=torch.int32)
                 last_non_pad_token = (token_indices * non_pad_mask).argmax(-1)
             else:
+                # inputs_embeds path: cannot determine padding without input_ids
                 last_non_pad_token = -1
 
             pooled_logits = logits[torch.arange(batch_size, device=logits.device), last_non_pad_token]
@@ -161,15 +186,19 @@ def _build_gemma3_text_classifier(model_name, num_labels, load_kwargs):
     config.num_labels = num_labels
     config.problem_type = load_kwargs.get("problem_type", "regression")
 
-    # Build model
+    # Separate dtype and passthrough kwargs from classification kwargs
     dtype_kwargs = {}
     if "torch_dtype" in load_kwargs:
         dtype_kwargs["torch_dtype"] = load_kwargs["torch_dtype"]
+
+    passthrough_keys = {"device_map", "revision", "trust_remote_code", "low_cpu_mem_usage"}
+    extra_kwargs = {k: v for k, v in load_kwargs.items() if k in passthrough_keys}
 
     model = Gemma3TextForSequenceClassification.from_pretrained(
         model_name,
         config=config,
         **dtype_kwargs,
+        **extra_kwargs,
     )
 
     return model

@@ -11,11 +11,6 @@ Stage 2 (~19ms): Full fine-tuned model scoring for articles that pass Stage 1.
 
 Expected speedup: ~68% of articles are LOW and skip Stage 2 -> ~12ms avg vs ~19ms.
 
-Note: The v6 probe needs retraining since the model changed from Qwen2.5-1.5B to
-Gemma-3-1B. The embedding probe itself is model-independent (uses e5-small embeddings),
-but recalibration of the threshold may be needed since the Stage 2 model's score
-distribution may differ slightly.
-
 Usage:
     from filters.uplifting.v6.inference_hybrid import UpliftingHybridScorer
 
@@ -80,11 +75,15 @@ class UpliftingHybridScorer(HybridScorer):
         super().__init__(device=device, use_prefilter=use_prefilter)
 
     def _create_stage2_scorer(self):
-        """Create the existing UpliftingScorer as Stage 2."""
+        """Create the existing UpliftingScorer as Stage 2.
+
+        Prefilter is disabled: HybridScorer handles prefiltering itself,
+        so Stage 2 doesn't need to load or run the prefilter again.
+        """
         return UpliftingScorer(
             model_path=self._model_path,
             device=self.device_str,
-            use_prefilter=self.use_prefilter,
+            use_prefilter=False,
         )
 
     def _get_embedding_stage_config(self) -> Dict:

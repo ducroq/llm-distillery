@@ -111,33 +111,41 @@ This model scores articles across {training_metadata['num_dimensions']} semantic
 
 ## Usage
 
+This is a LoRA adapter. Load via PEFT:
+
 ```python
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer
+from peft import PeftModel
 import torch
 
-# Load model and tokenizer
-model_name = "{repo_name}"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSequenceClassification.from_pretrained(model_name)
+# Load base model + adapter
+repo_name = "{repo_name}"
+base_model_name = "{training_metadata['model_name']}"
 
-# Prepare input
-article = {{
-    "title": "Example Article Title",
-    "content": "Article content here..."
-}}
+# Note: Some base models (e.g., gemma3_text) may not work with
+# AutoModelForSequenceClassification. Use the filter's model_loading helper
+# or load the base model class directly if you get a ValueError.
+from transformers import AutoModelForSequenceClassification
+base_model = AutoModelForSequenceClassification.from_pretrained(
+    base_model_name, num_labels={training_metadata['num_dimensions']}, problem_type="regression"
+)
 
-text = f"{{article['title']}}\\n\\n{{article['content']}}"
+tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
+    base_model.config.pad_token_id = tokenizer.pad_token_id
+
+model = PeftModel.from_pretrained(base_model, repo_name)
+model.eval()
+
+# Score an article
+text = "Article Title\\n\\nArticle content here..."
 inputs = tokenizer(text, return_tensors="pt", max_length=512, truncation=True)
 
-# Get predictions
 with torch.no_grad():
-    outputs = model(**inputs)
-    scores = outputs.logits[0].numpy()
+    scores = model(**inputs).logits[0].numpy()
 
-# Dimension names
 dimensions = {training_metadata['dimension_names']}
-
-# Print scores
 for dim, score in zip(dimensions, scores):
     print(f"{{dim}}: {{score:.2f}}")
 ```
@@ -162,7 +170,7 @@ This model evaluates content based on specific semantic dimensions. Users should
 If you use this model, please cite:
 
 ```bibtex
-@misc{{{filter_config['filter']['name']}_filter_v{filter_config['filter']['version']},
+@misc{{{filter_config['filter']['name']}_filter_v{str(filter_config['filter']['version']).replace('.', '_')},
   title={{{filter_config['filter']['name'].title()} Content Filter}},
   author={{Your Name}},
   year={{{filter_config['filter'].get('created', '2026')[:4]}}},
@@ -236,11 +244,19 @@ def main():
     with open(history_path, "r") as f:
         training_history = json.load(f)
 
+    if not training_history:
+        print(f"Error: training_history.json is empty in {args.filter}")
+        return
+
     with open(metadata_path, "r") as f:
         training_metadata = json.load(f)
 
     # Load filter config
     config_path = args.filter / "config.yaml"
+    if not config_path.exists():
+        print(f"Error: config.yaml not found in {args.filter}")
+        return
+
     with open(config_path, "r") as f:
         filter_config = yaml.safe_load(f)
 
@@ -341,6 +357,8 @@ def main():
 
     except Exception as e:
         print(f"\nError during upload: {e}")
+        print(f"WARNING: Repository may be in a partial state. Re-run this script to complete upload.")
+        print(f"  https://huggingface.co/{args.repo_name}/tree/main")
         return
 
     # Post-upload verification: try loading from Hub

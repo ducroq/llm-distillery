@@ -22,6 +22,7 @@ Usage:
 
 import logging
 import pickle
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -85,7 +86,7 @@ class EmbeddingStage:
 
     # Singleton cache for embedding models (shared across instances)
     _embedding_models: Dict[str, object] = {}
-    _embedding_models_loading: Dict[str, bool] = {}
+    _embedding_models_lock = threading.Lock()
 
     def __init__(
         self,
@@ -124,6 +125,9 @@ class EmbeddingStage:
         # Embedding model loaded lazily on first use
         self._embedder = None
 
+    # Lock for the torch storage monkeypatch during probe loading
+    _probe_load_lock = threading.Lock()
+
     def _load_probe(self):
         """Load the trained MLP probe from pickle."""
         if not self.probe_path.exists():
@@ -134,19 +138,21 @@ class EmbeddingStage:
 
         # Pickle contains torch tensors that may have been saved on CUDA.
         # Temporarily patch torch storage loading to map everything to CPU.
-        import torch.storage as _ts
-        _original_load = _ts._load_from_bytes
+        # Lock required: monkeypatch is global and not thread-safe.
+        with self._probe_load_lock:
+            import torch.storage as _ts
+            _original_load = _ts._load_from_bytes
 
-        def _cpu_load_from_bytes(b):
-            import io
-            return torch.load(io.BytesIO(b), map_location="cpu", weights_only=False)
+            def _cpu_load_from_bytes(b):
+                import io
+                return torch.load(io.BytesIO(b), map_location="cpu", weights_only=False)
 
-        _ts._load_from_bytes = _cpu_load_from_bytes
-        try:
-            with open(self.probe_path, "rb") as f:
-                data = pickle.load(f)
-        finally:
-            _ts._load_from_bytes = _original_load
+            _ts._load_from_bytes = _cpu_load_from_bytes
+            try:
+                with open(self.probe_path, "rb") as f:
+                    data = pickle.load(f)
+            finally:
+                _ts._load_from_bytes = _original_load
 
         # Load scaler
         self.scaler = data["scaler"]
@@ -167,29 +173,34 @@ class EmbeddingStage:
         )
 
     def _ensure_embedder_loaded(self):
-        """Lazy-load the embedding model (singleton per model name)."""
+        """Lazy-load the embedding model (singleton per model name).
+
+        Thread-safe using double-checked locking pattern.
+        """
         if self._embedder is not None:
             return
 
         model_name = self.embedding_model_name
 
+        # Fast path: already loaded by another instance
         if model_name in self._embedding_models:
             self._embedder = self._embedding_models[model_name]
             return
 
-        if self._embedding_models_loading.get(model_name):
-            return
+        # Slow path: need to load, acquire lock
+        with self._embedding_models_lock:
+            # Double-check after acquiring lock
+            if model_name in self._embedding_models:
+                self._embedder = self._embedding_models[model_name]
+                return
 
-        self._embedding_models_loading[model_name] = True
-        try:
             from sentence_transformers import SentenceTransformer
 
             logger.info(f"Loading embedding model: {model_name}")
-            self._embedder = SentenceTransformer(model_name, device=self.device)
-            self._embedding_models[model_name] = self._embedder
+            embedder = SentenceTransformer(model_name, device=self.device)
+            self._embedding_models[model_name] = embedder
+            self._embedder = embedder
             logger.info(f"Embedding model loaded: {model_name}")
-        finally:
-            self._embedding_models_loading[model_name] = False
 
     @staticmethod
     def _prepare_text(article: Dict) -> str:

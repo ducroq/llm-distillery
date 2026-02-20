@@ -197,7 +197,11 @@ class HybridScorer(ABC):
                 stage2_indices.append(j)
                 stage2_articles.append(articles[idx])
             else:
-                # Stage 1 LOW: use probe scores directly
+                # Stage 1 LOW: use probe scores directly.
+                # Note: evidence gatekeeper is NOT applied to Stage 1 results.
+                # This is safe because the Stage 1 threshold (e.g., 2.25) is well
+                # below the gatekeeper cap (3.0), so any article that would be
+                # capped by the gatekeeper already falls below the threshold.
                 result = self.stage2_scorer._create_empty_result()
                 result["passed_prefilter"] = True
                 result["scores"] = screen.scores

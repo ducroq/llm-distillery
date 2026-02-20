@@ -26,6 +26,7 @@ from transformers import AutoTokenizer
 logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
 from peft import PeftModel
 from huggingface_hub import hf_hub_download
+from huggingface_hub.errors import RepositoryNotFoundError, GatedRepoError
 
 from filters.common.model_loading import load_base_model_for_seq_cls
 from filters.uplifting.v6.base_scorer import BaseUpliftingScorer
@@ -84,8 +85,6 @@ class UpliftingScorerHub(BaseUpliftingScorer):
         try:
             logger.info(f"Loading model from HuggingFace Hub: {self.repo_id}")
             logger.info(f"Device: {self.device}")
-            print(f"Loading model from HuggingFace Hub: {self.repo_id}")
-            print(f"Device: {self.device}")
 
             # Download and load adapter config
             config_path = hf_hub_download(
@@ -98,7 +97,7 @@ class UpliftingScorerHub(BaseUpliftingScorer):
                 adapter_config = json.load(f)
 
             base_model_name = adapter_config["base_model_name_or_path"]
-            print(f"Base model: {base_model_name}")
+            logger.info(f"Base model: {base_model_name}")
 
             # Load tokenizer from base model
             self.tokenizer = AutoTokenizer.from_pretrained(
@@ -110,7 +109,6 @@ class UpliftingScorerHub(BaseUpliftingScorer):
 
             # Load base model
             logger.info("Loading base model...")
-            print("Loading base model...")
             base_model = load_base_model_for_seq_cls(
                 base_model_name,
                 num_labels=len(self.DIMENSION_NAMES),
@@ -123,7 +121,6 @@ class UpliftingScorerHub(BaseUpliftingScorer):
 
             # Load PEFT model from hub
             logger.info("Loading LoRA adapter from Hub...")
-            print("Loading LoRA adapter from Hub...")
             self.model = PeftModel.from_pretrained(
                 base_model,
                 self.repo_id,
@@ -134,8 +131,9 @@ class UpliftingScorerHub(BaseUpliftingScorer):
             self.model.eval()
 
             logger.info("Model loaded successfully")
-            print("Model loaded successfully")
 
+        except (RepositoryNotFoundError, GatedRepoError):
+            raise
         except Exception as e:
             raise RuntimeError(
                 f"Failed to load model from Hub ({self.repo_id}): "
@@ -160,10 +158,7 @@ def main():
             pass
 
     print("Loading uplifting scorer from HuggingFace Hub...")
-    scorer = UpliftingScorerHub(
-        repo_id="jeergrvgreg/uplifting-filter-v6",
-        token=token,
-    )
+    scorer = UpliftingScorerHub(token=token)
 
     # Demo article
     demo_article = {

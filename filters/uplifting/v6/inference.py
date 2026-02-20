@@ -98,8 +98,6 @@ class UpliftingScorer(BaseUpliftingScorer):
         try:
             logger.info(f"Loading model from {self.model_path}")
             logger.info(f"Device: {self.device}")
-            print(f"Loading model from {self.model_path}")
-            print(f"Device: {self.device}")
 
             # Load PEFT config
             peft_config = PeftConfig.from_pretrained(str(self.model_path))
@@ -157,7 +155,6 @@ class UpliftingScorer(BaseUpliftingScorer):
             self.model.eval()
 
             logger.info("Model loaded successfully")
-            print("Model loaded successfully")
 
         except FileNotFoundError:
             raise
