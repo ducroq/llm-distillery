@@ -24,6 +24,10 @@ from transformers import (
 )
 from peft import LoraConfig, get_peft_model, TaskType
 
+# Import Gemma-3 compatible model loader
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from filters.common.model_loading import load_base_model_for_seq_cls
+
 
 def set_seed(seed: int):
     """Set random seed for reproducibility across all libraries."""
@@ -162,7 +166,7 @@ class QwenFilterModel(torch.nn.Module):
             # default to bfloat16 which causes dtype mismatches during backward)
             load_kwargs["torch_dtype"] = torch.float32
 
-        self.base_model = AutoModelForSequenceClassification.from_pretrained(
+        self.base_model = load_base_model_for_seq_cls(
             model_name,
             **load_kwargs
         )
@@ -549,16 +553,30 @@ def main():
 
         print(f"  Base model: {base_model_name}")
 
-        # Load base model
-        base_model = AutoModelForSequenceClassification.from_pretrained(
+        # Load base model (handles Gemma-3 compatibility)
+        # Force float32 for training stability (match initial training path)
+        base_model = load_base_model_for_seq_cls(
             base_model_name,
             num_labels=num_dimensions,
-            problem_type="regression"
+            problem_type="regression",
+            torch_dtype=torch.float32,
         )
+
+        # Enable gradient checkpointing to save memory (matches initial training)
+        base_model.gradient_checkpointing_enable()
 
         # Load PEFT adapter (already trained LoRA weights)
         from peft import PeftModel
         model_with_adapter = PeftModel.from_pretrained(base_model, checkpoint_model_path)
+
+        # Enable training on LoRA parameters
+        for name, param in model_with_adapter.named_parameters():
+            if "lora_" in name or "modules_to_save" in name:
+                param.requires_grad = True
+
+        trainable = sum(p.numel() for p in model_with_adapter.parameters() if p.requires_grad)
+        total = sum(p.numel() for p in model_with_adapter.parameters())
+        print(f"  Resumed LoRA: {trainable:,} / {total:,} parameters ({100 * trainable / total:.2f}% trainable)")
 
         # Wrap in simple container to match interface
         class ResumedModel(torch.nn.Module):
@@ -570,9 +588,6 @@ def main():
 
             def forward(self, input_ids, attention_mask, labels=None):
                 return self.base_model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
-
-            def parameters(self):
-                return self.base_model.parameters()
 
         model = ResumedModel(model_with_adapter)
         print(f"  Loaded PEFT model from checkpoint (no double LoRA)")
