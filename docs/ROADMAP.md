@@ -2,10 +2,9 @@
 
 ## Now (Current Sprint)
 
-- **Retrain cultural-discovery with Gemma-3-1B** - Same approach as uplifting v6
 - **belonging v1** - Assess existing work and develop
 - **Deploy hybrid inference to NexusMind** - Probes trained and calibrated, need to sync to production
-- **Fit calibration for other production filters** - Apply isotonic calibration to investment-risk v5, cultural-discovery v3, sustainability_technology v2
+- **Fit calibration for other production filters** - Apply isotonic calibration to investment-risk v5, sustainability_technology v2
 
 ## Next (Coming Soon)
 - **Retrain investment-risk with Gemma-3-1B** - New version (v6) using uplifting v6 as template, includes calibration
@@ -41,10 +40,13 @@
   - Val MAE: 0.673 (v5 was 0.688), Gemma-3-1B, 12% faster inference
   - Data sculpting: active learning (495 MEDIUM enrichment) + label correction (57 crime articles capped)
   - See `filters/uplifting/v6/README.md` for full documentation
-- [x] **cultural-discovery v3** - Production ready, deployed HuggingFace Hub - 2026-01
+- [x] **cultural-discovery v4** - Deployed on HuggingFace Hub (private) - 2026-02
+  - Calibrated test MAE: 0.74 (v3 was 0.77), Gemma-3-1B (was Qwen2.5-1.5B)
+  - 8,029 training articles (v3 7,827 + 202 active learning enrichment)
+  - Hybrid probe: threshold 1.25, 3% FN, 1.51x speedup
+  - All 3 inference paths verified (local, Hub, hybrid)
+- [x] **cultural-discovery v3** - Superseded by v4 - 2026-01
   - Val MAE: 0.77, 7,827 training articles (merged random+screened)
-  - 39% improvement on medium-tier, 23% on high-tier vs v1
-  - Key learning: screen+merge strategy for needle-in-haystack filters
 - [x] **uplifting v5** - Production ready, deployed HuggingFace Hub (private) - 2024-11
   - Val MAE: 0.68, 10K training articles
 - [x] **sustainability_technology v1** - Deployed HuggingFace Hub - 2024-11
@@ -75,6 +77,8 @@
   - sustainability_technology v2: MAE 0.707, threshold 1.25, 1.2% FN, 1.25x
   - investment-risk v5: MAE 0.497, threshold 1.50, 0.8% FN, 1.07x
   - cultural-discovery v3: MAE 0.609, threshold 1.25, 0.0% FN, 1.52x
+- [x] **Cultural-discovery v4 probe** - Retrained for Gemma-3-1B model - 2026-02
+  - Probe MAE 0.87, threshold 1.25, 3% FN, 1.51x speedup
 
 ### Score Calibration
 - [x] **Isotonic regression calibration** (ADR-008) - 2026-02
@@ -82,6 +86,7 @@
   - Shared library: `filters/common/score_calibration.py` (fit, apply, save, load)
   - CLI tool: `scripts/calibration/fit_calibration.py` (works for any filter)
   - Applied to uplifting v6: val MAE 0.673 -> 0.653, tier distribution closer to oracle
+  - Applied to cultural-discovery v4: test MAE 0.77 -> 0.74 (+4.4%)
   - Backwards compatible: scores pass through unchanged if `calibration.json` absent
 
 ### Filter Harmonization
@@ -102,4 +107,4 @@
 
 ---
 
-*Last updated: 2026-02-19*
+*Last updated: 2026-02-20*

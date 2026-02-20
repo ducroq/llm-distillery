@@ -34,10 +34,12 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [x] **investment-risk v5** - Production ready
   - Test MAE: 0.484 (excellent)
   - 10,000 training articles
-- [x] **cultural-discovery v3** - Production ready
-  - Val MAE: 0.77, merged v1+v2 datasets (7,827 articles)
-  - 39% better on medium-tier, 23% better on high-tier vs v1
+- [x] **cultural-discovery v4** - Deployed on HuggingFace Hub (private)
+  - Calibrated test MAE: 0.74 (v3 was 0.77), Gemma-3-1B
+  - 8,029 training articles (v3 7,827 + 202 active learning enrichment)
+  - All 3 inference paths verified (local, Hub, hybrid)
   - Target: ovr.news (Wisdom tab), Busara
+- [x] **cultural-discovery v3** - Superseded by v4
 
 ### In Active Development (priority order)
 - [ ] **belonging v1** - Needs assessment
@@ -67,6 +69,7 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - head+tail (256+256): MAE ~0.69 (deployed to production)
   - See `docs/IDEAS.md` for full results
 - [x] **Stage 2 model comparison** - Gemma-3-1B adopted as default Stage 2. Wins on both uplifting (MAE 0.652 vs 0.660) and cultural-discovery (MAE 0.743 vs 0.755). 8% faster, fewer params. Qwen-0.5B rejected (MAE 0.760)
+- [x] **Gemma-3-1B training support** - `training/train.py` updated with `load_base_model_for_seq_cls()` for both initial and resume paths
 - [ ] **Qwen2.5-7B support** - Larger model option for complex filters
 - [ ] **Training monitoring improvements** - Better logging, early stopping
 
@@ -77,8 +80,9 @@ Post-hoc isotonic regression to correct MSE score compression at inference time.
 - [x] **Shared calibration library** - `filters/common/score_calibration.py` (fit, apply, save, load)
 - [x] **CLI fitting tool** - `scripts/calibration/fit_calibration.py` (works for any filter)
 - [x] **Uplifting v6 calibration** - Fitted on 1,049 val articles, val MAE 0.673 -> 0.653 (+3.1%)
+- [x] **Cultural-discovery v4 calibration** - Fitted on 803 val articles, test MAE 0.77 -> 0.74 (+4.4%)
 - [x] **Base scorer integration** - `_load_calibration()` + `apply_calibration()` in `_process_raw_scores()`
-- [ ] **Fit calibration for other production filters** - investment-risk v5, cultural-discovery v3, sustainability_technology v2
+- [ ] **Fit calibration for other production filters** - investment-risk v5, sustainability_technology v2
   - Requires adding `_load_calibration()` to each filter's base_scorer.py (identical 10-line change)
 
 ## Hybrid Inference Pipeline (ADR-006)
@@ -96,6 +100,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - sustainability_technology v2: probe MAE 0.707, threshold 1.25, 1.2% FN, 1.25x speedup
   - investment-risk v5: probe MAE 0.497, threshold 1.50, 0.8% FN, 1.07x speedup
   - cultural-discovery v3: probe MAE 0.609, threshold 1.25, 0.0% FN, 1.52x speedup
+- [x] **Cultural-discovery v4 probe** - Retrained for Gemma-3-1B, MAE 0.87, threshold 1.25, 3% FN, 1.51x speedup
 
 ## Deployment
 
@@ -124,4 +129,4 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-02-19*
+*Last updated: 2026-02-20*
