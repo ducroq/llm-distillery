@@ -28,9 +28,12 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - Val MAE: 0.68, 10,000 training articles
 - [x] **sustainability_technology v1** - Deployed on HuggingFace Hub
   - Test MAE: 0.690
-- [x] **sustainability_technology v2** - Complete (prefilter + model)
+- [x] **sustainability_technology v3** - Deployed on HuggingFace Hub (private)
+  - Val MAE: 0.734 (calibrated test: 0.724), Gemma-3-1B
+  - 10,608 training articles (v2 10,039 + 569 active learning enrichment)
+  - All 3 inference paths: local, Hub, hybrid (probe MAE 0.91)
+- [x] **sustainability_technology v2** - Superseded by v3
   - Val MAE: 0.71, 7,990 training samples
-  - Prefilter: FP Block 88.2%, TP Pass 89.0%
 - [x] **investment-risk v5** - Production ready
   - Test MAE: 0.484 (excellent)
   - 10,000 training articles
@@ -82,7 +85,8 @@ Post-hoc isotonic regression to correct MSE score compression at inference time.
 - [x] **Uplifting v6 calibration** - Fitted on 1,049 val articles, val MAE 0.673 -> 0.653 (+3.1%)
 - [x] **Cultural-discovery v4 calibration** - Fitted on 803 val articles, test MAE 0.77 -> 0.74 (+4.4%)
 - [x] **Base scorer integration** - `_load_calibration()` + `apply_calibration()` in `_process_raw_scores()`
-- [ ] **Fit calibration for other production filters** - investment-risk v5, sustainability_technology v2
+- [x] **sustainability_technology v3 calibration** - Fitted on 1,061 val articles, test MAE 0.725 -> 0.724
+- [ ] **Fit calibration for other production filters** - investment-risk v5
   - Requires adding `_load_calibration()` to each filter's base_scorer.py (identical 10-line change)
 
 ## Hybrid Inference Pipeline (ADR-006)
@@ -101,6 +105,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - investment-risk v5: probe MAE 0.497, threshold 1.50, 0.8% FN, 1.07x speedup
   - cultural-discovery v3: probe MAE 0.609, threshold 1.25, 0.0% FN, 1.52x speedup
 - [x] **Cultural-discovery v4 probe** - Retrained for Gemma-3-1B, MAE 0.87, threshold 1.25, 3% FN, 1.51x speedup
+- [x] **Sustainability_technology v3 probe** - Trained for Gemma-3-1B, MAE 0.91, threshold 1.25 (to be calibrated)
 
 ## Deployment
 
@@ -129,4 +134,4 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-21*

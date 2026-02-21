@@ -45,10 +45,9 @@ llm-distillery/
 | Filter | Version | MAE | Training Data | Status |
 |--------|---------|-----|---------------|--------|
 | **uplifting** | v6 | 0.67 | 10.5K articles | Deployed (HF Hub, private) |
-| **sustainability_technology** | v1 | 0.69 | - | Deployed (HF Hub) |
-| **sustainability_technology** | v2 | 0.71 | 8K articles | Complete |
+| **sustainability_technology** | v3 | 0.72 | 10.6K articles | Deployed (HF Hub, private) |
 | **investment-risk** | v5 | 0.48 | 10K articles | Production ready |
-| **cultural-discovery** | v3 | 0.77 | 7,827 articles | Deployed (HF Hub) |
+| **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
 
 ### In Development
 | Filter | Version | Status | Blocker |

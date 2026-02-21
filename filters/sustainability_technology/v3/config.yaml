@@ -1,0 +1,83 @@
+filter:
+  name: sustainability_technology
+  version: "3.0"
+  description: "LCSA-based climate tech assessment with Gemma-3-1B and isotonic calibration"
+  framework: "Life Cycle Sustainability Assessment (LCSA)"
+
+scoring:
+  dimensions:
+    technology_readiness_level:
+      weight: 0.15
+      description: "Deployment stage (TRL 1-9)"
+
+    technical_performance:
+      weight: 0.15
+      description: "Real-world reliability and efficiency"
+
+    economic_competitiveness:
+      weight: 0.20
+      description: "Life Cycle Cost (LCC) competitiveness"
+
+    life_cycle_environmental_impact:
+      weight: 0.30
+      description: "Holistic environmental assessment"
+
+    social_equity_impact:
+      weight: 0.10
+      description: "Jobs, ethics, equitable access"
+
+    governance_systemic_impact:
+      weight: 0.10
+      description: "Systemic disruption potential"
+
+  tier_thresholds:
+    high_sustainability:
+      threshold: 7.0
+      description: "Mass deployed, proven sustainable, competitive"
+      translate: true
+
+    medium_high:
+      threshold: 5.0
+      description: "Commercial deployment, good sustainability"
+      translate: true
+
+    medium:
+      threshold: 3.0
+      description: "Pilot/early commercial, mixed profile"
+      translate: true
+
+    low:
+      threshold: 0.0
+      description: "Lab stage or poor sustainability performance"
+      translate: false
+
+  gatekeepers:
+    - dimension: technology_readiness_level
+      min_threshold: 3.0
+      caps_overall_at: 2.9
+      reason: "Lab-only technologies cannot achieve high overall sustainability scores"
+
+oracle:
+  recommended: gemini-flash
+
+training:
+  target_samples: 8000
+  recommended_model: "google/gemma-3-1b-pt"
+  dataset: "datasets/training/sustainability_technology_v3"
+
+preprocessing:
+  # Head+tail extraction: keeps first N + last M tokens, discards middle
+  # Enable when deploying model trained with --use-head-tail flag
+  head_tail:
+    enabled: true  # Head+tail trained model deployed
+    head_tokens: 256
+    tail_tokens: 256
+    separator: " [...] "
+
+hybrid_inference:
+  stage1:
+    embedding_model: "intfloat/multilingual-e5-small"
+    probe_path: "probe/embedding_probe_e5small.pkl"
+    threshold: 1.25  # Will be recalibrated after training
+  stage2:
+    model: "current"  # Uses existing SustainabilityTechnologyScorer
