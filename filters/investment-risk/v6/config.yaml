@@ -1,0 +1,174 @@
+# Investment Risk Filter Configuration v6.0
+# Gemma-3-1B migration + simplified tier system
+
+filter:
+  name: investment-risk
+  version: "6.0"
+  created: "2026-02-21"
+  description: "Capital preservation filter with orthogonal dimensions"
+  philosophy: "You can't predict crashes, but you can prepare for them."
+  changelog_v6: |
+    Changes from v5:
+    - Retrained with Gemma-3-1B (was Qwen2.5-1.5B): better MAE, faster inference
+    - Simplified tier system: high/medium_high/medium/low (was RED/YELLOW/GREEN/BLUE/NOISE)
+    - Harmonized code with v6 template (calibration, model_loading, error handling)
+    - Same training data (10K articles from v5)
+
+# Scoring dimensions and weights (6 orthogonal dimensions, unchanged from v5)
+scoring:
+  dimensions:
+    # RISK CHARACTERIZATION (What Kind of Risk)
+
+    risk_domain_type:
+      weight: 0.20
+      description: "WHERE in the financial system is the risk?"
+      scale:
+        0-2: "Not financial (gaming, entertainment, tech products, individual stocks)"
+        3-4: "Single sector/industry (retail, tech, healthcare specific)"
+        5-6: "Asset class level (equities broadly, bonds, real estate sector)"
+        7-8: "Multi-asset (cross-market, multiple sectors, currencies + commodities)"
+        9-10: "Core financial system (banks, credit markets, central banks, systemic)"
+
+    severity_magnitude:
+      weight: 0.25
+      description: "HOW BAD could this be if it materializes?"
+      scale:
+        0-2: "Negligible (routine fluctuation, normal market volatility)"
+        3-4: "Minor (5-10% drawdown, single sector correction)"
+        5-6: "Moderate (10-20% drawdown, multi-sector impact)"
+        7-8: "Severe (20-40% drawdown, bear market conditions)"
+        9-10: "Catastrophic (>40% crash, 2008-level, systemic failure)"
+
+    materialization_timeline:
+      weight: 0.15
+      description: "WHEN would the impact materialize?"
+      scale:
+        0-2: "Already priced in / Historical analysis / 5+ years out"
+        3-4: "Long-term (3-5 years)"
+        5-6: "Medium-term (1-3 years)"
+        7-8: "Short-term (3-12 months)"
+        9-10: "Immediate (0-3 months, unfolding now, already happening)"
+
+    # ASSESSMENT DIMENSIONS (How Real/Actionable)
+
+    evidence_quality:
+      weight: 0.15
+      description: "HOW well documented is this risk signal?"
+      gatekeeper: true
+      gatekeeper_threshold: 4
+      gatekeeper_rule: "Evidence < 4 caps overall signal at 2.9 (speculation penalty)"
+      scale:
+        0-2: "Pure speculation (FOMO, clickbait, 'could/might/may', no data)"
+        3-4: "Opinion with limited data (blog posts, newsletters)"
+        5-6: "Financial journalism with data (WSJ, Bloomberg, FT analysis)"
+        7-8: "Official sources, hard data (central bank, government stats)"
+        9-10: "Exceptional rigor (academic studies, IMF/BIS reports, verified data)"
+
+    impact_breadth:
+      weight: 0.15
+      description: "WHO is affected by this risk?"
+      scale:
+        0-2: "Individual/single company (stock tips, single stock analysis)"
+        3-4: "Single sector/industry (gaming, entertainment, specific niche)"
+        5-6: "Multiple sectors or regional (tech + financials, European markets)"
+        7-8: "National economy, broad market (US equities, all sectors)"
+        9-10: "Global, systemic, all investors (financial system, worldwide)"
+
+    retail_actionability:
+      weight: 0.10
+      description: "CAN a hobby investor (10K-500K) respond meaningfully?"
+      scale:
+        0-2: "Not actionable (derivatives, institutional only, academic, stock picking)"
+        3-4: "Limited (complex strategies, timing-dependent, expert knowledge)"
+        5-6: "Moderate (requires analysis, some complexity, careful execution)"
+        7-8: "Good (simple rebalancing, clear direction, ETF-level)"
+        9-10: "High (immediate simple action, clear triggers, raise cash/buy index)"
+
+  # Simplified tier classification (weighted_avg thresholds)
+  tiers:
+    high:
+      threshold: 7.0
+      description: "Critical risk signal - act now to reduce exposure"
+
+    medium_high:
+      threshold: 5.0
+      description: "Elevated risk - monitor closely and prepare defense"
+
+    medium:
+      threshold: 3.0
+      description: "Moderate signal - worth tracking, limited immediate action"
+
+    low:
+      threshold: 0.0
+      description: "Low signal - noise, not investment-relevant, or already priced in"
+
+  gatekeepers:
+    evidence_gatekeeper:
+      dimension: evidence_quality
+      threshold: 4
+      max_score: 2.9
+      reason: "Speculation without documented evidence cannot drive portfolio decisions"
+
+  # Content type flags (applied during scoring)
+  content_flags:
+    stock_picking:
+      description: "Individual stock recommendations"
+      cap_all_dimensions: 2
+
+    fomo_speculation:
+      description: "FOMO, meme stocks, crypto pumping"
+      cap_all_dimensions: 2
+
+    affiliate_marketing:
+      description: "Sponsored content, affiliate links"
+      cap_all_dimensions: 2
+
+    clickbait:
+      description: "Sensationalist without substance"
+      cap_evidence: 2
+
+    academic_research:
+      description: "Purely theoretical, not actionable"
+      cap_actionability: 2
+      note: "Can still have high evidence quality"
+
+# Prefilter configuration (unchanged from v5)
+prefilter:
+  version: "5.0"
+  target_pass_rate: "40-70%"
+  categories:
+    - fomo_speculation
+    - stock_picking
+    - affiliate_marketing
+    - clickbait
+    - non_financial
+
+# Ground truth generation
+ground_truth:
+  oracle_model: "gemini-flash"
+  target_labeled: 10000
+  sample_strategy: "random + screen+merge"
+
+# Training configuration
+training:
+  recommended_model: "google/gemma-3-1b-pt"
+  lora_rank: 16
+  target_mae: 0.48
+  correlation_validation: true
+
+# Hybrid inference (two-stage pipeline)
+hybrid_inference:
+  stage1:
+    embedding_model: "intfloat/multilingual-e5-small"
+    probe_path: "probe/embedding_probe_e5small.pkl"
+    threshold: 1.50  # Will recalibrate after training
+  stage2:
+    model: "current"
+
+# Deployment
+deployment:
+  pipeline:
+    - prefilter
+    - model
+    - postfilter
+  expected_latency_ms: 20

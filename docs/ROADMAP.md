@@ -4,10 +4,8 @@
 
 - **belonging v1** - Assess existing work and develop
 - **Deploy hybrid inference to NexusMind** - Probes trained and calibrated, need to sync to production
-- **Fit calibration for other production filters** - Apply isotonic calibration to investment-risk v5
 
 ## Next (Coming Soon)
-- **Retrain investment-risk with Gemma-3-1B** - New version (v6) using uplifting v6 as template, includes calibration
 - **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
 - **nature_recovery v1** - Develop harmonized prompt and prefilter
 - **signs_of_wisdom v1** - Develop harmonized prompt and prefilter
@@ -58,7 +56,13 @@
 - [x] **sustainability_technology v2** - Complete (prefilter + model) - 2025-01
   - Val MAE: 0.71, 7,990 training samples
   - Prefilter: FP Block 88.2%, TP Pass 89.0%
-- [x] **investment-risk v5** - Production ready - 2024-12
+- [x] **investment-risk v6** - Deployed on HuggingFace Hub (private) - 2026-02
+  - Val MAE: 0.497 (calibrated: 0.465), Gemma-3-1B (was Qwen2.5-1.5B in v5)
+  - 10,448 training articles (v5 10,198 + 250 active learning enrichment)
+  - Tier simplification: RED/YELLOW/GREEN/BLUE/NOISE -> high/medium_high/medium/low
+  - Hybrid probe: MAE 0.557, threshold 1.50
+  - All 3 inference paths: local, Hub, hybrid
+- [x] **investment-risk v5** - Superseded by v6 - 2024-12
   - Test MAE: 0.484, 10K training articles
 
 ### Research
@@ -85,6 +89,8 @@
   - Probe MAE 0.87, threshold 1.25, 3% FN, 1.51x speedup
 - [x] **Sustainability_technology v3 probe** - Trained for Gemma-3-1B - 2026-02
   - Probe MAE 0.91, threshold 1.25 (to be calibrated with production data)
+- [x] **Investment-risk v6 probe** - Trained for Gemma-3-1B - 2026-02
+  - Probe MAE 0.557, threshold 1.50
 
 ### Score Calibration
 - [x] **Isotonic regression calibration** (ADR-008) - 2026-02
@@ -94,6 +100,7 @@
   - Applied to uplifting v6: val MAE 0.673 -> 0.653, tier distribution closer to oracle
   - Applied to cultural-discovery v4: test MAE 0.77 -> 0.74 (+4.4%)
   - Applied to sustainability_technology v3: test MAE 0.725 -> 0.724 (+0.2%)
+  - Applied to investment-risk v6: val MAE 0.497 -> 0.465 (+6.5%)
   - Backwards compatible: scores pass through unchanged if `calibration.json` absent
 
 ### Filter Harmonization

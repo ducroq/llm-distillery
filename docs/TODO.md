@@ -34,7 +34,12 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - All 3 inference paths: local, Hub, hybrid (probe MAE 0.91)
 - [x] **sustainability_technology v2** - Superseded by v3
   - Val MAE: 0.71, 7,990 training samples
-- [x] **investment-risk v5** - Production ready
+- [x] **investment-risk v6** - Deployed on HuggingFace Hub (private)
+  - Val MAE: 0.497 (calibrated: 0.465), Gemma-3-1B
+  - 10,448 training articles (v5 10,198 + 250 active learning enrichment)
+  - Tier simplification: RED/YELLOW/GREEN/BLUE/NOISE -> high/medium_high/medium/low
+  - All 3 inference paths: local, Hub, hybrid (probe MAE 0.557)
+- [x] **investment-risk v5** - Superseded by v6
   - Test MAE: 0.484 (excellent)
   - 10,000 training articles
 - [x] **cultural-discovery v4** - Deployed on HuggingFace Hub (private)
@@ -86,8 +91,7 @@ Post-hoc isotonic regression to correct MSE score compression at inference time.
 - [x] **Cultural-discovery v4 calibration** - Fitted on 803 val articles, test MAE 0.77 -> 0.74 (+4.4%)
 - [x] **Base scorer integration** - `_load_calibration()` + `apply_calibration()` in `_process_raw_scores()`
 - [x] **sustainability_technology v3 calibration** - Fitted on 1,061 val articles, test MAE 0.725 -> 0.724
-- [ ] **Fit calibration for other production filters** - investment-risk v5
-  - Requires adding `_load_calibration()` to each filter's base_scorer.py (identical 10-line change)
+- [x] **investment-risk v6 calibration** - Fitted on 1,045 val articles, val MAE 0.497 -> 0.465 (+6.5%)
 
 ## Hybrid Inference Pipeline (ADR-006)
 
@@ -106,6 +110,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - cultural-discovery v3: probe MAE 0.609, threshold 1.25, 0.0% FN, 1.52x speedup
 - [x] **Cultural-discovery v4 probe** - Retrained for Gemma-3-1B, MAE 0.87, threshold 1.25, 3% FN, 1.51x speedup
 - [x] **Sustainability_technology v3 probe** - Trained for Gemma-3-1B, MAE 0.91, threshold 1.25 (to be calibrated)
+- [x] **Investment-risk v6 probe** - Trained for Gemma-3-1B, MAE 0.557, threshold 1.50
 
 ## Deployment
 

@@ -46,7 +46,7 @@ llm-distillery/
 |--------|---------|-----|---------------|--------|
 | **uplifting** | v6 | 0.67 | 10.5K articles | Deployed (HF Hub, private) |
 | **sustainability_technology** | v3 | 0.72 | 10.6K articles | Deployed (HF Hub, private) |
-| **investment-risk** | v5 | 0.48 | 10K articles | Production ready |
+| **investment-risk** | v6 | 0.47 | 10.4K articles | Deployed (HF Hub, private) |
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
 
 ### In Development
