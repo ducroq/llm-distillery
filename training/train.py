@@ -1,7 +1,8 @@
 """
-Training script for LLM Distillery using Qwen 2.5.
+Training script for LLM Distillery.
 
-Fine-tunes Qwen 2.5 models for multi-dimensional regression on filter-specific datasets.
+Fine-tunes language models (default: Gemma-3-1B) for multi-dimensional regression
+on filter-specific datasets.
 """
 
 import argparse
@@ -128,9 +129,9 @@ class FilterDataset(Dataset):
         }
 
 
-class QwenFilterModel(torch.nn.Module):
+class FilterModel(torch.nn.Module):
     """
-    Qwen 2.5 model adapted for multi-dimensional regression.
+    Language model adapted for multi-dimensional regression.
 
     Uses the base model with a custom regression head that outputs
     multiple continuous scores (one per dimension).
@@ -139,7 +140,7 @@ class QwenFilterModel(torch.nn.Module):
     def __init__(self, model_name: str, num_dimensions: int, use_gradient_checkpointing: bool = True, use_fp16: bool = False, use_quantization: bool = False):
         super().__init__()
 
-        # Load base Qwen model (we'll use the sequence classification variant)
+        # Load base model for sequence classification
         # Note: AutoModelForSequenceClassification expects num_labels, but we'll
         # use it for regression by setting num_labels = num_dimensions
         load_kwargs = {
@@ -350,7 +351,7 @@ def evaluate(model, dataloader, device, dimension_names: List[str]):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train filter model using Qwen 2.5")
+    parser = argparse.ArgumentParser(description="Train filter model")
     parser.add_argument(
         "--filter",
         type=Path,
@@ -372,8 +373,8 @@ def main():
     parser.add_argument(
         "--model-name",
         type=str,
-        default="Qwen/Qwen2.5-1.5B",
-        help="Qwen model name (default: Qwen/Qwen2.5-1.5B, use 1.5B for 16GB GPU)",
+        default="google/gemma-3-1b-pt",
+        help="Base model name (default: google/gemma-3-1b-pt)",
     )
     parser.add_argument(
         "--epochs",
@@ -606,7 +607,7 @@ def main():
     else:
         print(f"\nInitializing model: {args.model_name}")
         # Use FP32 by default for stability (FP16 causes NaN issues)
-        model = QwenFilterModel(args.model_name, num_dimensions, use_gradient_checkpointing=True, use_fp16=False)
+        model = FilterModel(args.model_name, num_dimensions, use_gradient_checkpointing=True, use_fp16=False)
         training_history = []
         best_val_mae = float("inf")
 

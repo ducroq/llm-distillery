@@ -20,15 +20,8 @@ from pathlib import Path
 from typing import Optional
 
 import torch
-from transformers import AutoTokenizer
 
-# Suppress the "should TRAIN this model" warning
-logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
-from peft import PeftModel
-from huggingface_hub import hf_hub_download
-from huggingface_hub.errors import RepositoryNotFoundError, GatedRepoError
-
-from filters.common.model_loading import load_base_model_for_seq_cls
+from filters.common.model_loading import load_lora_hub
 from filters.uplifting.v6.base_scorer import BaseUpliftingScorer
 
 logger = logging.getLogger(__name__)
@@ -75,70 +68,11 @@ class UpliftingScorerHub(BaseUpliftingScorer):
         self._load_model()
 
     def _load_model(self):
-        """
-        Load model from HuggingFace Hub.
-
-        Raises:
-            RuntimeError: If model loading fails
-            RepositoryNotFoundError: If repo doesn't exist
-        """
-        try:
-            logger.info(f"Loading model from HuggingFace Hub: {self.repo_id}")
-            logger.info(f"Device: {self.device}")
-
-            # Download and load adapter config
-            config_path = hf_hub_download(
-                repo_id=self.repo_id,
-                filename="adapter_config.json",
-                token=self.token,
-            )
-
-            with open(config_path, "r") as f:
-                adapter_config = json.load(f)
-
-            base_model_name = adapter_config["base_model_name_or_path"]
-            logger.info(f"Base model: {base_model_name}")
-
-            # Load tokenizer from base model
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                base_model_name,
-                token=self.token,
-            )
-            if self.tokenizer.pad_token is None:
-                self.tokenizer.pad_token = self.tokenizer.eos_token
-
-            # Load base model
-            logger.info("Loading base model...")
-            base_model = load_base_model_for_seq_cls(
-                base_model_name,
-                num_labels=len(self.DIMENSION_NAMES),
-                problem_type="regression",
-                torch_dtype=self.torch_dtype,
-            )
-
-            if base_model.config.pad_token_id is None:
-                base_model.config.pad_token_id = self.tokenizer.pad_token_id
-
-            # Load PEFT model from hub
-            logger.info("Loading LoRA adapter from Hub...")
-            self.model = PeftModel.from_pretrained(
-                base_model,
-                self.repo_id,
-                token=self.token,
-            )
-
-            self.model = self.model.to(self.device)
-            self.model.eval()
-
-            logger.info("Model loaded successfully")
-
-        except (RepositoryNotFoundError, GatedRepoError):
-            raise
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to load model from Hub ({self.repo_id}): "
-                f"{type(e).__name__}: {e}"
-            )
+        """Load model from HuggingFace Hub."""
+        self.model, self.tokenizer = load_lora_hub(
+            self.repo_id, len(self.DIMENSION_NAMES), self.device,
+            token=self.token, torch_dtype=self.torch_dtype,
+        )
 
 
 def main():

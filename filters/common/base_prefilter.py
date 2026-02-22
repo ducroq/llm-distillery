@@ -207,24 +207,6 @@ class BasePreFilter:
         return any(kw in text for kw in keywords)
 
     @staticmethod
-    def sanitize_unicode(text: str) -> str:
-        """
-        Remove surrogate characters and other invalid Unicode sequences.
-
-        DEPRECATED: Use sanitize_text_comprehensive() for better cleaning.
-        This method is kept for backward compatibility.
-
-        Args:
-            text: String that may contain invalid Unicode
-
-        Returns:
-            Cleaned string with invalid Unicode removed
-        """
-        if not isinstance(text, str):
-            return str(text)
-        return text.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore')
-
-    @staticmethod
     def sanitize_text_comprehensive(text: str) -> str:
         """
         Comprehensively clean text for LLM processing.

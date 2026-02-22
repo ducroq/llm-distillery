@@ -78,6 +78,17 @@ def load_filter_package(filter_path: Path) -> Tuple[Optional[object], Path, Dict
     """
     print(f"Loading filter package: {filter_path}")
 
+    # Validate filter path resolves inside filters/ directory
+    resolved = filter_path.resolve()
+    project_root = Path(__file__).resolve().parent.parent
+    filters_root = project_root / "filters"
+    try:
+        resolved.relative_to(filters_root.resolve())
+    except ValueError:
+        raise ValueError(
+            f"Filter path must be inside filters/ directory, got: {filter_path}"
+        )
+
     # Load prefilter
     prefilter_module_path = filter_path / "prefilter.py"
     prefilter = None
@@ -966,7 +977,8 @@ class GenericBatchScorer:
         error_log_dir.mkdir(exist_ok=True)
 
         timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-        log_file = error_log_dir / f'{article_id}_attempt{attempt}_{timestamp}.txt'
+        safe_id = re.sub(r'[^\w\-]', '_', str(article_id))[:64]
+        log_file = error_log_dir / f'{safe_id}_attempt{attempt}_{timestamp}.txt'
 
         with open(log_file, 'w', encoding='utf-8') as f:
             f.write(f"Article ID: {article_id}\n")

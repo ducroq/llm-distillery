@@ -24,16 +24,16 @@ class TestFilterPackageLoading:
 
     @pytest.fixture
     def uplifting_filter_path(self, project_root):
-        """Path to uplifting v5 filter."""
-        return project_root / "filters" / "uplifting" / "v5"
+        """Path to uplifting v6 filter."""
+        return project_root / "filters" / "uplifting" / "v6"
 
     @pytest.fixture
     def sustainability_filter_path(self, project_root):
-        """Path to sustainability_technology v1 filter."""
-        return project_root / "filters" / "sustainability_technology" / "v1"
+        """Path to sustainability_technology v3 filter."""
+        return project_root / "filters" / "sustainability_technology" / "v3"
 
     def test_load_uplifting_filter(self, uplifting_filter_path):
-        """Should load uplifting v5 filter package."""
+        """Should load uplifting v6 filter package."""
         if not uplifting_filter_path.exists():
             pytest.skip("Uplifting v5 filter not available")
 
@@ -51,7 +51,7 @@ class TestFilterPackageLoading:
         assert prompt_path.suffix == ".md"
 
     def test_load_sustainability_filter(self, sustainability_filter_path):
-        """Should load sustainability_technology v1 filter package."""
+        """Should load sustainability_technology v3 filter package."""
         if not sustainability_filter_path.exists():
             pytest.skip("Sustainability technology v1 filter not available")
 
@@ -126,10 +126,10 @@ class TestPrefilterValidation:
     def uplifting_prefilter(self):
         """Load uplifting prefilter if available."""
         project_root = Path(__file__).parent.parent.parent
-        filter_path = project_root / "filters" / "uplifting" / "v5"
+        filter_path = project_root / "filters" / "uplifting" / "v6"
 
         if not filter_path.exists():
-            pytest.skip("Uplifting v5 filter not available")
+            pytest.skip("Uplifting v6 filter not available")
 
         from ground_truth.batch_scorer import load_filter_package
         prefilter, _, _ = load_filter_package(filter_path)

@@ -122,11 +122,11 @@ import torch
 repo_name = "{repo_name}"
 base_model_name = "{training_metadata['model_name']}"
 
-# Note: Some base models (e.g., gemma3_text) may not work with
-# AutoModelForSequenceClassification. Use the filter's model_loading helper
-# or load the base model class directly if you get a ValueError.
-from transformers import AutoModelForSequenceClassification
-base_model = AutoModelForSequenceClassification.from_pretrained(
+# IMPORTANT: AutoModelForSequenceClassification does NOT work for Gemma-3
+# (gemma3_text config type is not in the Auto mapping).
+# Use the project's model_loading helper instead:
+from filters.common.model_loading import load_base_model_for_seq_cls
+base_model = load_base_model_for_seq_cls(
     base_model_name, num_labels={training_metadata['num_dimensions']}, problem_type="regression"
 )
 

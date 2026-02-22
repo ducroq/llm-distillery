@@ -22,14 +22,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from transformers import AutoTokenizer
-
-# Suppress the "should TRAIN this model" warning - we load trained weights from LoRA adapter
-logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
-from peft import PeftConfig, get_peft_model
-from safetensors.torch import load_file
-
-from filters.common.model_loading import load_base_model_for_seq_cls
+from filters.common.model_loading import load_lora_local
 
 # Import base class (handle hyphen in path via importlib)
 import importlib.util
@@ -82,92 +75,10 @@ class InvestmentRiskScorer(BaseInvestmentRiskScorer):
         self._load_model()
 
     def _load_model(self):
-        """
-        Load the trained LoRA model from local files.
-
-        Raises:
-            FileNotFoundError: If model files not found
-            RuntimeError: If model loading fails
-        """
-        # Validate model path exists
-        if not self.model_path.exists():
-            raise FileNotFoundError(
-                f"Model directory not found: {self.model_path}\n"
-                f"Please ensure the model is trained and saved."
-            )
-
-        adapter_path = self.model_path / "adapter_model.safetensors"
-        if not adapter_path.exists():
-            raise FileNotFoundError(
-                f"Adapter weights not found: {adapter_path}\n"
-                f"Please ensure the model training completed successfully."
-            )
-
-        try:
-            logger.info(f"Loading model from {self.model_path}")
-            logger.info(f"Device: {self.device}")
-
-            # Load PEFT config
-            peft_config = PeftConfig.from_pretrained(str(self.model_path))
-            base_model_name = peft_config.base_model_name_or_path
-
-            # Load tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(base_model_name)
-            if self.tokenizer.pad_token is None:
-                self.tokenizer.pad_token = self.tokenizer.eos_token
-
-            # Load base model (uses Gemma-3 compatible loader)
-            base_model = load_base_model_for_seq_cls(
-                base_model_name,
-                num_labels=len(self.DIMENSION_NAMES),
-                problem_type="regression",
-            )
-
-            if base_model.config.pad_token_id is None:
-                base_model.config.pad_token_id = self.tokenizer.pad_token_id
-
-            # Create PEFT model
-            self.model = get_peft_model(base_model, peft_config)
-
-            # Load adapter weights
-            adapter_state_dict = load_file(str(adapter_path))
-
-            # Remap keys for get_peft_model() + load_state_dict() compatibility.
-            # - LoRA keys: old format .lora_A.weight -> .lora_A.default.weight
-            # - Score keys: always need modules_to_save.default prefix for this loading path
-            needs_lora_remap = any(
-                ".lora_A.weight" in k and ".lora_A.default.weight" not in k
-                for k in adapter_state_dict.keys()
-            )
-            needs_score_remap = any(
-                k in ("base_model.model.score.weight", "base_model.model.score.bias")
-                for k in adapter_state_dict.keys()
-            )
-
-            if needs_lora_remap or needs_score_remap:
-                remapped = {}
-                for key, value in adapter_state_dict.items():
-                    new_key = key
-                    if needs_lora_remap and (".lora_A.weight" in key or ".lora_B.weight" in key):
-                        new_key = key.replace(".lora_A.weight", ".lora_A.default.weight")
-                        new_key = new_key.replace(".lora_B.weight", ".lora_B.default.weight")
-                    elif key == "base_model.model.score.weight":
-                        new_key = "base_model.model.score.modules_to_save.default.weight"
-                    elif key == "base_model.model.score.bias":
-                        new_key = "base_model.model.score.modules_to_save.default.bias"
-                    remapped[new_key] = value
-                adapter_state_dict = remapped
-
-            self.model.load_state_dict(adapter_state_dict, strict=False)
-            self.model = self.model.to(self.device)
-            self.model.eval()
-
-            logger.info("Model loaded successfully")
-
-        except FileNotFoundError:
-            raise
-        except Exception as e:
-            raise RuntimeError(f"Failed to load model: {type(e).__name__}: {e}")
+        """Load the trained LoRA model from local files."""
+        self.model, self.tokenizer = load_lora_local(
+            self.model_path, len(self.DIMENSION_NAMES), self.device
+        )
 
 
 def main():

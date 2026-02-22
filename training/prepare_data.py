@@ -267,18 +267,11 @@ def stratified_split(
 
     # Group by tier or score bin
     tier_groups = {}
-    debug_count = 0
     for label in labels:
         analysis = label.get(analysis_field, {})
 
         # Calculate overall score
         overall_score = calculate_overall_score(analysis, dimension_names)
-
-        # DEBUG: Print first article's processing
-        if debug_count == 0:
-            print(f"\nDEBUG first article:")
-            print(f"  calculated overall_score: {overall_score}")
-            debug_count += 1
 
         # Assign to stratum (tier or score bin)
         if use_score_bins:

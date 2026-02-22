@@ -74,13 +74,16 @@ class CommercePrefilterV2:
             device=self.device
         )
 
-        # Load classifier
+        # Load classifier (with optional integrity check)
+        from filters.common.embedding_stage import _verify_pickle_integrity
         classifier_path = self.model_dir / 'mlp_classifier.pkl'
+        _verify_pickle_integrity(classifier_path)
         with open(classifier_path, 'rb') as f:
             self._classifier = pickle.load(f)
 
-        # Load scaler
+        # Load scaler (with optional integrity check)
         scaler_path = self.model_dir / 'scaler.pkl'
+        _verify_pickle_integrity(scaler_path)
         with open(scaler_path, 'rb') as f:
             self._scaler = pickle.load(f)
 

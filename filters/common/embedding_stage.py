@@ -34,6 +34,30 @@ import torch.nn as nn
 logger = logging.getLogger(__name__)
 
 
+def _verify_pickle_integrity(pkl_path: Path):
+    """Verify pickle file integrity using companion .sha256 file if present.
+
+    If a .sha256 file exists alongside the pickle, computes the SHA-256 hash
+    and raises ValueError on mismatch. If no hash file exists, logs a warning.
+    """
+    import hashlib
+    hash_path = pkl_path.with_suffix(pkl_path.suffix + ".sha256")
+    if hash_path.exists():
+        expected = hash_path.read_text().strip().split()[0]
+        actual = hashlib.sha256(pkl_path.read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError(
+                f"Pickle integrity check failed for {pkl_path}:\n"
+                f"  expected: {expected}\n"
+                f"  actual:   {actual}"
+            )
+        logger.debug(f"Pickle integrity verified: {pkl_path.name}")
+    else:
+        logger.debug(
+            f"No .sha256 hash file for {pkl_path.name} — skipping integrity check"
+        )
+
+
 class MLPProbe(nn.Module):
     """Two-layer MLP probe for regression on frozen embeddings."""
 
@@ -136,8 +160,12 @@ class EmbeddingStage:
                 f"Train a probe first with: python research/embedding_vs_finetuning/train_probes.py"
             )
 
-        # Pickle contains torch tensors that may have been saved on CUDA.
-        # Temporarily patch torch storage loading to map everything to CPU.
+        # Verify probe file integrity if SHA-256 hash file exists
+        _verify_pickle_integrity(self.probe_path)
+
+        # Pickle contains non-tensor Python objects (sklearn scalers, config dicts)
+        # so weights_only=False is required. Temporarily patch torch storage
+        # loading to map CUDA tensors to CPU.
         # Lock required: monkeypatch is global and not thread-safe.
         with self._probe_load_lock:
             import torch.storage as _ts

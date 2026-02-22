@@ -166,19 +166,30 @@ def run_inference_raw(scorer, articles, dimension_names, batch_size=16):
 
 
 def compute_tier_distribution(scores, weights, dimension_names, tier_thresholds):
-    """Compute tier distribution from dimension scores."""
-    tiers = {"high": 0, "medium": 0, "low": 0}
+    """Compute tier distribution from dimension scores.
+
+    Reads tier names and thresholds from the filter's config.yaml instead of
+    hardcoding a 3-tier scheme. Supports any number of tiers.
+    """
+    # Sort tiers by threshold descending for correct assignment
+    sorted_tiers = sorted(tier_thresholds.items(), key=lambda x: x[1], reverse=True)
+    tiers = {name: 0 for name, _ in sorted_tiers}
+
     for i in range(len(scores)):
         weighted_avg = sum(
             float(scores[i, j]) * weights.get(dim, 0)
             for j, dim in enumerate(dimension_names)
         )
-        if weighted_avg >= tier_thresholds.get("high", 7.0):
-            tiers["high"] += 1
-        elif weighted_avg >= tier_thresholds.get("medium", 4.0):
-            tiers["medium"] += 1
-        else:
-            tiers["low"] += 1
+        assigned = False
+        for tier_name, threshold in sorted_tiers:
+            if weighted_avg >= threshold:
+                tiers[tier_name] += 1
+                assigned = True
+                break
+        if not assigned:
+            # Assign to lowest tier
+            tiers[sorted_tiers[-1][0]] += 1
+
     return tiers
 
 
@@ -235,10 +246,12 @@ def print_report(cal_data, oracle_scores, student_scores, dimension_names, weigh
     cal_tiers = compute_tier_distribution(calibrated_clamped, weights, dimension_names, tier_thresholds)
 
     print(f"\n  Tier distribution:")
-    print(f"  {'Tier':<10} {'Oracle':>10} {'Student':>10} {'Calibrated':>10}")
-    print(f"  {'-' * 40}")
-    for tier in ["high", "medium", "low"]:
-        print(f"  {tier:<10} {oracle_tiers[tier]:>10} {student_tiers[tier]:>10} {cal_tiers[tier]:>10}")
+    # Use sorted thresholds (descending) for display order
+    sorted_tier_names = sorted(tier_thresholds.keys(), key=lambda t: tier_thresholds[t], reverse=True)
+    print(f"  {'Tier':<20} {'Oracle':>10} {'Student':>10} {'Calibrated':>10}")
+    print(f"  {'-' * 50}")
+    for tier in sorted_tier_names:
+        print(f"  {tier:<20} {oracle_tiers.get(tier, 0):>10} {student_tiers.get(tier, 0):>10} {cal_tiers.get(tier, 0):>10}")
 
     print(f"{'=' * 60}")
 

@@ -174,14 +174,14 @@ class TestModelInference:
     def uplifting_scorer(self):
         """Load uplifting scorer if available."""
         project_root = Path(__file__).parent.parent.parent
-        model_path = project_root / "filters" / "uplifting" / "v5" / "model"
+        model_path = project_root / "filters" / "uplifting" / "v6" / "model"
 
         if not (model_path / "adapter_model.safetensors").exists():
-            pytest.skip("Uplifting v5 model not available")
+            pytest.skip("Uplifting v6 model not available")
 
         try:
-            from filters.uplifting.v5.inference import UpliftingScorer
-            return UpliftingScorer(model_path=model_path, use_prefilter=True)
+            from filters.uplifting.v6.inference import UpliftingScorer
+            return UpliftingScorer(use_prefilter=True)
         except Exception as e:
             pytest.skip(f"Failed to load model: {e}")
 
@@ -215,7 +215,7 @@ class TestModelInference:
 
         if result['passed_prefilter']:
             assert result['tier'] is not None
-            assert result['tier'] in ['high_impact', 'moderate_uplift', 'not_uplifting']
+            assert result['tier'] in ['high', 'medium', 'low']
 
     def test_prefilter_blocks_off_topic(self, uplifting_scorer):
         """Prefilter should block obviously off-topic content."""
