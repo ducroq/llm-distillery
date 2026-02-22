@@ -1,3 +1,5 @@
+> **DEPRECATED (Feb 2026):** This guide references early-stage workflows (Qwen fine-tuning, manual conversion scripts). The batch scorer is still accurate, but for the full current workflow see `docs/guides/filter-creation-workflow.md`.
+
 # Ground Truth Generation Guide
 
 **Version:** 3.0

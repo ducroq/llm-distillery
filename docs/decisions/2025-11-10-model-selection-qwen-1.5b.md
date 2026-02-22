@@ -1,7 +1,9 @@
 # ADR: Model Selection - Qwen/Qwen2.5-1.5B for Filter Training
 
+> **Status: SUPERSEDED (Feb 2026)** — Gemma-3-1B (`google/gemma-3-1b-pt`) adopted as default student model. Better MAE across all filters and 8% faster inference. See ROADMAP.md completed section and `filters/common/model_loading.py` for the Gemma-3 loading workaround.
+
 **Date:** 2025-11-10
-**Status:** Accepted
+**Status:** Superseded
 **Decision Maker:** Project Team
 
 ---

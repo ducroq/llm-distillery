@@ -1,3 +1,5 @@
+> **DEPRECATED (Feb 2026):** Training now uses Gemma-3-1B with `filters/common/model_loading.py`. See `docs/guides/filter-creation-workflow.md` for the current workflow.
+
 # Qwen 2.5 Fine-tuning Guide for Filter Training
 
 **Version:** 2.0

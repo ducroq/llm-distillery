@@ -13,14 +13,22 @@ llm-distillery/
 ├── CLAUDE.md              # This file (AI context)
 ├── filters/               # Versioned filter packages
 │   ├── uplifting/v6/      # Production ready, deployed
-│   ├── sustainability_technology/v1-v2/  # v1 deployed, v2 complete
-│   ├── investment-risk/v5/  # Production ready
-│   ├── cultural-discovery/v1-v3/  # v3 production ready, deployed
+│   ├── sustainability_technology/v1-v3/  # v3 production, deployed
+│   ├── investment-risk/v5-v6/  # v6 production, deployed
+│   ├── cultural-discovery/v1-v4/  # v4 production, deployed
 │   ├── signs_of_wisdom/v1/  # Early development
 │   ├── nature_recovery/v1/  # Early development
 │   ├── ai-engineering-practice/v2/  # Blocked on data
 │   ├── belonging/v1/      # Needs assessment
 │   └── todo/              # Planned filters
+│   └── common/            # Shared infrastructure
+│       ├── filter_base_scorer.py  # Base class for all filter scorers
+│       ├── model_loading.py       # Gemma-3 model loading + LoRA utilities
+│       ├── score_calibration.py   # Isotonic calibration fit/apply
+│       ├── embedding_stage.py     # e5-small probe for hybrid inference
+│       ├── hybrid_scorer.py       # Two-stage hybrid inference orchestrator
+│       ├── base_prefilter.py      # Base prefilter with commerce detection
+│       └── commerce_prefilter/    # ML commerce content detector
 ├── ground_truth/          # Oracle scoring pipeline (batch_scorer, llm_client)
 ├── training/              # Model training pipeline (prepare_data, validate, train)
 ├── evaluation/            # Model evaluation tools
@@ -32,7 +40,7 @@ llm-distillery/
 │   ├── IDEAS.md           # Future ideas
 │   ├── OPEN_QUESTIONS.md  # Unresolved questions
 │   ├── ROADMAP.md         # Now/Next/Later roadmap
-│   ├── adr/               # Short ADRs (003: screening filter, 004: commerce, 005: active learning)
+│   ├── adr/               # ADRs 001-008 (screening, commerce, active learning, hybrid, deployment, calibration)
 │   ├── decisions/         # Detailed decision records
 │   └── templates/         # ADR template
 ├── scripts/               # Utility scripts by phase
@@ -98,9 +106,6 @@ python training/prepare_data.py --filter filters/uplifting/v5 --data-source data
 # Validate training data
 python training/validate_training_data.py --data-dir datasets/training/uplifting_v5
 
-# Run prefilter evaluation
-python evaluation/sustainability_technology/compare_prefilters.py
-
 # Fit score calibration (after training)
 PYTHONPATH=. python scripts/calibration/fit_calibration.py \
     --filter filters/uplifting/v6 \
@@ -117,7 +122,8 @@ PYTHONPATH=. python scripts/calibration/fit_calibration.py \
 
 ## Conventions
 
-- **Filter packages**: `filters/{name}/v{version}/` with config.yaml, prompt-compressed.md, prefilter.py, postfilter.py, calibration.json
+- **Filter packages**: `filters/{name}/v{version}/` with config.yaml, prompt-compressed.md, prefilter.py, base_scorer.py, inference.py, inference_hub.py, inference_hybrid.py, calibration.json
+- **FilterBaseScorer**: All filter `base_scorer.py` files inherit from `filters/common/filter_base_scorer.py` for shared model loading, inference, and calibration logic
 - **ADRs**: Short architectural decisions in `docs/adr/`, detailed ones in `docs/decisions/`
 - **Datasets**: Raw -> Scored -> Training splits (80/10/10)
 
@@ -131,4 +137,4 @@ Before making changes, understand:
 
 ---
 
-*Last updated: 2026-02-19*
+*Last updated: 2026-02-22*

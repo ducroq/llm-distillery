@@ -1,3 +1,5 @@
+> **DEPRECATED (Feb 2026):** This guide references Qwen2.5-7B and early-stage workflows that no longer apply. See `docs/guides/filter-creation-workflow.md` for the current workflow.
+
 # Getting Started with LLM Distillery
 
 **Last Updated:** 2025-11-10

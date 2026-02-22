@@ -71,14 +71,14 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 ## Training Pipeline
 
 - [x] **Data preparation pipeline** - Stratified splits working
-- [x] **Training script** - Qwen2.5-1.5B + LoRA working
+- [x] **Training script** - Gemma-3-1B + LoRA working (was Qwen2.5-1.5B)
 - [x] **Context length experiments** - 1024/2048/head+tail tested
   - 1024tok: MAE 0.652, 2048tok: MAE 0.627
   - head+tail (256+256): MAE ~0.69 (deployed to production)
   - See `docs/IDEAS.md` for full results
 - [x] **Stage 2 model comparison** - Gemma-3-1B adopted as default Stage 2. Wins on both uplifting (MAE 0.652 vs 0.660) and cultural-discovery (MAE 0.743 vs 0.755). 8% faster, fewer params. Qwen-0.5B rejected (MAE 0.760)
 - [x] **Gemma-3-1B training support** - `training/train.py` updated with `load_base_model_for_seq_cls()` for both initial and resume paths
-- [ ] **Qwen2.5-7B support** - Larger model option for complex filters
+- [x] **Stage 2 model selection** - Gemma-3-1B adopted as default (was Qwen2.5-1.5B). Larger models deferred.
 - [ ] **Training monitoring improvements** - Better logging, early stopping
 
 ## Score Calibration (ADR-008)
@@ -112,6 +112,12 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **Sustainability_technology v3 probe** - Trained for Gemma-3-1B, MAE 0.91, threshold 1.25 (to be calibrated)
 - [x] **Investment-risk v6 probe** - Trained for Gemma-3-1B, MAE 0.557, threshold 1.50
 
+## Code Quality (Feb 2026)
+
+- [x] **FilterBaseScorer extraction** (#10) - Shared base class in `filters/common/filter_base_scorer.py`, all 4 production filters migrated
+- [x] **load_lora extraction** (#11) - Shared `load_lora_model()` in `filters/common/model_loading.py`
+- [x] **Code quality sweep** (#12-#19) - Resolved 8 issues: removed dead code, cleaned stale comments, fixed inconsistencies (-314 lines)
+
 ## Deployment
 
 - [ ] **Inference server** - Unified prefilter + model + postfilter pipeline
@@ -139,4 +145,4 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-02-21*
+*Last updated: 2026-02-22*

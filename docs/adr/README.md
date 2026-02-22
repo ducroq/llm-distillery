@@ -16,6 +16,9 @@ ADRs are short documents that capture important architectural decisions along wi
 - [ADR-003: Screening Filter for Training Data](003-screening-filter-for-training-data.md) - Enriches training data with signal-bearing content before oracle scoring
 - [ADR-004: Commerce Prefilter as Universal Noise Filter](004-universal-noise-prefilter.md) - Only commerce is universal noise; filter-specific noise handled by model (PROPOSED)
 - [ADR-005: Active Learning for Filter Improvement](005-active-learning-for-filter-improvement.md) - Use model predictions to guide training data collection; includes needle hunting strategy
+- [ADR-006: Hybrid Inference Pipeline](006-hybrid-inference-pipeline.md) - Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2)
+- [ADR-007: Adapter Format and Deployment](007-adapter-format-and-deployment.md) - PEFT adapter key format conventions for local and Hub loading
+- [ADR-008: Isotonic Score Calibration](008-isotonic-score-calibration.md) - Post-hoc per-dimension isotonic regression to correct MSE score compression
 
 ## Format
 

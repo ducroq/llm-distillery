@@ -1,7 +1,7 @@
 # LLM Distillery - Architecture
 
-**Last Updated**: 2025-11-17
-**Status**: Harmonized architecture across all filters
+**Last Updated**: 2026-02-22
+**Status**: Production system with 4 deployed filters, hybrid inference pipeline
 
 ---
 
@@ -10,12 +10,12 @@
 1. [Core Principles](#core-principles)
 2. [Knowledge Distillation Pipeline](#knowledge-distillation-pipeline)
 3. [Filter Package Architecture](#filter-package-architecture)
-4. [Oracle Output Discipline](#oracle-output-discipline)
-5. [Harmonized Prompt Structure](#harmonized-prompt-structure)
-6. [Prefilter Philosophy](#prefilter-philosophy)
-7. [Inline Filters](#inline-filters)
-8. [Training Pipeline](#training-pipeline)
-9. [Deployment Architecture](#deployment-architecture)
+4. [Shared Infrastructure](#shared-infrastructure)
+5. [Training Pipeline](#training-pipeline)
+6. [Hybrid Inference Pipeline](#hybrid-inference-pipeline)
+7. [Score Calibration](#score-calibration)
+8. [Deployment](#deployment)
+9. [Key Documents](#key-documents)
 
 ---
 
@@ -27,89 +27,39 @@
 
 **Why**: Enables changing tier thresholds without re-labeling training data. Separates concerns: oracle scores dimensions, postfilter classifies tiers.
 
-**Benefits**:
-- ✅ **Flexible thresholds**: Adjust tier boundaries without retraining
-- ✅ **Clean distillation**: Student models learn dimensional scoring, not classification logic
-- ✅ **Separation of concerns**: Oracle scores, postfilter classifies
-- ✅ **Maintainability**: Update tier logic in postfilter without touching oracle prompt
-
-**Example**:
-
-```json
-// ✅ CORRECT - Oracle outputs dimensions only
-{
-  "deployment_maturity": {"score": 7, "reasoning": "Commercial deployment with multiple customers"},
-  "technology_performance": {"score": 6, "reasoning": "Demonstrated efficiency gains"},
-  "cost_trajectory": {"score": 5, "reasoning": "Approaching grid parity"},
-  // ... 5 more dimensions ...
-  "primary_technology": "solar",  // Simple metadata OK
-  "confidence": "HIGH"
-}
-
-// ❌ WRONG - Oracle outputs classification
-{
-  "deployment_maturity": {"score": 7, "reasoning": "..."},
-  "technology_performance": {"score": 6, "reasoning": "..."},
-  "deployment_stage": "commercial_proven",  // ← Classification, should be in postfilter
-  "tier": "validated",                      // ← Classification, should be in postfilter
-  ...
-}
-```
-
 ### 2. Three-Stage Processing Pipeline
 
 ```
-┌─────────────┐
-│   Article   │ Raw input (title + text)
-└──────┬──────┘
-       │
-       v
-┌─────────────────┐
-│   Prefilter     │ Fast rule-based (blocks obvious noise)
-└──────┬──────────┘ Python regex/keyword matching
-       │            Target: <10% false negatives
-       │
-       v
-┌─────────────────┐
-│  Oracle (LLM)   │ Scores 8 dimensions (0-10) + reasoning
-└──────┬──────────┘ Output: dimensional_scores ONLY
-       │            Models: Gemini Flash (cheap), Claude Sonnet (accurate)
-       │
-       v
-┌─────────────────┐
-│   Postfilter    │ Computes tier/stage from dimensional scores
-└──────┬──────────┘ Applies gatekeeper rules
-       │            Python logic, configurable thresholds
-       v
-┌─────────────────┐
-│  Final Output   │ Tier + dimensional scores + metadata
-└─────────────────┘
+Article (title + text)
+    |
+    v
+Prefilter          Fast rule-based (Python regex/keywords)
+    |              Blocks obvious noise, <10% false negatives
+    v
+Oracle (LLM)       Scores dimensions (0-10) + reasoning
+    |              Models: Gemini Flash ($0.00015/article)
+    v
+Postfilter         Computes tiers from dimensional scores
+    |              Applies gatekeeper rules, configurable thresholds
+    v
+Final Output       Tier + dimensional scores + metadata
 ```
-
-**Key Insight**: Each stage has a distinct purpose:
-- **Prefilter**: Noise reduction (not quality filtering!)
-- **Oracle**: Dimensional scoring (not classification!)
-- **Postfilter**: Tier classification (flexible thresholds)
 
 ### 3. Knowledge Distillation
 
-**Teacher-Student Model**:
-- **Teacher (Oracle)**: Large foundation model (Gemini Flash, Claude Sonnet)
-  - Expensive per inference ($0.00015-0.003 per article)
-  - Slow (2-5 seconds per article)
-  - High quality dimensional scoring
-
-- **Student**: Small local model (Qwen2.5-7B)
-  - Zero cost per inference (local)
-  - Fast (20-50ms per article)
-  - Learns to replicate oracle judgments
-  - Target: 92-96% accuracy
+| | Teacher (Oracle) | Student |
+|---|---|---|
+| **Model** | Gemini Flash | Gemma-3-1B + LoRA |
+| **Cost** | $0.00015/article | $0 (local) |
+| **Latency** | 2-5 seconds | 30-40ms |
+| **Purpose** | Label training data | Production inference |
 
 **Workflow**:
-1. Oracle scores 5K+ articles → training dataset
-2. Student model fine-tuned on oracle scores
-3. Student deployed for production inference
-4. 100x cost reduction, 50x speed improvement
+1. Oracle scores 8-10K articles per filter
+2. Student model fine-tuned on oracle scores (Gemma-3-1B + LoRA)
+3. Isotonic calibration corrects score compression
+4. Hybrid inference adds fast embedding probe for speedup
+5. Deploy to HuggingFace Hub (private repos)
 
 ---
 
@@ -118,50 +68,48 @@
 ### Phase 1: Ground Truth Generation
 
 ```bash
-# 1. Calibrate prefilter (500 articles)
-python -m ground_truth.calibrate_prefilter \
-  --filter filters/uplifting/v4 \
-  --sample-size 500
-
-# 2. Calibrate oracle (100 articles, compare models)
-python -m ground_truth.calibrate_oracle \
-  --filter filters/uplifting/v4 \
-  --models gemini-flash,gemini-pro,claude-sonnet
-
-# 3. Score training data (5K+ articles)
+# Score training data with oracle (Gemini Flash)
 python -m ground_truth.batch_scorer \
-  --filter filters/uplifting/v4 \
-  --target-scored 5000 \
-  --llm gemini-flash
+  --filter filters/uplifting/v6 \
+  --source datasets/raw/master_dataset.jsonl \
+  --target-count 10000
+
+# For needle-in-haystack filters: screen + merge (ADR-003)
+# Random data provides negatives, screened data enriches positives
 ```
 
-**Cost**: ~$0.75 per filter @ $0.00015/article (Gemini Flash)
+**Cost**: ~$1.50 per 10K articles (Gemini Flash)
 
-### Phase 2: Training
+### Phase 2: Data Preparation & Training
 
 ```bash
-# Fine-tune Qwen2.5-7B on oracle scores
-python -m training.knowledge_distillation \
-  --filter uplifting \
-  --version v4 \
-  --scored-data datasets/scored/uplifting_v4 \
-  --base-model Qwen/Qwen2.5-7B \
-  --epochs 3
+# Prepare stratified train/val/test splits (80/10/10)
+python training/prepare_data.py \
+  --filter filters/uplifting/v6 \
+  --data-source datasets/scored/uplifting_v6/
+
+# Train Gemma-3-1B + LoRA on oracle scores
+python training/train.py \
+  --filter filters/uplifting/v6 \
+  --data-dir datasets/training/uplifting_v6
 ```
 
-**Requirements**: 16GB+ GPU (RTX 4090, A100), ~2-4 hours
+**Requirements**: 16GB+ GPU, ~2-4 hours per filter
 
-### Phase 3: Deployment
+### Phase 3: Calibration & Deployment
 
 ```bash
-# Run inference with trained model
-python -m inference.predict \
-  --filter inference/deployed/uplifting_v4/ \
-  --input articles.jsonl \
-  --output predictions.jsonl
-```
+# Fit isotonic calibration on validation set
+PYTHONPATH=. python scripts/calibration/fit_calibration.py \
+  --filter filters/uplifting/v6 \
+  --data-dir datasets/training/uplifting_v6 \
+  --test-data datasets/training/uplifting_v6/test.jsonl
 
-**Performance**: 20-50ms per article, $0 cost
+# Upload adapter to HuggingFace Hub
+python scripts/deployment/upload_to_hub.py \
+  --filter filters/uplifting/v6 \
+  --repo-id jeergrvgreg/uplifting-filter-v6
+```
 
 ---
 
@@ -171,13 +119,25 @@ Each filter is a self-contained package:
 
 ```
 filters/<filter-name>/v<version>/
-├── prompt-compressed.md    # Oracle prompt (ALWAYS USED for scoring)
-├── prompt-extended.md      # Extended version with examples (optional)
-├── prefilter.py           # Fast rule-based filter (noise reduction)
-├── postfilter.py          # Tier classification from dimensional scores
-├── config.yaml            # Weights, thresholds, tier boundaries, deployment specs
-├── README.md              # Filter documentation
-└── validation_report.md   # Calibration and validation results
+├── config.yaml              # Dimensions, weights, tier definitions
+├── prompt-compressed.md     # Oracle prompt (used for scoring)
+├── prefilter.py             # Fast rule-based noise filter
+├── base_scorer.py           # Subclass of FilterBaseScorer (shared logic)
+├── inference.py             # Local inference (loads adapter from model/)
+├── inference_hub.py         # HuggingFace Hub inference (loads from Hub)
+├── inference_hybrid.py      # Two-stage hybrid inference (probe + model)
+├── calibration.json         # Per-dimension isotonic calibration maps
+├── model/                   # LoRA adapter files
+│   ├── adapter_config.json
+│   ├── adapter_model.safetensors
+│   ├── tokenizer.json
+│   └── tokenizer_config.json
+├── probe/                   # Embedding probe for hybrid inference
+│   └── embedding_probe_e5small.pkl
+├── README.md                # Filter documentation
+├── README_MODEL.md          # HuggingFace model card
+├── training_metadata.json   # Training hyperparams and metrics
+└── training_history.json    # Per-epoch training logs
 ```
 
 ### config.yaml Structure
@@ -185,15 +145,15 @@ filters/<filter-name>/v<version>/
 ```yaml
 filter:
   name: "uplifting"
-  version: "4.0"
-  updated: "2025-11-17"
+  version: "6.0"
+  base_model: "google/gemma-3-1b-pt"
 
 dimensions:
   - name: "agency"
     weight: 1.0
   - name: "progress"
     weight: 1.0
-  # ... 6 more dimensions
+  # ... more dimensions
 
 tiers:
   impact:
@@ -201,492 +161,201 @@ tiers:
     description: "High impact uplifting content"
   connection:
     min_score: 4.0
-    description: "Moderate uplifting value"
   not_uplifting:
     max_score: 3.9
-    description: "Not uplifting"
 
 gatekeeper_rules:
   - dimension: "collective_benefit"
     threshold: 5.0
     action: "IF collective_benefit < 5.0 THEN max_overall = 3.0"
-    exceptions:
-      - "wonder >= 7"
 ```
 
 ---
 
-## Oracle Output Discipline
+## Shared Infrastructure
 
-### What Oracles Should Output
-
-**Dimensional scores** (0-10 per dimension):
-- Score value (integer 0-10)
-- Per-dimension reasoning (brief justification)
-
-**Simple metadata** (NOT classification):
-- primary_technology, asset_classes_affected, geographic_scope
-- confidence (HIGH/MEDIUM/LOW)
-- time_horizon (IMMEDIATE/SHORT_TERM/LONG_TERM)
-
-**Overall reasoning**: Why these scores, what's the overall picture
-
-### What Oracles Should NOT Output
-
-**❌ Tier/stage classifications**:
-- deployment_stage (commercial_proven, pilot, research, concept)
-- signal_tier (RED_FLAG, YELLOW_WARNING, GREEN_OPPORTUNITY)
-- tier (impact, connection, not_uplifting)
-
-**Why**: These are computed by postfilter from dimensional scores. If oracle outputs them:
-- Can't change thresholds without re-labeling training data
-- Student model learns classification logic (not dimensional scoring)
-- Tight coupling between oracle and tier definitions
-
-### Postfilter Classification
-
-Postfilter computes tiers from dimensional scores using configurable logic:
-
-```python
-# Example: investment-risk postfilter
-def classify_tier(scores: dict) -> str:
-    macro = scores['macro_risk_severity']
-    credit = scores['credit_market_stress']
-    systemic = scores['systemic_risk']
-    evidence = scores['evidence_quality']
-    actionability = scores['actionability']
-
-    # RED FLAG: High risk + strong evidence + actionable
-    if (macro >= 7 or credit >= 7 or systemic >= 8) \
-       and evidence >= 5 and actionability >= 5:
-        return 'RED_FLAG'
-
-    # YELLOW WARNING: Moderate risk
-    elif (macro >= 5 or credit >= 5 or systemic >= 6) \
-         and evidence >= 5 and actionability >= 4:
-        return 'YELLOW_WARNING'
-
-    # GREEN OPPORTUNITY: Low valuation, extremes
-    elif scores['valuation_risk'] <= 3 \
-         and scores['market_sentiment_extremes'] >= 7:
-        return 'GREEN_OPPORTUNITY'
-
-    # BLUE EDUCATIONAL: Framework improvement
-    elif evidence >= 6 and actionability < 4:
-        return 'BLUE_EDUCATIONAL'
-
-    # NOISE: Everything else
-    else:
-        return 'NOISE'
-```
-
-**Benefits**:
-- Change thresholds (e.g., RED_FLAG requires macro >= 8 instead of 7)
-- No need to re-label training data
-- Just update postfilter logic and redeploy
-
----
-
-## Harmonized Prompt Structure
-
-All filter prompts follow consistent structure:
-
-### 1. Header
-```markdown
-# Filter Name v{version}
-
-**Version**: {version}
-**Updated**: {date}
-**Purpose**: {one-sentence purpose}
-**Philosophy**: {guiding principle in quotes}
-
-**Oracle Output**: This oracle outputs DIMENSIONAL SCORES ONLY (0-10 per dimension).
-Tier/stage classification is computed by post-processing, NOT by this oracle.
-```
-
-### 2. Tier/Stage Definitions (Reference Only)
-```markdown
-## Tier/Stage Definitions (Reference - NOT for oracle to output)
-
-These definitions guide dimensional scoring but are NOT output by the oracle:
-
-### Tier 1: High Impact
-- Description...
-- Dimensional characteristics: dimension_a >= 7, dimension_b >= 6
-
-### Tier 2: Moderate
-...
-```
-
-**Note**: These help oracle understand what different score levels mean, but oracle does NOT output tier classifications.
-
-### 3. Prompt Template Marker
-```markdown
-## PROMPT TEMPLATE
-
-The following is the actual prompt sent to the oracle (everything above is context).
-```
-
-### 4. Scope and Rules
-```markdown
-**SCOPE**: What articles are in scope vs out of scope
-
-**CRITICAL FILTERS**:
-- Block criterion 1
-- Block criterion 2
-- Block criterion 3
-
-**GATEKEEPER RULES**:
-- IF condition THEN action
-```
-
-### 5. Article Placement
-```markdown
----
-
-**ARTICLE:**
-
-**Title**: {title}
-
-**Text**: {text}
-
----
-```
-
-**Critical**: ARTICLE must come AFTER scope/gatekeepers, BEFORE dimensions. This ensures oracle reads rules before evaluating content.
-
-### 6. Dimensions with Inline Filters
-```markdown
-## Dimensions
-
-### 1. dimension_name (0-10)
-
-**❌ CRITICAL FILTERS - If article is ANY of these, score 0-2:**
-- Filter criterion 1
-- Filter criterion 2
-- Filter criterion 3
-
-**If NONE of above filters match, score normally:**
-- **0-2**: Description
-- **3-4**: Description
-- **5-6**: Description
-- **7-8**: Description
-- **9-10**: Description
-```
-
-**Every dimension MUST have inline filters** (fast model compatibility).
-
-### 7. Output Format
-```markdown
-## Output Format (JSON)
-
-{
-  "dimension_1": {"score": <0-10>, "reasoning": "..."},
-  "dimension_2": {"score": <0-10>, "reasoning": "..."},
-  ...
-  "metadata_field": "value",
-  "confidence": "HIGH|MEDIUM|LOW"
-}
-
-// NO tier/stage classification fields!
-```
-
-### 8. Examples (Optional)
-```markdown
-## Examples
-
-### Example 1: High Score Article
-[Example with dimensional scores and reasoning]
-
-### Example 2: Low Score Article
-[Example with dimensional scores and reasoning]
-```
-
-### 9. Changelog
-```markdown
-## CHANGELOG
-
-### v{current} ({date})
-- Change description
-
-### v{previous} ({date})
-- Previous changes
-```
-
----
-
-## Prefilter Philosophy
-
-### Purpose
-**Noise reduction**, NOT quality filtering.
-
-### Key Principle
-- **False negatives** (blocking good articles): **CRITICAL FAILURE** - lost forever
-- **False positives** (passing bad articles): Acceptable - oracle catches them
-
-### Target
-- <10% false negative rate
-- 50-80% pass rate (depends on data quality)
-
-### Design Rules
-
-**DO**:
-- Block obvious out-of-scope content (e.g., "pilot" in aviation context for tech filter)
-- Use fast keyword/regex matching
-- Be conservative - when uncertain, pass the article
-- Measure false negative rate on validation set
-
-**DON'T**:
-- Try to filter quality (oracle's job!)
-- Block based on nuanced criteria
-- Over-optimize pass rate (prefer false positives)
-- Use complex NLP (defeats purpose of fast prefilter)
-
-### Example: sustainability_tech_innovation v1
-
-**Option A (Too Aggressive)**: 16% pass rate, 62.7% false negatives → ❌ FAILED
-
-**Option D (Minimal Filtering)**: 68% pass rate, 23.9% false negatives → ✅ DEPLOYED
-
-```python
-# Option D prefilter - Minimal filtering
-BLOCK_KEYWORDS = [
-    'hospital', 'medical device', 'clinical trial',  # Medicine
-    'cloud computing', 'data center', 'cybersecurity',  # IT
-    'banking', 'cryptocurrency', 'fintech',  # Finance
-    'airline pilot', 'flight training',  # Aviation pilots
-]
-
-REQUIRE_KEYWORDS = [
-    'climate', 'energy', 'renewable', 'solar', 'wind',
-    'carbon', 'emissions', 'sustainability', 'green'
-]
-```
-
----
-
-## Screening Filters (Training Data Enrichment)
-
-### Purpose
-
-Screening filters solve the **regression-to-mean problem** in training data collection for needle-in-haystack filters.
-
-**Problem:** When 94% of random articles score low (< 4.0), models learn to predict the mean (~2.0) because that minimizes overall error. This makes them useless for finding rare high-quality content.
-
-**Solution:** Screen articles BEFORE oracle scoring to enrich the training distribution with signal-bearing content.
-
-### Workflow
+All shared code lives in `filters/common/`:
 
 ```
-WITHOUT Screening (Regression-to-Mean):
-Raw articles ─────────────────────→ Oracle ─────→ Training
-                                    (94% zeros)
-                                    Model learns: "predict 2.0 for everything"
-
-WITH Screening (Enriched Distribution):
-Raw articles ──→ Screening Filter ──→ Oracle ──→ Training
-                 (reject 60-80%,      (~50% zeros,
-                  enriches signal)     richer gradient)
-                                    Model learns: "distinguish 3 from 7"
+filters/common/
+├── filter_base_scorer.py    # FilterBaseScorer — shared base class for all filters
+├── model_loading.py         # load_base_model_for_seq_cls(), load_lora_model()
+├── score_calibration.py     # Isotonic calibration: fit, apply, save, load
+├── embedding_stage.py       # e5-small embedding + MLP probe for hybrid Stage 1
+├── hybrid_scorer.py         # Two-stage hybrid inference orchestrator
+├── base_prefilter.py        # Base prefilter with commerce detector integration
+├── text_cleaning.py         # Text normalization utilities
+├── text_preprocessing.py    # Tokenization and truncation
+└── commerce_prefilter/      # ML commerce/promotional content detector
 ```
 
-### When to Use
+### FilterBaseScorer (`filter_base_scorer.py`)
 
-- **Use screening:** When random corpus is >80% low-scoring (weighted avg < 4.0)
-- **Skip screening:** When filter scope matches corpus well (e.g., tech filter on tech news)
+Base class that all filter `base_scorer.py` files inherit from. Provides:
+- Model loading with Gemma-3 compatibility workaround
+- Tokenization and batched inference
+- Score extraction from model output
+- Automatic calibration loading and application
+- Tier classification from dimensional scores
 
-### Screening vs Prefilter
+### Model Loading (`model_loading.py`)
 
-| Aspect | Screening Filter | Prefilter |
-|--------|------------------|-----------|
-| **Purpose** | Training data enrichment | Inference noise reduction |
-| **When used** | Before oracle scoring | Before model inference |
-| **Aggressiveness** | Aggressive (reject 60-85%) | Conservative (pass 50-80%) |
-| **False negatives** | Acceptable (10-20%) | Critical failure (< 10%) |
-| **False positives** | Critical failure | Acceptable (oracle catches) |
-| **Location** | `screening_filter.py` | `prefilter.py` |
+Handles the Gemma-3-1B compatibility issue: `google/gemma-3-1b-pt` uses `Gemma3TextConfig` (model_type `gemma3_text`), but `AutoModelForSequenceClassification` only maps `gemma3` (multimodal config). The loader tries Auto first, falls back to building a custom classification head on `Gemma3TextModel`.
 
-**Key insight:** A good prefilter is NOT a good screening filter. They optimize for opposite goals.
+Also provides `load_lora_model()` for consistent LoRA adapter loading with key format remapping between local format (`.lora_A.default.weight`) and Hub format (`.lora_A.weight`).
 
-### Target Distribution After Screening
+### Hybrid Scorer (`hybrid_scorer.py`)
 
-| Score Range | Random Corpus | After Screening |
-|-------------|---------------|-----------------|
-| Low (0-3) | ~85% | ~50-60% |
-| Medium (4-6) | ~12% | ~30-35% |
-| High (7-10) | ~3% | ~10-15% |
+Orchestrates two-stage inference:
+1. **Stage 1**: e5-small embedding + MLP probe (1-2ms) — fast approximate score
+2. **Stage 2**: Full Gemma-3-1B model (30-40ms) — only for articles above probe threshold
 
-### Implementation
-
-See:
-- [ADR-003: Screening Filter for Training Data Enrichment](adr/003-screening-filter-for-training-data.md)
-- [Screening Filter Template](templates/screening-filter-template.md)
-- [Filter Development Guide - Phase 5](agents/filter-development-guide.md#phase-5-training-data-collection)
-
----
-
-## Inline Filters
-
-### Why Required
-Fast models (Gemini Flash) may skip top-level scope sections. Inline filters ensure every dimension has filtering logic directly embedded.
-
-### Format
-```markdown
-**❌ CRITICAL FILTERS - If article is ANY of these, score 0-2:**
-- Filter criterion 1 (specific, actionable)
-- Filter criterion 2
-- Filter criterion 3
-```
-
-### Example: investment-risk macro_risk_severity
-
-```markdown
-### 1. macro_risk_severity (0-10)
-
-**❌ CRITICAL FILTERS - If article is ANY of these, score 0-2:**
-- Stock picking (analysis of individual stocks without macro context)
-- FOMO/speculation (hot stocks, meme stocks, get-rich-quick)
-- Personal finance advice (budgeting, savings accounts, credit cards)
-- Cryptocurrency pumping (price predictions, to-the-moon rhetoric)
-
-**If NONE of above filters match, score normally:**
-- **0-2**: No macro risk signals, routine market updates
-- **3-4**: Minor concerns, limited systemic implications
-- **5-6**: Moderate risk signals, potential portfolio impact
-- **7-8**: Significant macro risks, clear portfolio defense needed
-- **9-10**: Severe systemic threats, immediate action required
-```
-
-### Guidelines
-- 3-5 filter criteria per dimension
-- Specific, actionable (not vague)
-- Directly relevant to dimension being scored
-- If ANY criterion matches, score 0-2 (low)
+See [ADR-006](adr/006-hybrid-inference-pipeline.md) for design rationale.
 
 ---
 
 ## Training Pipeline
 
-### Data Preparation
-```
-Oracle Scores (5K articles)
-    ↓
-[Validation Split] → 10% held-out test set
-    ↓
-[Training Split] → 90% for fine-tuning
-    ↓
-[Data Augmentation] → Optional: paraphrasing, back-translation
-    ↓
-Training Dataset (JSONL)
-```
-
 ### Model Architecture
 
-**Base Model**: Qwen2.5-7B-Instruct
-- 7 billion parameters
-- Instruction-tuned
-- Good reasoning capabilities
+**Base Model**: `google/gemma-3-1b-pt` (Gemma-3-1B)
+- ~1B parameters
+- Fine-tuned with LoRA (rank 16, ~2M trainable parameters)
+- Regression head: 8 outputs (one per dimension, 0-10 scale)
+- Loss: MSE on dimensional scores
 
-**Fine-tuning Approach**: Multi-dimensional regression
-- Input: Article text (title + body)
-- Output: 8 dimensional scores (0-10) + reasoning
-- Loss: MSE on dimensional scores + optional reasoning quality
+### Training Hyperparameters
 
-**Training Hyperparameters**:
 ```yaml
+base_model: google/gemma-3-1b-pt
 epochs: 3
-batch_size: 8
-learning_rate: 5e-5
-warmup_steps: 100
-gradient_accumulation: 4
+batch_size: 4
+learning_rate: 2e-5
+lora_rank: 16
+lora_alpha: 32
+max_length: 512  # tokens (head+tail truncation)
 ```
 
-### Validation
+### Training Data
 
-**Metrics**:
-- Per-dimension MAE (Mean Absolute Error)
-- Overall accuracy (within ±1 of oracle score)
-- Tier classification accuracy (after postfilter)
-- Reasoning quality (optional)
+- **Size**: 8-10K articles per filter
+- **Splits**: 80% train / 10% validation / 10% test
+- **Enrichment**: Screen+merge for needle-in-haystack filters (ADR-003), active learning for rare tiers (ADR-005)
+- **Format**: JSONL with `text`, `dimension_scores`, `overall_score`, `tier`
 
-**Target Performance**:
-- 92-96% accuracy on tier classification
-- MAE < 1.0 per dimension
-- Reasoning coherent and relevant
+### Validation Metrics
+
+- **Per-dimension MAE**: Target < 1.0 (production filters achieve 0.47-0.74)
+- **Tier classification accuracy**: Target > 85%
+- **Calibrated MAE**: Post-calibration improvement typically 3-7%
 
 ---
 
-## Deployment Architecture
+## Hybrid Inference Pipeline
 
-### Production Pipeline
+Two-stage pipeline for faster inference (ADR-006):
 
 ```
-Input Articles (JSONL)
-    ↓
-┌──────────────┐
-│  Prefilter   │ Fast rule-based (Python)
-└──────┬───────┘ Blocks obvious noise
-       │
-       v (50-80% pass)
-┌──────────────┐
-│ Student Model│ Qwen2.5-7B fine-tuned (local GPU)
-└──────┬───────┘ Outputs dimensional scores
-       │
-       v
-┌──────────────┐
-│  Postfilter  │ Computes tiers from scores (Python)
-└──────┬───────┘ Applies gatekeeper rules
-       │
-       v
-Output (Tier + Scores + Metadata)
+Article
+    |
+    v
+Stage 1: e5-small Probe (1-2ms)
+    |
+    |--- score < threshold ---> Return probe estimate (skip Stage 2)
+    |
+    |--- score >= threshold --->
+    v
+Stage 2: Gemma-3-1B Model (30-40ms)
+    |
+    v
+Calibrated scores + tier
 ```
 
-### Deployment Options
+### Performance by Filter
 
-**Option 1: Local GPU** (recommended for batch processing)
-- Hardware: RTX 4090, A100, or similar
-- Throughput: 20-50ms per article
-- Cost: $0 per article (one-time hardware)
-- Best for: Large daily batches (1000+ articles)
+| Filter | Probe MAE | Threshold | FN Rate | Speedup |
+|--------|-----------|-----------|---------|---------|
+| uplifting v6 | 0.49 | 4.5 | 1.7% | ~2x |
+| sustainability_technology v3 | 0.91 | 1.25 | ~1% | ~1.3x |
+| investment-risk v6 | 0.557 | 1.50 | 0.8% | ~1.1x |
+| cultural-discovery v4 | 0.87 | 1.25 | 3% | ~1.5x |
 
-**Option 2: Cloud GPU** (recommended for API service)
-- Service: Modal, Replicate, or custom K8s
-- Throughput: 50-100ms per article (includes network)
-- Cost: ~$0.0001-0.0005 per article
-- Best for: On-demand API, variable load
+### Probe Architecture
 
-**Option 3: Hybrid** (recommended for production)
-- Prefilter: Serverless (AWS Lambda, Cloudflare Workers)
-- Model: GPU instance (Modal, Replicate)
-- Postfilter: Serverless
-- Benefits: Auto-scaling, cost-effective
+- Embedding: `intfloat/e5-small-v2` (33M params, 384-dim)
+- Classifier: MLP (384 -> 128 -> 1), trained on same training data
+- Stored in `probe/embedding_probe_e5small.pkl`
 
-### Performance Benchmarks
+---
 
-| Component | Latency | Throughput | Cost/Article |
-|-----------|---------|------------|--------------|
-| Prefilter | <5ms | 200/sec | $0 |
-| Student Model (GPU) | 20-50ms | 20-50/sec | $0 (local) |
-| Postfilter | <10ms | 100/sec | $0 |
-| **Total Pipeline** | **30-65ms** | **15-45/sec** | **$0** |
+## Score Calibration
 
-vs. Oracle (Gemini Flash):
-- Latency: 2-5 seconds
-- Cost: $0.00015/article
-- **100x faster, infinite cost reduction**
+Post-hoc isotonic regression corrects MSE-trained score compression (ADR-008):
+
+- **Problem**: MSE loss causes predictions to regress toward the mean, compressing the score range
+- **Solution**: Per-dimension isotonic regression fitted on validation set
+- **Format**: `calibration.json` — maps raw model scores to calibrated scores via `numpy.interp`
+- **Integration**: `FilterBaseScorer._process_raw_scores()` applies calibration automatically if `calibration.json` exists
+
+```bash
+# Fit calibration for a filter
+PYTHONPATH=. python scripts/calibration/fit_calibration.py \
+  --filter filters/uplifting/v6 \
+  --data-dir datasets/training/uplifting_v6 \
+  --test-data datasets/training/uplifting_v6/test.jsonl
+```
+
+Typical improvement: 3-7% MAE reduction.
+
+---
+
+## Deployment
+
+### HuggingFace Hub (Production)
+
+All 4 production filters are deployed as private repos on HuggingFace Hub:
+
+| Filter | Hub Repo | MAE |
+|--------|----------|-----|
+| uplifting v6 | `jeergrvgreg/uplifting-filter-v6` | 0.673 |
+| sustainability_technology v3 | `jeergrvgreg/sustainability-technology-filter-v3` | 0.724 |
+| investment-risk v6 | `jeergrvgreg/investment-risk-filter-v6` | 0.497 |
+| cultural-discovery v4 | `jeergrvgreg/cultural-discovery-filter-v4` | 0.740 |
+
+### Three Inference Paths
+
+1. **Local** (`inference.py`): Loads adapter from `model/` directory. Used for development and batch processing.
+2. **Hub** (`inference_hub.py`): Loads adapter from HuggingFace Hub via `PeftModel.from_pretrained()`. Used by NexusMind production.
+3. **Hybrid** (`inference_hybrid.py`): Stage 1 probe + Stage 2 Hub/local model. Used when throughput matters.
+
+### Adapter Format (ADR-007)
+
+Adapter files must be kept in OLD PEFT format (`.lora_A.weight`, `score.weight`) for Hub compatibility. Local inference remaps keys at load time. Do NOT run `resave_adapter.py` before upload.
+
+### Performance
+
+| Component | Latency | Cost |
+|-----------|---------|------|
+| Prefilter | <5ms | $0 |
+| Embedding probe (Stage 1) | 1-2ms | $0 |
+| Gemma-3-1B model (Stage 2) | 30-40ms | $0 |
+| **Full pipeline** | **35-50ms** | **$0** |
+
+vs. Oracle: 2-5 seconds, $0.00015/article
 
 ---
 
 ## Key Documents
 
-- **This file**: Architecture principles and design patterns
-- **[README.md](README.md)**: Project overview and quick start
-- **[SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md)**: Current system status
-- **[filters/README.md](filters/README.md)**: Filter development guide
-- **[CHANGELOG.md](CHANGELOG.md)**: Version history and changes
-- **[docs/agents/filter-harmonizer.md](docs/agents/filter-harmonizer.md)**: Consistency checking
-- **[docs/agents/filter-development-guide.md](docs/agents/filter-development-guide.md)**: Lifecycle guidance
+| Document | Purpose |
+|----------|---------|
+| [CLAUDE.md](../CLAUDE.md) | AI context and project overview |
+| [TODO.md](TODO.md) | Active tasks and filter status |
+| [ROADMAP.md](ROADMAP.md) | Now/Next/Later priorities |
+| [ADR index](adr/README.md) | Architecture decision records (001-008) |
+| [Filter creation workflow](guides/filter-creation-workflow.md) | Step-by-step for new filters |
+| [Deployment gotchas](adr/007-adapter-format-and-deployment.md) | Adapter format and Hub upload |
 
 ---
 
-**Last Updated**: 2025-11-17 (Harmonization milestone)
+*Last Updated: 2026-02-22*
