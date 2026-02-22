@@ -117,6 +117,17 @@
   - Deduplicated ~1,200 lines across 4 production base_scorer.py files
   - Standardized gatekeeper naming to `GATEKEEPER_*` across all filters
   - New filters need ~55 lines instead of ~450
+- [x] **Code quality sweep** (issues #11-#19) - 2026-02
+  - Extract `load_lora_local()` / `load_lora_hub()` into `model_loading.py` (#11) — 8 inference files simplified to 3-line delegations
+  - Pin all dependency upper bounds (#16), harden batch_scorer path validation (#18)
+  - Add pickle integrity verification with SHA-256 hashes (#15)
+  - Fix calibration script hardcoded 3-tier scheme (#14), stale Qwen refs (#12), model card template (#13)
+  - Update stale tests to v6 (#17), remove debug print + deprecated method (#19)
+  - Net: -314 lines across 20 files
+- [x] **Close backlog issues** (#2, #9, #20) - 2026-02
+  - #2 (score all articles): addressed by hybrid inference pipeline; remaining work is NexusMind config
+  - #9 (LLMBase API): closed as not planned — NexusMind is primary target
+  - #20 (config.yaml single source of truth): closed as not planned — Python constants preferred after #10
 
 ### Infrastructure
 - [x] **Ground truth generation pipeline** - 2024-11
