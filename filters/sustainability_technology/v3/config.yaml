@@ -30,7 +30,7 @@ scoring:
       weight: 0.10
       description: "Systemic disruption potential"
 
-  tier_thresholds:
+  tiers:
     high_sustainability:
       threshold: 7.0
       description: "Mass deployed, proven sustainable, competitive"
