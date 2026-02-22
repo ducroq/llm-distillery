@@ -111,6 +111,13 @@
   - uplifting v5 + cultural-discovery v3: deployed (academic domain exclusion already removed)
   - All production prefilters verified identical across 3 locations
 
+### Code Quality
+- [x] **Extract FilterBaseScorer** (issue #10) - 2026-02
+  - Shared abstract base class in `filters/common/filter_base_scorer.py`
+  - Deduplicated ~1,200 lines across 4 production base_scorer.py files
+  - Standardized gatekeeper naming to `GATEKEEPER_*` across all filters
+  - New filters need ~55 lines instead of ~450
+
 ### Infrastructure
 - [x] **Ground truth generation pipeline** - 2024-11
 - [x] **Oracle output discipline** - Scores only, tier in postfilter - 2024-11
@@ -121,4 +128,4 @@
 
 ---
 
-*Last updated: 2026-02-21*
+*Last updated: 2026-02-22*
