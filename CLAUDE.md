@@ -1,55 +1,30 @@
-# CLAUDE.md - Project Context for LLM Distillery
+# CLAUDE.md - LLM Distillery
 
-## What is this project?
+## What Is This?
 
-**LLM Distillery** is a framework for distilling knowledge from large foundation models (Gemini Flash) into small, domain-specific classifiers that run locally at 100x lower cost and 50x faster inference.
+**LLM Distillery** is a knowledge distillation framework. It trains small, cheap, local classifiers (Gemma-3-1B + LoRA) to replicate expensive cloud LLM scoring (Gemini Flash) at 100x lower cost and 50x faster inference.
 
-**Core workflow:** Oracle (Gemini Flash) scores articles on dimensions -> Train student model (Gemma-3-1B) -> Deploy locally
+**Core workflow:** Oracle (Gemini Flash) scores articles on dimensions (0-10) → Train student model (Gemma-3-1B) → Deploy as filter package
 
-## Project Structure
+**System context:** llm-distillery creates filters. NexusMind deploys them for production scoring. The interface is the filter package: `filters/{name}/v{N}/` directories copied between repos, plus HuggingFace Hub uploads.
 
-```
-llm-distillery/
-├── CLAUDE.md              # This file (AI context)
-├── filters/               # Versioned filter packages
-│   ├── uplifting/v6/      # Production ready, deployed
-│   ├── sustainability_technology/v1-v3/  # v3 production, deployed
-│   ├── investment-risk/v5-v6/  # v6 production, deployed
-│   ├── cultural-discovery/v1-v4/  # v4 production, deployed
-│   ├── signs_of_wisdom/v1/  # Early development
-│   ├── nature_recovery/v1/  # Early development
-│   ├── ai-engineering-practice/v2/  # Blocked on data
-│   ├── belonging/v1/      # Needs assessment
-│   └── todo/              # Planned filters
-│   └── common/            # Shared infrastructure
-│       ├── filter_base_scorer.py  # Base class for all filter scorers
-│       ├── model_loading.py       # Gemma-3 model loading + LoRA utilities
-│       ├── score_calibration.py   # Isotonic calibration fit/apply
-│       ├── embedding_stage.py     # e5-small probe for hybrid inference
-│       ├── hybrid_scorer.py       # Two-stage hybrid inference orchestrator
-│       ├── base_prefilter.py      # Base prefilter with commerce detection
-│       └── commerce_prefilter/    # ML commerce content detector
-├── ground_truth/          # Oracle scoring pipeline (batch_scorer, llm_client)
-├── training/              # Model training pipeline (prepare_data, validate, train)
-├── evaluation/            # Model evaluation tools
-├── research/              # Research experiments
-│   └── embedding_vs_finetuning/  # Embedding probes vs fine-tuning comparison
-├── datasets/              # Raw, scored, and training datasets
-├── docs/                  # Documentation
-│   ├── TODO.md            # Active task list
-│   ├── IDEAS.md           # Future ideas
-│   ├── OPEN_QUESTIONS.md  # Unresolved questions
-│   ├── ROADMAP.md         # Now/Next/Later roadmap
-│   ├── adr/               # ADRs 001-008 (screening, commerce, active learning, hybrid, deployment, calibration)
-│   ├── decisions/         # Detailed decision records
-│   └── templates/         # ADR template
-├── scripts/               # Utility scripts by phase
-└── config/                # Configuration and credentials
-```
+## Tech Stack
 
-## Current Status (February 2026)
+- **Oracle**: Gemini Flash ($0.001/article, dimensional scoring)
+- **Student**: Gemma-3-1B (`google/gemma-3-1b-pt`) with PEFT/LoRA adapters
+- **Calibration**: Per-dimension isotonic regression (ADR-008)
+- **Hybrid inference**: e5-small embedding probe (Stage 1) + fine-tuned model (Stage 2, ADR-006)
+- **Training data**: 5K-10K oracle-scored articles per filter, 80/10/10 splits
 
-### Production Ready Filters
+## Hard Constraints
+
+- **Oracle outputs scores only.** Dimensional scores (0-10), never tier/stage classifications. Tier assignment is postprocessing. Changing thresholds must never require re-labeling.
+- **Use `load_base_model_for_seq_cls()`** from `filters/common/model_loading.py`. Never use `AutoModelForSequenceClassification` directly — Gemma-3-1B's `gemma3_text` config isn't in the Auto mapping.
+- **Keep PEFT adapters in OLD key format.** `.lora_A.weight` / `score.weight`, not `.lora_A.default.weight`. Never run `resave_adapter.py` before Hub upload — it breaks `PeftModel.from_pretrained()`.
+- **Fit `calibration.json` after every training run.** Isotonic regression on the val set. Commit with the filter package. The base scorer auto-loads it.
+
+## Production Filters
+
 | Filter | Version | MAE | Training Data | Status |
 |--------|---------|-----|---------------|--------|
 | **uplifting** | v6 | 0.67 | 10.5K articles | Deployed (HF Hub, private) |
@@ -58,6 +33,7 @@ llm-distillery/
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
 
 ### In Development
+
 | Filter | Version | Status | Blocker |
 |--------|---------|--------|---------|
 | **belonging** | v1 | Needs assessment | Current sprint priority |
@@ -65,76 +41,53 @@ llm-distillery/
 | **nature_recovery** | v1 | Early dev | Need harmonized prompt |
 | **signs_of_wisdom** | v1 | Early dev | Need harmonized prompt |
 
-### Planned (filters/todo/)
-- future-of-education
-- seece (corporate excellence)
-- sustainability_economic_viability
-- sustainability_policy_effectiveness
+## Key Decisions
 
-### Backlog
-- **Commerce prefilter v2** - v1 needs rework for multilingual embeddings and context size.
+- **Dimensional regression (0-10)** — not classifications (ADR-001)
+- **Screen+merge for needle-in-haystack filters** (ADR-003)
+- **Commerce is the only universal prefilter** (ADR-004)
+- **Active learning for rare tiers** (ADR-005)
+- **Fine-tuning beats embedding probes** — research confirmed
+- **Gemma-3-1B** — replaced Qwen2.5; better MAE, faster inference
 
-## Key Decisions (see docs/adr/ and docs/decisions/)
+See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed records.
 
-- **Oracle outputs scores only** - Tier classification happens in postfilter (flexible thresholds)
-- **Dimensional regression** - Student models learn 0-10 scores, not classifications
-- **Gemma-3-1B** - Default student model (replaced Qwen2.5-1.5B), better MAE and faster inference
-- **Inline filters** - Fast rules embedded in prompts for model compatibility
-- **Screen+merge for needle-in-haystack filters** (ADR-003) - Random data provides negatives, screened data enriches positives; merge both for best results
-- **Commerce is only universal prefilter** (ADR-004) - Filter-specific noise handled by trained model, not additional prefilters
-- **Active learning for rare tiers** (ADR-005) - Use production filter to find high-scoring candidates, oracle score, add to training data
-- **Fine-tuning beats embedding probes** - Research confirmed fine-tuned models significantly outperform frozen embedding + probe approaches
-- **Post-hoc isotonic calibration** (ADR-008) - Per-dimension isotonic regression corrects MSE score compression; stored as `calibration.json`, applied at inference via `numpy.interp`
+## Before You Start
 
-## Development Workflow
+| When you're... | Read... |
+|----------------|---------|
+| Developing a new filter | `docs/agents/filter-development-guide.md` — full lifecycle, or `docs/guides/filter-creation-workflow.md` — quick steps |
+| Deploying to NexusMind or gpu-server | `docs/WAY-OF-WORKING.md` — deployment runbook with verify steps |
+| Training on GPU server | `memory/gpu-server.md` — venv, PYTHONPATH, HF_HUB_OFFLINE |
+| Debugging model loading or PEFT issues | `memory/gemma3-model.md` — Auto mapping fix, key format details |
+| Making architectural decisions | `docs/adr/README.md` — 8 settled ADRs |
+| Checking priorities or planning work | `docs/TODO.md` and `docs/ROADMAP.md` |
+| Understanding system design | `docs/ARCHITECTURE.md` |
+| Stuck on tooling or infra | `memory/gotcha-log.md` — problem/fix archive |
 
-### Filter Development
-
-See `docs/guides/filter-creation-workflow.md` for full step-by-step using uplifting v6 as template.
-
-Phases: Planning -> Architecture -> Validation -> Prefilter -> Training Data -> Training -> Inference Code -> Calibration -> Hybrid Probe -> Deploy -> Document
-
-### Common Commands
+## Getting Started
 
 ```bash
-# Score training data
-python -m ground_truth.batch_scorer --filter filters/uplifting/v5 --source datasets/raw/master_dataset.jsonl
+pip install -r requirements.txt
+
+# Configure: add HF token to config/credentials/secrets.ini
+# Oracle scoring
+python -m ground_truth.batch_scorer --filter filters/uplifting/v6 --source datasets/raw/master_dataset.jsonl
 
 # Prepare training splits
-python training/prepare_data.py --filter filters/uplifting/v5 --data-source datasets/scored/...
+python training/prepare_data.py --filter filters/uplifting/v6 --data-source datasets/scored/uplifting_v6.jsonl
 
-# Validate training data
-python training/validate_training_data.py --data-dir datasets/training/uplifting_v5
-
-# Fit score calibration (after training)
+# Fit calibration (after training)
 PYTHONPATH=. python scripts/calibration/fit_calibration.py \
-    --filter filters/uplifting/v6 \
-    --data-dir datasets/training/uplifting_v6 \
+    --filter filters/uplifting/v6 --data-dir datasets/training/uplifting_v6 \
     --test-data datasets/training/uplifting_v6/test.jsonl
+
+# Upload to Hub
+python scripts/deployment/upload_to_huggingface.py \
+    --filter filters/uplifting/v6 --repo-name jeergrvgreg/uplifting-filter-v6 \
+    --token $HF_TOKEN --private
 ```
-
-## Deployment Gotchas (see ADR-007)
-
-- **Do NOT run `resave_adapter.py` before Hub upload** — it changes key format and breaks `PeftModel.from_pretrained()`. Local `inference.py` handles remapping at load time.
-- **Use `load_base_model_for_seq_cls()`** from `filters/common/model_loading.py` instead of `AutoModelForSequenceClassification` directly. Gemma-3-1B (`gemma3_text` config) is not in the Auto mapping.
-- **Upload script verifies Hub loading** automatically after upload. If it fails, check adapter format.
-- **Fit `calibration.json` after training** (ADR-008) — the base scorer auto-loads it if present. Run `scripts/calibration/fit_calibration.py` on the val set. Commit `calibration.json` with the filter package.
-
-## Conventions
-
-- **Filter packages**: `filters/{name}/v{version}/` with config.yaml, prompt-compressed.md, prefilter.py, base_scorer.py, inference.py, inference_hub.py, inference_hybrid.py, calibration.json
-- **FilterBaseScorer**: All filter `base_scorer.py` files inherit from `filters/common/filter_base_scorer.py` for shared model loading, inference, and calibration logic
-- **ADRs**: Short architectural decisions in `docs/adr/`, detailed ones in `docs/decisions/`
-- **Datasets**: Raw -> Scored -> Training splits (80/10/10)
-
-## Important Files to Read
-
-Before making changes, understand:
-- `docs/TODO.md` - Current tasks and filter status
-- `docs/ROADMAP.md` - What's now/next/later
-- `docs/ARCHITECTURE.md` - System design
-- `docs/adr/` and `docs/decisions/` - Past decisions
 
 ---
 
-*Last updated: 2026-02-22*
+*Last updated: 2026-03-01*

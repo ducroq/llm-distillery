@@ -1,3 +1,5 @@
+> **Note (Mar 2026):** For general operations guidance (principles, runbooks, deployment), see `docs/WAY-OF-WORKING.md`. This guide covers agent-specific patterns for dataset validation and QA.
+
 # Agent Workflow Guide
 
 ## Overview

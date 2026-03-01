@@ -21,17 +21,18 @@ output: "Interactive checklists with status indicators, validation reports, and 
 
 ---
 
-## Overview: The 9-Phase Lifecycle
+## Overview: The Filter Development Lifecycle
 
 ```
-Planning → Architecture → Validation → Prefilter → Training Data → Training → Testing → Documentation → Deployment
-   ↓           ↓              ↓            ↓              ↓            ↓          ↓           ↓              ↓
- Define    Harmonize    Calibrate +    Optimize     Score 5K+     Distill    Benchmark   Document      Release
-                        Redundancy
-                         Analysis*
+Planning → Architecture → Validation → Prefilter → Training Data → Training → Calibration → Hybrid Probe → Testing → Documentation → Deployment
+   ↓           ↓              ↓            ↓              ↓            ↓          ↓              ↓             ↓           ↓              ↓
+ Define    Harmonize    Calibrate +    Optimize     Score 5K+     Distill    Isotonic     e5 probe +     Benchmark   Document      Release
+                        Redundancy                                          (ADR-008)     threshold
+                         Analysis*                                                        (ADR-006)
 ```
 
-**\*CRITICAL NEW STEP**: Phase 3 now includes dimension redundancy analysis - can save 50-75% training time!
+**\*CRITICAL**: Phase 3 includes dimension redundancy analysis - can save 50-75% training time!
+**Student model**: Gemma-3-1B (`google/gemma-3-1b-pt`) with PEFT/LoRA adapters. Always use `load_base_model_for_seq_cls()` for model loading.
 
 **Timeline**: 2-4 weeks from planning to deployment (faster with good dimension design!)
 **Cost**: ~$5-10 for training data (5K articles @ $0.001/article)
@@ -1496,7 +1497,7 @@ python scripts/save_validation_report.py \
 
 - [ ] **Training data ready** - train.jsonl, val.jsonl, test.jsonl
 - [ ] **Training mode selected** - Distillation OR instruction tuning
-- [ ] **Base model selected** - Qwen 2.5 7B (recommended)
+- [ ] **Base model selected** - Gemma-3-1B (recommended, `google/gemma-3-1b-pt`)
 - [ ] **Training run complete** - Model checkpoints saved
 - [ ] **Validation metrics** - MAE, accuracy, correlation tracked
 - [ ] **Test set evaluation** - Final performance on held-out test set
@@ -1524,45 +1525,12 @@ python -m training.train \
   --mode distillation \
   --filter-name {filter_name} \
   --version v1 \
-  --base-model unsloth/Qwen2.5-7B-Instruct \
-  --epochs 3 \
-  --learning-rate 2e-4 \
-  --batch-size 4 \
-  --gradient-accumulation 4 \
-  --output-dir filters/{filter_name}/v1_distillation
+  --config filters/{filter_name}/v1/config.yaml \
+  --data-dir datasets/training/{filter_name}_v1 \
+  --output-dir filters/{filter_name}/v1/model
 ```
 
-#### Mode 2: Instruction Tuning
-
-**Approach:** Model learns to generate full JSON output (like oracle)
-
-**Input:** Article text + instruction
-**Output:** Full JSON with scores and reasoning
-
-**Advantages:**
-- Can generate reasoning
-- More flexible output format
-
-**Disadvantages:**
-- Harder to train (generation task)
-- Slower inference
-- More prone to hallucination
-
-**Training:**
-```bash
-python -m training.train \
-  --mode instruction \
-  --filter-name {filter_name} \
-  --version v1 \
-  --base-model unsloth/Qwen2.5-7B-Instruct \
-  --epochs 3 \
-  --learning-rate 2e-4 \
-  --batch-size 2 \
-  --gradient-accumulation 8 \
-  --output-dir filters/{filter_name}/v1_instruction
-```
-
-**Recommendation:** Start with distillation. Add instruction tuning later if reasoning needed.
+> **Note**: Instruction tuning mode (generating full JSON with reasoning) was explored but is not recommended. Distillation (regression) is simpler, faster, and produces better results.
 
 ### Training Process
 
@@ -1584,19 +1552,13 @@ python scripts/prepare_training_data.py \
 #### Step 2: Run Training
 
 ```bash
-python -m training.train \
-  --mode distillation \
-  --filter-name {filter_name} \
-  --version v1 \
-  --base-model unsloth/Qwen2.5-7B-Instruct \
-  --epochs 3 \
-  --learning-rate 2e-4 \
-  --batch-size 4 \
-  --gradient-accumulation 4 \
-  --warmup-steps 100 \
-  --output-dir filters/{filter_name}/v1_distillation \
-  --wandb-project llm-distillery-{filter_name}
+PYTHONPATH=. python training/train.py \
+  --config filters/{filter_name}/v1/config.yaml \
+  --data-dir datasets/training/{filter_name}_v1 \
+  --output-dir filters/{filter_name}/v1/model
 ```
+
+> **Important**: Use `PYTHONPATH=.` when running from project root. On gpu-server, activate venv first. See `docs/WAY-OF-WORKING.md` for GPU server access patterns.
 
 **Time:** 2-6 hours depending on data size and GPU
 **Cost:** $0-5 if using cloud GPU (or free with local GPU)
@@ -1678,7 +1640,7 @@ python -m training.evaluate \
 1. Use early stopping
 2. Reduce learning rate
 3. Add more training data
-4. Reduce model size (try Qwen 1.5B)
+4. Verify model loading uses `load_base_model_for_seq_cls()` (not `AutoModelForSequenceClassification` — see Gemma-3 model loading notes)
 
 #### Issue 3: Poor tier classification accuracy
 
@@ -1708,7 +1670,7 @@ python -m training.evaluate \
 
 **Date:** YYYY-MM-DD
 **Training Mode:** Distillation
-**Base Model:** Qwen 2.5 7B Instruct
+**Base Model:** Gemma-3-1B (`google/gemma-3-1b-pt`)
 **Training Data:** X articles
 **Test Data:** X articles (held-out)
 
@@ -1758,6 +1720,85 @@ python -m training.evaluate \
 - [ ] Tune hyperparameters: ✅ / ❌
 - [ ] Improve specific dimension: [Which one?]
 ```
+
+---
+
+## Phase 6b: Score Calibration (ADR-008)
+
+**Goal**: Correct MSE-induced score compression with per-dimension isotonic regression
+
+MSE training causes models to compress scores toward the mean. Isotonic calibration maps raw model outputs to calibrated scores that better match oracle distribution.
+
+### Checklist
+
+- [ ] **Training complete** - Trained model available in `filters/{filter_name}/v{N}/model/`
+- [ ] **Val/test data available** - Need held-out data for calibration fitting
+- [ ] **Run calibration fitting** - Generates `calibration.json`
+- [ ] **Verify calibrated MAE** - Should improve over raw MAE
+- [ ] **Commit calibration.json** - Goes in filter package directory
+
+### Process
+
+```bash
+PYTHONPATH=. python scripts/calibration/fit_calibration.py \
+    --filter filters/{filter_name}/v{N} \
+    --data-dir datasets/training/{filter_name}_v{N} \
+    --test-data datasets/training/{filter_name}_v{N}/test.jsonl
+```
+
+**Output**: `filters/{filter_name}/v{N}/calibration.json` — per-dimension isotonic regression mapping.
+
+The `FilterBaseScorer` base class auto-loads `calibration.json` if present and applies calibration at inference time via `numpy.interp`.
+
+### Validation
+
+- Calibrated MAE should be ≤ raw MAE (if not, investigate dimension-level results)
+- Check that high scores aren't artificially boosted (calibration should decompress, not inflate)
+- Verify `calibration.json` contains entries for all scoring dimensions
+
+---
+
+## Phase 6c: Hybrid Inference Probe (ADR-006)
+
+**Goal**: Train a fast embedding probe for two-stage hybrid inference (optional but recommended)
+
+Hybrid inference uses a cheap Stage 1 (e5-small embedding + MLP probe) to quickly identify low-scoring articles, then only runs the expensive Stage 2 (fine-tuned Gemma-3-1B) on promising candidates. Speedup varies from 1.1x to 2.1x depending on filter pass rate.
+
+### Checklist
+
+- [ ] **Trained model available** - Stage 2 model must be trained first
+- [ ] **Generate embeddings** - e5-small embeddings for training data
+- [ ] **Train MLP probe** - Lightweight classifier on embeddings
+- [ ] **Find optimal threshold** - Balance false negatives vs speedup
+- [ ] **Create inference_hybrid.py** - Integrates probe + model
+- [ ] **Verify false negative rate** - Target <2% on test set
+
+### Process
+
+See `filters/common/embedding_stage.py` and `filters/common/hybrid_scorer.py` for the shared infrastructure.
+
+```bash
+# Generate embeddings
+PYTHONPATH=. python scripts/embeddings/generate_embeddings.py \
+    --data-dir datasets/training/{filter_name}_v{N} \
+    --output-dir filters/{filter_name}/v{N}/probe
+
+# Train probe
+PYTHONPATH=. python scripts/embeddings/train_probe.py \
+    --embeddings-dir filters/{filter_name}/v{N}/probe \
+    --output-dir filters/{filter_name}/v{N}/probe
+```
+
+**Output**: `filters/{filter_name}/v{N}/probe/` directory with probe weights and threshold config.
+
+### Reference Stats (Production Filters)
+
+| Filter | Probe MAE | Threshold | FN Rate | Speedup |
+|--------|-----------|-----------|---------|---------|
+| uplifting v5 | 0.49 | 4.5 | 1.7% | 2.09x |
+| sustainability_technology v2 | 0.707 | 1.25 | 1.2% | 1.25x |
+| investment-risk v5 | 0.497 | 1.50 | 0.8% | 1.07x |
+| cultural-discovery v3 | 0.609 | 1.25 | 0.0% | 1.52x |
 
 ---
 
@@ -1963,9 +2004,9 @@ python scripts/benchmark_inference.py \
 - GPU not utilized properly
 
 **Fixes:**
-1. Try smaller model (Qwen 1.5B)
-2. Optimize inference code (batching, quantization)
-3. Use GPU for inference
+1. Gemma-3-1B is already compact — check if GPU is being utilized
+2. Use hybrid inference (embedding probe Stage 1 + model Stage 2, ADR-006)
+3. Optimize inference code (batching, quantization)
 
 #### Issue 3: Systematic failures on specific type
 
@@ -1989,7 +2030,7 @@ python scripts/benchmark_inference.py \
 # {Filter Name} v1 - Testing Report
 
 **Date:** YYYY-MM-DD
-**Model:** Qwen 2.5 7B Distillation
+**Model:** Gemma-3-1B + LoRA Distillation
 **Test Sample:** 100 articles (unseen)
 
 ## Oracle Benchmark
@@ -2292,17 +2333,22 @@ python scripts/benchmark_inference.py \
 Each deployed filter should have these files in its directory:
 
 ```
-filters/{filter_name}/v1/
-├── inference.py           # Local inference module
-├── inference_hub.py       # HuggingFace Hub inference (optional)
-├── test_inference.py      # Test script with sample articles
-├── DEPLOYMENT.md          # Deployment guide
-├── model/                 # Trained model artifacts
-│   ├── adapter_model.safetensors
+filters/{filter_name}/v{N}/
+├── config.yaml              # Dimensions, weights, tiers, gatekeepers
+├── prompt-compressed.md     # Oracle prompt
+├── prefilter.py             # Rule-based noise filter
+├── base_scorer.py           # Scoring logic (inherits FilterBaseScorer)
+├── inference.py             # Local inference module
+├── inference_hub.py         # HuggingFace Hub inference
+├── inference_hybrid.py      # Two-stage hybrid inference (probe + model)
+├── calibration.json         # Isotonic calibration (ADR-008)
+├── README.md                # Results, known limitations
+├── model/                   # LoRA adapter + tokenizer config
+│   ├── adapter_model.safetensors  # Keep in OLD key format!
 │   ├── adapter_config.json
 │   └── ...
-└── benchmarks/            # Test set results
-    └── test_set_results.json
+├── probe/                   # e5-small MLP probe for hybrid Stage 1
+└── training_metadata.json   # Hyperparameters, dataset info
 ```
 
 ### Deployment Process
@@ -2344,7 +2390,11 @@ class {FilterName}Scorer:
 - Gatekeeper enforcement in postfilter
 - Tier assignment based on config thresholds
 
-**Reference implementation:** `filters/sustainability_technology/v1/inference.py`
+**Important — Model Loading**: Always use `load_base_model_for_seq_cls()` from `filters/common/model_loading.py` instead of `AutoModelForSequenceClassification`. Gemma-3-1B's `gemma3_text` config type is not in the Auto mapping (see ADR-007).
+
+**Important — PEFT Adapter Format**: Keep adapter files in OLD key format (`.lora_A.weight`, `score.weight`). Do NOT run `resave_adapter.py`. Hub loading requires OLD format; local inference.py remaps as needed.
+
+**Reference implementation:** `filters/uplifting/v6/inference.py`
 
 #### Step 2: Create HuggingFace Hub Module (Optional)
 
@@ -2372,7 +2422,7 @@ class {FilterName}ScorerHub:
         pass
 ```
 
-**Reference implementation:** `filters/sustainability_technology/v1/inference_hub.py`
+**Reference implementation:** `filters/uplifting/v6/inference_hub.py`
 
 #### Step 3: Create Test Script
 
@@ -2417,7 +2467,7 @@ def test_inference(use_hub=False):
 - Low-scoring article (expected: low tier)
 - Off-topic article (expected: blocked by prefilter or low tier)
 
-**Reference implementation:** `filters/sustainability_technology/v1/test_inference.py`
+**Reference implementation:** `filters/uplifting/v6/` (see test patterns used in production filters)
 
 #### Step 4: Upload to HuggingFace Hub
 
@@ -2500,7 +2550,7 @@ print(result['tier'])
 - Inference: ~15ms/article (GPU)
 ```
 
-**Reference implementation:** `filters/sustainability_technology/v1/DEPLOYMENT.md`
+**Reference implementation:** `filters/uplifting/v6/README.md`
 
 #### Step 7: Update Filter README
 
