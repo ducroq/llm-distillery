@@ -1,7 +1,7 @@
 # Belonging Filter - Development Status
 
 **Last Updated:** 2026-03-01
-**Status:** Phase 1-2 Reiteration Complete — Ready for Oracle Validation
+**Status:** Phase 3 Oracle Validation Complete — Ready for Batch Labeling
 
 ---
 
@@ -24,29 +24,62 @@
   - [x] Config updated: model → Gemma-3-1B, head_tail 256+256, target_samples → 10K
   - [x] `hybrid_inference` section added (placeholder, threshold TBD after training)
   - [x] `gatekeepers` section added to config
+- [x] **Phase 3 oracle validation** (2026-03-01):
+  - [x] 152 articles scored with Gemini Flash (72 candidates + 80 master dataset)
+  - [x] Fixed missing article placeholder — root cause of hallucinated evidence
+  - [x] Added `out_of_scope` content type for noise articles
+  - [x] Added anti-hallucination warning after validation examples
+  - [x] **Results:** 3 HIGH, 16 MEDIUM, 133 LOW — correct tier distribution
+  - [x] **Hallucinations:** 0 (after fix)
+  - [x] **Gatekeeper:** triggered on 88% of articles, correctly blocks noise
+  - [x] **Evidence quality:** exact quotes from articles, "No evidence in article" for absent dimensions
+  - [x] **Dimension independence confirmed:** slow_presence consistently lowest (max 6.0), purpose_beyond_self often highest
+
+---
+
+## Oracle Validation Results (152 articles)
+
+| Metric | Value |
+|--------|-------|
+| Articles scored | 152 |
+| HIGH (≥7.0) | 3 (2%) |
+| MEDIUM (4.0-7.0) | 16 (11%) |
+| LOW (<4.0) | 133 (88%) |
+| Gatekeeper triggered | 133 (88%) |
+| Hallucinated evidence | 0 |
+| Content type "out_of_scope" | 127 |
+
+**MEDIUM+ dimension stats:**
+
+| Dimension | Min | Max | Mean |
+|-----------|-----|-----|------|
+| intergenerational_bonds | 2.0 | 8.5 | 5.7 |
+| community_fabric | 3.0 | 8.0 | 6.4 |
+| reciprocal_care | 2.0 | 8.0 | 5.4 |
+| rootedness | 2.0 | 8.0 | 6.3 |
+| purpose_beyond_self | 4.0 | 9.0 | 6.7 |
+| slow_presence | 3.0 | 6.0 | 4.2 |
+
+**Note:** `slow_presence` caps at 6.0 in news corpus — unhurried rituals need literary/longform content to score higher. Not a prompt issue.
 
 ---
 
 ## Next Steps
 
-1. **Phase 3: Oracle Validation** (next)
-   - Pick 20 articles from `calibrations/candidates/belonging_candidates.jsonl`
-   - Test with rewritten prompt against Gemini Flash
-   - Validate: scope check catches out-of-scope, gatekeeper caps wellness leakage
-   - Validate: exact-quote evidence works (no hallucinated paraphrases)
-   - Check dimension independence and scoring distribution
-
-2. **Automated Oracle Calibration**
+1. **Phase 4: Batch Labeling** (next)
    ```bash
    python -m ground_truth.batch_scorer \
        --filter filters/belonging/v1 \
-       --source "filters/belonging/v1/calibrations/candidates/belonging_candidates.jsonl" \
-       --target-count 100
+       --source "datasets/raw/master_dataset_*.jsonl" \
+       --llm gemini-flash \
+       --target-scored 10000 \
+       --random-sample --seed 42
    ```
 
-3. **Batch Labeling** (after calibration)
-   - Generate ground truth dataset (target: 10,000 articles)
-   - Use for fine-tuning Gemma-3-1B + LoRA
+2. **Phase 5: Training** (after labeling)
+   - Prepare training splits (80/10/10)
+   - Train Gemma-3-1B + LoRA on gpu-server
+   - Fit isotonic calibration on val set
 
 ---
 
@@ -58,7 +91,7 @@
 | `prompt-compressed.md` | Oracle prompt for LLM scoring |
 | `prefilter.py` | Rule-based blocker (saves API costs) |
 | `DEEP_ROOTS.md` | Philosophical grounding (Weil, Tönnies, etc.) |
-| `calibrations/candidates/belonging_candidates.jsonl` | 72 articles for testing |
+| `calibrations/candidates/belonging_candidates.jsonl` | 72 candidate articles |
 
 ---
 
@@ -79,3 +112,4 @@
 - RSS sources in FluxusSource will improve future data quality for this filter
 - Gatekeeper on community_fabric prevents wellness/longevity articles from scoring HIGH without actual community evidence
 - Phase 1-2 reiteration aligned prompt and config with uplifting v6 / cultural-discovery v4 production standards
+- Master dataset prefilter blocks 52% of articles (91,992/178,462) — saves API costs during batch labeling
