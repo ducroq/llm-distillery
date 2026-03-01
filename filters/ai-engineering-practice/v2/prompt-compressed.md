@@ -12,7 +12,7 @@
 
 **Is this article about an engineer/developer describing their actual experience using AI tools?**
 
-- **YES** → Proceed to dimensional scoring
+- **YES** → Proceed to Step 1b (domain classification), then dimensional scoring
 - **NO** → Use content_type "not_relevant", score ALL dimensions 0-2
 
 **"Experience using AI tools" means:**
@@ -25,6 +25,21 @@
 - AI in other domains (medical, business, pricing algorithms)
 - Building AI applications (tutorials on making LLM apps)
 - Tools FOR managing AI (privacy firewalls, monitoring dashboards)
+
+---
+
+## STEP 1b: Domain Classification
+
+Classify the engineering domain (choose ONE):
+- **software** — Web, mobile, cloud, DevOps, data engineering
+- **embedded** — Firmware, RTOS, microcontrollers, FPGA, hardware-software interface
+- **mechanical** — CAD, FEA, CFD, topology optimization, 3D printing, manufacturing
+- **electrical** — PCB design, circuit simulation, power systems, signal processing
+- **civil_structural** — Structural analysis, BIM, construction, geotechnical
+- **mixed** — Crosses 2+ domains (e.g., robotics firmware + mechanical design)
+- **other** — Engineering domain not listed above (specify in evidence)
+
+This is a LABEL, not a score. It does not affect dimensional scoring.
 
 ---
 
@@ -158,6 +173,7 @@ For each dimension, you MUST cite **exact text from the article** as evidence.
 ```json
 {
   "content_type": "not_relevant|practitioner_account|research_study|...",
+  "engineering_domain": "software|embedded|mechanical|electrical|civil_structural|mixed|other",
   "workflow_detail": {
     "score": 0.0,
     "evidence": "EXACT QUOTE from article or 'No evidence in article'"
@@ -185,12 +201,13 @@ For each dimension, you MUST cite **exact text from the article** as evidence.
 
 ## Examples
 
-### Example 1: GOOD - Practitioner Account (HIGH score)
+### Example 1: GOOD - Software Practitioner Account (HIGH score)
 **Article:** "I'm a senior engineer at Spotify. Here's my daily Copilot workflow: I write a docstring, tab-complete the function, then spend 5-10 minutes reviewing. I've learned to be suspicious of any code touching our payment systems - Copilot hallucinates API calls about 30% of the time there."
 
 ```json
 {
   "content_type": "practitioner_account",
+  "engineering_domain": "software",
   "workflow_detail": {"score": 9.0, "evidence": "write a docstring, tab-complete the function, then spend 5-10 minutes reviewing"},
   "validation_coverage": {"score": 7.0, "evidence": "I've learned to be suspicious of any code touching our payment systems - Copilot hallucinates API calls about 30% of the time"},
   "methodological_rigor": {"score": 3.0, "evidence": "Single practitioner anecdote, no systematic data"},
@@ -205,6 +222,7 @@ For each dimension, you MUST cite **exact text from the article** as evidence.
 ```json
 {
   "content_type": "vendor_announcement",
+  "engineering_domain": "software",
   "workflow_detail": {"score": 1.0, "evidence": "No evidence in article - only lists features, no usage experience"},
   "validation_coverage": {"score": 0.0, "evidence": "No evidence in article"},
   "methodological_rigor": {"score": 1.0, "evidence": "No evidence in article - product announcement only"},
@@ -219,6 +237,7 @@ For each dimension, you MUST cite **exact text from the article** as evidence.
 ```json
 {
   "content_type": "not_relevant",
+  "engineering_domain": "software",
   "workflow_detail": {"score": 1.0, "evidence": "No evidence in article - describes building a tool FOR AI usage, not using AI in engineering work"},
   "validation_coverage": {"score": 0.0, "evidence": "No evidence in article"},
   "methodological_rigor": {"score": 0.0, "evidence": "No evidence in article"},
@@ -233,11 +252,42 @@ For each dimension, you MUST cite **exact text from the article** as evidence.
 ```json
 {
   "content_type": "not_relevant",
+  "engineering_domain": "other",
   "workflow_detail": {"score": 0.0, "evidence": "No evidence in article - AI in retail/business, not engineering practice"},
   "validation_coverage": {"score": 0.0, "evidence": "No evidence in article"},
   "methodological_rigor": {"score": 0.0, "evidence": "No evidence in article"},
   "practitioner_voice": {"score": 0.0, "evidence": "No evidence in article - wrong domain"},
   "educational_applicability": {"score": 0.0, "evidence": "No evidence in article - not about engineering with AI tools"}
+}
+```
+
+### Example 5: GOOD - Mechanical Engineer Crossover (HIGH score)
+**Article:** "Our structural team started using AI-assisted topology optimization in Fusion 360 last quarter. The workflow: define load cases manually, let the generative design module propose geometries, then we validate with traditional FEA. First month we rejected 80% of suggestions — the AI didn't understand our fatigue constraints. By month three, after we learned to constrain the design space better, we're accepting about 60%. Saves roughly 2 weeks per iteration on bracket designs."
+
+```json
+{
+  "content_type": "practitioner_account",
+  "engineering_domain": "mechanical",
+  "workflow_detail": {"score": 8.0, "evidence": "define load cases manually, let the generative design module propose geometries, then we validate with traditional FEA"},
+  "validation_coverage": {"score": 7.0, "evidence": "rejected 80% of suggestions — the AI didn't understand our fatigue constraints"},
+  "methodological_rigor": {"score": 4.0, "evidence": "Single team anecdote with some metrics (80% rejection, 60% acceptance, 2 weeks saved)"},
+  "practitioner_voice": {"score": 8.0, "evidence": "Our structural team started using..."},
+  "educational_applicability": {"score": 7.0, "evidence": "Teachable pattern: constrain design space to improve AI output quality"}
+}
+```
+
+### Example 6: GOOD - Embedded Engineer Crossover (HIGH score)
+**Article:** "I've been using Claude to help debug register-level issues on our STM32H7 project. My workflow: paste the datasheet table for the peripheral, describe the symptom, and ask for hypotheses. It caught a clock configuration error I'd been staring at for two days — the PLL multiplier was set for the wrong input frequency. I still verify every suggestion against the reference manual, but it's like having a second pair of eyes that never gets tired."
+
+```json
+{
+  "content_type": "practitioner_account",
+  "engineering_domain": "embedded",
+  "workflow_detail": {"score": 8.0, "evidence": "paste the datasheet table for the peripheral, describe the symptom, and ask for hypotheses"},
+  "validation_coverage": {"score": 6.0, "evidence": "I still verify every suggestion against the reference manual"},
+  "methodological_rigor": {"score": 3.0, "evidence": "Single practitioner anecdote, no systematic data"},
+  "practitioner_voice": {"score": 9.0, "evidence": "I've been using Claude to help debug register-level issues on our STM32H7 project"},
+  "educational_applicability": {"score": 6.0, "evidence": "Demonstrates pattern: use AI with hardware datasheets for hypothesis generation"}
 }
 ```
 
@@ -250,5 +300,6 @@ For each dimension, you MUST cite **exact text from the article** as evidence.
 3. **INLINE FILTERS** - Check CRITICAL FILTERS for each dimension before scoring
 4. **EXACT QUOTES** - Evidence must be verbatim text or "No evidence in article"
 5. **not_relevant = 0s** - If content_type is "not_relevant", ALL dimensions should be 0-2
+6. **DOMAIN IS A LABEL** - engineering_domain does not affect scores. A mechanical engineer's account is scored identically to a software engineer's
 
 **DO NOT include any text outside the JSON object.**

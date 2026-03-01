@@ -51,9 +51,10 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 
 ### In Active Development (priority order)
 - [ ] **belonging v1** - Needs assessment
-- [ ] **ai-engineering-practice v2** - BLOCKED ON DATA
-  - Needs FluxusSource hardware engineering sources
+- [ ] **ai-engineering-practice v2** - Ready for oracle scoring
+  - FluxusSource hardware sources active (1,193 articles)
   - Prompt calibration complete (~60% tier accuracy)
+  - Added engineering_domain classification (crossover tracking)
 - [ ] **nature_recovery v1** - Early development
   - Concept and README complete, 8 dimensions defined
   - Next: harmonized prompt, prefilter.py, validation

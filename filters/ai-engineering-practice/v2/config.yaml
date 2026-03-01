@@ -37,6 +37,18 @@ oracle:
     - gemini-pro
     - claude-sonnet
 
+  # Domain classification (label, not scored — does not affect dimensional scores)
+  domain_classification:
+    field: engineering_domain
+    values:
+      - software        # Web, mobile, cloud, DevOps, data engineering
+      - embedded        # Firmware, RTOS, microcontrollers, FPGA, hardware-software interface
+      - mechanical      # CAD, FEA, CFD, topology optimization, 3D printing, manufacturing
+      - electrical      # PCB design, circuit simulation, power systems, signal processing
+      - civil_structural # Structural analysis, BIM, construction, geotechnical
+      - mixed           # Crosses 2+ domains
+      - other           # Engineering domain not listed above
+
 scoring:
   dimensions:
     # === CONTENT DIMENSIONS (WHAT is described) ===
@@ -150,7 +162,7 @@ training:
   target_samples: 5000
   train_val_test_split: [0.8, 0.1, 0.1]
   quality_threshold: 0.7
-  recommended_model: "Qwen2.5-1.5B"
+  recommended_model: "Gemma-3-1B"
   expected_mae: "<1.0 per dimension"
 
 deployment:

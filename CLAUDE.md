@@ -37,7 +37,7 @@
 | Filter | Version | Status | Blocker |
 |--------|---------|--------|---------|
 | **belonging** | v1 | Needs assessment | Current sprint priority |
-| **ai-engineering-practice** | v2 | Blocked | Needs FluxusSource hardware sources |
+| **ai-engineering-practice** | v2 | Ready for oracle scoring | Domain classification added |
 | **nature_recovery** | v1 | Early dev | Need harmonized prompt |
 | **signs_of_wisdom** | v1 | Early dev | Need harmonized prompt |
 

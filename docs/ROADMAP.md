@@ -3,10 +3,9 @@
 ## Now (Current Sprint)
 
 - **belonging v1** - Assess existing work and develop
-- **Deploy hybrid inference to NexusMind** - Probes trained and calibrated, need to sync to production
 
 ## Next (Coming Soon)
-- **ai-engineering-practice v2** - Unblock by adding hardware engineering sources to FluxusSource
+- **ai-engineering-practice v2** - Unblocked, ready for oracle scoring + training
 - **nature_recovery v1** - Develop harmonized prompt and prefilter
 - **signs_of_wisdom v1** - Develop harmonized prompt and prefilter
 
@@ -91,6 +90,11 @@
   - Probe MAE 0.91, threshold 1.25 (to be calibrated with production data)
 - [x] **Investment-risk v6 probe** - Trained for Gemma-3-1B - 2026-02
   - Probe MAE 0.557, threshold 1.50
+
+### Hybrid Deployment
+- [x] **Deploy hybrid inference to NexusMind** - 2026-03
+  - embedding_stage.py, hybrid_scorer.py, inference_hybrid.py synced to NexusMind repo
+  - Probe directories for all 4 production filters deployed
 
 ### Score Calibration
 - [x] **Isotonic regression calibration** (ADR-008) - 2026-02

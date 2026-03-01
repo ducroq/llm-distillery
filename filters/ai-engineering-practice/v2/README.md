@@ -1,9 +1,8 @@
 # AI Engineering Practice Filter v2
 
-**Status:** BLOCKED ON DATA
+**Status:** UNBLOCKED — Ready for oracle scoring
 **Previous Version:** v1 (FAILED - oracle hallucination)
-**Blocked Since:** 2025-12-20
-**Unblock Dependency:** FluxusSource hardware engineering sources (see below)
+**Unblocked:** 2026-03-01 — FluxusSource hardware engineering sources confirmed active (1,193 articles)
 
 ## Purpose
 
@@ -110,30 +109,24 @@ Original thresholds (7.0/4.0) were too aggressive for practitioner accounts:
    - Tier accuracy: ~60%
 6. [x] Adjust tier thresholds (7.0 -> 6.0, 4.0 -> 3.5)
 
-### Phase 3: Training Data Generation - BLOCKED ON DATA
-7. [ ] BLOCKED: Insufficient HIGH-scoring articles in current FluxusSource data
-   - Current data is software-heavy, mostly news/announcements
-   - Practitioner accounts with workflow detail are rare
-   - Need hardware engineering sources added to FluxusSource
+### Phase 3: Training Data Generation - READY
+7. [ ] Oracle-score articles from master dataset (5K+ target)
+   - FluxusSource hardware sources active: 22 feeds, 1,193+ articles in NexusMind raw data
+   - Added engineering_domain classification field (software/embedded/mechanical/electrical/civil_structural/mixed/other)
+   - Domain label is metadata only — does not affect dimensional scores
 
-### Phase 4: Training - BLOCKED
+### Phase 4: Training
 8. [ ] Generate 5K+ training samples
-9. [ ] Train Qwen2.5-1.5B model
+9. [ ] Train Gemma-3-1B model
 
-## Data Dependency
+## Data Sources (Resolved)
 
-**Issue filed:** `FluxusSource/docs/issues/add_hardware_engineering_sources.md`
+FluxusSource hardware engineering sources are active on sadalsuud (confirmed 2026-03-01):
+- **rss_semiconductor_hardware.yaml** — 12 active feeds (EE Times, Tom's Hardware, CNX Software, Bootlin, Embedded Artistry, FPGA feeds)
+- **rss_mechanical_engineering.yaml** — 10 active feeds (engineering.com, 3dprint.com, ANSYS, Siemens Simcenter, Voxelmatters)
+- **1,193 articles** in NexusMind raw data from these sources
 
-This filter needs practitioner content that current FluxusSource feeds don't provide:
-- Embedded/firmware blogs (beningo.com, embedded.com)
-- FPGA practitioner content (controlpaths.com, adiuvoengineering.com)
-- Mechanical/CAD blogs (mechanical-engineering.com, engineersrule.com)
-- 3D printing forums (forum.prusa3d.com)
-- Structural/civil engineering (structuremag.org, aecmag.com)
-
-**Verified articles:** 22 practitioner articles confirmed across these sources (see FluxusSource issue)
-
-**Unblock criteria:** FluxusSource adds 10+ hardware engineering feeds, collects 2+ weeks of data
+Practitioner blogs (Bootlin, Embedded Artistry, Beningo) produce low volume but high signal. Bulk comes from news/aggregator feeds — the oracle scoring will separate practitioner content from product announcements.
 
 ## Learnings from Documentation
 
