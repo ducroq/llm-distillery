@@ -7,6 +7,7 @@ filter:
   name: belonging
   version: "1.0"
   created: "2025-01-12"
+  updated: "2026-03-01"
   description: "Rate content for evidence of genuine belonging - social fabric that cannot be purchased or optimized"
   focus: "Gemeinschaft over Gesellschaft: organic community bonds, rootedness, intergenerational ties"
 
@@ -15,9 +16,19 @@ filter:
     (diet, exercise, longevity hacks). Focuses on what cannot be purchased: the relational
     infrastructure of a good life.
 
+  changelog_v1_reiteration: |
+    Phase 1-2 reiteration (2026-03-01):
+    - Prompt restructured with Step 1 scope check (production pattern)
+    - Inline critical filters added per dimension (before scale tables)
+    - Anti-hallucination rule: evidence must be EXACT QUOTE
+    - community_fabric added as gatekeeper dimension (threshold 3.0)
+    - Model updated from Qwen2.5-1.5B to Gemma-3-1B
+    - head_tail preprocessing added (256+256 tokens)
+    - target_samples increased to 10000
+
 prefilter:
   enabled: true
-  expected_pass_rate: 0.15  # Estimated 15% of random articles, needs calibration
+  expected_pass_rate: 0.15
   description: "Blocks wellness industry, professional networking, tourism, and self-help content"
 
 oracle:
@@ -43,11 +54,18 @@ scoring:
         7-8: Deep intergenerational relationship, sustained mentorship, living tradition
         9-10: Transformative knowledge transfer across generations, elders central to community
       evidence_focus: "Grandparents involved, elder wisdom transmitted, youth learning from old, multi-age gatherings"
+      critical_filters: |
+        Score 0-2 if: Age-segregated contexts (retirement homes, youth programs without elders),
+        elders mentioned only as care burden or longevity examples,
+        professional mentorship (career coaching, business networking)
 
     community_fabric:
       weight: 0.25
       category: relational
       description: "Mutual aid, neighborly ties, third places, local institutions, civic participation"
+      gatekeeper: true
+      gatekeeper_threshold: 3
+      gatekeeper_max_score: 3.42
       scale: |
         0-2: Isolated individuals, transactional relationships, or online-only connection
         3-4: Loose acquaintance networks, event-based gathering
@@ -55,6 +73,11 @@ scoring:
         7-8: Strong mutual aid networks, deep neighborly bonds, thriving local institutions
         9-10: Thick social fabric - everyone knows everyone, decades-long relationships, organic solidarity
       evidence_focus: "Neighbors helping neighbors, community institutions, third places, civic engagement, mutual aid"
+      critical_filters: |
+        Score 0-2 if: Professional networking, LinkedIn, "building social capital",
+        online-only communities without in-person component,
+        corporate team-building or company culture,
+        self-help "find your tribe" framing
 
     reciprocal_care:
       weight: 0.10
@@ -67,6 +90,10 @@ scoring:
         7-8: Multigenerational household or close proximity, daily care exchange
         9-10: Deep interdependence across generations, care woven into daily life, aging at home as norm
       evidence_focus: "Grandparents living with family, home care for elders, daily family meals, shared childcare"
+      critical_filters: |
+        Score 0-2 if: Care framed as burden, institutionalization as solution,
+        independence idealized over interdependence,
+        paid caregiving services without family/community context
 
     # === PLACE & MEANING DIMENSIONS ===
 
@@ -81,6 +108,10 @@ scoring:
         7-8: Decades in one place, deep local knowledge, committed to staying
         9-10: Generational rootedness - family in same place for generations, identity tied to land
       evidence_focus: "Years/generations in place, local knowledge, commitment to staying, place-based identity"
+      critical_filters: |
+        Score 0-2 if: Mobility celebrated, location independence, digital nomad framing,
+        tourism framing ("visit this authentic community"),
+        "anywhere" lifestyle as aspiration
 
     purpose_beyond_self:
       weight: 0.15
@@ -93,6 +124,10 @@ scoring:
         7-8: Deep vocation, life organized around contribution, ikigai evident
         9-10: Purpose inseparable from community wellbeing, life as gift to others
       evidence_focus: "Service motivation, vocation language, contribution to others, meaning through giving"
+      critical_filters: |
+        Score 0-2 if: Purpose as personal fulfillment or longevity benefit,
+        "find your ikigai" self-help framing,
+        career advancement or personal optimization
 
     slow_presence:
       weight: 0.10
@@ -105,6 +140,10 @@ scoring:
         7-8: Rhythm of life includes significant slow time, established rituals, shared meals
         9-10: Life organized around presence - daily rituals, extended meals, sabbath practices, anti-hurry culture
       evidence_focus: "Shared meals, rituals, unhurried time, traditions, presence practices, rest"
+      critical_filters: |
+        Score 0-2 if: Mindfulness for productivity, optimized rest,
+        "slow living" as aesthetic/brand/lifestyle product,
+        wellness retreat/tourism framing
 
   tiers:
     high:
@@ -118,6 +157,13 @@ scoring:
     low:
       threshold: 0.0
       description: "Minimal belonging evidence, isolated/transactional relationships, or commercially-framed content"
+
+  gatekeepers:
+    community_fabric_gatekeeper:
+      dimension: community_fabric
+      threshold: 3
+      max_score: 3.42
+      reason: "Without community fabric evidence, content is unlikely to be genuinely about belonging"
 
   content_type_caps:
     wellness_industry:
@@ -182,15 +228,31 @@ scoring:
         - "Online coordination for in-person mutual aid"
         - "Diaspora communities maintaining ties"
 
+preprocessing:
+  head_tail:
+    enabled: true
+    head_tokens: 256
+    tail_tokens: 256
+    separator: " [...] "
+
 training:
-  target_samples: 5000
+  target_samples: 10000
   train_val_test_split: [0.8, 0.1, 0.1]
   quality_threshold: 0.7
-  recommended_model: "Qwen2.5-1.5B"
+  recommended_model: "google/gemma-3-1b-pt"
   expected_mae: "<1.0 per dimension"
 
+hybrid_inference:
+  stage1:
+    embedding_model: "intfloat/multilingual-e5-small"
+    probe_path: "probe/embedding_probe_e5small.pkl"
+    threshold: null  # To be calibrated after training
+  stage2:
+    model: "current"
+
 deployment:
-  inference_time: "20-50ms"
+  inference_time: "~20ms"
+  inference_time_hybrid: "~12ms avg"
   cost_per_article: "$0.00"
   use_cases:
     - "Curating stories of community resilience"

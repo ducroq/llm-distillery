@@ -26,6 +26,9 @@ Keep adapter files with `.lora_A.weight` keys (OLD format), not `.lora_A.default
 ### Fit Calibration After Every Training Run (ADR-008)
 Per-dimension isotonic regression corrects MSE score compression. Run `scripts/calibration/fit_calibration.py` on the val set. Commit `calibration.json` with the filter package. The base scorer auto-loads it.
 
+### Oracle Prompts Follow the Scope-Check Pattern
+Every production prompt uses a two-step structure: **Step 1: Scope Check** (is this article even about our topic? NO → all dimensions 0-2, stop), then **Step 2: Score Dimensions** (with inline critical filters before each scale table). This prevents fast models (Gemini Flash) from skipping top-level rules and scoring noise articles as if they were in-scope. The scope check also includes a noise detection checklist and an anti-hallucination rule requiring exact quotes as evidence.
+
 ### Filter Packages Are Self-Contained
 Each filter lives in `filters/{name}/v{N}/` with everything needed: config.yaml, prompt, prefilter, scorer, inference modules, calibration, model weights. Independently deployable and auditable.
 
@@ -47,8 +50,8 @@ The 9-phase lifecycle. See `docs/agents/filter-development-guide.md` for detaile
 | Phase | Goal | Key Command / Action |
 |-------|------|---------------------|
 | 1. Planning | Define dimensions, tiers, gatekeepers | Create `filters/{name}/v1/config.yaml` |
-| 2. Architecture | Write oracle prompt | Create `prompt-compressed.md` |
-| 3. Validation | Calibrate oracle, check dimension redundancy | `python -m ground_truth.batch_scorer --filter ... --source ... --target-count 100` |
+| 2. Architecture | Write oracle prompt with scope check + inline critical filters | Create `prompt-compressed.md` |
+| 3. Validation | Calibrate oracle, verify scope check catches noise | `python -m ground_truth.batch_scorer --filter ... --source ... --target-count 100` |
 | 4. Prefilter | Rule-based noise filter | Create `prefilter.py` inheriting `base_prefilter.py` |
 | 5. Training Data | Score 5K-10K articles | `python -m ground_truth.batch_scorer --filter ... --source datasets/raw/master_dataset.jsonl` |
 | 6. Training | Distill to Gemma-3-1B | `PYTHONPATH=. python training/train.py --config ... --data-dir ... --output-dir ...` |
