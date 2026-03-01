@@ -6,6 +6,8 @@
 
 **ORACLE OUTPUT:** Dimensional scores only (0-10). Tier classification happens in postfilter.
 
+**INPUT DATA:** [Paste the summary of the article here]
+
 ---
 
 ## STEP 1: SCOPE CHECK (Do This FIRST)
@@ -225,7 +227,7 @@ Before scoring, classify the content type:
 
 ```json
 {
-  "content_type": "organic_community|intergenerational|rooted_place|mutual_aid|wellness_industry|networking|tourism|self_help|corporate|online_only",
+  "content_type": "organic_community|intergenerational|rooted_place|mutual_aid|out_of_scope|wellness_industry|networking|tourism|self_help|corporate|online_only",
   "intergenerational_bonds": {
     "score": 0.0,
     "evidence": "EXACT QUOTE from article or 'No evidence in article'"
@@ -314,6 +316,8 @@ Before scoring, classify the content type:
 ---
 
 ## 7. Critical Reminders
+
+**WARNING:** The validation examples above are for calibration ONLY. NEVER copy evidence text from the examples. Your evidence MUST come from the INPUT article, not from this prompt.
 
 1. **SCOPE CHECK FIRST** — if the article isn't about genuine belonging, score all 0-2 and stop
 2. **Belonging is not longevity** — filter out "live longer through community" framing
