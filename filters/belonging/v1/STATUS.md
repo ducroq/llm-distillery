@@ -64,6 +64,22 @@
 
 ---
 
+## Flagged: Dimension Redundancy (re-evaluate after batch labeling)
+
+PCA on 152 articles: PC1=92.9% — dominated by the 88% noise articles scoring 0-2 everywhere.
+
+**MEDIUM+ only (n=19):**
+
+| Pair | r | Note |
+|------|---|------|
+| community_fabric ↔ rootedness | **0.845** | May be measuring the same thing — community is almost always placed |
+| reciprocal_care ↔ purpose_beyond_self | 0.731 | Care as purpose expression |
+| intergenerational_bonds ↔ community_fabric | -0.39 | Genuinely independent |
+
+**Decision: Keep 6 dimensions for now.** n=19 is too small for structural changes. Re-evaluate when batch labeling produces 50+ MEDIUM+ articles. If CF↔Rt stays >0.80, consider merging into a single "rooted_community" dimension.
+
+---
+
 ## Next Steps
 
 1. **Phase 4: Batch Labeling** (next)

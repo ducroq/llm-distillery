@@ -51,7 +51,7 @@ The 9-phase lifecycle. See `docs/agents/filter-development-guide.md` for detaile
 |-------|------|---------------------|
 | 1. Planning | Define dimensions, tiers, gatekeepers | Create `filters/{name}/v1/config.yaml` |
 | 2. Architecture | Write oracle prompt with scope check + inline critical filters | Create `prompt-compressed.md` |
-| 3. Validation | Calibrate oracle, verify scope check catches noise | `python -m ground_truth.batch_scorer --filter ... --source ... --target-count 100` |
+| 3. Validation | Calibrate oracle, verify scope check, check dimension redundancy (PCA/correlation on MEDIUM+ articles) | `python -m ground_truth.batch_scorer --filter ... --source ... --target-count 100` |
 | 4. Prefilter | Rule-based noise filter | Create `prefilter.py` inheriting `base_prefilter.py` |
 | 5. Training Data | Score 5K-10K articles | `python -m ground_truth.batch_scorer --filter ... --source datasets/raw/master_dataset.jsonl` |
 | 6. Training | Distill to Gemma-3-1B | `PYTHONPATH=. python training/train.py --config ... --data-dir ... --output-dir ...` |
