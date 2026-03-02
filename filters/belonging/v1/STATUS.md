@@ -80,15 +80,50 @@ PCA on 152 articles: PC1=92.9% — dominated by the 88% noise articles scoring 0
 
 ---
 
+## Scope Probe Screening (2026-03-02)
+
+Belonging is needle-in-haystack: 2% HIGH, 11% MEDIUM in oracle validation. Randomly sampling 10K articles for batch labeling would waste most of the API budget on obvious LOWs. Per ADR-003 (Screen + Merge), we trained a temporary logistic regression probe on E5-small embeddings to rank the master dataset by MEDIUM+ likelihood.
+
+**Script:** `scripts/train_scope_probe.py`
+
+**Approach:** Binary logistic regression (`class_weight='balanced'`) on 384-dim E5-small embeddings. 152 training articles, 19 MEDIUM+ vs 133 LOW.
+
+| Metric | Value |
+|--------|-------|
+| LOOCV recall (MEDIUM+) | 14/19 (73.7%) |
+| LOOCV precision | 14/31 (45.2%) |
+| Missed MEDIUM+ articles | 5 (German, Samoan, Indian police, millet germplasm, state health collaboration) |
+| Master dataset total | 178,462 |
+| Prefilter blocked | 91,992 (51.5%) |
+| Prefilter passed + scored | 86,470 |
+| Top 5,000 score range | 0.4822 - 0.6556 (median 0.5077) |
+| Estimated MEDIUM+ in top 5K | ~2,258 (from LOOCV precision) |
+
+**Known bias:** Top candidates skew heavily toward The Better India (8/10 top articles). The probe learned source/style as a proxy — expected with n=19 positives. Manual inspection of top-10: ~2-3 genuine belonging, rest are "uplifting Indian community stories" without actual belonging dimensions (intergenerational bonds, rootedness, social fabric). Bottom-10 of top-5000: clear noise (medical studies, CinemaSins, link roundups).
+
+**Output:** `datasets/belonging/scope_candidates.jsonl` (5,000 articles with `_probe_score` field)
+
+**Verdict:** Good enough as a screening tool. 73.7% recall means we capture most positives; the oracle will handle precision during batch labeling.
+
+---
+
 ## Next Steps
 
 1. **Phase 4: Batch Labeling** (next)
+   - Score `scope_candidates.jsonl` (enriched positives): ~5,000 articles
+   - Score random sample from master dataset (negatives): ~5,000 articles
+   - Merge both + 152 already scored -> ~10,152 total training articles
    ```bash
+   python -m ground_truth.batch_scorer \
+       --filter filters/belonging/v1 \
+       --source "datasets/belonging/scope_candidates.jsonl" \
+       --llm gemini-flash \
+       --target-scored 5000
    python -m ground_truth.batch_scorer \
        --filter filters/belonging/v1 \
        --source "datasets/raw/master_dataset_*.jsonl" \
        --llm gemini-flash \
-       --target-scored 10000 \
+       --target-scored 5000 \
        --random-sample --seed 42
    ```
 
@@ -96,6 +131,7 @@ PCA on 152 articles: PC1=92.9% — dominated by the 88% noise articles scoring 0
    - Prepare training splits (80/10/10)
    - Train Gemma-3-1B + LoRA on gpu-server
    - Fit isotonic calibration on val set
+   - Re-evaluate CF-rootedness correlation with 50+ MEDIUM+ articles
 
 ---
 
@@ -108,6 +144,8 @@ PCA on 152 articles: PC1=92.9% — dominated by the 88% noise articles scoring 0
 | `prefilter.py` | Rule-based blocker (saves API costs) |
 | `DEEP_ROOTS.md` | Philosophical grounding (Weil, Tönnies, etc.) |
 | `calibrations/candidates/belonging_candidates.jsonl` | 72 candidate articles |
+| `../../scripts/train_scope_probe.py` | Scope probe: train LR + screen master dataset |
+| `../../datasets/belonging/scope_candidates.jsonl` | 5,000 top probe-ranked candidates for batch labeling |
 
 ---
 
