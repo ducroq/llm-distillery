@@ -19,6 +19,7 @@ ADRs are short documents that capture important architectural decisions along wi
 - [ADR-006: Hybrid Inference Pipeline](006-hybrid-inference-pipeline.md) - Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2)
 - [ADR-007: Adapter Format and Deployment](007-adapter-format-and-deployment.md) - PEFT adapter key format conventions for local and Hub loading
 - [ADR-008: Isotonic Score Calibration](008-isotonic-score-calibration.md) - Post-hoc per-dimension isotonic regression to correct MSE score compression
+- [ADR-009: Add Filters First, Reduce Later](009-add-filters-first-reduce-later.md) - Deploy new filters as separate tabs; merge later if redundant in practice
 
 ## Format
 

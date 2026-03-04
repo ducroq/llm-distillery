@@ -181,11 +181,38 @@ Random negatives provide obvious negatives (tech, science, finance) the model ne
 
 ---
 
+## CF↔Rootedness Re-evaluation (2026-03-04)
+
+Phase 3 flagged community_fabric↔rootedness at r=0.845 (n=19). Re-evaluated with full batch data:
+
+| Sample | n | r |
+|--------|---|---|
+| Phase 3 (small sample) | 19 | 0.845 |
+| **Phase 5 MEDIUM+ (full data)** | **801** | **0.470** |
+| All data (inflated by noise floor) | 7,370 | 0.916 |
+
+**Verdict:** r=0.845 was a small-sample artifact. At n=801, CF↔rootedness is moderate (0.470) — not redundant. Only pair above 0.5 is community_fabric↔purpose_beyond_self (0.564). PCA shows 4 meaningful components. **Keep all 6 dimensions.**
+
+## Cross-Filter Orthogonality (2026-03-04)
+
+| Filter pair | r | n | Status |
+|-------------|---|---|--------|
+| belonging ↔ uplifting | 0.508 | 1,866 | Moderate overlap |
+| belonging ↔ cultural-discovery | 0.547 | 1,021 | Moderate overlap |
+| belonging ↔ sustainability_technology | 0.119 | 498 | Orthogonal |
+| uplifting ↔ cultural-discovery | 0.376 | 1,958 | Weak |
+
+498 belonging MEDIUM+ articles are truly exclusive (LOW on all other filters). Belonging captures distinct content: intergenerational bonds, rootedness, mutual care in ordinary life.
+
+**Decision:** Deploy belonging as separate tab in ovr.news (ADR-009). Add filters first, reduce later.
+
+---
+
 ## Next Steps
 
-1. **Re-evaluate CF↔rootedness correlation** — n=802 MEDIUM+ now available (was n=19 at Phase 3)
-2. **Hub upload** — Upload model to HuggingFace Hub (private)
-3. **Deploy to NexusMind** — Copy filter package, restart scorer service
+1. **Hub upload** — Upload model to HuggingFace Hub (private)
+2. **Deploy to NexusMind** — Copy filter package, restart scorer service
+3. **Add belonging tab to ovr.news** — New tab with NexusMind integration
 
 ---
 
