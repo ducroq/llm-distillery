@@ -31,7 +31,7 @@
 | **sustainability_technology** | v3 | 0.72 | 10.6K articles | Deployed (HF Hub, private) |
 | **investment-risk** | v6 | 0.47 | 10.4K articles | Deployed (HF Hub, private) |
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
-| **belonging** | v1 | 0.49 | 7.4K articles | Trained, pending deploy |
+| **belonging** | v1 | 0.49 | 7.4K articles | Deployed (HF Hub, private) |
 
 ### In Development
 
