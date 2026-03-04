@@ -1,7 +1,7 @@
 # Belonging Filter - Development Status
 
-**Last Updated:** 2026-03-01
-**Status:** Phase 3 Oracle Validation Complete — Ready for Batch Labeling
+**Last Updated:** 2026-03-04
+**Status:** Phase 5 Training Complete — Ready for Hub Upload
 
 ---
 
@@ -34,6 +34,19 @@
   - [x] **Gatekeeper:** triggered on 88% of articles, correctly blocks noise
   - [x] **Evidence quality:** exact quotes from articles, "No evidence in article" for absent dimensions
   - [x] **Dimension independence confirmed:** slow_presence consistently lowest (max 6.0), purpose_beyond_self often highest
+- [x] **Phase 5: Training** (2026-03-04):
+  - [x] Training splits prepared: 5,894 train / 738 val / 738 test (stratified 80/10/10)
+  - [x] Trained Gemma-3-1B + LoRA on gpu-server (3 epochs, batch 8, lr 2e-5, head+tail 256+256)
+  - [x] Val MAE: 0.5343 (raw) → **0.4891** (calibrated, +8.3%)
+  - [x] Isotonic calibration fitted on 738 val articles
+  - [x] `inference.py` and `base_scorer.py` created
+  - [x] Model and calibration synced to local
+- [x] **Phase 4 batch labeling** (2026-03-02 — 2026-03-03):
+  - [x] Scope candidates scored: 4,999 articles via Gemini Flash
+  - [x] Random negatives scored: 2,500 articles via Gemini Flash (seed=42)
+  - [x] Deduplicated and merged: 7,370 unique articles (129 cross-source duplicates removed)
+  - [x] Data quality checks: schema, scores, gatekeeper, source diversity all verified
+  - [x] **Result:** 802 MEDIUM+ articles (72 HIGH, 730 MEDIUM, 6,568 LOW)
 
 ---
 
@@ -107,31 +120,72 @@ Belonging is needle-in-haystack: 2% HIGH, 11% MEDIUM in oracle validation. Rando
 
 ---
 
+## Phase 4: Batch Labeling (2026-03-02 — 2026-03-03)
+
+Two-pass scoring per ADR-003 (Screen + Merge):
+
+1. **Scope candidates** — 4,999 probe-enriched articles scored with Gemini Flash
+2. **Random negatives** — 2,500 random articles from master dataset (seed=42)
+
+Scope candidates provide near-miss negatives (articles that looked like belonging but weren't).
+Random negatives provide obvious negatives (tech, science, finance) the model needs to learn to reject trivially.
+
+| Source | Articles | HIGH | MEDIUM | LOW |
+|--------|----------|------|--------|-----|
+| Scope candidates | 4,999 | 72 (1.4%) | 722 (14.4%) | 4,205 (84.1%) |
+| Random negatives | 2,500 | 1 (0.0%) | 36 (1.4%) | 2,463 (98.5%) |
+| **Merged (deduplicated)** | **7,370** | **72 (1.0%)** | **730 (9.9%)** | **6,568 (89.1%)** |
+
+129 duplicates removed (articles appearing in both scope candidates and random negatives; scope version kept).
+
+**Data quality checks:**
+- Schema: all 7,370 articles have all 6 dimensions with score + evidence fields
+- Scores: all in 0-10 range, no nulls
+- Gatekeeper: 12 articles with community_fabric < 3.0 but weighted avg > 3.42 — acceptable, gatekeeper cap is applied at inference time in `filter_base_scorer.py`, not in training data
+- Content type: minor oracle label drift (non-canonical types like "corporate", "networking") — not a training concern since model learns dimension scores, not content types
+
+**Output:** `datasets/belonging/belonging_all_scored.jsonl` (7,370 articles)
+
+---
+
+## Training Results (Phase 5 — 2026-03-04)
+
+| Metric | Value |
+|--------|-------|
+| Training articles | 5,894 |
+| Val articles | 738 |
+| Test articles | 738 |
+| Val MAE (raw) | 0.5343 |
+| Val MAE (calibrated) | **0.4891** |
+| Calibration improvement | +8.3% |
+| Base model | Gemma-3-1B |
+| LoRA trainable params | 13.05M / 1.01B (1.29%) |
+| Epochs | 3 |
+| Batch size | 8 |
+| Learning rate | 2e-5 |
+| Head+tail | 256+256 tokens |
+
+**Per-dimension calibrated MAE:**
+
+| Dimension | Raw MAE | Calibrated MAE |
+|-----------|---------|----------------|
+| intergenerational_bonds | 0.522 | 0.468 |
+| community_fabric | 0.590 | 0.557 |
+| reciprocal_care | 0.508 | 0.458 |
+| rootedness | 0.531 | 0.485 |
+| purpose_beyond_self | 0.596 | 0.555 |
+| slow_presence | 0.454 | 0.412 |
+
+**Model:** `filters/belonging/v1/model/` (adapter_model.safetensors + tokenizer)
+**Calibration:** `filters/belonging/v1/calibration.json` (isotonic regression, 738 val articles)
+
+---
+
 ## Next Steps
 
-1. **Phase 4: Batch Labeling** (next)
-   - Score `scope_candidates.jsonl` (enriched positives): ~5,000 articles
-   - Score random sample from master dataset (negatives): ~5,000 articles
-   - Merge both + 152 already scored -> ~10,152 total training articles
-   ```bash
-   python -m ground_truth.batch_scorer \
-       --filter filters/belonging/v1 \
-       --source "datasets/belonging/scope_candidates.jsonl" \
-       --llm gemini-flash \
-       --target-scored 5000
-   python -m ground_truth.batch_scorer \
-       --filter filters/belonging/v1 \
-       --source "datasets/raw/master_dataset_*.jsonl" \
-       --llm gemini-flash \
-       --target-scored 5000 \
-       --random-sample --seed 42
-   ```
-
-2. **Phase 5: Training** (after labeling)
-   - Prepare training splits (80/10/10)
-   - Train Gemma-3-1B + LoRA on gpu-server
-   - Fit isotonic calibration on val set
-   - Re-evaluate CF-rootedness correlation with 50+ MEDIUM+ articles
+1. **Re-evaluate CF↔rootedness correlation** — n=802 MEDIUM+ now available (was n=19 at Phase 3)
+2. **Hub upload** — Upload model to HuggingFace Hub (private)
+3. **Deploy to NexusMind** — Copy filter package, restart scorer service
 
 ---
 
@@ -146,6 +200,9 @@ Belonging is needle-in-haystack: 2% HIGH, 11% MEDIUM in oracle validation. Rando
 | `calibrations/candidates/belonging_candidates.jsonl` | 72 candidate articles |
 | `../../scripts/train_scope_probe.py` | Scope probe: train LR + screen master dataset |
 | `../../datasets/belonging/scope_candidates.jsonl` | 5,000 top probe-ranked candidates for batch labeling |
+| `../../datasets/belonging/belonging_all_scored.jsonl` | 7,370 merged, deduplicated training articles |
+| `../../datasets/belonging/belonging/` | Scored scope candidates (102 batches) |
+| `../../datasets/belonging/random_negatives/belonging/` | Scored random negatives (50 batches) |
 
 ---
 

@@ -1,0 +1,113 @@
+[
+  {
+    "epoch": 1,
+    "train": {
+      "mae": 1.2420978546142578,
+      "rmse": 1.9598816633224487,
+      "intergenerational_bonds_mae": 1.3639956712722778,
+      "intergenerational_bonds_rmse": 2.158475875854492,
+      "community_fabric_mae": 1.1645094156265259,
+      "community_fabric_rmse": 1.822438359260559,
+      "reciprocal_care_mae": 1.1978850364685059,
+      "reciprocal_care_rmse": 1.8932199478149414,
+      "rootedness_mae": 1.2593376636505127,
+      "rootedness_rmse": 1.9464311599731445,
+      "purpose_beyond_self_mae": 1.4539427757263184,
+      "purpose_beyond_self_rmse": 2.3165948390960693,
+      "slow_presence_mae": 1.012916922569275,
+      "slow_presence_rmse": 1.5254603624343872,
+      "loss": 3.8408869661016736
+    },
+    "val": {
+      "mae": 0.7529431581497192,
+      "rmse": 1.2071970701217651,
+      "intergenerational_bonds_mae": 0.722095787525177,
+      "intergenerational_bonds_rmse": 1.1730912923812866,
+      "community_fabric_mae": 0.8258641958236694,
+      "community_fabric_rmse": 1.3082561492919922,
+      "reciprocal_care_mae": 0.7113421559333801,
+      "reciprocal_care_rmse": 1.1404348611831665,
+      "rootedness_mae": 0.7714128494262695,
+      "rootedness_rmse": 1.2124005556106567,
+      "purpose_beyond_self_mae": 0.8418616056442261,
+      "purpose_beyond_self_rmse": 1.378292441368103,
+      "slow_presence_mae": 0.6450819373130798,
+      "slow_presence_rmse": 0.9930129647254944,
+      "loss": 1.5067439909263323
+    }
+  },
+  {
+    "epoch": 2,
+    "train": {
+      "mae": 0.6639611124992371,
+      "rmse": 1.0815346240997314,
+      "intergenerational_bonds_mae": 0.6507880091667175,
+      "intergenerational_bonds_rmse": 1.0734504461288452,
+      "community_fabric_mae": 0.7024450898170471,
+      "community_fabric_rmse": 1.1496186256408691,
+      "reciprocal_care_mae": 0.6308609843254089,
+      "reciprocal_care_rmse": 1.0176141262054443,
+      "rootedness_mae": 0.6841545701026917,
+      "rootedness_rmse": 1.1036847829818726,
+      "purpose_beyond_self_mae": 0.7520827054977417,
+      "purpose_beyond_self_rmse": 1.2325224876403809,
+      "slow_presence_mae": 0.5634353160858154,
+      "slow_presence_rmse": 0.8784153461456299,
+      "loss": 1.1693503113117276
+    },
+    "val": {
+      "mae": 0.5994810461997986,
+      "rmse": 0.9562583565711975,
+      "intergenerational_bonds_mae": 0.5975743532180786,
+      "intergenerational_bonds_rmse": 0.9442647695541382,
+      "community_fabric_mae": 0.632898211479187,
+      "community_fabric_rmse": 1.0177395343780518,
+      "reciprocal_care_mae": 0.5802102088928223,
+      "reciprocal_care_rmse": 0.9050937294960022,
+      "rootedness_mae": 0.6160305142402649,
+      "rootedness_rmse": 0.9939630031585693,
+      "purpose_beyond_self_mae": 0.6580995917320251,
+      "purpose_beyond_self_rmse": 1.0832053422927856,
+      "slow_presence_mae": 0.5120730400085449,
+      "slow_presence_rmse": 0.7606973052024841,
+      "loss": 0.9148537773759134
+    }
+  },
+  {
+    "epoch": 3,
+    "train": {
+      "mae": 0.5285831093788147,
+      "rmse": 0.8778301477432251,
+      "intergenerational_bonds_mae": 0.5290516018867493,
+      "intergenerational_bonds_rmse": 0.8793238997459412,
+      "community_fabric_mae": 0.559852659702301,
+      "community_fabric_rmse": 0.9304448366165161,
+      "reciprocal_care_mae": 0.5107278823852539,
+      "reciprocal_care_rmse": 0.8511233329772949,
+      "rootedness_mae": 0.5289003252983093,
+      "rootedness_rmse": 0.868356466293335,
+      "purpose_beyond_self_mae": 0.5844143629074097,
+      "purpose_beyond_self_rmse": 0.9923341870307922,
+      "slow_presence_mae": 0.4585517644882202,
+      "slow_presence_rmse": 0.7220773100852966,
+      "loss": 0.7704125063157713
+    },
+    "val": {
+      "mae": 0.5342888832092285,
+      "rmse": 0.9102846384048462,
+      "intergenerational_bonds_mae": 0.5230678915977478,
+      "intergenerational_bonds_rmse": 0.8878772258758545,
+      "community_fabric_mae": 0.5915313959121704,
+      "community_fabric_rmse": 0.9848441481590271,
+      "reciprocal_care_mae": 0.5082241296768188,
+      "reciprocal_care_rmse": 0.8672099709510803,
+      "rootedness_mae": 0.5316545367240906,
+      "rootedness_rmse": 0.9364926815032959,
+      "purpose_beyond_self_mae": 0.5957366228103638,
+      "purpose_beyond_self_rmse": 1.030095100402832,
+      "slow_presence_mae": 0.4555186927318573,
+      "slow_presence_rmse": 0.7233927845954895,
+      "loss": 0.8274289013076854
+    }
+  }
+]
