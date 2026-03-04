@@ -50,7 +50,7 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [x] **cultural-discovery v3** - Superseded by v4
 
 ### In Active Development (priority order)
-- [ ] **belonging v1** - Needs assessment
+- [x] **belonging v1** - Training complete, val MAE 0.49 (calibrated), 7,370 articles
 - [ ] **ai-engineering-practice v2** - Ready for oracle scoring
   - FluxusSource hardware sources active (1,193 articles)
   - Prompt calibration complete (~60% tier accuracy)
@@ -93,6 +93,7 @@ Post-hoc isotonic regression to correct MSE score compression at inference time.
 - [x] **Base scorer integration** - `_load_calibration()` + `apply_calibration()` in `_process_raw_scores()`
 - [x] **sustainability_technology v3 calibration** - Fitted on 1,061 val articles, test MAE 0.725 -> 0.724
 - [x] **investment-risk v6 calibration** - Fitted on 1,045 val articles, val MAE 0.497 -> 0.465 (+6.5%)
+- [x] **belonging v1 calibration** - Fitted on 738 val articles, val MAE 0.534 -> 0.489 (+8.3%)
 
 ## Hybrid Inference Pipeline (ADR-006)
 
@@ -146,4 +147,4 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-02-22*
+*Last updated: 2026-03-04*

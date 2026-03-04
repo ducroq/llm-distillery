@@ -2,7 +2,7 @@
 
 ## Now (Current Sprint)
 
-- **belonging v1** - Assess existing work and develop
+- **ai-engineering-practice v2** - Oracle scoring + training
 
 ## Next (Coming Soon)
 - **ai-engineering-practice v2** - Unblocked, ready for oracle scoring + training
@@ -32,6 +32,10 @@
 ## Completed
 
 ### Filters
+- [x] **belonging v1** - Training complete - 2026-03
+  - Val MAE: 0.534 (calibrated: 0.489), Gemma-3-1B
+  - 7,370 training articles (5K scope candidates + 2.5K random negatives, deduplicated)
+  - 6 dimensions, isotonic calibration fitted on 738 val articles
 - [x] **uplifting v6** - Deployed on HuggingFace Hub (private) - 2026-02
   - Val MAE: 0.673 (v5 was 0.688), Gemma-3-1B, 12% faster inference
   - Data sculpting: active learning (495 MEDIUM enrichment) + label correction (57 crime articles capped)
@@ -143,4 +147,4 @@
 
 ---
 
-*Last updated: 2026-02-22*
+*Last updated: 2026-03-04*

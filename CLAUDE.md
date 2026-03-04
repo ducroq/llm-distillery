@@ -31,12 +31,12 @@
 | **sustainability_technology** | v3 | 0.72 | 10.6K articles | Deployed (HF Hub, private) |
 | **investment-risk** | v6 | 0.47 | 10.4K articles | Deployed (HF Hub, private) |
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
+| **belonging** | v1 | 0.49 | 7.4K articles | Trained, pending deploy |
 
 ### In Development
 
 | Filter | Version | Status | Blocker |
 |--------|---------|--------|---------|
-| **belonging** | v1 | Needs assessment | Current sprint priority |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring | Domain classification added |
 | **nature_recovery** | v1 | Early dev | Need harmonized prompt |
 | **signs_of_wisdom** | v1 | Early dev | Need harmonized prompt |
@@ -90,4 +90,4 @@ python scripts/deployment/upload_to_huggingface.py \
 
 ---
 
-*Last updated: 2026-03-01*
+*Last updated: 2026-03-04*
