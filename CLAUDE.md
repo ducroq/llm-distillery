@@ -33,13 +33,14 @@
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
 | **belonging** | v1 | 0.49 | 7.4K articles | Deployed (HF Hub, private) |
 
-### In Development
+### In Development (priority: ovr.news tabs)
 
-| Filter | Version | Status | Blocker |
-|--------|---------|--------|---------|
-| **ai-engineering-practice** | v2 | Ready for oracle scoring | Domain classification added |
-| **nature_recovery** | v1 | Early dev | Need harmonized prompt |
-| **signs_of_wisdom** | v1 | Early dev | Need harmonized prompt |
+| Filter | Version | Status | Target |
+|--------|---------|--------|--------|
+| **nature_recovery** | v1 | Need harmonized prompt | ovr.news "Herstel" tab |
+| **signs_of_wisdom** | v1 | Need harmonized prompt | ovr.news (enrich Erfgoed or standalone) |
+| **future-of-education** | v1 | Concept only | ovr.news "Leren" tab |
+| **ai-engineering-practice** | v2 | Ready for oracle scoring | Separate product (not ovr.news) |
 
 ## Key Decisions
 
@@ -49,6 +50,7 @@
 - **Active learning for rare tiers** (ADR-005)
 - **Fine-tuning beats embedding probes** — research confirmed
 - **Gemma-3-1B** — replaced Qwen2.5; better MAE, faster inference
+- **Add filters first, reduce later** — deploy as separate tabs, dedup later (ADR-009)
 
 See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed records.
 

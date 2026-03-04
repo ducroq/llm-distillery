@@ -49,25 +49,24 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - Target: ovr.news (Wisdom tab), Busara
 - [x] **cultural-discovery v3** - Superseded by v4
 
-### In Active Development (priority order)
-- [x] **belonging v1** - Training complete, val MAE 0.49 (calibrated), 7,370 articles
-- [ ] **ai-engineering-practice v2** - Ready for oracle scoring
-  - FluxusSource hardware sources active (1,193 articles)
-  - Prompt calibration complete (~60% tier accuracy)
-  - Added engineering_domain classification (crossover tracking)
-- [ ] **nature_recovery v1** - Early development
+### In Active Development (priority: ovr.news tabs)
+- [x] **belonging v1** - Deployed, val MAE 0.49 (calibrated), 7,370 articles. Next: ovr.news tab
+- [ ] **nature_recovery v1** - ovr.news "Herstel" tab
   - Concept and README complete, 8 dimensions defined
-  - Next: harmonized prompt, prefilter.py, validation
-- [ ] **signs_of_wisdom v1** - Early development
+  - Next: harmonized prompt, prefilter.py, oracle scoring, training
+- [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Erfgoed or standalone)
   - Concept and README complete
-  - Next: harmonized prompt, prefilter.py
+  - Next: harmonized prompt, prefilter.py, oracle scoring, training
   - Challenge: wisdom is rare in news
 
-### Planned (filters/todo/)
-- [ ] **future-of-education** - Educational innovation filter
-- [ ] **seece** - Social, economic, environmental corporate excellence
-- [ ] **sustainability_economic_viability** - Economic aspects of sustainability
-- [ ] **sustainability_policy_effectiveness** - Policy impact and effectiveness
+### Other Filters
+- [ ] **future-of-education** - ovr.news "Leren" tab (after nature_recovery + signs_of_wisdom)
+- [ ] **ai-engineering-practice v2** - Ready for oracle scoring (not ovr.news, separate product)
+  - FluxusSource hardware sources active (1,193 articles)
+  - Prompt calibration complete (~60% tier accuracy)
+- [ ] **seece** - Corporate excellence (not ovr.news)
+- [ ] **sustainability_economic_viability** - Sustainability sub-dimension (not ovr.news)
+- [ ] **sustainability_policy_effectiveness** - Sustainability sub-dimension (not ovr.news)
 
 ## Training Pipeline
 

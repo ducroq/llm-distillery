@@ -1,33 +1,25 @@
 # LLM Distillery - Roadmap
 
-## Now (Current Sprint)
+## Now (Current Sprint) — Priority: ovr.news tabs
 
-- **ai-engineering-practice v2** - Oracle scoring + training
+- **belonging v1 → ovr.news** - Add "Verbondenheid" tab (filter deployed, frontend work only)
+- **nature_recovery v1** - Harmonized prompt → oracle scoring → training → "Herstel" tab
+- **signs_of_wisdom v1** - Harmonized prompt → oracle scoring → training → enrich Erfgoed or new tab
 
 ## Next (Coming Soon)
-- **ai-engineering-practice v2** - Unblocked, ready for oracle scoring + training
-- **nature_recovery v1** - Develop harmonized prompt and prefilter
-- **signs_of_wisdom v1** - Develop harmonized prompt and prefilter
+- **future-of-education v1** - Educational innovation → "Leren" tab for ovr.news
+- **ai-engineering-practice v2** - Oracle scoring + training (not ovr.news, separate product)
 
 ## Later (Backlog)
 
 - **uplifting v7** - HIGH-tier data collection
   - v6 has only 8 HIGH articles (0.08%) — model can't learn upper score range
-  - Collect 50-100 HIGH articles from targeted sources (Better India, Upworthy, Reasons to be Cheerful, Solutions Journalism Network)
-  - Apply crime content-type cap to oracle prompt (fix is designed, not yet in prompt-compressed.md)
-- **Active Learning for HIGH-tier articles** - Continue using production filter to find high-scoring candidates
-  - Method: Filter production output, screen predicted >= 5.5, oracle score, repeat
-  - Target sources: positive_news_the_better_india, positive_news_upworthy, etc.
-  - Goal: Collect 50+ HIGH-tier (7+) articles for v7
-- **Prefilter strategy documented** - ADR-004: Commerce is only universal noise; filter-specific noise handled by trained model
-  - Commerce prefilter v2 already deployed
-  - Accept ~30-40% oracle waste during training (zeros = valuable negative examples)
-  - No new universal prefilter needed
-- **future-of-education filter** - Educational innovation (in filters/todo/)
-- **seece filter** - Corporate excellence (in filters/todo/)
+  - Collect 50-100 HIGH articles from targeted sources
+- **Prefilter strategy documented** - ADR-004: Commerce is only universal noise
+- **seece filter** - Corporate excellence (not ovr.news)
+- **sustainability_economic_viability / sustainability_policy_effectiveness** - Sustainability sub-dimensions (not ovr.news)
 - **Batch processing pipeline** - High-volume scoring infrastructure
 - **Production monitoring** - Accuracy drift detection
-- **Qwen2.5-7B support** - Larger model option (lower priority given Gemma-3-1B results)
 
 ## Completed
 
