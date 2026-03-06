@@ -51,10 +51,10 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 
 ### In Active Development (priority: ovr.news tabs)
 - [x] **belonging v1** - Deployed, val MAE 0.49 (calibrated), 7,370 articles. Next: ovr.news tab
-- [ ] **nature_recovery v1** - ovr.news "Herstel" tab
-  - Phases 1-8 complete: trained (val MAE 0.54), calibrated (0.507), probe (MAE 0.50)
-  - 3,280 articles, Gemma-3-1B + LoRA, all 3 inference paths + probe created
-  - Next: Phase 9 deployment (Hub upload, NexusMind sync, ovr.news integration)
+- [x] **nature_recovery v1** - Deployed to Hub + gpu-server
+  - Val MAE 0.54 (calibrated 0.507), probe MAE 0.50, 3,280 articles
+  - Hub: `jeergrvgreg/nature-recovery-filter-v1` (private)
+  - Remaining: ovr.news "Herstel" tab frontend integration
 - [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Erfgoed or standalone)
   - Concept and README complete
   - Next: harmonized prompt, prefilter.py, oracle scoring, training

@@ -1,7 +1,7 @@
 # Nature Recovery Filter - Development Status
 
 **Last Updated:** 2026-03-06
-**Status:** Phases 1-8 Complete — Ready for Phase 9 (Deployment)
+**Status:** Phases 1-9 Complete — Deployed to Hub + gpu-server
 
 ---
 
@@ -139,7 +139,12 @@ sustainability_technology scores *technologies* via LCSA (readiness, cost, lifec
   - [x] e5-small MLP probe trained on 2,623 train / 328 val articles
   - [x] Probe MAE: 0.50 (early stopping at epoch 29)
   - [x] Saved to `probe/embedding_probe_e5small.pkl`
-- [ ] **Phase 9: Deployment** — Hub upload, NexusMind sync, ovr.news integration
+- [x] **Phase 9: Deployment** (2026-03-06):
+  - [x] Uploaded to HuggingFace Hub: `jeergrvgreg/nature-recovery-filter-v1` (private)
+  - [x] Hub verification passed: PeftModel.from_pretrained() loads correctly
+  - [x] Deployed to gpu-server: ~/NexusMind/filters/nature_recovery/v1/
+  - [x] Import verified on gpu-server (GPU busy with existing scorer, model load deferred)
+  - [ ] ovr.news "Herstel" tab integration (NexusMind frontend work)
 
 ---
 

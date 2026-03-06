@@ -3,7 +3,7 @@
 ## Now (Current Sprint) — Priority: ovr.news tabs
 
 - **belonging v1 → ovr.news** - Add "Verbondenheid" tab (filter deployed, frontend work only)
-- **nature_recovery v1** - Phases 1-8 complete (val MAE 0.54, probe MAE 0.50) → Phase 9 deploy → "Herstel" tab
+- **nature_recovery v1** - Deployed (val MAE 0.54, probe MAE 0.50) → ovr.news "Herstel" tab (frontend only)
 - **signs_of_wisdom v1** - Harmonized prompt → oracle scoring → training → enrich Erfgoed or new tab
 
 ## Next (Coming Soon)
