@@ -52,8 +52,9 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 ### In Active Development (priority: ovr.news tabs)
 - [x] **belonging v1** - Deployed, val MAE 0.49 (calibrated), 7,370 articles. Next: ovr.news tab
 - [ ] **nature_recovery v1** - ovr.news "Herstel" tab
-  - Concept and README complete, 8 dimensions defined
-  - Next: harmonized prompt, prefilter.py, oracle scoring, training
+  - Phases 1-5 complete: 6 dims, prompt harmonized, oracle validated, embedding screening (ADR-011)
+  - 3,280 scored articles (17 HIGH, 103 MEDIUM), splits prepared (2,623/328/329)
+  - Next: Phase 6 training (Gemma-3-1B + LoRA on gpu-server)
 - [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Erfgoed or standalone)
   - Concept and README complete
   - Next: harmonized prompt, prefilter.py, oracle scoring, training
@@ -146,4 +147,4 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-03-04*
+*Last updated: 2026-03-06*

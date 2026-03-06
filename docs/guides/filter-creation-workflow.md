@@ -76,6 +76,16 @@ For needle-in-haystack filters (low pass rate), use screen+merge strategy (ADR-0
 - Random articles provide negatives
 - Pre-screened articles enrich positives
 
+**Embedding screening (ADR-011):** If Phase 3 validation found positive articles, use them as seeds:
+```bash
+PYTHONPATH=. python scripts/screening/embedding_screener.py \
+    --positives datasets/<name>/positives_phase3.jsonl \
+    --corpus datasets/raw/*.jsonl \
+    --output datasets/<name>/screen_candidates.jsonl \
+    --top-k 500
+```
+This finds semantically similar articles via e5-small cosine similarity — much higher recall than keyword screening.
+
 ### 6. Prepare training splits
 
 ```bash
@@ -202,6 +212,7 @@ These live in `filters/common/` and are used by all filters:
 - **Calibration before clamping** — Pipeline: raw logits -> calibrate -> clamp 0-10 -> weighted avg -> gatekeeper -> tier
 - **Screen+merge for rare-positive filters** — ADR-003
 - **Commerce is the only universal prefilter** — ADR-004
+- **Oracle consistency over data volume** — Prompt precision predicts MAE better than dataset size (ADR-010). Use belonging v1 as template for prompt structure.
 
 ---
 

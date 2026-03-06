@@ -27,6 +27,9 @@ from typing import Any, Dict, List, Tuple
 # Third-party imports
 import yaml
 
+# Local imports
+from ground_truth import analysis_field_name
+
 
 def load_filter_config(filter_dir: Path) -> Dict[str, Any]:
     """Load filter configuration from config.yaml."""
@@ -70,13 +73,8 @@ def extract_filter_info(config: Dict[str, Any]) -> Tuple[str, List[str], Dict[st
 
 
 def get_analysis_field_name(filter_name: str) -> str:
-    """Infer analysis field name from filter name.
-
-    Examples:
-        uplifting -> uplifting_analysis
-        sustainability_tech_deployment -> sustainability_tech_deployment_analysis
-    """
-    return f"{filter_name}_analysis"
+    """Infer analysis field name from filter name. Delegates to shared convention."""
+    return analysis_field_name(filter_name)
 
 
 def load_labels(input_path: Path) -> List[Dict[str, Any]]:

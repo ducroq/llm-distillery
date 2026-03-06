@@ -1,47 +1,58 @@
-"""Nature Recovery Pre-Filter v1.0 - Passes recovery stories, blocks disaster news"""
+"""Nature Recovery Pre-Filter v1.0 - Passes recovery/nature stories, blocks non-environmental content"""
 import re
-from typing import Dict, Optional
-from filters.base_prefilter import BasePreFilter
+from typing import Dict, Tuple
+
+from filters.common.base_prefilter import BasePreFilter
+
 
 class NatureRecoveryPreFilterV1(BasePreFilter):
     VERSION = "1.0"
 
     def __init__(self):
-        super().__init__()
-        self.filter_name = "sustainability_nature_recovery"
+        super().__init__(use_commerce_prefilter=False)
+        self.filter_name = "nature_recovery"
         self.version = "1.0"
 
-    def should_label(self, article: Dict) -> tuple[bool, str]:
+    def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """
-        Determine if article should be sent to LLM for labeling.
+        Determine if article should be sent to oracle for scoring.
 
         Returns:
-            (should_label, reason)
-            - (True, "passed"): Send to LLM
-            - (False, reason): Block from LLM
+            (should_score, reason)
+            - (True, "passed"): Send to oracle
+            - (False, reason): Block from oracle
         """
-        text_lower = self._get_combined_text(article).lower()
+        title = article.get('title', '')
+        content = article.get('content', '') or article.get('text', '')
+        text_lower = (title + ' ' + content[:self.MAX_PREFILTER_CONTENT]).lower()
 
-        # BLOCK: Not climate/sustainability/nature related
-        if not self._is_sustainability_related(text_lower):
-            return (False, "not_sustainability_topic")
+        # BLOCK: Not nature/environment related at all
+        if not self._is_nature_related(text_lower):
+            return (False, "not_nature_topic")
 
-        # Block: Pure disaster/decline news
-        if re.search(r'\b(extinction|collapse|dying|destroyed)\b', text_lower):
-            if not re.search(r'\b(recovery|restored|improving|rebounding)\b', text_lower):
+        # BLOCK: Pure disaster/decline without any recovery framing
+        doom_pattern = re.search(
+            r'\b(extinction|collapse|dying|destroyed|devastating|catastroph|irreversible)\b',
+            text_lower
+        )
+        if doom_pattern:
+            recovery_pattern = re.search(
+                r'\b(recover|restor|rebound|return|improv|increas|grow|thriv|heal|reintroduc|rewild)\b',
+                text_lower
+            )
+            if not recovery_pattern:
                 return (False, "disaster_no_recovery")
 
         return (True, "passed")
 
-    def _is_sustainability_related(self, text_lower: str) -> bool:
-        """Check if article is about nature/ecosystem/environmental issues (PERMISSIVE)"""
+    def _is_nature_related(self, text_lower: str) -> bool:
+        """Check if article is about nature/ecosystem/environmental issues (PERMISSIVE)."""
         keywords = [
             'ecosystem', 'biodiversity', 'habitat', 'deforestation', 'reforestation',
             'coral', 'reef', 'ocean', 'marine', 'wildlife', 'species', 'extinction',
             'pollution', 'air quality', 'water quality', 'environment', 'climate',
             'carbon', 'wetland', 'mangrove', 'conservation', 'restoration', 'recovery',
+            'rewilding', 'endangered', 'protected area', 'national park', 'nature reserve',
+            'emission', 'ozone', 'deforestation', 'afforestation', 'fish stock',
         ]
         return any(kw in text_lower for kw in keywords)
-
-    def _get_combined_text(self, article: Dict) -> str:
-        return ' '.join([article.get('title',''), article.get('description',''), article.get('content','')[:2000]])

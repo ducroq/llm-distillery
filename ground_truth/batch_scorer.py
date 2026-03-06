@@ -42,6 +42,7 @@ from google import genai as genai_new
 from google.genai import types as genai_types
 
 # Local imports
+from . import analysis_field_name
 from .secrets_manager import get_secrets_manager
 from .text_cleaning import clean_article as clean_article_comprehensive, sanitize_text_comprehensive
 
@@ -1122,7 +1123,7 @@ class GenericBatchScorer:
 
             if analysis:
                 # Add analysis to article
-                article[f'{self.filter_name}_analysis'] = analysis
+                article[analysis_field_name(self.filter_name)] = analysis
 
                 results.append(article)
                 processed_ids.append(article_id)

@@ -37,7 +37,7 @@
 
 | Filter | Version | Status | Target |
 |--------|---------|--------|--------|
-| **nature_recovery** | v1 | Need harmonized prompt | ovr.news "Herstel" tab |
+| **nature_recovery** | v1 | Phase 1-2 complete, ready for oracle validation | ovr.news "Herstel" tab |
 | **signs_of_wisdom** | v1 | Need harmonized prompt | ovr.news (enrich Erfgoed or standalone) |
 | **future-of-education** | v1 | Concept only | ovr.news "Leren" tab |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring | Separate product (not ovr.news) |
@@ -51,6 +51,8 @@
 - **Fine-tuning beats embedding probes** — research confirmed
 - **Gemma-3-1B** — replaced Qwen2.5; better MAE, faster inference
 - **Add filters first, reduce later** — deploy as separate tabs, dedup later (ADR-009)
+- **Oracle consistency over data volume** — prompt precision predicts MAE better than dataset size; use belonging v1 as template (ADR-010)
+- **Embedding screening for needle filters** — use Phase 3 positives as e5-small seeds to screen corpora; replaces keyword screening (ADR-011)
 
 See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed records.
 

@@ -20,6 +20,8 @@ ADRs are short documents that capture important architectural decisions along wi
 - [ADR-007: Adapter Format and Deployment](007-adapter-format-and-deployment.md) - PEFT adapter key format conventions for local and Hub loading
 - [ADR-008: Isotonic Score Calibration](008-isotonic-score-calibration.md) - Post-hoc per-dimension isotonic regression to correct MSE score compression
 - [ADR-009: Add Filters First, Reduce Later](009-add-filters-first-reduce-later.md) - Deploy new filters as separate tabs; merge later if redundant in practice
+- [ADR-010: Oracle Consistency Over Data Volume](010-oracle-consistency-over-data-volume.md) - Prompt precision and anti-contamination design matter more than training data volume for student MAE
+- [ADR-011: Embedding-Based Screening for Needle Filters](011-embedding-screener-for-needle-filters.md) - Use Phase 3 positives as e5-small embedding seeds to screen large corpora for batch labeling candidates
 
 ## Format
 
