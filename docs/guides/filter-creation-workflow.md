@@ -146,18 +146,18 @@ PYTHONPATH=. python scripts/calibration/fit_calibration.py \
     --test-data datasets/training/<name>_v1/test.jsonl
 ```
 
-This generates `calibration.json` in the filter directory. The base scorer picks it up automatically at inference time. See ADR-008.
+This generates `calibration.json` in the filter directory and auto-computes `score_scale_factor` in `config.yaml` (needed by NexusMind for 0-10 normalization). The base scorer picks up calibration automatically at inference time. See ADR-008.
 
 ### 10. Train hybrid probe (optional)
 
 Train an e5-small MLP probe for Stage 1 screening:
 ```bash
-PYTHONPATH=. python research/embedding_vs_finetuning/train_probe.py \
-    --filter <name> --version v1 \
+PYTHONPATH=. python scripts/train_probe.py \
+    --filter filters/<name>/v1 \
     --data-dir datasets/training/<name>_v1
 ```
 
-Calibrate the threshold using `evaluation/calibrate_hybrid_threshold.py`. Store probe in `filters/<name>/v1/probe/`.
+Probe is saved to `filters/<name>/v1/probe/embedding_probe_e5small.pkl`. Calibrate the threshold using `evaluation/calibrate_hybrid_threshold.py`.
 
 ### 11. Deploy to HuggingFace Hub
 
@@ -216,4 +216,4 @@ These live in `filters/common/` and are used by all filters:
 
 ---
 
-*Last updated: 2026-02-19*
+*Last updated: 2026-03-06*

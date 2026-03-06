@@ -1746,7 +1746,9 @@ PYTHONPATH=. python scripts/calibration/fit_calibration.py \
     --test-data datasets/training/{filter_name}_v{N}/test.jsonl
 ```
 
-**Output**: `filters/{filter_name}/v{N}/calibration.json` — per-dimension isotonic regression mapping.
+**Output**:
+- `filters/{filter_name}/v{N}/calibration.json` — per-dimension isotonic regression mapping
+- `config.yaml` updated with `score_scale_factor` — NexusMind uses this to normalize weighted averages to 0-10 (auto-computed as `10.0 / theoretical_max`)
 
 The `FilterBaseScorer` base class auto-loads `calibration.json` if present and applies calibration at inference time via `numpy.interp`.
 
