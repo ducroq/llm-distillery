@@ -307,6 +307,31 @@ def evaluate_on_data(cal_data, data_path, scorer, dimension_names, weights, tier
     print_report(eval_data, oracle_scores, student_scores, dimension_names, weights, tier_thresholds, label=label)
 
 
+def _update_score_scale_factor(config_path: Path, factor: float, weighted_max: float):
+    """Insert or update score_scale_factor in config.yaml, preserving comments."""
+    import re
+
+    text = config_path.read_text(encoding="utf-8")
+    factor_line = f"  score_scale_factor: {factor}  # 10.0 / {weighted_max:.2f} (calibrated max)\n"
+
+    # Replace existing score_scale_factor line
+    pattern = r"^(\s*)score_scale_factor:.*$"
+    if re.search(pattern, text, re.MULTILINE):
+        text = re.sub(pattern, factor_line.rstrip(), text, flags=re.MULTILINE)
+    else:
+        # Insert after "scoring:" line
+        scoring_match = re.search(r"^scoring:\s*$", text, re.MULTILINE)
+        if scoring_match:
+            insert_pos = scoring_match.end()
+            text = text[:insert_pos] + "\n" + factor_line + text[insert_pos:]
+        else:
+            logger.warning("Could not find 'scoring:' section in config.yaml, skipping")
+            return
+
+    config_path.write_text(text, encoding="utf-8")
+    logger.info(f"Updated {config_path} with score_scale_factor={factor}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Fit post-hoc score calibration (isotonic regression) for a production filter"
@@ -424,6 +449,24 @@ def main():
     # Save
     output_path = args.output or (filter_dir / "calibration.json")
     save_calibration(cal_data, str(output_path))
+
+    # Compute and write score_scale_factor to config.yaml
+    cal_stats = cal_data.get("stats", {}).get("per_dimension", {})
+    if cal_stats and weights:
+        weighted_max = sum(
+            weights.get(dim, 0) * cal_stats[dim]["calibrated_max"]
+            for dim in dimension_names
+            if dim in cal_stats
+        )
+        if weighted_max > 0:
+            score_scale_factor = round(10.0 / weighted_max, 4)
+            logger.info(
+                f"score_scale_factor: {score_scale_factor} "
+                f"(10.0 / {weighted_max:.2f} theoretical max from calibration)"
+            )
+
+            config_path = filter_dir / "config.yaml"
+            _update_score_scale_factor(config_path, score_scale_factor, weighted_max)
 
     # Print report
     print_report(cal_data, oracle_scores, student_scores, dimension_names, weights, tier_thresholds, label="val")
