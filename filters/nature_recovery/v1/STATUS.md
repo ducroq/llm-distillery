@@ -1,7 +1,7 @@
 # Nature Recovery Filter - Development Status
 
 **Last Updated:** 2026-03-06
-**Status:** Phases 1-7 Complete — Ready for Phase 8 (Hybrid Probe) and Phase 9 (Deployment)
+**Status:** Phases 1-8 Complete — Ready for Phase 9 (Deployment)
 
 ---
 
@@ -135,7 +135,10 @@ sustainability_technology scores *technologies* via LCSA (readiness, cost, lifec
   - [x] Score range expansion working: negative predictions mapped to 0, compressed upper range expanded
   - [x] Tier recovery on val: medium 4 -> 5 (oracle: 11)
 
-- [ ] **Phase 8: Hybrid Probe** — e5-small embedding probe (ADR-006)
+- [x] **Phase 8: Hybrid Probe** (2026-03-06):
+  - [x] e5-small MLP probe trained on 2,623 train / 328 val articles
+  - [x] Probe MAE: 0.50 (early stopping at epoch 29)
+  - [x] Saved to `probe/embedding_probe_e5small.pkl`
 - [ ] **Phase 9: Deployment** — Hub upload, NexusMind sync, ovr.news integration
 
 ---
