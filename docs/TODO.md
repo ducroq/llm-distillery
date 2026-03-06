@@ -52,9 +52,9 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 ### In Active Development (priority: ovr.news tabs)
 - [x] **belonging v1** - Deployed, val MAE 0.49 (calibrated), 7,370 articles. Next: ovr.news tab
 - [ ] **nature_recovery v1** - ovr.news "Herstel" tab
-  - Phases 1-5 complete: 6 dims, prompt harmonized, oracle validated, embedding screening (ADR-011)
-  - 3,280 scored articles (17 HIGH, 103 MEDIUM), splits prepared (2,623/328/329)
-  - Next: Phase 6 training (Gemma-3-1B + LoRA on gpu-server)
+  - Phases 1-7 complete: trained (val MAE 0.54), calibrated (val MAE 0.507)
+  - 3,280 articles, Gemma-3-1B + LoRA, all 3 inference paths created
+  - Next: Phase 8 hybrid probe, Phase 9 deployment (Hub upload, NexusMind sync)
 - [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Erfgoed or standalone)
   - Concept and README complete
   - Next: harmonized prompt, prefilter.py, oracle scoring, training
@@ -94,6 +94,7 @@ Post-hoc isotonic regression to correct MSE score compression at inference time.
 - [x] **sustainability_technology v3 calibration** - Fitted on 1,061 val articles, test MAE 0.725 -> 0.724
 - [x] **investment-risk v6 calibration** - Fitted on 1,045 val articles, val MAE 0.497 -> 0.465 (+6.5%)
 - [x] **belonging v1 calibration** - Fitted on 738 val articles, val MAE 0.534 -> 0.489 (+8.3%)
+- [x] **nature_recovery v1 calibration** - Fitted on 328 val articles, val MAE 0.540 -> 0.507 (+6.2%)
 
 ## Hybrid Inference Pipeline (ADR-006)
 

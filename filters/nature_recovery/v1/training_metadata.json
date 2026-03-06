@@ -1,0 +1,29 @@
+{
+  "filter_name": "nature_recovery",
+  "filter_version": "1.0",
+  "dimension_names": [
+    "recovery_evidence",
+    "measurable_outcomes",
+    "ecological_significance",
+    "restoration_scale",
+    "human_agency",
+    "protection_durability"
+  ],
+  "num_dimensions": 6,
+  "model_name": "google/gemma-3-1b-pt",
+  "num_parameters": 1012945536,
+  "num_trainable_parameters": 13052672,
+  "epochs": 3,
+  "batch_size": 8,
+  "learning_rate": 2e-05,
+  "max_length": 512,
+  "warmup_steps": 500,
+  "train_examples": 2623,
+  "val_examples": 328,
+  "best_val_mae": 0.5403228998184204,
+  "include_prompt": false,
+  "training_mode": "knowledge_distillation",
+  "use_head_tail": true,
+  "head_tokens": 256,
+  "tail_tokens": 256
+}

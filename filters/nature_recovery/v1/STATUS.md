@@ -1,7 +1,7 @@
 # Nature Recovery Filter - Development Status
 
-**Last Updated:** 2026-03-05
-**Status:** Phase 1 Complete — Ready for Phase 2 (Prompt Architecture)
+**Last Updated:** 2026-03-06
+**Status:** Phases 1-7 Complete — Ready for Phase 8 (Hybrid Probe) and Phase 9 (Deployment)
 
 ---
 
@@ -122,8 +122,19 @@ sustainability_technology scores *technologies* via LCSA (readiness, cost, lifec
   - [x] Distribution: 17 HIGH (0.5%), 103 MEDIUM (3.1%), 3,160 LOW (96.3%)
   - [x] Training splits prepared: 2,623 train / 328 val / 329 test
 
-- [ ] **Phase 6: Training** — Gemma-3-1B + LoRA on gpu-server (data transferred)
-- [ ] **Phase 7: Calibration** — Isotonic regression on val set (ADR-008)
+- [x] **Phase 6: Training** (2026-03-06):
+  - [x] Gemma-3-1B + LoRA on gpu-server, 3 epochs
+  - [x] Val MAE: 0.540 (Epoch 1: 0.782, Epoch 2: 0.580, Epoch 3: 0.540)
+  - [x] Best model saved at epoch 3
+  - [x] All inference files created: inference.py, inference_hub.py, inference_hybrid.py
+
+- [x] **Phase 7: Calibration** (2026-03-06):
+  - [x] Isotonic regression fitted on 328 val articles
+  - [x] Val MAE: 0.540 -> 0.507 (+6.2%)
+  - [x] Test MAE: 0.489 (raw) -> 0.501 (calibrated, slight regression typical for small skewed datasets)
+  - [x] Score range expansion working: negative predictions mapped to 0, compressed upper range expanded
+  - [x] Tier recovery on val: medium 4 -> 5 (oracle: 11)
+
 - [ ] **Phase 8: Hybrid Probe** — e5-small embedding probe (ADR-006)
 - [ ] **Phase 9: Deployment** — Hub upload, NexusMind sync, ovr.news integration
 
@@ -134,8 +145,14 @@ sustainability_technology scores *technologies* via LCSA (readiness, cost, lifec
 | File | Purpose |
 |------|---------|
 | `config.yaml` | Dimensions, weights, content type caps, gatekeeper |
-| `prompt-compressed.md` | Oracle prompt (Phase 2 — not yet rewritten) |
-| `prefilter.py` | Rule-based blocker (Phase 4 — needs rewrite) |
+| `prompt-compressed.md` | Oracle prompt (production) |
+| `prefilter.py` | Rule-based nature content filter |
+| `base_scorer.py` | Base class with dimensions, weights, tiers, gatekeeper |
+| `inference.py` | Local model inference |
+| `inference_hub.py` | HuggingFace Hub inference |
+| `inference_hybrid.py` | Two-stage hybrid inference (probe + model) |
+| `calibration.json` | Per-dimension isotonic regression |
+| `model/` | LoRA adapter + tokenizer |
 | `DEEP_ROOTS.md` | Scientific and philosophical grounding |
 | `STATUS.md` | This file — development progress tracker |
 | `README.md` | Summary and quick reference |
