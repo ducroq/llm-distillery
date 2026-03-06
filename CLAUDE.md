@@ -37,7 +37,7 @@
 
 | Filter | Version | Status | Target |
 |--------|---------|--------|--------|
-| **nature_recovery** | v1 | Phase 1-2 complete, ready for oracle validation | ovr.news "Herstel" tab |
+| **nature_recovery** | v1 | Phases 1-8 complete (val MAE 0.54, probe MAE 0.50), ready for deployment | ovr.news "Herstel" tab |
 | **signs_of_wisdom** | v1 | Need harmonized prompt | ovr.news (enrich Erfgoed or standalone) |
 | **future-of-education** | v1 | Concept only | ovr.news "Leren" tab |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring | Separate product (not ovr.news) |
@@ -94,4 +94,4 @@ python scripts/deployment/upload_to_huggingface.py \
 
 ---
 
-*Last updated: 2026-03-04*
+*Last updated: 2026-03-06*

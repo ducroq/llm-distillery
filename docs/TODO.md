@@ -52,9 +52,9 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 ### In Active Development (priority: ovr.news tabs)
 - [x] **belonging v1** - Deployed, val MAE 0.49 (calibrated), 7,370 articles. Next: ovr.news tab
 - [ ] **nature_recovery v1** - ovr.news "Herstel" tab
-  - Phases 1-7 complete: trained (val MAE 0.54), calibrated (val MAE 0.507)
-  - 3,280 articles, Gemma-3-1B + LoRA, all 3 inference paths created
-  - Next: Phase 8 hybrid probe, Phase 9 deployment (Hub upload, NexusMind sync)
+  - Phases 1-8 complete: trained (val MAE 0.54), calibrated (0.507), probe (MAE 0.50)
+  - 3,280 articles, Gemma-3-1B + LoRA, all 3 inference paths + probe created
+  - Next: Phase 9 deployment (Hub upload, NexusMind sync, ovr.news integration)
 - [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Erfgoed or standalone)
   - Concept and README complete
   - Next: harmonized prompt, prefilter.py, oracle scoring, training
@@ -114,6 +114,8 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **Cultural-discovery v4 probe** - Retrained for Gemma-3-1B, MAE 0.87, threshold 1.25, 3% FN, 1.51x speedup
 - [x] **Sustainability_technology v3 probe** - Trained for Gemma-3-1B, MAE 0.91, threshold 1.25 (to be calibrated)
 - [x] **Investment-risk v6 probe** - Trained for Gemma-3-1B, MAE 0.557, threshold 1.50
+- [x] **Belonging v1 probe** - Trained for Gemma-3-1B, MAE 0.54
+- [x] **Nature_recovery v1 probe** - Trained for Gemma-3-1B, MAE 0.50
 
 ## Code Quality (Feb 2026)
 
