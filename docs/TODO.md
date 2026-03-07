@@ -135,7 +135,9 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [ ] **Generalize prefilter evaluation** - Apply to all filters
 - [ ] **Dataset QA pipeline** - Automated quality checks
 - [ ] **Cost tracking** - Monitor API usage for oracle scoring
-- [x] **Hub scorers: add torch_dtype parameter** - All 5 `inference_hub.py` files now accept optional `torch_dtype` param and pass it to `from_pretrained()`. Use `torch_dtype=torch.float16` on hardware without bfloat16 support.
+- [x] **Hub scorers: add torch_dtype parameter** - All 6 `inference_hub.py` files now accept optional `torch_dtype` param and pass it to `from_pretrained()`. Use `torch_dtype=torch.float16` on hardware without bfloat16 support.
+- [x] **Deploy all filters to NexusMind** (#7) - All 6 filters deployed to gpu-server + sadalsuud + HuggingFace Hub
+- [x] **Auto-compute score_scale_factor** (#22/#26) - Calibration script writes `score_scale_factor` to config.yaml; backfilled to all 6 filters
 - [x] **Harmonize filters: llm-distillery as single source of truth** - Fixed drift between llm-distillery and NexusMind
   - base_prefilter.py: threading.Lock() for commerce detector (was bool flag)
   - investment-risk v5: merged source-based + content-pattern approaches, removed academic source blocking
@@ -150,4 +152,4 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-03-06*
+*Last updated: 2026-03-07*
