@@ -123,6 +123,18 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **load_lora extraction** (#11) - Shared `load_lora_model()` in `filters/common/model_loading.py`
 - [x] **Code quality sweep** (#12-#19) - Resolved 8 issues: removed dead code, cleaned stale comments, fixed inconsistencies (-314 lines)
 
+## Energy-Efficient Inference (#24)
+
+- [x] **PyTorch dynamic quantization experiment** - 2026-03-07
+  - Tested FP32/FP16/INT8 on uplifting v6, CPU-only
+  - INT8: 2.6x faster, 3.3x smaller, but MAE +0.63 (unusable)
+  - FP16: NaN on CPU (no native fp16 ALUs)
+  - **Verdict:** Naive quantization rejected
+  - See `docs/experiments/quantization-benchmark-2026-03-07.md`
+- [ ] **ONNX Runtime INT8** - Calibrated quantization with representative data
+- [ ] **Smaller base model retraining** - SmolLM-360M or similar sub-1B models
+- [ ] **llama.cpp / GGUF** - Purpose-built CPU inference engine
+
 ## Deployment
 
 - [ ] **Inference server** - Unified prefilter + model + postfilter pipeline
@@ -153,3 +165,4 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 ---
 
 *Last updated: 2026-03-07*
+

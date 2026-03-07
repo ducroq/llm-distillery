@@ -12,6 +12,9 @@
 
 ## Later (Backlog)
 
+- **Energy-efficient inference (#24)** - CPU-viable scoring for when GPU access ends
+  - Naive PyTorch INT8 rejected (MAE +0.63, see `docs/experiments/`)
+  - Next: ONNX Runtime calibrated INT8, or smaller base model (SmolLM-360M)
 - **uplifting v7** - HIGH-tier data collection
   - v6 has only 8 HIGH articles (0.08%) — model can't learn upper score range
   - Collect 50-100 HIGH articles from targeted sources
@@ -65,6 +68,10 @@
   - Test MAE: 0.484, 10K training articles
 
 ### Research
+- [x] **Quantization feasibility** - PyTorch dynamic INT8/FP16 on Gemma-3-1B - 2026-03
+  - INT8: 2.6x faster, 3.3x smaller, but MAE +0.63 (unusable)
+  - FP16: NaN on CPU, 4x slower (no native fp16 ALUs)
+  - Naive quantization rejected; calibrated (ONNX) or smaller models needed
 - [x] **Context length experiments** - 1024/2048/head+tail strategies - 2025-01
   - head+tail (256+256) deployed to production
   - See `docs/IDEAS.md` for full results
@@ -143,4 +150,4 @@
 
 ---
 
-*Last updated: 2026-03-06*
+*Last updated: 2026-03-07*
