@@ -58,6 +58,8 @@ preprocessing:
     separator: " [...] "
 
 scoring:
+  score_scale_factor: 1.1364  # 10.0 / 8.80 (calibrated max)
+
   dimensions:
     discovery_novelty:
       weight: 0.25

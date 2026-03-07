@@ -16,6 +16,8 @@ filter:
 
 # Scoring dimensions and weights (6 orthogonal dimensions, unchanged from v5)
 scoring:
+  score_scale_factor: 1.2652  # 10.0 / 7.90 (calibrated max)
+
   dimensions:
     # RISK CHARACTERIZATION (What Kind of Risk)
 

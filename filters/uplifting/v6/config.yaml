@@ -29,6 +29,8 @@ oracle:
   target_model: "Gemini Flash 2.0 / Claude Haiku"
 
 scoring:
+  score_scale_factor: 1.349  # 10.0 / 7.41 (calibrated max)
+
   dimensions:
     # === IMPACT DOMAINS (WHAT kind of uplift) ===
 

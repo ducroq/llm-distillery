@@ -5,6 +5,8 @@ filter:
   framework: "Life Cycle Sustainability Assessment (LCSA)"
 
 scoring:
+  score_scale_factor: 1.3535  # 10.0 / 7.39 (calibrated max)
+
   dimensions:
     technology_readiness_level:
       weight: 0.15

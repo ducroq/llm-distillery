@@ -40,6 +40,8 @@ oracle:
   target_model: "Gemini Flash 2.0 / Claude Haiku"
 
 scoring:
+  score_scale_factor: 1.1869  # 10.0 / 8.43 (calibrated max)
+
   dimensions:
     # === RELATIONAL DIMENSIONS ===
 

@@ -42,6 +42,8 @@ oracle:
     - claude-sonnet
 
 scoring:
+  score_scale_factor: 1.5345  # 10.0 / 6.52 (calibrated max)
+
   dimensions:
     # === EVIDENCE DIMENSIONS ===
 
