@@ -24,6 +24,10 @@
 ## Completed
 
 ### Filters
+- [x] **nature_recovery v1** - Deployed on HuggingFace Hub (private) - 2026-03
+  - Val MAE: 0.540 (calibrated: 0.507), Gemma-3-1B
+  - 3,280 training articles (screen+merge via ADR-011 embedding screening)
+  - 6 dimensions, probe MAE 0.50 (best across all filters)
 - [x] **belonging v1** - Training complete - 2026-03
   - Val MAE: 0.534 (calibrated: 0.489), Gemma-3-1B
   - 7,370 training articles (5K scope candidates + 2.5K random negatives, deduplicated)
