@@ -1,0 +1,221 @@
+# Uplifting Content Filter - Version 7.0
+# ADR-010 harmonized prompt: scope check, anti-hallucination, reframed assessment dimensions
+# Key change: evidence_level + benefit_distribution reframed to measure UPLIFT specifically (not general article quality)
+
+filter:
+  name: uplifting
+  version: "7.0"
+  created: "2026-03-08"
+  description: "Rate content for uplifting value using orthogonal impact and assessment dimensions"
+  focus: "DOCUMENTED OUTCOMES for human/planetary wellbeing, not emotional tone or speculation"
+
+  changelog_v7: |
+    Changes from v6:
+    - ADR-010 harmonized prompt: Step 1 scope check, anti-hallucination (EXACT QUOTE), noise detection checklist
+    - evidence_level reframed: measures evidence OF UPLIFTING OUTCOMES, not general journalism quality
+    - benefit_distribution reframed: measures distribution OF BENEFIT, not audience size
+    - Weight rebalancing: impact domains 50% -> 65%, assessment 50% -> 35%
+      - human_wellbeing_impact: 0.25 -> 0.30
+      - social_cohesion_impact: 0.15 -> 0.20
+      - justice_rights_impact: 0.10 -> 0.15
+      - evidence_level: 0.20 -> 0.10 (still gatekeeper)
+      - benefit_distribution: 0.20 -> 0.10
+      - change_durability: 0.10 -> 0.15
+    - Prompt display names: evidence_level -> "Outcome Verification", benefit_distribution -> "Inclusive Reach"
+    - JSON field names unchanged for backwards compatibility (evidence_level, benefit_distribution)
+
+prefilter:
+  enabled: true
+  expected_pass_rate: 0.20
+  description: "Blocks corporate finance, military buildups, and pure speculation without outcomes"
+
+oracle:
+  recommended: gemini-flash
+  candidates:
+    - gemini-flash
+    - gemini-pro
+    - claude-sonnet
+  target_model: "Gemini Flash 2.0 / Claude Haiku"
+
+scoring:
+  score_scale_factor: null  # To be computed after training
+
+  dimensions:
+    # === IMPACT DOMAINS (WHAT kind of uplift) === 65% total
+
+    human_wellbeing_impact:
+      weight: 0.30
+      category: impact_domain
+      description: "Improvement in health, safety, livelihoods, or basic needs"
+      scale: |
+        0-2: No wellbeing impact or harm documented
+        3-4: Minor/indirect wellbeing benefit
+        5-6: Moderate wellbeing improvement for identifiable group
+        7-8: Significant wellbeing improvement with measurable outcomes
+        9-10: Transformative wellbeing change (lives saved, poverty lifted, health restored)
+      evidence_focus: "Health metrics, safety improvements, livelihood gains, basic needs met"
+
+    social_cohesion_impact:
+      weight: 0.20
+      category: impact_domain
+      description: "Communities strengthened, solidarity built, connections across groups"
+      scale: |
+        0-2: No social impact or division/isolation
+        3-4: Limited connection within existing groups
+        5-6: Moderate community building or cross-group collaboration
+        7-8: Strong solidarity, mutual aid networks, inclusive coalitions
+        9-10: Transformative social bonds across divides (class, race, nation)
+      evidence_focus: "Collaboration examples, mutual aid, coalition building, community events"
+
+    justice_rights_impact:
+      weight: 0.15
+      category: impact_domain
+      description: "Wrongs addressed, accountability achieved, rights expanded"
+      scale: |
+        0-2: No justice/rights dimension
+        3-4: Problem documented but no action
+        5-6: Initial accountability or rights advocacy
+        7-8: Significant justice achieved (ruling, reparation, policy change)
+        9-10: Landmark justice (systemic accountability, rights breakthrough)
+      evidence_focus: "Court rulings, policy changes, accountability actions, rights expansions"
+      critical_filters: |
+        Score 0-2 if: Individual criminal sentencing without systemic impact
+        (single convictions, arrests, sentences that don't set precedent or change policy)
+
+    # === ASSESSMENT DIMENSIONS (HOW real/lasting) === 35% total
+
+    evidence_level:
+      weight: 0.10
+      category: assessment
+      description: "How verified are the UPLIFTING OUTCOMES specifically? (Not general journalism quality)"
+      gatekeeper: true
+      gatekeeper_threshold: 3
+      gatekeeper_max_score: 3.0
+      scale: |
+        0-2: No uplifting outcome to verify, OR pure speculation
+        3-4: Uplifting outcome claimed but limited evidence
+        5-6: Uplifting outcome documented with some data
+        7-8: Uplifting outcome well-documented with verifiable data
+        9-10: Uplifting outcome independently verified/replicated
+      evidence_focus: "Data citations, source quality, verification level — specifically for the UPLIFTING outcome"
+
+    benefit_distribution:
+      weight: 0.10
+      category: assessment
+      description: "Who receives the uplifting benefit? How accessible is it? (Not audience size)"
+      scale: |
+        0-2: No benefit to distribute, OR elite only (billionaires, executives, shareholders)
+        3-4: Benefit reaches limited group (one community, one organization)
+        5-6: Benefit reaches moderate population (regional, underserved demographic)
+        7-8: Benefit broadly accessible (free/affordable, nationwide, low barriers)
+        9-10: Benefit universally accessible (global commons, open source, structural inclusion)
+      evidence_focus: "Who receives the benefit, access barriers, pricing, geographic reach of BENEFIT (not news)"
+
+    change_durability:
+      weight: 0.15
+      category: assessment
+      description: "How lasting is the positive change?"
+      scale: |
+        0-2: One-time event or temporary relief
+        3-4: Short-term improvement (months)
+        5-6: Sustained change (years) but reversible
+        7-8: Durable structural change (institutions, infrastructure, rights)
+        9-10: Permanent/self-sustaining transformation (systemic, generational)
+      evidence_focus: "Timeframe mentioned, structural vs symptomatic, sustainability indicators"
+
+  tiers:
+    high:
+      threshold: 7.0
+      description: "Verified, broadly beneficial, lasting positive change"
+
+    medium:
+      threshold: 4.0
+      description: "Documented benefits with moderate reach or durability"
+
+    low:
+      threshold: 0.0
+      description: "Speculation, elite-only benefits, or no documented wellbeing impact"
+
+  gatekeepers:
+    evidence_gatekeeper:
+      dimension: evidence_level
+      threshold: 3
+      max_score: 3.0
+      reason: "Unverified uplift is not uplift"
+
+  content_type_caps:
+    corporate_finance:
+      max_score: 2.0
+      triggers:
+        - "Stock prices, earnings, funding rounds, valuations, M&A, IPO"
+      exceptions:
+        - "worker cooperative"
+        - "public benefit corporation"
+        - "open source"
+        - "community ownership"
+
+    military_security:
+      max_score: 4.0
+      triggers:
+        - "Military buildup, defense spending, weapons, armed forces deployment"
+      exceptions:
+        - "demilitarization"
+        - "peace process"
+        - "conflict resolution"
+        - "disarmament"
+
+    individual_crime:
+      max_score: 3.0
+      triggers:
+        - "Single arrest, trial, conviction, sentencing of individual(s)"
+      exceptions:
+        - "systemic reform"
+        - "class action"
+        - "landmark/precedent-setting ruling"
+        - "policy change"
+
+    doom_framed:
+      max_score: 4.0
+      triggers:
+        - "More than 50% of content describes harm/crisis/problem"
+      exceptions:
+        - "Investigative journalism documenting harm for accountability"
+
+    pure_speculation:
+      max_score: 3.0
+      triggers:
+        - "Article primarily uses 'could', 'might', 'may', 'promises to', 'aims to'"
+      exceptions:
+        - "documented pilot results"
+        - "verified early outcomes"
+
+preprocessing:
+  head_tail:
+    enabled: true
+    head_tokens: 256
+    tail_tokens: 256
+    separator: " [...] "
+
+training:
+  target_samples: 5000  # ADR-010: prompt precision > data volume. belonging v1 (7.4K, MAE 0.49) beat uplifting v6 (10.5K, MAE 0.67)
+  train_val_test_split: [0.8, 0.1, 0.1]
+  quality_threshold: 0.7
+  recommended_model: "google/gemma-3-1b-pt"
+  expected_mae: "<0.55"
+
+hybrid_inference:
+  stage1:
+    embedding_model: "intfloat/multilingual-e5-small"
+    probe_path: "probe/embedding_probe_e5small.pkl"
+    threshold: null  # To be calibrated after training
+  stage2:
+    model: "current"
+
+deployment:
+  inference_time: "~20ms"
+  inference_time_hybrid: "~12ms avg"
+  cost_per_article: "$0.00"
+  use_cases:
+    - "Positive news aggregation"
+    - "Solutions journalism curation"
+    - "Progress tracking dashboards"

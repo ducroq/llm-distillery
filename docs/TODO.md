@@ -55,6 +55,11 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - Val MAE 0.54 (calibrated 0.507), probe MAE 0.50, 3,280 articles
   - Hub: `jeergrvgreg/nature-recovery-filter-v1` (private)
   - Remaining: ovr.news "Herstel" tab frontend integration
+- [ ] **uplifting v7** - ADR-010 prompt rewrite, fixes evidence/distribution inflation
+  - v7 prompt: scope check, anti-hallucination, reframed assessment dimensions
+  - Weight rebalancing: evidence+distribution 40% → 20%, impact domains 50% → 65%
+  - Oracle scoring complete: 6,590 articles (100 HIGH, 2,082 MEDIUM, 4,408 LOW)
+  - Next: prepare splits → train on gpu-server → calibrate → compare vs v6
 - [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Erfgoed or standalone)
   - Concept and README complete
   - Next: harmonized prompt, prefilter.py, oracle scoring, training
@@ -164,5 +169,5 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-03-07*
+*Last updated: 2026-03-08*
 
