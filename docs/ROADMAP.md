@@ -4,7 +4,7 @@
 
 - **belonging v1 → ovr.news** - Add "Verbondenheid" tab (filter deployed, frontend work only)
 - **nature_recovery v1** - Deployed (val MAE 0.54, probe MAE 0.50) → ovr.news "Herstel" tab (frontend only)
-- **uplifting v7** - ADR-010 prompt rewrite fixing evidence/distribution inflation → oracle scoring 5K articles → training
+- **uplifting v7** - ADR-010 prompt rewrite. Trained (val MAE 0.787) but not deployed — regression vs v6 (0.67). Next: multi-run oracle averaging → retrain
 - **signs_of_wisdom v1** - Harmonized prompt → oracle scoring → training → enrich Erfgoed or new tab
 
 ## Next (Coming Soon)
@@ -16,7 +16,6 @@
 - **Energy-efficient inference (#24)** - CPU-viable scoring for when GPU access ends
   - Naive PyTorch INT8 rejected (MAE +0.63, see `docs/experiments/`)
   - Next: ONNX Runtime calibrated INT8, or smaller base model (SmolLM-360M)
-- **uplifting v7** - Moved to "Now" — ADR-010 prompt rewrite in progress
 - **Prefilter strategy documented** - ADR-004: Commerce is only universal noise
 - **seece filter** - Corporate excellence (not ovr.news)
 - **sustainability_economic_viability / sustainability_policy_effectiveness** - Sustainability sub-dimensions (not ovr.news)
@@ -149,4 +148,4 @@
 
 ---
 
-*Last updated: 2026-03-08*
+*Last updated: 2026-03-18*

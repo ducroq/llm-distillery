@@ -10,6 +10,7 @@ Subclasses define constants and _load_prefilter(); everything else lives here.
 See GitHub issue #10.
 """
 
+import hashlib
 import inspect
 import logging
 from abc import ABC, abstractmethod
@@ -65,6 +66,7 @@ class FilterBaseScorer(ABC):
 
         self._load_preprocessing_config()
         self._load_calibration()
+        self._compute_prompt_hash()
 
         if use_prefilter:
             self._load_prefilter()
@@ -81,6 +83,34 @@ class FilterBaseScorer(ABC):
     def device_str(self) -> str:
         """Return string representation of device."""
         return str(self.device)
+
+    # --- Prompt hash ---
+
+    def _compute_prompt_hash(self):
+        """Compute a short hash of the prompt file for provenance tracking."""
+        self.prompt_hash = None
+        filter_dir = self._get_filter_dir()
+        for name in ("prompt-compressed.md", "prompt.md"):
+            prompt_path = filter_dir / name
+            if prompt_path.exists():
+                content = prompt_path.read_text(encoding="utf-8")
+                self.prompt_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()[:12]
+                break
+
+    # --- Scoring metadata ---
+
+    def scoring_metadata(self) -> Dict:
+        """Return provenance metadata for this scorer.
+
+        Useful for active learning: knowing which model version and prompt
+        produced a score, so stale scores can be identified and re-scored.
+        """
+        return {
+            "filter_name": self.FILTER_NAME,
+            "filter_version": self.FILTER_VERSION,
+            "prompt_hash": self.prompt_hash,
+            "calibrated": self.calibration is not None,
+        }
 
     # --- Calibration ---
 

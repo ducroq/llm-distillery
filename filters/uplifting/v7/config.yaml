@@ -38,7 +38,7 @@ oracle:
   target_model: "Gemini Flash 2.0 / Claude Haiku"
 
 scoring:
-  score_scale_factor: null  # To be computed after training
+  score_scale_factor: 1.1976  # 10.0 / 8.35 (calibrated max)
 
   dimensions:
     # === IMPACT DOMAINS (WHAT kind of uplift) === 65% total

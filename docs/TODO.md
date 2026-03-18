@@ -59,7 +59,10 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - v7 prompt: scope check, anti-hallucination, reframed assessment dimensions
   - Weight rebalancing: evidence+distribution 40% → 20%, impact domains 50% → 65%
   - Oracle scoring complete: 6,590 articles (100 HIGH, 2,082 MEDIUM, 4,408 LOW)
-  - Next: prepare splits → train on gpu-server → calibrate → compare vs v6
+  - Training complete: val MAE 0.787 (6 epochs, clamp-to-1.0), but regression vs v6 (0.67)
+  - Calibration fitted but overfits val (test MAE 0.811 → 0.841), HIGH tier detection broken (2/11)
+  - Root cause: bimodal discrete scores (15-17 values vs v6's 250+ from multi-run averaging)
+  - Next: multi-run oracle averaging (re-score 2x, average 3 runs) → retrain → calibrate
 - [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Erfgoed or standalone)
   - Concept and README complete
   - Next: harmonized prompt, prefilter.py, oracle scoring, training
@@ -169,5 +172,5 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-03-08*
+*Last updated: 2026-03-18*
 

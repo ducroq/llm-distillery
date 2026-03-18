@@ -389,6 +389,7 @@ class GenericBatchScorer:
         api_key: Optional[str] = None,
         output_dir: str = "datasets",
         filter_name: Optional[str] = None,
+        filter_version: Optional[str] = None,
         thinking_budget: int = 0
     ):
         """
@@ -408,6 +409,8 @@ class GenericBatchScorer:
             output_dir: Directory to save scored articles and logs
             filter_name: Name of the filter (e.g., "uplifting"). If None,
                         auto-detected from prompt_path directory structure.
+            filter_version: Version of the filter (e.g., "7.0"). If None,
+                        auto-detected from config.yaml or directory name.
             thinking_budget: Token budget for Gemini "thinking" mode (0-24576).
                         Default 0 disables thinking to reduce costs by ~80%.
                         Set higher (e.g., 1024-8192) for complex reasoning tasks.
@@ -423,8 +426,15 @@ class GenericBatchScorer:
         else:
             self.filter_name = filter_name
 
+        # Store filter version for scoring metadata
+        self.filter_version = filter_version
+
         # Load prompt template
         self.prompt_template = self._load_prompt_template()
+
+        # Compute prompt hash for reproducibility tracking
+        import hashlib
+        self.prompt_hash = hashlib.sha256(self.prompt_template.encode('utf-8')).hexdigest()[:12]
 
         # Initialize LLM client
         self.llm_client = self._init_llm_client(api_key)
@@ -884,6 +894,9 @@ class GenericBatchScorer:
                 analysis['analyzed_at'] = datetime.utcnow().isoformat() + 'Z'
                 analysis['analyzed_by'] = f'{self.llm_provider}-api-batch'
                 analysis['filter_name'] = self.filter_name
+                if self.filter_version:
+                    analysis['filter_version'] = self.filter_version
+                analysis['prompt_hash'] = self.prompt_hash
 
                 # Log success metrics
                 self._log_metrics(
@@ -1499,11 +1512,20 @@ if __name__ == '__main__':
     prompt_path = None
     filter_name = None
 
+    filter_version = None
+
     if args.filter:
         # New filter package mode
         filter_path = Path(args.filter)
         filter_name = filter_path.parent.name  # e.g., "uplifting" from "filters/uplifting/v1"
         prefilter_obj, prompt_path, config = load_filter_package(filter_path)
+
+        # Extract filter version from config or directory name
+        if config and 'filter' in config:
+            filter_version = str(config['filter'].get('version', ''))
+        if not filter_version:
+            # Fallback: extract from directory name (e.g., "v7" -> "7")
+            filter_version = filter_path.name.lstrip('v')
 
         # Wrap prefilter object to match batch_scorer interface
         # Filter packages return (bool, reason) but batch_scorer expects just bool
@@ -1544,6 +1566,7 @@ if __name__ == '__main__':
         api_key=args.api_key,
         output_dir=args.output_dir,
         filter_name=filter_name,
+        filter_version=filter_version,
         thinking_budget=args.thinking_budget
     )
 
