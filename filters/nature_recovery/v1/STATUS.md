@@ -38,7 +38,7 @@
 | Tiers defined with thresholds | PASS — 3 tiers (7.0 / 4.0 / 0.0) |
 | At least 1 gatekeeper | PASS — recovery_evidence (threshold 3, cap 3.5) |
 | Weights sum to 1.0 | PASS — verified |
-| Use case documented | PASS — ovr.news "Herstel" tab |
+| Use case documented | PASS — ovr.news Recovery tab |
 
 | ADR-010 Requirement | Status |
 |---|---|
@@ -144,7 +144,7 @@ sustainability_technology scores *technologies* via LCSA (readiness, cost, lifec
   - [x] Hub verification passed: PeftModel.from_pretrained() loads correctly
   - [x] Deployed to gpu-server: ~/NexusMind/filters/nature_recovery/v1/
   - [x] Import verified on gpu-server (GPU busy with existing scorer, model load deferred)
-  - [ ] ovr.news "Herstel" tab integration (NexusMind frontend work)
+  - [ ] ovr.news Recovery tab integration (NexusMind frontend work)
 
 ---
 

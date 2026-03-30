@@ -22,6 +22,9 @@ ADRs are short documents that capture important architectural decisions along wi
 - [ADR-009: Add Filters First, Reduce Later](009-add-filters-first-reduce-later.md) - Deploy new filters as separate tabs; merge later if redundant in practice
 - [ADR-010: Oracle Consistency Over Data Volume](010-oracle-consistency-over-data-volume.md) - Prompt precision and anti-contamination design matter more than training data volume for student MAE
 - [ADR-011: Embedding-Based Screening for Needle Filters](011-embedding-screener-for-needle-filters.md) - Use Phase 3 positives as e5-small embedding seeds to screen large corpora for batch labeling candidates
+- [ADR-012: Lens-Aligned Filter Naming](012-lens-aligned-filter-naming.md) - Rename filters to match ovr.news editorial lens names at next version bump
+- [ADR-013: English Lens Names](013-english-lens-names.md) - All lens and tab names use English; no Dutch naming (amends ADR-012)
+- [ADR-014: Cross-Filter Percentile Normalization](014-cross-filter-percentile-normalization.md) - Normalize scores across filters using percentile rank mapping; supersedes score_scale_factor
 
 ## Format
 

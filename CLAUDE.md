@@ -1,5 +1,8 @@
 # CLAUDE.md - LLM Distillery
 
+- **Status**: Production
+- **agent-ready-projects**: v1.3.2
+
 ## What Is This?
 
 **LLM Distillery** is a knowledge distillation framework. It trains small, cheap, local classifiers (Gemma-3-1B + LoRA) to replicate expensive cloud LLM scoring (Gemini Flash) at 100x lower cost and 50x faster inference.
@@ -27,7 +30,7 @@
 
 | Filter | Version | MAE | Training Data | Status |
 |--------|---------|-----|---------------|--------|
-| **uplifting** | v6 | 0.67 | 10.5K articles | Deployed (HF Hub, private) |
+| **uplifting** | v6 | 0.67 | 10.5K articles | Deployed (HF Hub, private) — legacy, replaced by thriving |
 | **sustainability_technology** | v3 | 0.72 | 10.6K articles | Deployed (HF Hub, private) |
 | **investment-risk** | v6 | 0.47 | 10.4K articles | Deployed (HF Hub, private) |
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
@@ -38,8 +41,9 @@
 
 | Filter | Version | Status | Target |
 |--------|---------|--------|--------|
-| **signs_of_wisdom** | v1 | Need harmonized prompt | ovr.news (enrich Erfgoed or standalone) |
-| **future-of-education** | v1 | Concept only | ovr.news "Leren" tab |
+| **thriving** | v1 | PAUSED — calibrated MAE 0.94, bimodal distribution problem | ovr.news Thriving tab (uplifting v6 stays) |
+| **signs_of_wisdom** | v1 | Need harmonized prompt | ovr.news Wisdom tab |
+| **future-of-education** | v1 | Concept only | ovr.news Education tab |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring | Separate product (not ovr.news) |
 
 ## Key Decisions
@@ -51,20 +55,27 @@
 - **Fine-tuning beats embedding probes** — research confirmed
 - **Gemma-3-1B** — replaced Qwen2.5; better MAE, faster inference
 - **Add filters first, reduce later** — deploy as separate tabs, dedup later (ADR-009)
+- **Lens-aligned filter naming** — rename filters to match ovr.news lens names at version bumps (ADR-012)
 - **Oracle consistency over data volume** — prompt precision predicts MAE better than dataset size; use belonging v1 as template (ADR-010)
 - **Embedding screening for needle filters** — use Phase 3 positives as e5-small seeds to screen corpora; replaces keyword screening (ADR-011)
+- **English lens names** — all lens/tab names in English, no Dutch (ADR-013)
+- **Cross-filter percentile normalization** — non-linear mapping from production CDF; supersedes score_scale_factor (ADR-014)
 
 See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed records.
 
 ## Before You Start
 
+**Always read `memory/MEMORY.md` first** — it's the project memory index with current work status, gotchas, and pointers to topic files.
+
 | When you're... | Read... |
 |----------------|---------|
+| Starting a new session | `memory/MEMORY.md` — project memory index, current work status |
+| Resuming thriving v1 work | `memory/thriving-v1-scoring.md` — scoring status, resume commands, full pipeline |
 | Developing a new filter | `docs/agents/filter-development-guide.md` — full lifecycle, or `docs/guides/filter-creation-workflow.md` — quick steps |
-| Deploying to NexusMind or gpu-server | `docs/WAY-OF-WORKING.md` — deployment runbook with verify steps |
+| Deploying to NexusMind or gpu-server | `docs/RUNBOOK.md` — deployment, training, scoring how-to |
 | Training on GPU server | `memory/gpu-server.md` — venv, PYTHONPATH, HF_HUB_OFFLINE |
 | Debugging model loading or PEFT issues | `memory/gemma3-model.md` — Auto mapping fix, key format details |
-| Making architectural decisions | `docs/adr/README.md` — 8 settled ADRs |
+| Making architectural decisions | `docs/adr/README.md` — 14 settled ADRs |
 | Checking priorities or planning work | `docs/TODO.md` and `docs/ROADMAP.md` |
 | Understanding system design | `docs/ARCHITECTURE.md` |
 | Stuck on tooling or infra | `memory/gotcha-log.md` — problem/fix archive |
@@ -76,21 +87,23 @@ pip install -r requirements.txt
 
 # Configure: add HF token to config/credentials/secrets.ini
 # Oracle scoring
-python -m ground_truth.batch_scorer --filter filters/uplifting/v6 --source datasets/raw/master_dataset.jsonl
+python -m ground_truth.batch_scorer --filter filters/{name}/v{N} --source datasets/raw/master_dataset.jsonl
 
 # Prepare training splits
-python training/prepare_data.py --filter filters/uplifting/v6 --data-source datasets/scored/uplifting_v6.jsonl
+python training/prepare_data.py --filter filters/{name}/v{N} --data-source datasets/scored/{name}_v{N}.jsonl
 
 # Fit calibration (after training)
 PYTHONPATH=. python scripts/calibration/fit_calibration.py \
-    --filter filters/uplifting/v6 --data-dir datasets/training/uplifting_v6 \
-    --test-data datasets/training/uplifting_v6/test.jsonl
+    --filter filters/{name}/v{N} --data-dir datasets/training/{name}_v{N} \
+    --test-data datasets/training/{name}_v{N}/test.jsonl
 
 # Upload to Hub
 python scripts/deployment/upload_to_huggingface.py \
-    --filter filters/uplifting/v6 --repo-name jeergrvgreg/uplifting-filter-v6 \
+    --filter filters/{name}/v{N} --repo-name jeergrvgreg/{name}-filter-v{N} \
     --token $HF_TOKEN --private
 ```
+
+See `docs/RUNBOOK.md` for full operational commands.
 
 ## Cross-Repo Evidence
 
@@ -98,4 +111,4 @@ This project is a source project for [agentic-engineering](https://github.com/du
 
 ---
 
-*Last updated: 2026-03-06*
+*Last updated: 2026-03-28*

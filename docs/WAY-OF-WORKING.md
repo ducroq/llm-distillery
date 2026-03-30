@@ -1,6 +1,6 @@
 # Way of Working
 
-Operational principles and runbooks for this repository. For project identity, hard constraints, and task-triggered navigation, see `CLAUDE.md` (auto-loaded every session).
+Operational principles for this repository. For project identity and hard constraints, see `CLAUDE.md`. For deployment, training, and scoring commands, see `docs/RUNBOOK.md`.
 
 ---
 
@@ -149,4 +149,4 @@ python scripts/run_filters.py --filter {name} --hub --max-items 50
 
 ---
 
-*Last updated: 2026-03-01*
+*Last updated: 2026-03-30*

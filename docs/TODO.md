@@ -54,22 +54,24 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [x] **nature_recovery v1** - Deployed to Hub + gpu-server
   - Val MAE 0.54 (calibrated 0.507), probe MAE 0.50, 3,280 articles
   - Hub: `jeergrvgreg/nature-recovery-filter-v1` (private)
-  - Remaining: ovr.news "Herstel" tab frontend integration
-- [ ] **uplifting v7** - ADR-010 prompt rewrite, fixes evidence/distribution inflation
+  - Remaining: ovr.news Recovery tab frontend integration
+- [x] **uplifting v7** - ADR-010 prompt rewrite → became thriving v1 (ADR-012 lens-aligned naming)
   - v7 prompt: scope check, anti-hallucination, reframed assessment dimensions
-  - Weight rebalancing: evidence+distribution 40% → 20%, impact domains 50% → 65%
-  - Oracle scoring complete: 6,590 articles (100 HIGH, 2,082 MEDIUM, 4,408 LOW)
-  - Training complete: val MAE 0.787 (6 epochs, clamp-to-1.0), but regression vs v6 (0.67)
-  - Calibration fitted but overfits val (test MAE 0.811 → 0.841), HIGH tier detection broken (2/11)
-  - Root cause: bimodal discrete scores (15-17 values vs v6's 250+ from multi-run averaging)
-  - Next: multi-run oracle averaging (re-score 2x, average 3 runs) → retrain → calibrate
-- [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Erfgoed or standalone)
+  - Training MAE 0.787 regression identified as discrete score problem (15-17 values)
+  - Evolved into thriving v1: renamed, social_cohesion_impact removed, 3-run averaging planned
+- [ ] **thriving v1** - PAUSED — bimodal distribution problem, best calibrated MAE 0.94
+  - Uplifting v6 (MAE 0.67) remains in production
+  - Two training attempts: hybrid data (MAE 1.09), full 2-run averaged + head+tail + 6 epochs (MAE 0.97, calibrated 0.94)
+  - Root cause: bimodal oracle scores (36% score 0-1, sparse 3-5 range, model can't learn transition)
+  - Open questions: softer prompt scope check? more data in middle range? different loss function?
+  - All assets preserved — see `memory/thriving-v1-scoring.md`
+- [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Discovery or standalone)
   - Concept and README complete
   - Next: harmonized prompt, prefilter.py, oracle scoring, training
   - Challenge: wisdom is rare in news
 
 ### Other Filters
-- [ ] **future-of-education** - ovr.news "Leren" tab (after nature_recovery + signs_of_wisdom)
+- [ ] **future-of-education** - ovr.news Education tab (after nature_recovery + signs_of_wisdom)
 - [ ] **ai-engineering-practice v2** - Ready for oracle scoring (not ovr.news, separate product)
   - FluxusSource hardware sources active (1,193 articles)
   - Prompt calibration complete (~60% tier accuracy)
@@ -172,5 +174,5 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-03-18*
+*Last updated: 2026-03-30*
 

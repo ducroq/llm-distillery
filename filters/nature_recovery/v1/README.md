@@ -4,7 +4,7 @@
 **Status**: Phase 1 complete, Phase 2 next (prompt architecture)
 **Philosophy**: "Nature recovers when we let it, and faster than we expect"
 **Purpose**: Detect documented ecosystem recovery — hope grounded in data, not aspiration
-**Target**: ovr.news "Herstel" tab
+**Target**: ovr.news Recovery tab
 
 ## Concept
 

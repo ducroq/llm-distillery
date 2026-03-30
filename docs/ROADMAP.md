@@ -2,13 +2,13 @@
 
 ## Now (Current Sprint) — Priority: ovr.news tabs
 
-- **belonging v1 → ovr.news** - Add "Verbondenheid" tab (filter deployed, frontend work only)
-- **nature_recovery v1** - Deployed (val MAE 0.54, probe MAE 0.50) → ovr.news "Herstel" tab (frontend only)
-- **uplifting v7** - ADR-010 prompt rewrite. Trained (val MAE 0.787) but not deployed — regression vs v6 (0.67). Next: multi-run oracle averaging → retrain
-- **signs_of_wisdom v1** - Harmonized prompt → oracle scoring → training → enrich Erfgoed or new tab
+- **belonging v1 → ovr.news** - Add Belonging tab (filter deployed, frontend work only)
+- **nature_recovery v1** - Deployed (val MAE 0.54, probe MAE 0.50) → ovr.news Recovery tab (frontend only)
+- **thriving v1** - PAUSED. Calibrated MAE 0.94 after two training attempts — bimodal score distribution limits learnability. Uplifting v6 (MAE 0.67) stays in production. See `memory/thriving-v1-scoring.md` for findings and open questions
+- **signs_of_wisdom v1** - Harmonized prompt → oracle scoring → training → enrich Discovery or new tab
 
 ## Next (Coming Soon)
-- **future-of-education v1** - Educational innovation → "Leren" tab for ovr.news
+- **future-of-education v1** - Educational innovation → Education tab for ovr.news
 - **ai-engineering-practice v2** - Oracle scoring + training (not ovr.news, separate product)
 
 ## Later (Backlog)
@@ -148,4 +148,4 @@
 
 ---
 
-*Last updated: 2026-03-18*
+*Last updated: 2026-03-30*

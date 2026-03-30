@@ -8,7 +8,7 @@
 
 Scores articles for evidence of genuine belonging: social fabric, rootedness, and intergenerational continuity that cannot be purchased or optimized. Inspired by Blue Zones research but deliberately excludes commercially-capturable dimensions (diet, exercise, longevity hacks).
 
-**ovr.news tab:** "Verbondenheid" (pending frontend integration)
+**ovr.news tab:** Belonging (pending frontend integration)
 
 See `DEEP_ROOTS.md` for philosophical grounding (Simone Weil, Tönnies, Blue Zones).
 
