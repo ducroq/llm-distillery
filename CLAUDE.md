@@ -1,7 +1,7 @@
 # CLAUDE.md - LLM Distillery
 
 - **Status**: Production
-- **agent-ready-projects**: v1.3.2
+- **agent-ready-projects**: v1.3.4
 
 ## What Is This?
 

@@ -88,3 +88,23 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 **Root cause**: `score_scale_factor` (e.g., 1.53 for nature_recovery) applies a linear stretch to compensate for calibration range compression. But the distributions are non-linear — most nature_recovery articles cluster near 0, and linear stretching doesn't help them. Meanwhile, calibration itself is fitted on enriched val sets (ADR-003/005), not production data, so the calibration ceiling reflects what the oracle saw in enriched data, not what's possible.
 
 **Fix**: Replace `score_scale_factor` with percentile normalization (ADR-014). Non-linear monotonic mapping fitted from production MEDIUM+ data. Same pattern as isotonic calibration (ADR-008) but applied on the weighted average across filters, not per-dimension within a filter. Set `score_scale_factor` to 1.0 for all filters after deploying normalization.
+
+---
+
+## SCP Creates Nested Directories When Target Exists (Mar 2026)
+
+**Problem**: `scp -r filters/thriving/v1/ gpu-server:~/llm-distillery/filters/thriving/v1/` creates `v1/v1/` nesting. Hit twice: filter directory and model directory.
+
+**Root cause**: When the target directory already exists, `scp -r source/ target/` copies `source` INTO `target` rather than merging contents.
+
+**Fix**: Either create parent only (`mkdir -p .../thriving`) and let scp create `v1/`, or scp individual files. Always verify with `ls` after copying.
+
+---
+
+## Git Bash Mangles Unix Paths in Arguments (Mar 2026)
+
+**Problem**: `--remote-dir /home/jeroen/...` becomes `C:/Program Files/Git/home/jeroen/...` when passed through Python on Windows Git Bash.
+
+**Root cause**: Git Bash's POSIX-to-Windows path conversion applies to command arguments that look like Unix paths.
+
+**Fix**: Set `MSYS_NO_PATHCONV=1` before the command: `MSYS_NO_PATHCONV=1 PYTHONPATH=. python ...`
