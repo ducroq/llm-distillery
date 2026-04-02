@@ -1,5 +1,5 @@
 """
-Cultural Discovery Pre-Filter v1.0
+Cultural Discovery Pre-Filter v4.0
 
 Blocks obvious low-value content before LLM labeling:
 - Political conflict framing (unless reconciliation/peace/dialogue)
@@ -18,10 +18,10 @@ from typing import Dict, List, Tuple
 from filters.common.base_prefilter import BasePreFilter
 
 
-class CulturalDiscoveryPreFilterV1(BasePreFilter):
-    """Fast rule-based pre-filter for cultural discovery content v1"""
+class CulturalDiscoveryPreFilterV4(BasePreFilter):
+    """Fast rule-based pre-filter for cultural discovery content v4"""
 
-    VERSION = "1.0"
+    VERSION = "4.0"
 
     # === DOMAIN EXCLUSIONS ===
 
@@ -360,11 +360,6 @@ class CulturalDiscoveryPreFilterV1(BasePreFilter):
             - (True, "passed"): Send to oracle
             - (False, reason): Block with specific reason
         """
-        # Check content length first
-        passed, reason = self.check_content_length(article)
-        if not passed:
-            return False, reason
-
         # Check domain exclusions
         url = article.get('url', '')
         if url:
@@ -491,6 +486,6 @@ class CulturalDiscoveryPreFilterV1(BasePreFilter):
 
 
 if __name__ == '__main__':
-    pf = CulturalDiscoveryPreFilterV1()
+    pf = CulturalDiscoveryPreFilterV4()
     print(f"Cultural Discovery Pre-Filter v{pf.VERSION} loaded.")
     print(f"Statistics: {pf.get_statistics()}")

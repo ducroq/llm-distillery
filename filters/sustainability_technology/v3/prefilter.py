@@ -136,8 +136,8 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
     def __init__(self):
         """Initialize the sustainability technology prefilter."""
         super().__init__()
-        self.filter_name = "sustainability_technology_v2"
-        self.version = "2.2"
+        self.filter_name = "sustainability_technology_v3"
+        self.version = "3.0"
 
     def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """

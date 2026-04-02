@@ -39,8 +39,7 @@ class BaseInvestmentRiskScorer(FilterBaseScorer):
 
     TIER_THRESHOLDS = [
         ("high", 7.0, "Critical risk signal - act now to reduce exposure"),
-        ("medium_high", 5.0, "Elevated risk - monitor closely and prepare defense"),
-        ("medium", 3.0, "Moderate signal - worth tracking, limited immediate action"),
+        ("medium", 4.0, "Moderate signal - worth tracking, limited immediate action"),
         ("low", 0.0, "Low signal - noise, not investment-relevant, or already priced in"),
     ]
 

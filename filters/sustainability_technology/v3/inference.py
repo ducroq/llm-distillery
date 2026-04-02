@@ -17,7 +17,6 @@ Usage:
     python filters/sustainability_technology/v3/inference.py --input articles.jsonl --output results.jsonl
 """
 
-import json
 import logging
 from pathlib import Path
 from typing import Optional
@@ -37,7 +36,7 @@ class SustainabilityTechnologyScorer(BaseSustainabilityTechnologyScorer):
     - Per-dimension scores (6 LCSA dimensions)
     - Score calibration (isotonic regression)
     - TRL gatekeeper logic
-    - Tier assignment (high_sustainability/medium_high/medium/low)
+    - Tier assignment (high/medium/low)
 
     For loading from HuggingFace Hub, use SustainabilityTechnologyScorerHub instead.
     """
@@ -67,67 +66,11 @@ class SustainabilityTechnologyScorer(BaseSustainabilityTechnologyScorer):
 
 
 def main():
-    """CLI interface for batch scoring."""
-    import argparse
-
-    parser = argparse.ArgumentParser(
-        description="Score articles with sustainability_technology filter v3"
-    )
-    parser.add_argument(
-        "--input", "-i", type=Path, help="Input JSONL file with articles"
-    )
-    parser.add_argument(
-        "--output", "-o", type=Path, help="Output JSONL file for results"
-    )
-    parser.add_argument(
-        "--no-prefilter", action="store_true", help="Skip prefilter"
-    )
-    parser.add_argument(
-        "--batch-size", type=int, default=16, help="Batch size for inference"
-    )
-
-    args = parser.parse_args()
-
-    # Initialize scorer
-    logging.basicConfig(level=logging.INFO)
-    scorer = SustainabilityTechnologyScorer(use_prefilter=not args.no_prefilter)
-
-    if args.input:
-        # Score from file
-        logger.info(f"Loading articles from {args.input}")
-        articles = []
-        with open(args.input, "r", encoding="utf-8") as f:
-            for line in f:
-                articles.append(json.loads(line))
-
-        logger.info(f"Scoring {len(articles)} articles...")
-        results = scorer.score_batch(articles, batch_size=args.batch_size)
-
-        # Output
-        if args.output:
-            logger.info(f"Writing results to {args.output}")
-            with open(args.output, "w", encoding="utf-8") as f:
-                for article, result in zip(articles, results):
-                    article_id = article.get("id") or article.get("article_id", "")
-                    output = {"article_id": article_id, **result}
-                    f.write(json.dumps(output) + "\n")
-        else:
-            # Print summary
-            passed = sum(1 for r in results if r["passed_prefilter"])
-            print(f"\nResults: {passed}/{len(results)} passed prefilter")
-
-            if passed > 0:
-                tiers = {}
-                for r in results:
-                    if r["tier"]:
-                        tiers[r["tier"]] = tiers.get(r["tier"], 0) + 1
-                print("Tier distribution:")
-                for tier, count in sorted(tiers.items()):
-                    print(f"  {tier}: {count}")
-    else:
-        # Interactive demo
-        print("\n--- Interactive Demo ---")
-        demo_article = {
+    from filters.common.cli import run_scorer_cli
+    run_scorer_cli(
+        SustainabilityTechnologyScorer,
+        "sustainability_technology filter v3",
+        {
             "title": "New Solar Panel Technology Achieves 30% Efficiency",
             "content": """
             Researchers at MIT have developed a new perovskite-silicon tandem solar cell
@@ -136,21 +79,8 @@ def main():
             Early pilot deployments show promising results with 25-year durability projections.
             The cells are expected to reach cost parity with conventional panels by 2026.
             """
-        }
-
-        print(f"\nDemo article: {demo_article['title']}")
-        result = scorer.score_article(demo_article)
-
-        print(f"\nResults:")
-        print(f"  Passed prefilter: {result['passed_prefilter']}")
-        if result["scores"]:
-            print(f"  Scores:")
-            for dim, score in result["scores"].items():
-                print(f"    {dim}: {score:.2f}")
-            print(f"  Weighted average: {result['weighted_average']:.2f}")
-            print(f"  Tier: {result['tier']} ({result['tier_description']})")
-            if result["gatekeeper_applied"]:
-                print(f"  Note: TRL gatekeeper applied")
+        },
+    )
 
 
 if __name__ == "__main__":

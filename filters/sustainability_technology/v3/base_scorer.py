@@ -38,15 +38,14 @@ class BaseSustainabilityTechnologyScorer(FilterBaseScorer):
     }
 
     TIER_THRESHOLDS = [
-        ("high_sustainability", 7.0, "Mass deployed, proven sustainable, competitive"),
-        ("medium_high", 5.0, "Commercial deployment, good sustainability"),
-        ("medium", 3.0, "Pilot/early commercial, mixed profile"),
+        ("high", 7.0, "Mass deployed, proven sustainable, competitive"),
+        ("medium", 4.0, "Commercial deployment or pilot with good sustainability"),
         ("low", 0.0, "Lab stage or poor sustainability performance"),
     ]
 
     GATEKEEPER_DIMENSION = "technology_readiness_level"
     GATEKEEPER_MIN = 3.0
-    GATEKEEPER_CAP = 2.9
+    GATEKEEPER_CAP = 2.2  # 2.2 × 1.35 = 2.97, just below medium tier (3.0)
 
     def _load_prefilter(self):
         from filters.sustainability_technology.v3.prefilter import SustainabilityTechnologyPreFilterV2

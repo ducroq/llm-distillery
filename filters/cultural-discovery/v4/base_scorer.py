@@ -43,7 +43,7 @@ class BaseCulturalDiscoveryScorer(FilterBaseScorer):
 
     GATEKEEPER_DIMENSION = "evidence_quality"
     GATEKEEPER_MIN = 3.0
-    GATEKEEPER_CAP = 3.0
+    GATEKEEPER_CAP = 3.0  # 3.0 × 1.14 = 3.42, below medium tier (4.0)
 
     def _load_prefilter(self):
         import importlib.util
@@ -51,4 +51,4 @@ class BaseCulturalDiscoveryScorer(FilterBaseScorer):
         spec = importlib.util.spec_from_file_location("prefilter", prefilter_path)
         prefilter_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(prefilter_module)
-        self.prefilter = prefilter_module.CulturalDiscoveryPreFilterV1()
+        self.prefilter = prefilter_module.CulturalDiscoveryPreFilterV4()
