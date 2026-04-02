@@ -162,6 +162,17 @@ class BelongingPreFilterV1(BasePreFilter):
         r'\b(online membership|virtual membership)\b',
     ]
 
+    # === OBITUARY / FUNERAL PATTERNS ===
+
+    OBITUARY_PATTERNS = [
+        r'\b(obituary|obituaries|in memoriam)\b',
+        r'\b(funeral|funeral mass|funeral service|memorial service)\b',
+        r'\b(passed away|laid to rest|death notice)\b',
+        r'\b(dies aged|died aged|dies at \d|died at \d)\b',
+        r'\b(survived by|in loving memory|paying tribute|pays tribute)\b',
+        r'\b(mourners?|mourning|condolences)\b',
+    ]
+
     # === MULTILINGUAL PATTERNS (Dutch, German, French) ===
 
     MULTILINGUAL_BLOCK_PATTERNS = [
@@ -248,6 +259,7 @@ class BelongingPreFilterV1(BasePreFilter):
         self.self_help_regex = [re.compile(p, re.IGNORECASE) for p in self.SELF_HELP_PATTERNS]
         self.corporate_regex = [re.compile(p, re.IGNORECASE) for p in self.CORPORATE_PATTERNS]
         self.online_only_regex = [re.compile(p, re.IGNORECASE) for p in self.ONLINE_ONLY_PATTERNS]
+        self.obituary_regex = [re.compile(p, re.IGNORECASE) for p in self.OBITUARY_PATTERNS]
 
         # Multilingual block patterns
         self.multilingual_block_regex = [re.compile(p, re.IGNORECASE) for p in self.MULTILINGUAL_BLOCK_PATTERNS]
@@ -329,6 +341,11 @@ class BelongingPreFilterV1(BasePreFilter):
             if not has_exception and positive_count < 2:
                 return False, "online_only"
 
+        # Obituary/funeral
+        if self._has_obituary_patterns(combined_text):
+            if not has_exception and positive_count < 2:
+                return False, "obituary_funeral"
+
         # Multilingual block patterns
         if self.has_any_pattern(combined_text, self.multilingual_block_regex):
             if not has_exception and positive_count < 2:
@@ -383,6 +400,10 @@ class BelongingPreFilterV1(BasePreFilter):
         """Check if text contains online-only community patterns"""
         return self.has_any_pattern(text, self.online_only_regex)
 
+    def _has_obituary_patterns(self, text: str) -> bool:
+        """Check if text contains obituary/funeral patterns"""
+        return self.has_any_pattern(text, self.obituary_regex)
+
     def _count_positive_signals(self, text: str) -> int:
         """Count how many positive belonging signals are present (English)"""
         return self.count_pattern_matches(text, self.positive_regex)
@@ -405,6 +426,7 @@ class BelongingPreFilterV1(BasePreFilter):
             'self_help_patterns': len(self.SELF_HELP_PATTERNS),
             'corporate_patterns': len(self.CORPORATE_PATTERNS),
             'online_only_patterns': len(self.ONLINE_ONLY_PATTERNS),
+            'obituary_patterns': len(self.OBITUARY_PATTERNS),
             'multilingual_block_patterns': len(self.MULTILINGUAL_BLOCK_PATTERNS),
             'exception_patterns': len(self.EXCEPTION_PATTERNS),
             'positive_patterns': len(self.POSITIVE_PATTERNS),
@@ -508,6 +530,26 @@ def test_prefilter():
                     'still lives in the ancestral home where she was born. Every harvest, the extended family '
                     'gathers to help, a tradition handed down since her grandfather\'s time. The neighboring families '
                     'have known each other for over a century, helping each other through hardship.',
+            'expected': (True, 'passed')
+        },
+
+        # Should BLOCK - Obituary/funeral
+        {
+            'title': 'Roy Keane Mourns Mother Marie at Funeral Mass',
+            'text': 'Former Manchester United captain Roy Keane was among mourners paying tribute at the funeral '
+                    'mass of his mother Marie Keane, who passed away last Tuesday aged 82. Family and friends '
+                    'gathered to offer condolences at the service. She is survived by her six children and '
+                    'fourteen grandchildren. Marie was laid to rest at the local cemetery following the service.',
+            'expected': (False, 'obituary_funeral')
+        },
+
+        # Should PASS - Funeral with genuine heritage/elder significance (exception overrides)
+        {
+            'title': 'Elder\'s Funeral Revives Ancestral Mourning Tradition Lost for Decades',
+            'text': 'When elder Nana Yaa passed, the village revived the ancestral mourning ritual that had not '
+                    'been performed in three generations. Grandparents taught the younger generation the traditional '
+                    'songs passed down through heritage. The multigenerational gathering at the funeral brought '
+                    'together families who had scattered, reconnecting them with their ancestral home and traditions.',
             'expected': (True, 'passed')
         },
 
