@@ -153,15 +153,35 @@ All files staged on gpu-server (2026-04-02). Verified:
 
 Training command (run from `~/llm-distillery/` on gpu-server):
 ```bash
-HF_HUB_OFFLINE=1 PYTHONPATH=. python training/train.py \
-    --config filters/foresight/v1/config.yaml \
+HF_HUB_OFFLINE=1 PYTHONPATH=. ~/gpu-server/nexusmind-scorer/venv/bin/python3 training/train.py \
+    --filter filters/foresight/v1 \
     --data-dir datasets/training/foresight_v1 \
     --output-dir filters/foresight/v1/model \
     --use-head-tail --head-tokens 256 --tail-tokens 256 \
-    --epochs 3 --batch-size 16 --lr 2e-4
+    --epochs 3 --batch-size 16 --learning-rate 2e-4
 ```
 
-Expected: ~10-15 min on RTX 4080. After training, scp model back:
+### Training Results (Attempt 1: 3 epochs)
+
+| Epoch | Train MAE | Val MAE |
+|-------|-----------|---------|
+| 1 | 2.49 | 1.44 |
+| 2 | 1.25 | 1.07 |
+| 3 | 0.99 | **0.99** |
+
+Per-dimension val MAE (best epoch):
+| Dimension | Val MAE |
+|-----------|---------|
+| evidence_foundation | 0.78 |
+| institutional_durability | 0.92 |
+| time_horizon | 0.97 |
+| intergenerational_investment | 0.97 |
+| systems_awareness | 1.14 |
+| course_correction | 1.15 |
+
+No overfitting (train ≈ val). MAE still dropping — more epochs could improve. Systems_awareness and course_correction are the fuzziest dimensions (predicted by oracle calibration review).
+
+After training, scp model back:
 ```bash
 scp -r gpu-server:~/llm-distillery/filters/foresight/v1/model/ filters/foresight/v1/model/
 ```
@@ -226,7 +246,7 @@ Key prompt features:
 - [x] Create prefilter.py (rule-based, permissive — blocks noise, passes policy/governance)
 - [x] Full oracle scoring — 1,719 articles (1,480 screened + 500 random bg, 3 failed), ~€1.70
 - [x] Prepare training splits — 1,374 train / 172 val / 173 test (stratified by tier)
-- [ ] Train on gpu-server (Gemma-3-1B + LoRA) — staged, waiting for GPU availability
+- [x] Train on gpu-server (Gemma-3-1B + LoRA) — 3 epochs, best val MAE 0.99 (still dropping, no overfit)
 - [ ] Fit calibration (isotonic regression)
 - [ ] Write inference code (base_scorer, inference, inference_hub, inference_hybrid)
 - [ ] Train hybrid probe (e5-small MLP)
