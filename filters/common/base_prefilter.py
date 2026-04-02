@@ -295,7 +295,7 @@ class BasePreFilter:
         raise NotImplementedError("Subclasses must implement apply_filter()")
 
     def _get_combined_text(self, article: Dict) -> str:
-        """Combine title + description + content for analysis"""
+        """Combine title + description + content/text for analysis"""
         parts = []
 
         if 'title' in article:
@@ -304,9 +304,10 @@ class BasePreFilter:
         if 'description' in article:
             parts.append(article['description'])
 
-        if 'content' in article:
+        content = article.get('content') or article.get('text', '')
+        if content:
             # Limit content for pre-filter efficiency
-            parts.append(article['content'][:self.MAX_PREFILTER_CONTENT])
+            parts.append(content[:self.MAX_PREFILTER_CONTENT])
 
         return ' '.join(parts)
 

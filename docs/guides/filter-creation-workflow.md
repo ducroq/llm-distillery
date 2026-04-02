@@ -55,6 +55,29 @@ Score ~50-100 articles with the oracle prompt and check:
 - Gatekeeper effectiveness
 - See `docs/agents/filter-development-guide.md` Phase 3
 
+### 3b. Calibration batch (REQUIRED before full scoring)
+
+Score 200-300 articles from a random corpus sample with the oracle and analyze the **score distribution**:
+
+```bash
+python -m ground_truth.batch_scorer \
+    --filter filters/<name>/v1 \
+    --source datasets/raw/master_dataset.jsonl \
+    --llm gemini-flash --target-scored 300 --random-sample --seed 42
+```
+
+Check for the **bimodal distribution problem**: if >80% of articles score 0-2 and the 2-5 range is empty, the filter concept is too rare for single-pass scoring. This happened with thriving v1 (MAE 0.94) and was caught early with foresight v1 ($0.30 vs $7+ for a full run).
+
+**If bimodal:** Switch to two-stage scoring:
+1. Embedding pre-screening (ADR-011) with **hand-crafted seed articles** (not scored data — scored seeds get contaminated by corpus composition)
+2. Oracle scores only screened candidates, with **soft content-type caps** (4.0-5.0 instead of 2.0-3.0) to catch false positives without creating dead zones
+
+**Key insight:** For needle-in-haystack filters, the prefilter handles "is this relevant?" and the oracle handles "how much?" Hard content-type caps (2.0-3.0) create a dead zone between noise and signal that the student model cannot learn.
+
+**If smooth:** Proceed to Step 5 (full scoring).
+
+Cost: ~$0.30 for 300 articles. This is cheap insurance against wasting a full scoring budget.
+
 ### 4. Build the prefilter
 
 Create `filters/<name>/v1/prefilter.py`:
@@ -76,15 +99,17 @@ For needle-in-haystack filters (low pass rate), use screen+merge strategy (ADR-0
 - Random articles provide negatives
 - Pre-screened articles enrich positives
 
-**Embedding screening (ADR-011):** If Phase 3 validation found positive articles, use them as seeds:
+**Embedding screening (ADR-011):** Use hand-crafted seed articles representing the concept:
 ```bash
 PYTHONPATH=. python scripts/screening/embedding_screener.py \
-    --positives datasets/<name>/positives_phase3.jsonl \
+    --positives datasets/<name>/screening/seed_positives.jsonl \
     --corpus datasets/raw/*.jsonl \
-    --output datasets/<name>/screen_candidates.jsonl \
-    --top-k 500
+    --output datasets/<name>/screening/screen_candidates.jsonl \
+    --top-k 2000
 ```
 This finds semantically similar articles via e5-small cosine similarity — much higher recall than keyword screening.
+
+**Important: Hand-craft seeds, don't use scored data.** Write 10-15 synthetic article summaries representing canonical examples of your concept. Seeds extracted from scored data get contaminated by corpus composition (e.g., an academic-heavy corpus produces academic-biased seeds). See `datasets/foresight/screening/seed_positives.jsonl` for an example.
 
 ### 6. Prepare training splits
 
@@ -213,6 +238,10 @@ These live in `filters/common/` and are used by all filters:
 - **Screen+merge for rare-positive filters** — ADR-003
 - **Commerce is the only universal prefilter** — ADR-004
 - **Oracle consistency over data volume** — Prompt precision predicts MAE better than dataset size (ADR-010). Use belonging v1 as template for prompt structure.
+- **Anti-hallucination rule** — New prompts should include: "Evidence MUST be an EXACT QUOTE from the article, or 'No evidence in article.'" Prevents oracle drift and paraphrased evidence.
+- **Cross-dimension exclusion notes** — When dimensions share conceptual space (correlation r > 0.7), add explicit notes: "This dimension does NOT measure X — that belongs in [other dimension]." Proven to reduce oracle conflation (foresight v1).
+- **Calibration batch before full scoring** — Always score 200-300 random articles first to check distribution. Catches bimodal problems at $0.30 instead of $7+.
+- **Two-stage scoring for needle filters** — If concept is rare in news, use embedding pre-screening + soft caps. Hard content-type caps (2.0-3.0) create untrainable dead zones.
 
 ---
 

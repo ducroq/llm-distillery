@@ -41,10 +41,9 @@
 
 | Filter | Version | Status | Target |
 |--------|---------|--------|--------|
-| **thriving** | v1 | PAUSED — calibrated MAE 0.94, bimodal distribution problem | ovr.news Thriving tab (uplifting v6 stays) |
-| **signs_of_wisdom** | v1 | Need harmonized prompt | ovr.news Wisdom tab |
-| **future-of-education** | v1 | Concept only | ovr.news Education tab |
-| **ai-engineering-practice** | v2 | Ready for oracle scoring | Separate product (not ovr.news) |
+| **foresight** | v1 | Oracle scored (1,719 articles), training splits ready, staged on gpu-server | ovr.news Foresight tab |
+| **thriving** | v1 | PAUSED — calibrated MAE 0.94, bimodal distribution problem; candidate for two-stage scoring fix | ovr.news Thriving tab (uplifting v6 stays) |
+| **ai-engineering-practice** | v2 | Ready for oracle scoring; rename to augmented-engineering at next bump | Separate product (not ovr.news) |
 
 ## Key Decisions
 

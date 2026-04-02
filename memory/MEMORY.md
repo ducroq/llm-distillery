@@ -84,7 +84,7 @@ _(none yet)_
 
 ## Next Up (from ROADMAP "Now")
 
-- **thriving v1** — PAUSED. Calibrated MAE 0.94 after 2 attempts. Bimodal distribution problem. Uplifting v6 stays. See `memory/thriving-v1-scoring.md` for full findings and open questions.
-- **signs_of_wisdom v1** — needs harmonized prompt → full pipeline
+- **foresight v1** — prompt validated, two-stage scoring proven (embedding screening + soft caps). Next: prefilter.py → full scoring (~7K) → training. See `filters/foresight/v1/README.md`.
+- **thriving v1** — PAUSED. Candidate for two-stage scoring fix (same bimodal problem foresight solved). See `memory/thriving-v1-scoring.md`.
 - **#24** — ONNX Runtime INT8 or smaller base model retraining
 - **belonging + nature_recovery → ovr.news** — frontend integration only
