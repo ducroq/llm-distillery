@@ -1,7 +1,7 @@
 # Foresight Filter
 
 **Version**: 1.0
-**Status**: Development — oracle scoring complete (1,719 articles), ready for training splits
+**Status**: Development — trained and calibrated (test MAE 0.86), ready for deployment or data improvement
 **Evolved from**: signs_of_wisdom concept (2025-12-28)
 **Philosophy**: "Foresight is a structural evaluation of a decision, not an emotional response to an event"
 **Purpose**: Identify decisions that demonstrate long-term thinking — choices made for generations ahead, not for the next quarter or election cycle.
@@ -161,25 +161,82 @@ HF_HUB_OFFLINE=1 PYTHONPATH=. ~/gpu-server/nexusmind-scorer/venv/bin/python3 tra
     --epochs 3 --batch-size 16 --learning-rate 2e-4
 ```
 
-### Training Results (Attempt 1: 3 epochs)
+### Training Results (9 epochs: 3 initial + 6 resumed)
 
 | Epoch | Train MAE | Val MAE |
 |-------|-----------|---------|
 | 1 | 2.49 | 1.44 |
 | 2 | 1.25 | 1.07 |
-| 3 | 0.99 | **0.99** |
+| 3 | 0.99 | 0.99 |
+| 4 | 0.78 | 0.88 |
+| 5 | 0.70 | 0.84 |
+| 6 | 0.62 | 0.90 |
+| 7 | 0.57 | 0.86 |
+| 8 | 0.55 | 0.84 |
+| 9 | 0.51 | **0.80** |
 
-Per-dimension val MAE (best epoch):
+Per-dimension val MAE (epoch 9):
 | Dimension | Val MAE |
 |-----------|---------|
-| evidence_foundation | 0.78 |
-| institutional_durability | 0.92 |
-| time_horizon | 0.97 |
-| intergenerational_investment | 0.97 |
-| systems_awareness | 1.14 |
-| course_correction | 1.15 |
+| institutional_durability | 0.71 |
+| evidence_foundation | 0.72 |
+| intergenerational_investment | 0.76 |
+| time_horizon | 0.78 |
+| systems_awareness | 0.88 |
+| course_correction | 0.95 |
 
-No overfitting (train ≈ val). MAE still dropping — more epochs could improve. Systems_awareness and course_correction are the fuzziest dimensions (predicted by oracle calibration review).
+Train MAE (0.51) is now well below val MAE (0.80) — beginning to overfit. 9 epochs is likely near optimal. Systems_awareness and course_correction remain the hardest dimensions (as predicted by oracle calibration review).
+
+Comparison to other filters:
+| Filter | Training articles | Val MAE |
+|--------|------------------|---------|
+| belonging v1 | 5,900 | 0.49 |
+| investment-risk v6 | 8,400 | 0.47 |
+| nature_recovery v1 | 2,600 | 0.54 |
+| **foresight v1** | **1,374** | **0.80** |
+
+MAE 0.80 with only 1,374 training examples is reasonable. Calibration (isotonic regression) typically improves by 3-8%.
+
+**Overfitting:** Mild. Train-val gap widened from 0.0 (epoch 3) to 0.29 (epoch 9), but val MAE was still improving at epoch 9. Near-optimal — more epochs would worsen the gap without improving val.
+
+**Adapter format:** Verified OLD key format (`.lora_A.weight`, `score.weight`). Hub-compatible. LoRA rank 16, alpha 32, 13M trainable params of 1B total.
+
+### Calibration Results
+
+| Metric | Val (172) | Test (173) |
+|--------|-----------|------------|
+| MAE before | 0.80 | 0.85 |
+| MAE after | 0.70 | **0.86** |
+| Improvement | +12.2% | -1.4% |
+
+Calibration overfits the small val set — test MAE slightly worsened. The honest number is **test MAE 0.86**.
+
+Per-dimension calibrated test MAE:
+| Dimension | Test MAE |
+|-----------|----------|
+| institutional_durability | 0.74 |
+| intergenerational_investment | 0.79 |
+| evidence_foundation | 0.80 |
+| time_horizon | 0.94 |
+| systems_awareness | 0.95 |
+| course_correction | 0.95 |
+
+### Dimension Compression Experiment (4-dim)
+
+Merged time_horizon + intergenerational_investment + institutional_durability → long_term_commitment. Retrained on same data.
+
+| Metric | 6-dim | 4-dim |
+|--------|-------|-------|
+| Val MAE | **0.80** | 0.81 |
+| long_term_commitment | 0.82 avg | **0.68** |
+| course_correction | **0.95** | 0.98 |
+| Train-val gap | **0.29** | 0.57 |
+
+Merged dimension improved (0.68 vs 0.82 avg) but model overfits faster and course_correction worsened. Overall MAE marginally worse. **Verdict: keep 6 dimensions.** The bottleneck is training data volume, not dimensionality.
+
+**Options to improve MAE:**
+- Score more articles (another 1-2K screened) → most impactful, likely 0.65-0.70
+- Accept 0.86 as v1 and improve with v2 when more data accumulates
 
 After training, scp model back:
 ```bash
@@ -246,8 +303,9 @@ Key prompt features:
 - [x] Create prefilter.py (rule-based, permissive — blocks noise, passes policy/governance)
 - [x] Full oracle scoring — 1,719 articles (1,480 screened + 500 random bg, 3 failed), ~€1.70
 - [x] Prepare training splits — 1,374 train / 172 val / 173 test (stratified by tier)
-- [x] Train on gpu-server (Gemma-3-1B + LoRA) — 3 epochs, best val MAE 0.99 (still dropping, no overfit)
-- [ ] Fit calibration (isotonic regression)
+- [x] Train on gpu-server (Gemma-3-1B + LoRA) — 9 epochs (3 + 6 resumed), best val MAE **0.80**
+- [x] Write inference code (base_scorer.py, inference.py)
+- [x] Fit calibration — val MAE 0.80→0.70 (+12%), test MAE 0.85→0.86 (-1.4%, overfits small val set)
 - [ ] Write inference code (base_scorer, inference, inference_hub, inference_hybrid)
 - [ ] Train hybrid probe (e5-small MLP)
 - [ ] Deploy to HuggingFace Hub

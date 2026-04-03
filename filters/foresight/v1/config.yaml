@@ -36,6 +36,8 @@ oracle:
     - claude-sonnet
 
 scoring:
+  score_scale_factor: 1.4837  # 10.0 / 6.74 (calibrated max)
+
   # score_scale_factor: TBD after calibration
 
   dimensions:
