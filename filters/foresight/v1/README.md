@@ -346,8 +346,8 @@ Key prompt features:
 - [x] Fit calibration (round 2) — val MAE 0.74→0.69 (+7.5%), **test MAE 0.75** (neutral)
 - [x] Write inference_hub.py (HuggingFace Hub inference)
 - [x] Model directory cleanup (consolidated model-r2 → model)
-- [ ] Train hybrid probe (e5-small MLP)
-- [ ] Write inference_hybrid.py (two-stage hybrid inference, needs probe)
+- [x] Train hybrid probe — e5-small MLP, probe MAE 0.99 (rough estimator, expected for conceptually hard filter)
+- [x] Write inference_hybrid.py (two-stage hybrid inference)
 - [ ] Deploy to HuggingFace Hub
 - [ ] Fit normalization.json (ADR-014, needs production data)
 - [ ] Deploy to NexusMind (gpu-server + sadalsuud)
