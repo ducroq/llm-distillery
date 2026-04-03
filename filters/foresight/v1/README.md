@@ -1,7 +1,7 @@
 # Foresight Filter
 
 **Version**: 1.0
-**Status**: Development — trained and calibrated (test MAE 0.86), ready for deployment or data improvement
+**Status**: Ready for deployment — calibrated test MAE 0.75, on par with cultural-discovery and sustainability_tech
 **Evolved from**: signs_of_wisdom concept (2025-12-28)
 **Philosophy**: "Foresight is a structural evaluation of a decision, not an emotional response to an event"
 **Purpose**: Identify decisions that demonstrate long-term thinking — choices made for generations ahead, not for the next quarter or election cycle.
@@ -201,25 +201,33 @@ MAE 0.80 with only 1,374 training examples is reasonable. Calibration (isotonic 
 
 **Adapter format:** Verified OLD key format (`.lora_A.weight`, `score.weight`). Hub-compatible. LoRA rank 16, alpha 32, 13M trainable params of 1B total.
 
-### Calibration Results
+### Calibration Results (Round 2, final)
 
-| Metric | Val (172) | Test (173) |
+| Metric | Val (346) | Test (346) |
 |--------|-----------|------------|
-| MAE before | 0.80 | 0.85 |
-| MAE after | 0.70 | **0.86** |
-| Improvement | +12.2% | -1.4% |
-
-Calibration overfits the small val set — test MAE slightly worsened. The honest number is **test MAE 0.86**.
+| MAE before | 0.74 | 0.75 |
+| MAE after | **0.69** | **0.75** |
+| Improvement | +7.5% | -0.2% (neutral) |
 
 Per-dimension calibrated test MAE:
 | Dimension | Test MAE |
 |-----------|----------|
-| institutional_durability | 0.74 |
-| intergenerational_investment | 0.79 |
-| evidence_foundation | 0.80 |
-| time_horizon | 0.94 |
-| systems_awareness | 0.95 |
-| course_correction | 0.95 |
+| intergenerational_investment | 0.63 |
+| institutional_durability | 0.65 |
+| evidence_foundation | 0.78 |
+| time_horizon | 0.78 |
+| course_correction | 0.79 |
+| systems_awareness | 0.86 |
+
+Compared to production filters:
+| Filter | Training data | Calibrated test MAE |
+|--------|--------------|-------------------|
+| belonging v1 | 5,900 | 0.49 |
+| investment-risk v6 | 8,400 | 0.47 |
+| nature_recovery v1 | 2,600 | 0.51 |
+| sustainability_tech v3 | 8,500 | 0.72 |
+| cultural-discovery v4 | 6,400 | 0.74 |
+| **foresight v1** | **2,761** | **0.75** |
 
 ### Dimension Compression Experiment (4-dim)
 
@@ -234,9 +242,37 @@ Merged time_horizon + intergenerational_investment + institutional_durability �
 
 Merged dimension improved (0.68 vs 0.82 avg) but model overfits faster and course_correction worsened. Overall MAE marginally worse. **Verdict: keep 6 dimensions.** The bottleneck is training data volume, not dimensionality.
 
-**Options to improve MAE:**
-- Score more articles (another 1-2K screened) → most impactful, likely 0.65-0.70
-- Accept 0.86 as v1 and improve with v2 when more data accumulates
+### Training Round 2 (doubled data: 2,761 examples, 9 epochs)
+
+Scored 1,734 additional articles (~€1.70) from expanded screening (4K candidates from 215K corpus).
+
+| Epoch | Train MAE | Val MAE |
+|-------|-----------|---------|
+| 1 | 1.79 | 1.07 |
+| 4 | 0.64 | 0.81 |
+| 8 | 0.25 | **0.74** |
+| 9 | 0.18 | 0.75 |
+
+Per-dimension val MAE (epoch 8):
+| Dimension | Round 1 (1,374) | Round 2 (2,761) | Change |
+|-----------|----------------|----------------|--------|
+| evidence_foundation | 0.72 | **0.67** | -7% |
+| institutional_durability | 0.71 | **0.68** | -4% |
+| intergenerational_investment | 0.76 | **0.69** | -10% |
+| time_horizon | 0.78 | **0.77** | -1% |
+| systems_awareness | 0.88 | **0.81** | -8% |
+| course_correction | 0.95 | **0.85** | -11% |
+
+Every dimension improved. Doubling data confirmed as the bottleneck (not dimensionality — 4-dim experiment showed no gain).
+
+### Total Oracle Cost
+
+| Run | Articles | Cost |
+|-----|----------|------|
+| Calibration runs 1+2 | 600 | ~€0.60 |
+| Scoring round 1 | 1,719 | ~€1.70 |
+| Scoring round 2 | 1,734 | ~€1.70 |
+| **Total** | **4,053** | **~€4.00** |
 
 After training, scp model back:
 ```bash
@@ -305,10 +341,16 @@ Key prompt features:
 - [x] Prepare training splits — 1,374 train / 172 val / 173 test (stratified by tier)
 - [x] Train on gpu-server (Gemma-3-1B + LoRA) — 9 epochs (3 + 6 resumed), best val MAE **0.80**
 - [x] Write inference code (base_scorer.py, inference.py)
-- [x] Fit calibration — val MAE 0.80→0.70 (+12%), test MAE 0.85→0.86 (-1.4%, overfits small val set)
-- [ ] Write inference code (base_scorer, inference, inference_hub, inference_hybrid)
+- [x] Score round 2 — 1,734 additional articles (~€1.70), merged to 3,453 total
+- [x] Retrain with doubled data (2,761 examples) — val MAE 0.80→0.74 (-7.2%)
+- [x] Fit calibration (round 2) — val MAE 0.74→0.69 (+7.5%), **test MAE 0.75** (neutral)
+- [x] Write inference_hub.py (HuggingFace Hub inference)
+- [x] Model directory cleanup (consolidated model-r2 → model)
 - [ ] Train hybrid probe (e5-small MLP)
+- [ ] Write inference_hybrid.py (two-stage hybrid inference, needs probe)
 - [ ] Deploy to HuggingFace Hub
+- [ ] Fit normalization.json (ADR-014, needs production data)
+- [ ] Deploy to NexusMind (gpu-server + sadalsuud)
 - [ ] ovr.news frontend integration
 
 ---

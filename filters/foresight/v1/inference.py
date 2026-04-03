@@ -37,6 +37,8 @@ class ForesightScorer(BaseForesightScorer):
     - Score calibration (isotonic regression)
     - Evidence foundation gatekeeper logic
     - Tier assignment (high/medium/low)
+
+    For loading from HuggingFace Hub, use ForesightScorerHub instead.
     """
 
     def __init__(

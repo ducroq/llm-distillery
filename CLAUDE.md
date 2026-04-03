@@ -1,7 +1,7 @@
 # CLAUDE.md - LLM Distillery
 
 - **Status**: Production
-- **agent-ready-projects**: v1.3.4
+- **agent-ready-projects**: v1.4.0
 
 ## What Is This?
 
@@ -41,7 +41,7 @@
 
 | Filter | Version | Status | Target |
 |--------|---------|--------|--------|
-| **foresight** | v1 | Oracle scored (1,719 articles), training splits ready, staged on gpu-server | ovr.news Foresight tab |
+| **foresight** | v1 | Calibrated test MAE 0.75, 3,453 articles, ready for Hub deploy | ovr.news Foresight tab |
 | **thriving** | v1 | PAUSED — calibrated MAE 0.94, bimodal distribution problem; candidate for two-stage scoring fix | ovr.news Thriving tab (uplifting v6 stays) |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring; rename to augmented-engineering at next bump | Separate product (not ovr.news) |
 

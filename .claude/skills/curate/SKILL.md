@@ -1,12 +1,23 @@
 ---
 name: curate
-description: End-of-session curation — review gotcha log, promote patterns, update memory index
+description: End-of-session curation — freshness check, review gotcha log, promote patterns, update memory index
 disable-model-invocation: true
 ---
 
 End-of-session curation for the agent-ready-projects framework.
 
 Review the session's work and update the layered memory system:
+
+## Step 0 — Freshness check
+
+Check for context rot from *previous* sessions. This catches what the session-focused steps below miss.
+
+1. **Dead references**: Read the memory index and project file. For every file path mentioned, verify it still exists. List any broken paths.
+2. **Stale memory**: Check modification dates of files in `memory/`. Flag any that haven't been modified in 30+ days — they may be outdated. (Use `git log -1 --format=%ci -- <file>` for each.)
+3. **Lingering gotchas**: Read the gotcha log. Flag any unresolved entries older than 14 days — they're either fixed (mark `[RESOLVED]`) or stuck (surface to the user).
+4. **Ground truth drift**: If the project file has a "Ground Truth Designations" table, verify each listed file exists and has been modified more recently than the artifacts that defer to it. Flag any where a downstream artifact is newer than its source of truth.
+
+Report findings before proceeding. Don't fix anything in this step — just surface what's stale so the engineer can decide.
 
 ## Step 1 — Gotcha log review
 
@@ -40,12 +51,12 @@ Read `memory/MEMORY.md`. Update:
 
 ## Step 4 — Verify references
 
-Spot-check that paths mentioned in the memory index and project file still exist. Flag any broken references.
+Skip if Step 0 already ran a full freshness check. Otherwise, spot-check that paths mentioned in the memory index and project file still exist. Flag any broken references.
 
 ## Step 5 — Report
 
 Summarize what you changed:
-- New gotcha entries added
-- Entries resolved or promoted
-- Memory index updates
-- Anything flagged as stale or broken
+- **Freshness**: Dead references, stale memory files, lingering gotchas, ground truth drift (from Step 0)
+- **Gotchas**: New entries added, entries resolved or promoted
+- **Memory index**: Updates made
+- **Action needed**: Anything flagged that requires engineer decision
