@@ -84,7 +84,7 @@ _(none yet)_
 
 ## Next Up (from ROADMAP "Now")
 
-- **foresight v1** — trained and calibrated (test MAE 0.75, 2,761 training examples). Next: inference_hub.py, hybrid probe, Hub upload, NexusMind deploy. See `filters/foresight/v1/README.md`.
+- **foresight v1** — DEPLOYED to Hub (`jeergrvgreg/foresight-filter-v1`, private). Test MAE 0.75. Next: NexusMind deploy (#31), ovr.news frontend (ovr.news#172). See `filters/foresight/v1/README.md`.
 - **thriving v1** — PAUSED. Candidate for two-stage scoring fix (same bimodal problem foresight solved). See `memory/thriving-v1-scoring.md`.
 - **#24** — ONNX Runtime INT8 or smaller base model retraining
 - **belonging + nature_recovery → ovr.news** — frontend integration only
