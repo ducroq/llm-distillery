@@ -194,7 +194,7 @@ hybrid_inference:
   stage1:
     embedding_model: "intfloat/multilingual-e5-small"
     probe_path: "probe/embedding_probe_e5small.pkl"
-    threshold: null  # To be calibrated after training
+    threshold: 2.25  # Default from nature_recovery; calibrate on production data
   stage2:
     model: "current"
 

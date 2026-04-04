@@ -17,8 +17,6 @@ Usage:
 import logging
 from typing import Optional
 
-import torch
-
 from filters.common.model_loading import load_lora_hub
 from filters.foresight.v1.base_scorer import BaseForesightScorer
 

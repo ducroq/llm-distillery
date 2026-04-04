@@ -48,7 +48,7 @@ class ForesightScorer(BaseForesightScorer):
         use_prefilter: bool = True,
     ):
         if model_path is None:
-            model_path = Path(__file__).parent / "model" / "model"
+            model_path = Path(__file__).parent / "model"
         self.model_path = Path(model_path)
 
         super().__init__(device=device, use_prefilter=use_prefilter)

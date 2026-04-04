@@ -279,13 +279,6 @@ After training, scp model back:
 scp -r gpu-server:~/llm-distillery/filters/foresight/v1/model/ filters/foresight/v1/model/
 ```
 
-### Oracle Scoring Cost
-
-- Run 1 (calibration, random): ~€0.30 (300 articles)
-- Run 2 (calibration, screened): ~€0.30 (300 articles)
-- Run 3 (full): ~€1.70 (1,719 articles)
-- **Total oracle cost: ~€2.30**
-
 ---
 
 ## Scoring Philosophy
