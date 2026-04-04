@@ -1,7 +1,7 @@
 # Foresight Filter
 
 **Version**: 1.0
-**Status**: Ready for deployment — calibrated test MAE 0.75, on par with cultural-discovery and sustainability_tech
+**Status**: Deployed to HuggingFace Hub (private) — calibrated test MAE 0.75
 **Evolved from**: signs_of_wisdom concept (2025-12-28)
 **Philosophy**: "Foresight is a structural evaluation of a decision, not an emotional response to an event"
 **Purpose**: Identify decisions that demonstrate long-term thinking — choices made for generations ahead, not for the next quarter or election cycle.
@@ -341,7 +341,7 @@ Key prompt features:
 - [x] Model directory cleanup (consolidated model-r2 → model)
 - [x] Train hybrid probe — e5-small MLP, probe MAE 0.99 (rough estimator, expected for conceptually hard filter)
 - [x] Write inference_hybrid.py (two-stage hybrid inference)
-- [ ] Deploy to HuggingFace Hub
+- [x] Deploy to HuggingFace Hub — `jeergrvgreg/foresight-filter-v1` (private), verified via PeftModel.from_pretrained()
 - [ ] Fit normalization.json (ADR-014, needs production data)
 - [ ] Deploy to NexusMind (gpu-server + sadalsuud)
 - [ ] ovr.news frontend integration

@@ -36,12 +36,12 @@
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
 | **belonging** | v1 | 0.49 | 7.4K articles | Deployed (HF Hub, private) |
 | **nature_recovery** | v1 | 0.54 | 3.3K articles | Deployed (HF Hub, private) |
+| **foresight** | v1 | 0.75 | 3.5K articles | Deployed (HF Hub, private) |
 
 ### In Development (priority: ovr.news tabs)
 
 | Filter | Version | Status | Target |
 |--------|---------|--------|--------|
-| **foresight** | v1 | Calibrated test MAE 0.75, 3,453 articles, ready for Hub deploy | ovr.news Foresight tab |
 | **thriving** | v1 | PAUSED — calibrated MAE 0.94, bimodal distribution problem; candidate for two-stage scoring fix | ovr.news Thriving tab (uplifting v6 stays) |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring; rename to augmented-engineering at next bump | Separate product (not ovr.news) |
 
