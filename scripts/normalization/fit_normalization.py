@@ -35,51 +35,63 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def load_weighted_averages_local(data_dir: Path, filter_name: str) -> list:
+def load_weighted_averages_local(data_dir: Path, filter_name: str, all_tiers: bool = False) -> list:
     """Load weighted averages from local filtered JSONL files."""
     was = []
-    analysis_key = f"{filter_name}_analysis"
 
-    for tier_dir in ["high", "medium"]:
-        tier_path = data_dir / tier_dir
-        if not tier_path.is_dir():
-            continue
-        for jsonl_file in sorted(tier_path.glob("filtered_*.jsonl")):
-            with open(jsonl_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    try:
-                        article = json.loads(line)
-                        attrs = article.get("nexus_mind_attributes", {})
-                        for key, analysis in attrs.items():
-                            if isinstance(analysis, dict) and "weighted_average" in analysis:
-                                was.append(analysis["weighted_average"])
-                    except (json.JSONDecodeError, KeyError):
-                        continue
+    if all_tiers:
+        # Read from root-level filtered_*.jsonl files (all scored articles)
+        jsonl_files = sorted(data_dir.glob("filtered_*.jsonl"))
+    else:
+        # Read from high/ and medium/ subdirs only
+        jsonl_files = []
+        for tier_dir in ["high", "medium"]:
+            tier_path = data_dir / tier_dir
+            if tier_path.is_dir():
+                jsonl_files.extend(sorted(tier_path.glob("filtered_*.jsonl")))
+
+    for jsonl_file in jsonl_files:
+        with open(jsonl_file, "r", encoding="utf-8") as f:
+            for line in f:
+                try:
+                    article = json.loads(line)
+                    attrs = article.get("nexus_mind_attributes", {})
+                    for key, analysis in attrs.items():
+                        if isinstance(analysis, dict) and "weighted_average" in analysis:
+                            was.append(analysis["weighted_average"])
+                except (json.JSONDecodeError, KeyError):
+                    continue
 
     return was
 
 
-def load_weighted_averages_ssh(ssh_host: str, remote_dir: str) -> list:
+def load_weighted_averages_ssh(ssh_host: str, remote_dir: str, all_tiers: bool = False) -> list:
     """Load weighted averages from a remote host via SSH."""
     # Write extraction script to temp file, scp to remote, execute, retrieve results
     script_content = """import json, glob, os, sys
 remote_dir = sys.argv[1]
+all_tiers = sys.argv[2] == "1" if len(sys.argv) > 2 else False
 was = []
-for tier in ["high", "medium"]:
-    tier_dir = os.path.join(remote_dir, tier)
-    if not os.path.isdir(tier_dir):
-        continue
-    for fp in sorted(glob.glob(os.path.join(tier_dir, "filtered_*.jsonl"))):
-        with open(fp) as f:
-            for line in f:
-                try:
-                    d = json.loads(line)
-                    attrs = d.get("nexus_mind_attributes", {})
-                    for k, v in attrs.items():
-                        if isinstance(v, dict) and "weighted_average" in v:
-                            was.append(v["weighted_average"])
-                except:
-                    pass
+if all_tiers:
+    files = sorted(glob.glob(os.path.join(remote_dir, "filtered_*.jsonl")))
+else:
+    files = []
+    for tier in ["high", "medium"]:
+        tier_dir = os.path.join(remote_dir, tier)
+        if not os.path.isdir(tier_dir):
+            continue
+        files.extend(sorted(glob.glob(os.path.join(tier_dir, "filtered_*.jsonl"))))
+for fp in files:
+    with open(fp) as f:
+        for line in f:
+            try:
+                d = json.loads(line)
+                attrs = d.get("nexus_mind_attributes", {})
+                for k, v in attrs.items():
+                    if isinstance(v, dict) and "weighted_average" in v:
+                        was.append(v["weighted_average"])
+            except:
+                pass
 for w in was:
     print(w)
 """
@@ -91,8 +103,9 @@ for w in was:
     try:
         subprocess.run(["scp", local_script, f"{ssh_host}:{remote_script}"],
                        capture_output=True, timeout=30, check=True)
+        all_tiers_flag = "1" if all_tiers else "0"
         result = subprocess.run(
-            ["ssh", ssh_host, "python3", remote_script, remote_dir],
+            ["ssh", ssh_host, "python3", remote_script, remote_dir, all_tiers_flag],
             capture_output=True, text=True, timeout=300,
         )
         if result.returncode != 0:
@@ -134,6 +147,11 @@ def main():
         "--n-bins", type=int, default=200,
         help="Number of breakpoints in the lookup table (default: 200)",
     )
+    parser.add_argument(
+        "--all-tiers", action="store_true",
+        help="Include all scored articles (not just MEDIUM+). "
+             "Reads root-level filtered_*.jsonl instead of high/medium subdirs.",
+    )
     args = parser.parse_args()
 
     # Validate inputs
@@ -165,14 +183,15 @@ def main():
     logger.info(f"Filter: {filter_name} v{filter_version}")
 
     # Load production weighted averages
+    tier_label = "ALL tiers" if args.all_tiers else "MEDIUM+"
     if args.ssh:
-        logger.info(f"Loading production data from {args.ssh}:{args.remote_dir}")
-        source_desc = f"production MEDIUM+ from {args.ssh}:{args.remote_dir}"
-        was = load_weighted_averages_ssh(args.ssh, args.remote_dir)
+        logger.info(f"Loading production data ({tier_label}) from {args.ssh}:{args.remote_dir}")
+        source_desc = f"production {tier_label} from {args.ssh}:{args.remote_dir}"
+        was = load_weighted_averages_ssh(args.ssh, args.remote_dir, all_tiers=args.all_tiers)
     else:
-        logger.info(f"Loading production data from {args.data_dir}")
-        source_desc = f"production MEDIUM+ from {args.data_dir}"
-        was = load_weighted_averages_local(args.data_dir, filter_name)
+        logger.info(f"Loading production data ({tier_label}) from {args.data_dir}")
+        source_desc = f"production {tier_label} from {args.data_dir}"
+        was = load_weighted_averages_local(args.data_dir, filter_name, all_tiers=args.all_tiers)
 
     if len(was) < 10:
         logger.error(f"Only {len(was)} weighted averages found — need at least 10")

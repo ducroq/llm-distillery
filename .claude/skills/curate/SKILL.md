@@ -49,14 +49,27 @@ Read `memory/MEMORY.md`. Update:
 - **Next Up** — reflect what shipped or changed this session
 - Remove or correct anything that is now stale
 
-## Step 4 — Verify references
+## Step 4 — Doc sync check
+
+Check whether key docs reflect the current repo state. Code changes during a session can leave docs stale — this step catches drift that inline updates missed.
+
+1. **CLAUDE.md Architecture section**: Compare listed files/directories against actual repo contents. Flag new files not listed, or listed files that no longer exist.
+2. **CLAUDE.md Key Commands / Getting Started**: Verify commands still match actual CLI flags and defaults. Flag any mismatches (e.g., a renamed flag, a changed default).
+3. **RUNBOOK** (`docs/RUNBOOK.md`): Check that operational details (environment setup, deployment steps, common problems) match reality. Flag anything that looks stale.
+4. **Production Filters table**: Check if any filters changed version, MAE, or status during this session. Update the table.
+5. **TODO / ROADMAP**: Check if any open items were resolved during this session. Mark them.
+
+Fix what you can. Flag anything that needs engineer input.
+
+## Step 5 — Verify references
 
 Skip if Step 0 already ran a full freshness check. Otherwise, spot-check that paths mentioned in the memory index and project file still exist. Flag any broken references.
 
-## Step 5 — Report
+## Step 6 — Report
 
 Summarize what you changed:
 - **Freshness**: Dead references, stale memory files, lingering gotchas, ground truth drift (from Step 0)
 - **Gotchas**: New entries added, entries resolved or promoted
 - **Memory index**: Updates made
+- **Doc sync**: CLAUDE.md, RUNBOOK, production filters table updates made or flagged (from Step 4)
 - **Action needed**: Anything flagged that requires engineer decision

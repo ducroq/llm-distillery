@@ -1,7 +1,7 @@
 # CLAUDE.md - LLM Distillery
 
 - **Status**: Production
-- **agent-ready-projects**: v1.4.0
+- **agent-ready-projects**: v1.6.0
 
 ## What Is This?
 
@@ -77,6 +77,7 @@ See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed reco
 | Making architectural decisions | `docs/adr/README.md` — 14 settled ADRs |
 | Checking priorities or planning work | `docs/TODO.md` and `docs/ROADMAP.md` |
 | Understanding system design | `docs/ARCHITECTURE.md` |
+| Reviewing work quality | `docs/checklists/` — architect, test, implement, QA gates |
 | Stuck on tooling or infra | `memory/gotcha-log.md` — problem/fix archive |
 
 ## Getting Started
@@ -95,6 +96,11 @@ python training/prepare_data.py --filter filters/{name}/v{N} --data-source datas
 PYTHONPATH=. python scripts/calibration/fit_calibration.py \
     --filter filters/{name}/v{N} --data-dir datasets/training/{name}_v{N} \
     --test-data datasets/training/{name}_v{N}/test.jsonl
+
+# Fit normalization (after production data accumulates)
+MSYS_NO_PATHCONV=1 PYTHONPATH=. python scripts/normalization/fit_normalization.py \
+    --filter filters/{name}/v{N} --ssh sadalsuud \
+    --remote-dir /home/jeroen/local_dev/NexusMind/data/filtered/{name} --all-tiers
 
 # Upload to Hub
 python scripts/deployment/upload_to_huggingface.py \

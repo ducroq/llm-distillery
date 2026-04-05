@@ -23,6 +23,7 @@ Loaded every session. Topic files loaded on demand via triggers below.
 - **Training data dir naming**: Hyphens preserved: `cultural-discovery_v3`. Check actual dir names before scripting.
 - **Config format variation**: `tiers:` (uplifting, cultural-discovery, investment-risk v6) vs `tier_thresholds:` (sustainability_tech v5).
 - **Hyphenated filter imports**: Use `importlib.import_module()` — Python can't import hyphens.
+- **Git Bash path mangling**: Set `MSYS_NO_PATHCONV=1` before any command that passes Unix paths as arguments.
 
 ## Key File Paths
 
@@ -84,7 +85,7 @@ _(none yet)_
 
 ## Next Up (from ROADMAP "Now")
 
-- **foresight v1** — DEPLOYED to Hub (`jeergrvgreg/foresight-filter-v1`, private). Test MAE 0.75. Next: NexusMind deploy (#31), ovr.news frontend (ovr.news#172). See `filters/foresight/v1/README.md`.
-- **thriving v1** — PAUSED. Candidate for two-stage scoring fix (same bimodal problem foresight solved). See `memory/thriving-v1-scoring.md`.
+- **foresight v1** — DEPLOYED to Hub. Next: NexusMind deploy (NexusMind#138 → llm-distillery#31), then fit normalization.
+- **nature_recovery normalization** — BLOCKED by NexusMind#138 (hybrid inference deploy). Once probe screens articles, refit with `fit_normalization.py --all-tiers`. See #32.
+- **thriving v1** — PAUSED. Candidate for two-stage scoring fix. See `memory/thriving-v1-scoring.md`.
 - **#24** — ONNX Runtime INT8 or smaller base model retraining
-- **belonging + nature_recovery → ovr.news** — frontend integration only

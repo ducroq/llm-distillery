@@ -101,13 +101,23 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 
 ---
 
-## Git Bash Mangles Unix Paths in Arguments (Mar 2026)
+## Git Bash Mangles Unix Paths in Arguments (Mar 2026, recurred Apr 2026)
 
 **Problem**: `--remote-dir /home/jeroen/...` becomes `C:/Program Files/Git/home/jeroen/...` when passed through Python on Windows Git Bash.
 
 **Root cause**: Git Bash's POSIX-to-Windows path conversion applies to command arguments that look like Unix paths.
 
 **Fix**: Set `MSYS_NO_PATHCONV=1` before the command: `MSYS_NO_PATHCONV=1 PYTHONPATH=. python ...`
+
+---
+
+## Systemd Service Context Differs From Interactive SSH (Apr 2026)
+
+**Problem**: Filter works when tested interactively on gpu-server (`ssh gpu-server "python3 ..."`) but fails when the NexusMind scorer systemd service restarts.
+
+**Root cause**: The systemd service runs with a different environment than an interactive SSH session. Key differences: working directory, PYTHONPATH, HF_HUB_OFFLINE, PATH, and available GPU memory (other services may claim VRAM). Interactive testing bypasses these constraints, so "it works when I run it" doesn't guarantee it works in production.
+
+**Fix**: Always test through the actual execution context after deploying changes: `sudo systemctl restart nexusmind-scorer && journalctl -u nexusmind-scorer -f`. Check the service's EnvironmentFile and WorkingDirectory in the unit file, not just interactive shell behavior.
 
 ---
 
