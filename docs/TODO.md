@@ -55,12 +55,12 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - Val MAE 0.54 (calibrated 0.507), probe MAE 0.50, 3,280 articles
   - Hub: `jeergrvgreg/nature-recovery-filter-v1` (private)
   - Remaining: ovr.news Recovery tab frontend integration
-- [x] **uplifting v7** - ADR-010 prompt rewrite → became thriving v1 (ADR-012 lens-aligned naming)
+- [x] **uplifting v7** - ADR-010 prompt rewrite, deployed with hybrid inference (2026-04-06)
   - v7 prompt: scope check, anti-hallucination, reframed assessment dimensions
-  - Training MAE 0.787 regression identified as discrete score problem (15-17 values)
+  - Hybrid inference: probe MAE 1.10, threshold 1.00, 0.5% FN, 1.07x speedup
   - Evolved into thriving v1: renamed, social_cohesion_impact removed, 3-run averaging planned
 - [ ] **thriving v1** - PAUSED — bimodal distribution problem, best calibrated MAE 0.94
-  - Uplifting v6 (MAE 0.67) remains in production
+  - Uplifting v7 remains in production
   - Two training attempts: hybrid data (MAE 1.09), full 2-run averaged + head+tail + 6 epochs (MAE 0.97, calibrated 0.94)
   - Root cause: bimodal oracle scores (36% score 0-1, sparse 3-5 range, model can't learn transition)
   - Open questions: softer prompt scope check? more data in middle range? different loss function?
@@ -126,6 +126,9 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **Investment-risk v6 probe** - Trained for Gemma-3-1B, MAE 0.557, threshold 1.50
 - [x] **Belonging v1 probe** - Trained for Gemma-3-1B, MAE 0.54
 - [x] **Nature_recovery v1 probe** - Trained for Gemma-3-1B, MAE 0.50
+- [x] **Foresight v1 probe** - Trained for Gemma-3-1B
+- [x] **Uplifting v7 probe** - Trained for Gemma-3-1B, MAE 1.10, threshold 1.00 (#34)
+- [x] **Harmonize all filters** (2026-04-06) - All 7 production filters now have hybrid inference with calibrated thresholds and `--compare` CLI. Fixed investment-risk import path bug (hyphen vs underscore). Deployed to sadalsuud + gpu-server.
 
 ## Code Quality (Feb 2026)
 
