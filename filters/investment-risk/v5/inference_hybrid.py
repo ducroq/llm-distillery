@@ -72,7 +72,7 @@ class InvestmentRiskHybridScorer(HybridScorer):
         return InvestmentRiskScorer(
             model_path=self._model_path,
             device=self.device_str,
-            use_prefilter=self.use_prefilter,
+            use_prefilter=False,
         )
 
     def _get_embedding_stage_config(self) -> Dict:
@@ -161,7 +161,8 @@ def main():
         # Optional comparison with standard scorer
         if args.compare:
             print(f"\nRunning standard scorer for comparison...")
-            ir_module = import_module("filters.investment-risk.v5.inference")
+            _pkg = Path(__file__).parent
+            ir_module = import_module(f"filters.{_pkg.parent.name}.{_pkg.name}.inference")
             standard_scorer = ir_module.InvestmentRiskScorer(
                 use_prefilter=not args.no_prefilter,
             )

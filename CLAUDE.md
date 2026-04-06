@@ -42,7 +42,7 @@
 
 | Filter | Version | Status | Target |
 |--------|---------|--------|--------|
-| **thriving** | v1 | PAUSED — calibrated MAE 0.94, bimodal distribution problem; candidate for two-stage scoring fix | ovr.news Thriving tab (uplifting v6 stays) |
+| **thriving** | v1 | PAUSED — calibrated MAE 0.94, bimodal distribution problem; candidate for two-stage scoring fix | ovr.news Thriving tab (uplifting v7 stays) |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring; rename to augmented-engineering at next bump | Separate product (not ovr.news) |
 
 ## Key Decisions
