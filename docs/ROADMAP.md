@@ -8,7 +8,10 @@
 - **foresight v1** - Deployed (val MAE 0.75, 3.5K articles) → ovr.news Foresight tab (frontend only)
 
 ## Next (Coming Soon)
-- ~~**future-of-education v1**~~ - DROPPED: education stories covered by Opportunity (skills/access) and Breakthroughs (research)
+- **cultural-discovery v5** - Active learning enrichment complete (473 articles), training data ready (8,502). Train on gpu-server.
+- **nature_recovery v2** - Active learning enrichment complete (237 articles), training data ready (3,517). Train on gpu-server.
+- **Breakthroughs lens** - Best candidate for new ovr.news tab. Blocked on science journalism full-text harvesting (NexusMind#143).
+- ~~**future-of-education v1**~~ - DROPPED: education stories covered by Breakthroughs (research)
 - **ai-engineering-practice v2** - Oracle scoring + training (not ovr.news, separate product)
 
 ## Later (Backlog)
@@ -148,4 +151,4 @@
 
 ---
 
-*Last updated: 2026-03-30*
+*Last updated: 2026-04-06*

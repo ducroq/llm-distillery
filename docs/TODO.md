@@ -68,8 +68,18 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - Hybrid inference: probe trained, threshold 2.25 (default, calibrate on production data)
   - Remaining: ovr.news Foresight tab frontend integration
 
+### Active Learning In Progress
+- [ ] **cultural-discovery v5** - Training data ready (8,502 articles = v4 8,029 + 473 enrichment)
+  - Oracle scored 473 production MEDIUM+ articles with Gemini Flash
+  - Smooth distribution (bell curve centered at WA 4.8), no bimodality
+  - Next: train on gpu-server, calibrate, retrain probe, deploy
+- [ ] **nature_recovery v2** - Training data ready (3,517 articles = v1 3,280 + 237 enrichment)
+  - Oracle scored 237 production MEDIUM+ articles with Gemini Flash
+  - Bimodal distribution (student over-scored noise) — valuable corrective signal
+  - Next: train on gpu-server, calibrate, retrain probe, deploy
+
 ### Other Filters
-- [ ] ~~**future-of-education**~~ - DROPPED: education stories land naturally in Opportunity (skills/access) or Breakthroughs (research)
+- [ ] ~~**future-of-education**~~ - DROPPED: education stories land naturally in Breakthroughs (research)
 - [ ] **ai-engineering-practice v2** - Ready for oracle scoring (not ovr.news, separate product)
   - FluxusSource hardware sources active (1,193 articles)
   - Prompt calibration complete (~60% tier accuracy)
@@ -168,6 +178,16 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - Deployed all production prefilters to NexusMind (sadalsuud + gpu-server)
   - Verified 0 diff between all three locations
 
+## Cross-Filter Normalization (ADR-014)
+
+- [x] **uplifting v6 normalization** - Fitted on production CDF
+- [x] **belonging v1 normalization** - Fitted on production CDF
+- [x] **cultural-discovery v4 normalization** - Fitted on production CDF
+- [x] **sustainability_technology v3 normalization** - Fitted on production CDF
+- [x] **uplifting v7 normalization** - Fitted on 73,986 production articles (2026-04-06)
+- [x] **foresight v1 normalization** - Fitted on 623 articles (thin LUT, improves as data accumulates)
+- [x] **nature_recovery v1 normalization** - Refitted on 76,500 articles (still clamped — extreme needle filter, #32)
+
 ## Documentation
 
 - [ ] **Update filters/README.md** - Current status is outdated (Nov 2025)
@@ -176,5 +196,5 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-03-30*
+*Last updated: 2026-04-06*
 
