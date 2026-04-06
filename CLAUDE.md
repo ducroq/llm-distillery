@@ -42,7 +42,7 @@
 
 | Filter | Version | Status | Target |
 |--------|---------|--------|--------|
-| **thriving** | v1 | PAUSED — calibrated MAE 0.94, bimodal distribution problem; candidate for two-stage scoring fix | ovr.news Thriving tab (uplifting v7 stays) |
+| **thriving** | v1 | PARKED indefinitely — orthogonal lens design caused bimodal distribution (ADR-015); uplifting v7 stays as Thriving tab |  |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring; rename to augmented-engineering at next bump | Separate product (not ovr.news) |
 
 ## Key Decisions
@@ -59,6 +59,8 @@
 - **Embedding screening for needle filters** — use Phase 3 positives as e5-small seeds to screen corpora; replaces keyword screening (ADR-011)
 - **English lens names** — all lens/tab names in English, no Dutch (ADR-013)
 - **Cross-filter percentile normalization** — non-linear mapping from production CDF; supersedes score_scale_factor (ADR-014)
+- **Lenses as perspectives, not partitions** — overlap between lenses is correct; never exclude adjacent lens content in oracle prompts (ADR-015)
+- **Drop tier assignments** — filters output pass/block + continuous score only; tiers add no value over the score itself (ADR-016)
 
 See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed records.
 

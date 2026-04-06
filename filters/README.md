@@ -152,25 +152,23 @@ filters/<filter-name>/v<version>/
 
 ---
 
-#### 8. nature_recovery v1 📋 Early Development
+#### 8. nature_recovery v1 ✅ Deployed
 
-**Status**: Concept and README complete, 8 dimensions defined
+**Status**: Deployed on HuggingFace Hub (private). Val MAE 0.54 (calibrated 0.507), 3.3K articles, 6 dimensions.
 
-**Next**: Harmonized prompt, prefilter
+**Next**: ovr.news Recovery tab frontend integration
 
 **Location**: [filters/nature_recovery/v1/](nature_recovery/v1/)
 
 ---
 
-#### 9. signs_of_wisdom v1 📋 Early Development
+#### 9. foresight v1 ✅ Deployed
 
-**Status**: Concept and README complete
+**Status**: Deployed on HuggingFace Hub (private). Val MAE 0.75, 3.5K articles, 6 dimensions. Renamed from signs_of_wisdom per ADR-012.
 
-**Next**: Harmonized prompt, prefilter
+**Next**: ovr.news Foresight tab frontend integration
 
-**Challenge**: Wisdom is rare in news
-
-**Location**: [filters/signs_of_wisdom/v1/](signs_of_wisdom/v1/)
+**Location**: [filters/foresight/v1/](foresight/v1/)
 
 ---
 

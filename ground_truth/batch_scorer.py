@@ -1111,9 +1111,14 @@ class GenericBatchScorer:
         self.logger.info("="*60)
 
     def process_batch(self, articles: List[Dict], batch_num: int) -> Dict:
-        """Process a batch of articles."""
-        results = []
-        processed_ids = []
+        """Process a batch of articles.
+
+        Each article is written to disk immediately after scoring to prevent
+        data loss from rate limits, crashes, or interruptions.
+        """
+        output_file = self.output_dir / f'scored_batch_{batch_num:03d}.jsonl'
+        num_scored = 0
+        num_failed = 0
 
         self.logger.info("="*60)
         self.logger.info(f"Processing batch {batch_num} ({len(articles)} articles)")
@@ -1138,8 +1143,17 @@ class GenericBatchScorer:
                 # Add analysis to article
                 article[analysis_field_name(self.filter_name)] = analysis
 
-                results.append(article)
-                processed_ids.append(article_id)
+                # Write immediately to disk (append mode)
+                clean_article = self._sanitize_article(article)
+                with open(output_file, 'a', encoding='utf-8') as f:
+                    f.write(json.dumps(clean_article, ensure_ascii=False, separators=(',', ':')) + '\n')
+
+                # Update state immediately so resumes skip this article
+                self.state['processed'].append(article_id)
+                self.state['total_scored'] += 1
+                self._save_state()
+
+                num_scored += 1
 
                 # Rate limiting based on provider
                 if self.llm_provider == "claude":
@@ -1151,29 +1165,19 @@ class GenericBatchScorer:
 
                 print(f"     SUCCESS")
             else:
+                num_failed += 1
                 print(f"     FAILED to analyze")
 
-        # Save batch results
-        if results:
-            output_file = self.output_dir / f'scored_batch_{batch_num:03d}.jsonl'
-            with open(output_file, 'w', encoding='utf-8') as f:
-                for article in results:
-                    # Sanitize article to remove invalid Unicode before saving
-                    clean_article = self._sanitize_article(article)
-                    f.write(json.dumps(clean_article, ensure_ascii=False, separators=(',', ':')) + '\n')
+        if num_scored > 0:
+            print(f"\nSAVED {num_scored} scored articles to {output_file.name}")
 
-            print(f"\nSAVED {len(results)} scored articles to {output_file.name}")
-
-        # Update state
-        self.state['processed'].extend(processed_ids)
-        self.state['total_scored'] += len(processed_ids)
         self.state['batches_completed'] += 1
         self._save_state()
 
         return {
             'batch_num': batch_num,
-            'articles_processed': len(results),
-            'articles_failed': len(articles) - len(results),
+            'articles_processed': num_scored,
+            'articles_failed': num_failed,
         }
 
     def load_unscored_articles(

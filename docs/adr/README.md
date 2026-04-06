@@ -25,6 +25,8 @@ ADRs are short documents that capture important architectural decisions along wi
 - [ADR-012: Lens-Aligned Filter Naming](012-lens-aligned-filter-naming.md) - Rename filters to match ovr.news editorial lens names at next version bump
 - [ADR-013: English Lens Names](013-english-lens-names.md) - All lens and tab names use English; no Dutch naming (amends ADR-012)
 - [ADR-014: Cross-Filter Percentile Normalization](014-cross-filter-percentile-normalization.md) - Normalize scores across filters using percentile rank mapping; supersedes score_scale_factor
+- [ADR-015: Lenses as Perspectives, Not Partitions](015-lenses-as-perspectives-not-partitions.md) - Lenses are overlapping perspectives; oracle prompts must not exclude adjacent lenses' content
+- [ADR-016: Drop Tier Assignments](016-drop-tier-assignments.md) - Filters output pass/block + continuous score only; tiers removed from pipeline (gradual, consumer-first)
 
 ## Format
 

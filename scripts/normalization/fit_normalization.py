@@ -72,15 +72,21 @@ def load_weighted_averages_ssh(ssh_host: str, remote_dir: str, all_tiers: bool =
 remote_dir = sys.argv[1]
 all_tiers = sys.argv[2] == "1" if len(sys.argv) > 2 else False
 was = []
-if all_tiers:
-    files = sorted(glob.glob(os.path.join(remote_dir, "filtered_*.jsonl")))
-else:
-    files = []
-    for tier in ["high", "medium"]:
-        tier_dir = os.path.join(remote_dir, tier)
-        if not os.path.isdir(tier_dir):
-            continue
+# Always read both patterns: flat files at root AND tier subdirectories
+# Some filters use one, some use the other, some use both (NexusMind#144)
+files = sorted(glob.glob(os.path.join(remote_dir, "filtered_*.jsonl")))
+for tier in ["high", "medium", "medium_high", "low"]:
+    tier_dir = os.path.join(remote_dir, tier)
+    if os.path.isdir(tier_dir):
         files.extend(sorted(glob.glob(os.path.join(tier_dir, "filtered_*.jsonl"))))
+if not all_tiers:
+    # Without --all-tiers, skip root-level flat files (they contain all tiers including low)
+    # and only read from medium+ tier subdirs
+    files = []
+    for tier in ["high", "medium", "medium_high"]:
+        tier_dir = os.path.join(remote_dir, tier)
+        if os.path.isdir(tier_dir):
+            files.extend(sorted(glob.glob(os.path.join(tier_dir, "filtered_*.jsonl"))))
 for fp in files:
     with open(fp) as f:
         for line in f:

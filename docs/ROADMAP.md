@@ -4,11 +4,11 @@
 
 - **belonging v1 → ovr.news** - Add Belonging tab (filter deployed, frontend work only)
 - **nature_recovery v1** - Deployed (val MAE 0.54, probe MAE 0.50) → ovr.news Recovery tab (frontend only)
-- **thriving v1** - PAUSED. Calibrated MAE 0.94 after two training attempts — bimodal score distribution limits learnability. Uplifting v6 (MAE 0.67) stays in production. See `memory/thriving-v1-scoring.md` for findings and open questions
-- **signs_of_wisdom v1** - Harmonized prompt → oracle scoring → training → enrich Discovery or new tab
+- ~~**thriving v1**~~ - PARKED indefinitely. Uplifting v7 stays as Thriving tab. Orthogonal lens design caused bimodal distribution (ADR-015); a fixed v2 would just be uplifting v7 again
+- **foresight v1** - Deployed (val MAE 0.75, 3.5K articles) → ovr.news Foresight tab (frontend only)
 
 ## Next (Coming Soon)
-- **future-of-education v1** - Educational innovation → Education tab for ovr.news
+- ~~**future-of-education v1**~~ - DROPPED: education stories covered by Opportunity (skills/access) and Breakthroughs (research)
 - **ai-engineering-practice v2** - Oracle scoring + training (not ovr.news, separate product)
 
 ## Later (Backlog)

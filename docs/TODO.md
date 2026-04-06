@@ -59,19 +59,17 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - v7 prompt: scope check, anti-hallucination, reframed assessment dimensions
   - Hybrid inference: probe MAE 1.10, threshold 1.00, 0.5% FN, 1.07x speedup
   - Evolved into thriving v1: renamed, social_cohesion_impact removed, 3-run averaging planned
-- [ ] **thriving v1** - PAUSED — bimodal distribution problem, best calibrated MAE 0.94
-  - Uplifting v7 remains in production
-  - Two training attempts: hybrid data (MAE 1.09), full 2-run averaged + head+tail + 6 epochs (MAE 0.97, calibrated 0.94)
-  - Root cause: bimodal oracle scores (36% score 0-1, sparse 3-5 range, model can't learn transition)
-  - Open questions: softer prompt scope check? more data in middle range? different loss function?
-  - All assets preserved — see `memory/thriving-v1-scoring.md`
-- [ ] **signs_of_wisdom v1** - ovr.news tab (enrich Discovery or standalone)
-  - Concept and README complete
-  - Next: harmonized prompt, prefilter.py, oracle scoring, training
-  - Challenge: wisdom is rare in news
+- [ ] ~~**thriving v1**~~ - PARKED indefinitely. Uplifting v7 (MAE 0.67) stays as Thriving tab.
+  - Root cause: orthogonal lens design created bimodal distribution (ADR-015)
+  - A fixed thriving v2 would converge back to uplifting v7. Not worth retraining.
+  - Assets preserved in `memory/thriving-v1-scoring.md` if ever revisited
+- [x] **foresight v1** - Deployed on HuggingFace Hub (private) — was signs_of_wisdom
+  - Val MAE 0.75, 3,480 training articles, 6 dimensions
+  - Hybrid inference: probe trained, threshold 2.25 (default, calibrate on production data)
+  - Remaining: ovr.news Foresight tab frontend integration
 
 ### Other Filters
-- [ ] **future-of-education** - ovr.news Education tab (after nature_recovery + signs_of_wisdom)
+- [ ] ~~**future-of-education**~~ - DROPPED: education stories land naturally in Opportunity (skills/access) or Breakthroughs (research)
 - [ ] **ai-engineering-practice v2** - Ready for oracle scoring (not ovr.news, separate product)
   - FluxusSource hardware sources active (1,193 articles)
   - Prompt calibration complete (~60% tier accuracy)
@@ -126,7 +124,8 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **Investment-risk v6 probe** - Trained for Gemma-3-1B, MAE 0.557, threshold 1.50
 - [x] **Belonging v1 probe** - Trained for Gemma-3-1B, MAE 0.54
 - [x] **Nature_recovery v1 probe** - Trained for Gemma-3-1B, MAE 0.50
-- [x] **Foresight v1 probe** - Trained for Gemma-3-1B
+- [x] **Foresight v1 probe** - Trained for Gemma-3-1B, threshold 2.25
+- [x] **Foresight v1 calibration** - Fitted, calibration.json committed with filter package
 - [x] **Uplifting v7 probe** - Trained for Gemma-3-1B, MAE 1.10, threshold 1.00 (#34)
 - [x] **Harmonize all filters** (2026-04-06) - All 7 production filters now have hybrid inference with calibrated thresholds and `--compare` CLI. Fixed investment-risk import path bug (hyphen vs underscore). Deployed to sadalsuud + gpu-server.
 
