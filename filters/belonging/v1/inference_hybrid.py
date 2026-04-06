@@ -31,8 +31,9 @@ from filters.belonging.v1.inference import BelongingScorer
 logger = logging.getLogger(__name__)
 
 # Default Stage 1 threshold: articles below this skip Stage 2
-# TODO: Calibrate on production data after probe training
-DEFAULT_THRESHOLD = 2.25
+# Calibrated on v1 val data (738 articles):
+#   Threshold 1.00 -> 0.0% FN rate on MEDIUM+, ~1.18x speedup
+DEFAULT_THRESHOLD = 1.00
 
 
 class BelongingHybridScorer(HybridScorer):
@@ -114,6 +115,10 @@ def main():
         "--threshold", type=float, default=DEFAULT_THRESHOLD,
         help=f"Stage 1 threshold (default: {DEFAULT_THRESHOLD})"
     )
+    parser.add_argument(
+        "--compare", action="store_true",
+        help="Also run standard scorer and compare results"
+    )
 
     args = parser.parse_args()
 
@@ -155,6 +160,33 @@ def main():
         print(f"\nTier distribution:")
         for tier, count in sorted(tiers.items()):
             print(f"  {tier}: {count}")
+
+        # Optional comparison with standard scorer
+        if args.compare:
+            print(f"\nRunning standard scorer for comparison...")
+            standard_scorer = BelongingScorer(
+                use_prefilter=not args.no_prefilter,
+            )
+            start = time.time()
+            standard_results = standard_scorer.score_batch(
+                articles, batch_size=args.batch_size
+            )
+            standard_time = time.time() - start
+
+            print(f"Standard scorer: {standard_time:.2f}s ({standard_time/len(articles)*1000:.1f}ms/article)")
+            print(f"Speedup: {standard_time/hybrid_time:.2f}x")
+
+            # Check agreement on MEDIUM+ articles
+            disagreements = 0
+            for i, (h, s) in enumerate(zip(results, standard_results)):
+                if s.get("tier") in ("medium", "high") and h.get("stage_used") == "stage1_low":
+                    disagreements += 1
+                    print(
+                        f"  FALSE NEGATIVE #{disagreements}: article {i} "
+                        f"(standard={s.get('tier')}, stage1_est={h.get('stage1_estimate', 0):.2f})"
+                    )
+
+            print(f"\nFalse negatives (MEDIUM+ classified as LOW by Stage 1): {disagreements}")
 
         if args.output:
             print(f"\nWriting results to {args.output}")

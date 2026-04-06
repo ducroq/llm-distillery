@@ -1,23 +1,23 @@
 """
-Investment Risk Filter v5 - Hybrid Inference Pipeline
+Uplifting Content Filter v7 - Hybrid Inference Pipeline
 
 Two-stage scorer that uses embedding + MLP probe for fast screening (Stage 1)
-and the trained Qwen2.5-1.5B model for precise scoring (Stage 2).
+and the trained Gemma-3-1B model for precise scoring (Stage 2).
 
 Stage 1 (~1.3ms): Embedding probe estimates scores. Articles with weighted_avg < threshold
-are classified as NOISE/low-signal without running the expensive model.
+are classified as LOW/borderline without running the expensive model.
 
-Stage 2 (~25ms): Full fine-tuned model scoring for articles that pass Stage 1.
+Stage 2 (~19ms): Full fine-tuned model scoring for articles that pass Stage 1.
 
 Usage:
-    from filters.investment_risk.v5.inference_hybrid import InvestmentRiskHybridScorer
+    from filters.uplifting.v7.inference_hybrid import UpliftingHybridScorer
 
-    scorer = InvestmentRiskHybridScorer()
+    scorer = UpliftingHybridScorer()
     result = scorer.score_article(article)
     # result["stage_used"] -> "stage1_low" or "stage2"
 
     # CLI
-    python filters/investment-risk/v5/inference_hybrid.py --input articles.jsonl --output results.jsonl
+    python filters/uplifting/v7/inference_hybrid.py --input articles.jsonl --output results.jsonl
 """
 
 import json
@@ -26,21 +26,24 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from filters.common.hybrid_scorer import HybridScorer
+from filters.uplifting.v7.inference import UpliftingScorer
 
 logger = logging.getLogger(__name__)
 
 # Default Stage 1 threshold: articles below this skip Stage 2
-# Calibrated on 1,020 val articles: 0.8% FN on actionable tiers, 1.07x speedup
-DEFAULT_THRESHOLD = 1.50
+# Calibrated on v7 val data (659 articles):
+#   Threshold 1.00 -> 0.9% FN rate on MEDIUM+, ~1.05x speedup
+#   Probe MAE 1.04 limits useful thresholds; conservative setting
+DEFAULT_THRESHOLD = 1.00
 
 
-class InvestmentRiskHybridScorer(HybridScorer):
+class UpliftingHybridScorer(HybridScorer):
     """
-    Two-stage hybrid scorer for investment-risk filter v5.
+    Two-stage hybrid scorer for uplifting content filter v7.
 
     Combines:
     - Stage 1: multilingual-e5-small embeddings + MLP probe
-    - Stage 2: Existing InvestmentRiskScorer (Qwen2.5-1.5B fine-tuned)
+    - Stage 2: Existing UpliftingScorer (Gemma-3-1B fine-tuned)
     """
 
     def __init__(
@@ -51,32 +54,38 @@ class InvestmentRiskHybridScorer(HybridScorer):
         device: Optional[str] = None,
         use_prefilter: bool = True,
     ):
+        """
+        Initialize the hybrid uplifting scorer.
+
+        Args:
+            model_path: Path to Stage 2 model directory (default: ./model)
+            probe_path: Path to Stage 1 probe file (default: ./probe/embedding_probe_e5small.pkl)
+            threshold: Stage 1 threshold (articles below skip Stage 2)
+            device: Device to use ('cuda', 'cpu', or None for auto)
+            use_prefilter: Whether to apply rule-based prefilter
+        """
         self._model_path = model_path
         self._probe_path = probe_path or (
             Path(__file__).parent / "probe" / "embedding_probe_e5small.pkl"
         )
         self._threshold = threshold
 
-        # Deferred import: derive module path from __file__ to handle both
-        # hyphenated (investment-risk) and underscored (investment_risk) dir names
-        from importlib import import_module
-        _pkg = Path(__file__).parent
-        _module_path = f"filters.{_pkg.parent.name}.{_pkg.name}.inference"
-        self._scorer_module = import_module(_module_path)
-
         super().__init__(device=device, use_prefilter=use_prefilter)
 
     def _create_stage2_scorer(self):
-        """Create the existing InvestmentRiskScorer as Stage 2."""
-        InvestmentRiskScorer = self._scorer_module.InvestmentRiskScorer
-        return InvestmentRiskScorer(
+        """Create the existing UpliftingScorer as Stage 2.
+
+        Prefilter is disabled: HybridScorer handles prefiltering itself,
+        so Stage 2 doesn't need to load or run the prefilter again.
+        """
+        return UpliftingScorer(
             model_path=self._model_path,
             device=self.device_str,
-            use_prefilter=self.use_prefilter,
+            use_prefilter=False,
         )
 
     def _get_embedding_stage_config(self) -> Dict:
-        """Return EmbeddingStage configuration for investment-risk v5."""
+        """Return EmbeddingStage configuration for uplifting v7."""
         return {
             "embedding_model_name": "intfloat/multilingual-e5-small",
             "probe_path": str(self._probe_path),
@@ -87,10 +96,9 @@ class InvestmentRiskHybridScorer(HybridScorer):
 def main():
     """CLI interface for hybrid batch scoring."""
     import argparse
-    from importlib import import_module
 
     parser = argparse.ArgumentParser(
-        description="Score articles with investment-risk hybrid scorer (two-stage pipeline)"
+        description="Score articles with uplifting hybrid scorer (two-stage pipeline)"
     )
     parser.add_argument(
         "--input", "-i", type=Path, help="Input JSONL file with articles"
@@ -117,7 +125,7 @@ def main():
 
     # Initialize hybrid scorer
     print("Initializing hybrid scorer...")
-    scorer = InvestmentRiskHybridScorer(
+    scorer = UpliftingHybridScorer(
         threshold=args.threshold,
         use_prefilter=not args.no_prefilter,
     )
@@ -161,8 +169,7 @@ def main():
         # Optional comparison with standard scorer
         if args.compare:
             print(f"\nRunning standard scorer for comparison...")
-            ir_module = import_module("filters.investment-risk.v5.inference")
-            standard_scorer = ir_module.InvestmentRiskScorer(
+            standard_scorer = UpliftingScorer(
                 use_prefilter=not args.no_prefilter,
             )
             start = time.time()
@@ -174,18 +181,17 @@ def main():
             print(f"Standard scorer: {standard_time:.2f}s ({standard_time/len(articles)*1000:.1f}ms/article)")
             print(f"Speedup: {standard_time/hybrid_time:.2f}x")
 
-            # Check agreement — investment-risk uses RED/YELLOW/GREEN as actionable tiers
-            actionable_tiers = ("RED", "YELLOW", "GREEN")
+            # Check agreement on MEDIUM+ articles
             disagreements = 0
             for i, (h, s) in enumerate(zip(results, standard_results)):
-                if s.get("tier") in actionable_tiers and h.get("stage_used") == "stage1_low":
+                if s.get("tier") in ("medium", "high") and h.get("stage_used") == "stage1_low":
                     disagreements += 1
                     print(
                         f"  FALSE NEGATIVE #{disagreements}: article {i} "
                         f"(standard={s.get('tier')}, stage1_est={h.get('stage1_estimate', 0):.2f})"
                     )
 
-            print(f"\nFalse negatives (actionable classified as LOW by Stage 1): {disagreements}")
+            print(f"\nFalse negatives (MEDIUM+ classified as LOW by Stage 1): {disagreements}")
 
         # Output
         if args.output:
@@ -199,13 +205,13 @@ def main():
         # Interactive demo
         print("\n--- Hybrid Scorer Demo ---")
         demo_article = {
-            "title": "Federal Reserve Signals Emergency Rate Discussion Amid Banking Stress",
+            "title": "Community Garden Feeds 500 Families in Food Desert",
             "content": (
-                "The Federal Reserve has called an unscheduled board meeting to discuss "
-                "potential emergency measures as regional bank stress indicators hit levels "
-                "not seen since March 2023. Three mid-size banks reported deposit outflows "
-                "exceeding 5% in the past week, while credit default swap spreads on "
-                "bank debt have widened significantly."
+                "A volunteer-led community garden in Detroit has grown to feed over 500 families "
+                "in what was previously a food desert. The project, started three years ago on "
+                "abandoned lots, now spans 2 acres and produces 10,000 pounds of fresh vegetables "
+                "annually. Local residents volunteer their time, and all produce is distributed "
+                "free to neighborhood families."
             ),
         }
 

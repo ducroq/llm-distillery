@@ -207,7 +207,7 @@ hybrid_inference:
   stage1:
     embedding_model: "intfloat/multilingual-e5-small"
     probe_path: "probe/embedding_probe_e5small.pkl"
-    threshold: null  # To be calibrated after training
+    threshold: 1.00  # Calibrated on v7 val (659 articles): 0.9% FN on MEDIUM+
   stage2:
     model: "current"
 

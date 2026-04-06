@@ -10,8 +10,8 @@ are classified as LOW/borderline without running the expensive model.
 Stage 2 (~20ms): Full fine-tuned model scoring for articles that pass Stage 1.
 
 Usage:
-    from importlib import import_module
-    mod = import_module("filters.investment-risk.v6.inference_hybrid")
+    from filters.common.hybrid_scorer import HybridScorer  # or use importlib for hyphenated dirs
+    # Use importlib if the directory name has hyphens:
     scorer = mod.InvestmentRiskHybridScorer()
     result = scorer.score_article(article)
     # result["stage_used"] -> "stage1_low" or "stage2"
@@ -67,9 +67,12 @@ class InvestmentRiskHybridScorer(HybridScorer):
         )
         self._threshold = threshold
 
-        # Deferred import to avoid circular imports with hyphenated package name
+        # Deferred import: derive module path from __file__ to handle both
+        # hyphenated (investment-risk) and underscored (investment_risk) dir names
         from importlib import import_module
-        self._scorer_module = import_module("filters.investment-risk.v6.inference")
+        _pkg = Path(__file__).parent
+        _module_path = f"filters.{_pkg.parent.name}.{_pkg.name}.inference"
+        self._scorer_module = import_module(_module_path)
 
         super().__init__(device=device, use_prefilter=use_prefilter)
 
@@ -172,7 +175,8 @@ def main():
         # Optional comparison with standard scorer
         if args.compare:
             print(f"\nRunning standard scorer for comparison...")
-            ir_module = import_module("filters.investment-risk.v6.inference")
+            _pkg = Path(__file__).parent
+            ir_module = import_module(f"filters.{_pkg.parent.name}.{_pkg.name}.inference")
             standard_scorer = ir_module.InvestmentRiskScorer(
                 use_prefilter=not args.no_prefilter,
             )
