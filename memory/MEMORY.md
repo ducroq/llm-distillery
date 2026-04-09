@@ -45,7 +45,7 @@ Loaded every session. Topic files loaded on demand via triggers below.
 | `scripts/oracle/average_oracle_runs.py` | Multi-run oracle score averaging |
 | `filters/common/score_normalization.py` | Cross-filter percentile normalization (ADR-014) |
 | `scripts/normalization/fit_normalization.py` | Fit normalization CDF from production data |
-| `docs/adr/README.md` | ADR index (001-014) |
+| `docs/adr/README.md` | ADR index (001-017) |
 
 ## Cross-Project: NexusMind
 
@@ -85,7 +85,8 @@ _(none yet)_
 
 ## Next Up (from ROADMAP "Now")
 
-- **foresight v1** — DEPLOYED to Hub. Next: NexusMind deploy (NexusMind#138 → llm-distillery#31), then fit normalization.
-- **nature_recovery normalization** — BLOCKED by NexusMind#138 (hybrid inference deploy). Once probe screens articles, refit with `fit_normalization.py --all-tiers`. See #32.
+- **foresight v1** — DEPLOYED to Hub. Next: NexusMind deploy (#31), then fit normalization.
+- **nature_recovery normalization** — FIXED (#32 closed 2026-04-09). Refit covers full score range (354 articles, x: 0.10–10.0). gpu-server scorer verified producing differentiated scores.
+- **raw_weighted_average** — Now passed through gpu-server API → sadalsuud pipeline → filtered output (#36 closed 2026-04-09). Normalization fitting script prefers it to avoid double-normalization.
 - **thriving v1** — PAUSED. Candidate for two-stage scoring fix. See `memory/thriving-v1-scoring.md`.
 - **#24** — ONNX Runtime INT8 or smaller base model retraining
