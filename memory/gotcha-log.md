@@ -121,10 +121,10 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 
 ---
 
-## train.py --output-dir Creates Nested model/model/ (Apr 2026)
+## [RESOLVED] train.py --output-dir Creates Nested model/model/ (Apr 2026)
 
 **Problem**: `--output-dir filters/foresight/v1/model` saves adapter to `model/model/`. Then `--resume-from filters/foresight/v1/model/model` looks for `model/model/model/`.
 
 **Root cause**: `train.py` appends `/model` to the output dir for the adapter save path. Both `--output-dir` and `--resume-from` do this, so the nesting doubles each time.
 
-**Fix**: Use `--output-dir filters/<name>/v1` (without trailing `model/`), or pass `--resume-from filters/<name>/v1/model` (one level up from the adapter). The script will find `model/model/` correctly.
+**Fix**: train.py now strips trailing `model` from both `--output-dir` and `--resume-from` before appending. Either path form works now.

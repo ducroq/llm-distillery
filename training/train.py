@@ -444,6 +444,14 @@ def main():
 
     args = parser.parse_args()
 
+    # Normalize paths: strip trailing "model" component to prevent double nesting.
+    # The script always appends /model when saving/loading, so --output-dir and
+    # --resume-from should point to the filter version dir (e.g. filters/name/v1).
+    if args.output_dir is not None and args.output_dir.name == "model":
+        args.output_dir = args.output_dir.parent
+    if args.resume_from is not None and args.resume_from.name == "model":
+        args.resume_from = args.resume_from.parent
+
     # Set random seed for reproducibility
     set_seed(args.seed)
     print(f"Random seed set to: {args.seed}")
