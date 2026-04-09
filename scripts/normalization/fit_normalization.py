@@ -39,16 +39,13 @@ def load_weighted_averages_local(data_dir: Path, filter_name: str, all_tiers: bo
     """Load weighted averages from local filtered JSONL files."""
     was = []
 
-    if all_tiers:
-        # Read from root-level filtered_*.jsonl files (all scored articles)
-        jsonl_files = sorted(data_dir.glob("filtered_*.jsonl"))
-    else:
-        # Read from high/ and medium/ subdirs only
-        jsonl_files = []
-        for tier_dir in ["high", "medium"]:
-            tier_path = data_dir / tier_dir
-            if tier_path.is_dir():
-                jsonl_files.extend(sorted(tier_path.glob("filtered_*.jsonl")))
+    # Read flat JSONL files at root (NexusMind#144: flat output, no tier subdirs)
+    jsonl_files = sorted(data_dir.glob("filtered_*.jsonl"))
+    # Also check legacy tier subdirectories
+    for tier_dir in ["high", "medium"] + (["low"] if all_tiers else []):
+        tier_path = data_dir / tier_dir
+        if tier_path.is_dir():
+            jsonl_files.extend(sorted(tier_path.glob("filtered_*.jsonl")))
 
     for jsonl_file in jsonl_files:
         with open(jsonl_file, "r", encoding="utf-8") as f:
@@ -58,7 +55,9 @@ def load_weighted_averages_local(data_dir: Path, filter_name: str, all_tiers: bo
                     attrs = article.get("nexus_mind_attributes", {})
                     for key, analysis in attrs.items():
                         if isinstance(analysis, dict) and "weighted_average" in analysis:
-                            was.append(analysis["weighted_average"])
+                            tier = analysis.get("tier", "low")
+                            if all_tiers or tier in ("high", "medium"):
+                                was.append(analysis["weighted_average"])
                 except (json.JSONDecodeError, KeyError):
                     continue
 
@@ -72,21 +71,13 @@ def load_weighted_averages_ssh(ssh_host: str, remote_dir: str, all_tiers: bool =
 remote_dir = sys.argv[1]
 all_tiers = sys.argv[2] == "1" if len(sys.argv) > 2 else False
 was = []
-# Always read both patterns: flat files at root AND tier subdirectories
-# Some filters use one, some use the other, some use both (NexusMind#144)
+# Read flat JSONL files at root (NexusMind#144: flat output, no tier subdirs)
 files = sorted(glob.glob(os.path.join(remote_dir, "filtered_*.jsonl")))
-for tier in ["high", "medium", "medium_high", "low"]:
+# Also check legacy tier subdirectories
+for tier in ["high", "medium", "medium_high"] + (["low"] if all_tiers else []):
     tier_dir = os.path.join(remote_dir, tier)
     if os.path.isdir(tier_dir):
         files.extend(sorted(glob.glob(os.path.join(tier_dir, "filtered_*.jsonl"))))
-if not all_tiers:
-    # Without --all-tiers, skip root-level flat files (they contain all tiers including low)
-    # and only read from medium+ tier subdirs
-    files = []
-    for tier in ["high", "medium", "medium_high"]:
-        tier_dir = os.path.join(remote_dir, tier)
-        if os.path.isdir(tier_dir):
-            files.extend(sorted(glob.glob(os.path.join(tier_dir, "filtered_*.jsonl"))))
 for fp in files:
     with open(fp) as f:
         for line in f:
@@ -95,7 +86,9 @@ for fp in files:
                 attrs = d.get("nexus_mind_attributes", {})
                 for k, v in attrs.items():
                     if isinstance(v, dict) and "weighted_average" in v:
-                        was.append(v["weighted_average"])
+                        tier = v.get("tier", "low")
+                        if all_tiers or tier in ("high", "medium"):
+                            was.append(v["weighted_average"])
             except:
                 pass
 for w in was:

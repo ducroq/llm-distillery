@@ -102,7 +102,7 @@ PYTHONPATH=. python scripts/calibration/fit_calibration.py \
 # Fit normalization (after production data accumulates)
 MSYS_NO_PATHCONV=1 PYTHONPATH=. python scripts/normalization/fit_normalization.py \
     --filter filters/{name}/v{N} --ssh sadalsuud \
-    --remote-dir /home/jeroen/local_dev/NexusMind/data/filtered/{name} --all-tiers
+    --remote-dir /home/jeroen/local_dev/NexusMind/data/filtered/{name}
 
 # Upload to Hub
 python scripts/deployment/upload_to_huggingface.py \
