@@ -32,14 +32,19 @@ if os.path.exists(neg_path):
 print("Already used hashes:", len(used_hashes))
 
 # Collect all HIGH articles not already used
+# Read flat JSONL files (NexusMind#144 removed tier subdirectories)
 candidates = []
 seen = set()
-files = sorted(glob.glob(os.path.join(FILTERED_DIR, "high", "filtered_*.jsonl")))
+files = sorted(glob.glob(os.path.join(FILTERED_DIR, "filtered_*.jsonl")))
 for f in files:
     with open(f) as fh:
         for line in fh:
             try:
                 art = json.loads(line)
+                ua = art.get("nexus_mind_attributes", {}).get("uplifting_analysis", {})
+                tier = ua.get("tier", "low")
+                if tier != "high":
+                    continue
                 ch = art.get("content_hash", "")
                 if ch and ch not in used_hashes and ch not in seen:
                     seen.add(ch)

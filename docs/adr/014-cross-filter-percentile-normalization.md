@@ -52,7 +52,7 @@ The inference pipeline becomes: raw prediction → calibrate (ADR-008) → weigh
 
 ### 1. Build the CDF (from existing production data)
 
-For each filter, extract weighted average scores from the existing MEDIUM+ production output on sadalsuud (`~/local_dev/NexusMind/data/filtered/{filter}/high/` and `medium/`). Sort and store as the empirical CDF: a sorted array of (raw_score, percentile) pairs in `filters/{name}/v{N}/normalization.json`.
+For each filter, extract weighted average scores from the existing MEDIUM+ production output on sadalsuud (`~/local_dev/NexusMind/data/filtered/{filter}/filtered_*.jsonl`). Sort and store as the empirical CDF: a sorted array of (raw_score, percentile) pairs in `filters/{name}/v{N}/normalization.json`.
 
 **Why production MEDIUM+ data:**
 - **Not val sets:** Training val sets are enriched via screen+merge (ADR-003) and active learning (ADR-005). Nature_recovery's val set has ~10% high-scoring articles, but production has 0.3%. Val set CDFs are not representative of production (tested and confirmed — see Alternatives).

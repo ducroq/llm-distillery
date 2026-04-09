@@ -1,7 +1,7 @@
 # CLAUDE.md - LLM Distillery
 
 - **Status**: Production
-- **agent-ready-projects**: v1.6.0
+- **agent-ready-projects**: v1.7.0
 
 ## What Is This?
 
@@ -81,6 +81,8 @@ See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed reco
 | Understanding system design | `docs/ARCHITECTURE.md` |
 | Reviewing work quality | `docs/checklists/` — architect, test, implement, QA gates |
 | Stuck on tooling or infra | `memory/gotcha-log.md` — problem/fix archive |
+| Ending a session | Run `/curate` |
+| Monthly or after major restructuring | Run `/audit-context` |
 
 ## Getting Started
 

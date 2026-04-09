@@ -14,20 +14,23 @@ OUTPUT_DIR = "/home/jeroen/local_dev/NexusMind/data/training_data/uplifting_v7"
 articles = {"high": [], "medium": []}
 seen_hashes = set()
 
-for tier in ["high", "medium"]:
-    pattern = os.path.join(FILTERED_DIR, tier, "filtered_*.jsonl")
-    files = sorted(glob.glob(pattern))
-    for f in files:
-        with open(f) as fh:
-            for line in fh:
-                try:
-                    art = json.loads(line)
-                    ch = art.get("content_hash", "")
-                    if ch and ch not in seen_hashes:
-                        seen_hashes.add(ch)
-                        articles[tier].append(art)
-                except:
-                    pass
+# Read flat JSONL files (NexusMind#144 removed tier subdirectories)
+files = sorted(glob.glob(os.path.join(FILTERED_DIR, "filtered_*.jsonl")))
+for f in files:
+    with open(f) as fh:
+        for line in fh:
+            try:
+                art = json.loads(line)
+                ua = art.get("nexus_mind_attributes", {}).get("uplifting_analysis", {})
+                tier = ua.get("tier", "low")
+                if tier not in ("high", "medium"):
+                    continue
+                ch = art.get("content_hash", "")
+                if ch and ch not in seen_hashes:
+                    seen_hashes.add(ch)
+                    articles[tier].append(art)
+            except:
+                pass
 
 print("=== Deduplicated counts ===")
 print("HIGH:", len(articles["high"]))
