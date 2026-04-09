@@ -76,7 +76,7 @@ See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed reco
 | Deploying to NexusMind or gpu-server | `docs/RUNBOOK.md` — deployment, training, scoring how-to |
 | Training on GPU server | `memory/gpu-server.md` — venv, PYTHONPATH, HF_HUB_OFFLINE |
 | Debugging model loading or PEFT issues | `memory/gemma3-model.md` — Auto mapping fix, key format details |
-| Making architectural decisions | `docs/adr/README.md` — 14 settled ADRs |
+| Making architectural decisions | `docs/adr/README.md` — 17 settled ADRs |
 | Checking priorities or planning work | `docs/TODO.md` and `docs/ROADMAP.md` |
 | Understanding system design | `docs/ARCHITECTURE.md` |
 | Reviewing work quality | `docs/checklists/` — architect, test, implement, QA gates |

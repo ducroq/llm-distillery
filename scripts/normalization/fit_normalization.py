@@ -38,6 +38,8 @@ logger = logging.getLogger(__name__)
 def load_weighted_averages_local(data_dir: Path, filter_name: str, all_tiers: bool = False) -> list:
     """Load weighted averages from local filtered JSONL files."""
     was = []
+    n_raw = 0
+    n_fallback = 0
 
     # Read flat JSONL files at root (NexusMind#144: flat output, no tier subdirs)
     jsonl_files = sorted(data_dir.glob("filtered_*.jsonl"))
@@ -60,9 +62,27 @@ def load_weighted_averages_local(data_dir: Path, filter_name: str, all_tiers: bo
                                 # Prefer raw (pre-normalization) score to avoid double-normalization
                                 raw = analysis.get("raw_weighted_average")
                                 wa = raw if raw is not None else analysis["weighted_average"]
+                                if raw is not None:
+                                    n_raw += 1
+                                else:
+                                    n_fallback += 1
                                 was.append(wa)
                 except (json.JSONDecodeError, KeyError):
                     continue
+
+    if n_fallback > 0 and n_raw > 0:
+        logger.warning(
+            f"Mixed fields: {n_raw} articles used raw_weighted_average, "
+            f"{n_fallback} used weighted_average (possibly normalized). "
+            f"CDF may blend raw and normalized scores."
+        )
+    elif n_fallback > 0:
+        logger.warning(
+            f"raw_weighted_average not found in any article — using weighted_average "
+            f"for all {n_fallback} articles. Check for double-normalization risk."
+        )
+    else:
+        logger.info(f"Using raw_weighted_average for all {n_raw} articles")
 
     return was
 
@@ -74,10 +94,12 @@ def load_weighted_averages_ssh(ssh_host: str, remote_dir: str, all_tiers: bool =
 remote_dir = sys.argv[1]
 all_tiers = sys.argv[2] == "1" if len(sys.argv) > 2 else False
 was = []
+n_raw = 0
+n_fallback = 0
 # Read flat JSONL files at root (NexusMind#144: flat output, no tier subdirs)
 files = sorted(glob.glob(os.path.join(remote_dir, "filtered_*.jsonl")))
 # Also check legacy tier subdirectories
-for tier in ["high", "medium", "medium_high"] + (["low"] if all_tiers else []):
+for tier in ["high", "medium"] + (["low"] if all_tiers else []):
     tier_dir = os.path.join(remote_dir, tier)
     if os.path.isdir(tier_dir):
         files.extend(sorted(glob.glob(os.path.join(tier_dir, "filtered_*.jsonl"))))
@@ -93,11 +115,16 @@ for fp in files:
                         if all_tiers or tier in ("high", "medium"):
                             raw = v.get("raw_weighted_average")
                             wa = raw if raw is not None else v["weighted_average"]
+                            if raw is not None:
+                                n_raw += 1
+                            else:
+                                n_fallback += 1
                             was.append(wa)
-            except:
+            except Exception:
                 pass
 for w in was:
     print(w)
+print("META:raw=%d,fallback=%d" % (n_raw, n_fallback), file=sys.stderr)
 """
     with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write(script_content)
@@ -124,6 +151,27 @@ for w in was:
     for line in result.stdout.strip().split("\n"):
         if line.strip():
             was.append(float(line))
+
+    # Parse field-usage metadata from remote script stderr
+    import re
+    meta_match = re.search(r"META:raw=(\d+),fallback=(\d+)", result.stderr or "")
+    if meta_match:
+        n_raw = int(meta_match.group(1))
+        n_fallback = int(meta_match.group(2))
+        if n_fallback > 0 and n_raw > 0:
+            logger.warning(
+                f"Mixed fields: {n_raw} articles used raw_weighted_average, "
+                f"{n_fallback} used weighted_average (possibly normalized). "
+                f"CDF may blend raw and normalized scores."
+            )
+        elif n_fallback > 0:
+            logger.warning(
+                f"raw_weighted_average not found in any article — using weighted_average "
+                f"for all {n_fallback} articles. Check for double-normalization risk."
+            )
+        else:
+            logger.info(f"Using raw_weighted_average for all {n_raw} articles")
+
     return was
 
 

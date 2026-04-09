@@ -449,10 +449,10 @@ def main():
     # --resume-from should point to the filter version dir (e.g. filters/name/v1).
     if args.output_dir is not None and args.output_dir.name == "model":
         args.output_dir = args.output_dir.parent
-        print(f"Note: stripped trailing /model from --output-dir (script appends /model automatically)")
+        print(f"Note: stripped trailing /model from --output-dir; using {args.output_dir}")
     if args.resume_from is not None and args.resume_from.name == "model":
         args.resume_from = args.resume_from.parent
-        print(f"Note: stripped trailing /model from --resume-from (script appends /model automatically)")
+        print(f"Note: stripped trailing /model from --resume-from; using {args.resume_from}")
 
     # Set random seed for reproducibility
     set_seed(args.seed)
