@@ -57,7 +57,9 @@ def load_weighted_averages_local(data_dir: Path, filter_name: str, all_tiers: bo
                         if isinstance(analysis, dict) and "weighted_average" in analysis:
                             tier = analysis.get("tier", "low")
                             if all_tiers or tier in ("high", "medium"):
-                                was.append(analysis["weighted_average"])
+                                # Prefer raw (pre-normalization) score to avoid double-normalization
+                                wa = analysis.get("raw_weighted_average") or analysis["weighted_average"]
+                                was.append(wa)
                 except (json.JSONDecodeError, KeyError):
                     continue
 
@@ -88,7 +90,8 @@ for fp in files:
                     if isinstance(v, dict) and "weighted_average" in v:
                         tier = v.get("tier", "low")
                         if all_tiers or tier in ("high", "medium"):
-                            was.append(v["weighted_average"])
+                            wa = v.get("raw_weighted_average") or v["weighted_average"]
+                            was.append(wa)
             except:
                 pass
 for w in was:
