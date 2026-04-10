@@ -184,7 +184,7 @@ def main():
     )
     parser.add_argument(
         "--data-dir", type=Path, default=None,
-        help="Local directory with high/ and medium/ subdirs of filtered JSONL files",
+        help="Local directory containing flat filtered_*.jsonl files",
     )
     parser.add_argument(
         "--ssh", type=str, default=None,

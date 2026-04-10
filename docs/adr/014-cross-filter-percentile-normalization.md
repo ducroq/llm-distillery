@@ -57,7 +57,7 @@ For each filter, extract weighted average scores from the existing MEDIUM+ produ
 **Why production MEDIUM+ data:**
 - **Not val sets:** Training val sets are enriched via screen+merge (ADR-003) and active learning (ADR-005). Nature_recovery's val set has ~10% high-scoring articles, but production has 0.3%. Val set CDFs are not representative of production (tested and confirmed — see Alternatives).
 - **Not all articles:** LOW-scoring articles (below 4.0) are never shown to ovr.news users. Normalizing among "articles worth showing" is the correct reference population for HOME tab ranking and tab assignment.
-- **No inference cost:** The production data already exists on sadalsuud — 114K uplifting, 15K sustainability_tech, 8K cultural_discovery, 4.8K belonging, 493 nature_recovery articles.
+- **No inference cost:** The production data already exists on sadalsuud — 114K uplifting, 15K sustainability_tech, 8K cultural_discovery, 4.8K belonging, 48 nature_recovery articles (refitted 2026-04-10 from genuine MEDIUM+ data).
 
 ### 2. Normalize at inference time
 
@@ -119,7 +119,7 @@ No other filters' normalization files need to change. For a brand new filter wit
 - Adds a postprocessing step to the NexusMind inference pipeline
 - Raw weighted averages are no longer the scores ovr.news displays
 - Production distribution drift may require periodic refitting (refit when pass rate changes >20% relative, or at filter retrain)
-- Nature_recovery CDF is based on only 493 articles — thin but sufficient for a monotonic lookup
+- Nature_recovery CDF is based on only 48 articles (refitted 2026-04-10) — thin but sufficient for a monotonic lookup; will improve as corrected pipeline accumulates more MEDIUM+ articles with `raw_weighted_average`
 
 ## Implementation
 
