@@ -1,8 +1,9 @@
 """
-Fit cross-filter percentile normalization from production MEDIUM+ data (ADR-014).
+Fit cross-filter percentile normalization from production data (ADR-014).
 
-Reads weighted average scores from NexusMind filtered output on sadalsuud,
-fits a percentile CDF, and saves normalization.json to the filter directory.
+Reads raw_weighted_average scores from NexusMind filtered output, filters
+by score threshold (default >= 4.0, the MEDIUM threshold), fits a percentile
+CDF, and saves normalization.json to the filter directory.
 
 Usage:
     # From local JSONL files (e.g., after scp from sadalsuud)
@@ -35,19 +36,15 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def load_weighted_averages_local(data_dir: Path, filter_name: str, all_tiers: bool = False) -> list:
+def load_weighted_averages_local(data_dir: Path, filter_name: str, min_score: float = 4.0) -> list:
     """Load weighted averages from local filtered JSONL files."""
     was = []
     n_raw = 0
     n_fallback = 0
+    n_below_threshold = 0
 
-    # Read flat JSONL files at root (NexusMind#144: flat output, no tier subdirs)
+    # Read flat JSONL files (NexusMind#144: flat output, no tier subdirs)
     jsonl_files = sorted(data_dir.glob("filtered_*.jsonl"))
-    # Also check legacy tier subdirectories
-    for tier_dir in ["high", "medium"] + (["low"] if all_tiers else []):
-        tier_path = data_dir / tier_dir
-        if tier_path.is_dir():
-            jsonl_files.extend(sorted(tier_path.glob("filtered_*.jsonl")))
 
     for jsonl_file in jsonl_files:
         with open(jsonl_file, "r", encoding="utf-8") as f:
@@ -57,19 +54,22 @@ def load_weighted_averages_local(data_dir: Path, filter_name: str, all_tiers: bo
                     attrs = article.get("nexus_mind_attributes", {})
                     for key, analysis in attrs.items():
                         if isinstance(analysis, dict) and "weighted_average" in analysis:
-                            tier = analysis.get("tier", "low")
-                            if all_tiers or tier in ("high", "medium"):
-                                # Prefer raw (pre-normalization) score to avoid double-normalization
-                                raw = analysis.get("raw_weighted_average")
-                                wa = raw if raw is not None else analysis["weighted_average"]
-                                if raw is not None:
-                                    n_raw += 1
-                                else:
-                                    n_fallback += 1
-                                was.append(wa)
+                            # Use raw_weighted_average to avoid double-normalization
+                            raw = analysis.get("raw_weighted_average")
+                            wa = raw if raw is not None else analysis["weighted_average"]
+                            if wa < min_score:
+                                n_below_threshold += 1
+                                continue
+                            if raw is not None:
+                                n_raw += 1
+                            else:
+                                n_fallback += 1
+                            was.append(wa)
                 except (json.JSONDecodeError, KeyError):
                     continue
 
+    if n_below_threshold > 0:
+        logger.info(f"Excluded {n_below_threshold} articles below min_score={min_score}")
     if n_fallback > 0 and n_raw > 0:
         logger.warning(
             f"Mixed fields: {n_raw} articles used raw_weighted_average, "
@@ -87,22 +87,18 @@ def load_weighted_averages_local(data_dir: Path, filter_name: str, all_tiers: bo
     return was
 
 
-def load_weighted_averages_ssh(ssh_host: str, remote_dir: str, all_tiers: bool = False) -> list:
+def load_weighted_averages_ssh(ssh_host: str, remote_dir: str, min_score: float = 4.0) -> list:
     """Load weighted averages from a remote host via SSH."""
     # Write extraction script to temp file, scp to remote, execute, retrieve results
     script_content = """import json, glob, os, sys
 remote_dir = sys.argv[1]
-all_tiers = sys.argv[2] == "1" if len(sys.argv) > 2 else False
+min_score = float(sys.argv[2]) if len(sys.argv) > 2 else 4.0
 was = []
 n_raw = 0
 n_fallback = 0
-# Read flat JSONL files at root (NexusMind#144: flat output, no tier subdirs)
+n_below = 0
+# Read flat JSONL files (NexusMind#144: flat output, no tier subdirs)
 files = sorted(glob.glob(os.path.join(remote_dir, "filtered_*.jsonl")))
-# Also check legacy tier subdirectories
-for tier in ["high", "medium"] + (["low"] if all_tiers else []):
-    tier_dir = os.path.join(remote_dir, tier)
-    if os.path.isdir(tier_dir):
-        files.extend(sorted(glob.glob(os.path.join(tier_dir, "filtered_*.jsonl"))))
 for fp in files:
     with open(fp) as f:
         for line in f:
@@ -111,20 +107,21 @@ for fp in files:
                 attrs = d.get("nexus_mind_attributes", {})
                 for k, v in attrs.items():
                     if isinstance(v, dict) and "weighted_average" in v:
-                        tier = v.get("tier", "low")
-                        if all_tiers or tier in ("high", "medium"):
-                            raw = v.get("raw_weighted_average")
-                            wa = raw if raw is not None else v["weighted_average"]
-                            if raw is not None:
-                                n_raw += 1
-                            else:
-                                n_fallback += 1
-                            was.append(wa)
+                        raw = v.get("raw_weighted_average")
+                        wa = raw if raw is not None else v["weighted_average"]
+                        if wa < min_score:
+                            n_below += 1
+                            continue
+                        if raw is not None:
+                            n_raw += 1
+                        else:
+                            n_fallback += 1
+                        was.append(wa)
             except Exception:
                 pass
 for w in was:
     print(w)
-print("META:raw=%d,fallback=%d" % (n_raw, n_fallback), file=sys.stderr)
+print("META:raw=%d,fallback=%d,below=%d" % (n_raw, n_fallback, n_below), file=sys.stderr)
 """
     with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write(script_content)
@@ -134,9 +131,8 @@ print("META:raw=%d,fallback=%d" % (n_raw, n_fallback), file=sys.stderr)
     try:
         subprocess.run(["scp", local_script, f"{ssh_host}:{remote_script}"],
                        capture_output=True, timeout=30, check=True)
-        all_tiers_flag = "1" if all_tiers else "0"
         result = subprocess.run(
-            ["ssh", ssh_host, "python3", remote_script, remote_dir, all_tiers_flag],
+            ["ssh", ssh_host, "python3", remote_script, remote_dir, str(min_score)],
             capture_output=True, text=True, timeout=300,
         )
         if result.returncode != 0:
@@ -154,10 +150,13 @@ print("META:raw=%d,fallback=%d" % (n_raw, n_fallback), file=sys.stderr)
 
     # Parse field-usage metadata from remote script stderr
     import re
-    meta_match = re.search(r"META:raw=(\d+),fallback=(\d+)", result.stderr or "")
+    meta_match = re.search(r"META:raw=(\d+),fallback=(\d+),below=(\d+)", result.stderr or "")
     if meta_match:
         n_raw = int(meta_match.group(1))
         n_fallback = int(meta_match.group(2))
+        n_below = int(meta_match.group(3))
+        if n_below > 0:
+            logger.info(f"Excluded {n_below} articles below min_score={min_score}")
         if n_fallback > 0 and n_raw > 0:
             logger.warning(
                 f"Mixed fields: {n_raw} articles used raw_weighted_average, "
@@ -200,9 +199,9 @@ def main():
         help="Number of breakpoints in the lookup table (default: 200)",
     )
     parser.add_argument(
-        "--all-tiers", action="store_true",
-        help="Include all scored articles (not just MEDIUM+). "
-             "Reads root-level filtered_*.jsonl instead of high/medium subdirs.",
+        "--min-score", type=float, default=4.0,
+        help="Minimum raw_weighted_average to include (default: 4.0, the MEDIUM threshold). "
+             "Use 0.0 to include all scored articles.",
     )
     args = parser.parse_args()
 
@@ -235,15 +234,15 @@ def main():
     logger.info(f"Filter: {filter_name} v{filter_version}")
 
     # Load production weighted averages
-    tier_label = "ALL tiers" if args.all_tiers else "MEDIUM+"
+    score_label = f"raw_weighted_average >= {args.min_score}"
     if args.ssh:
-        logger.info(f"Loading production data ({tier_label}) from {args.ssh}:{args.remote_dir}")
-        source_desc = f"production {tier_label} from {args.ssh}:{args.remote_dir}"
-        was = load_weighted_averages_ssh(args.ssh, args.remote_dir, all_tiers=args.all_tiers)
+        logger.info(f"Loading production data ({score_label}) from {args.ssh}:{args.remote_dir}")
+        source_desc = f"production {score_label} from {args.ssh}:{args.remote_dir}"
+        was = load_weighted_averages_ssh(args.ssh, args.remote_dir, min_score=args.min_score)
     else:
-        logger.info(f"Loading production data ({tier_label}) from {args.data_dir}")
-        source_desc = f"production {tier_label} from {args.data_dir}"
-        was = load_weighted_averages_local(args.data_dir, filter_name, all_tiers=args.all_tiers)
+        logger.info(f"Loading production data ({score_label}) from {args.data_dir}")
+        source_desc = f"production {score_label} from {args.data_dir}"
+        was = load_weighted_averages_local(args.data_dir, filter_name, min_score=args.min_score)
 
     if len(was) < 10:
         logger.error(f"Only {len(was)} weighted averages found — need at least 10")
