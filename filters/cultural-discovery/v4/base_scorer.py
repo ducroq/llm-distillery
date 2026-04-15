@@ -43,7 +43,7 @@ class BaseCulturalDiscoveryScorer(FilterBaseScorer):
 
     GATEKEEPER_DIMENSION = "evidence_quality"
     GATEKEEPER_MIN = 3.0
-    GATEKEEPER_CAP = 3.0  # 3.0 × 1.14 = 3.42, below medium tier (4.0)
+    GATEKEEPER_CAP = 4.0  # Raised from 3.0 — evidence_quality MAE 1.31 caused excessive false gating (#23)
 
     def _load_prefilter(self):
         import importlib.util

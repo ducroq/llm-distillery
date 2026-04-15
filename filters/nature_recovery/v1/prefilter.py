@@ -9,7 +9,7 @@ class NatureRecoveryPreFilterV1(BasePreFilter):
     VERSION = "1.0"
 
     def __init__(self):
-        super().__init__(use_commerce_prefilter=False)
+        super().__init__()
         self.filter_name = "nature_recovery"
         self.version = "1.0"
 

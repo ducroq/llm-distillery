@@ -6,20 +6,18 @@ Provides common functionality for all semantic prefilters:
 - Article structure validation
 - Standard interface for apply_filter()
 - Shared utilities for pattern matching
-- Optional ML-based commerce content detection
+
+Commerce detection is handled globally by NexusMind's CommercePreprocessor
+before articles reach per-filter prefilters. See deployment-boundary memory.
 
 All filter prefilters should inherit from this base class.
 """
 
 import logging
 import re
-import threading
-from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import Dict, List, Optional, Tuple
 
 from filters.common.text_cleaning import sanitize_text_comprehensive, clean_article as clean_article_comprehensive
-
-if TYPE_CHECKING:
-    from filters.common.commerce_prefilter.v1.inference import CommercePrefilterSLM
 
 logger = logging.getLogger(__name__)
 
@@ -30,94 +28,11 @@ class BasePreFilter:
 
     Provides automatic Unicode sanitization and standard interface.
     Subclasses should implement apply_filter() method.
-
-    Optional commerce prefilter:
-        Set use_commerce_prefilter=True to enable ML-based commerce detection.
-        The commerce detector is loaded lazily and shared across all instances (singleton).
     """
 
     VERSION = "0.0"  # Override in subclass
     MIN_CONTENT_LENGTH = 300  # Minimum content length to prevent framework leakage
     MAX_PREFILTER_CONTENT = 2000  # Content chars to analyze in prefilter (for efficiency)
-
-    # Singleton commerce detector (shared across all instances)
-    _commerce_detector: Optional["CommercePrefilterSLM"] = None
-    _commerce_detector_lock = threading.Lock()
-
-    def __init__(
-        self,
-        use_commerce_prefilter: bool = False,
-        commerce_threshold: float = 0.7,
-    ):
-        """
-        Initialize the prefilter.
-
-        Args:
-            use_commerce_prefilter: Enable ML-based commerce content detection.
-                When enabled, articles identified as commerce/promotional content
-                will be blocked before domain-specific filtering.
-            commerce_threshold: Threshold for commerce classification (0-1).
-                Higher values are more strict (fewer false positives).
-        """
-        self.use_commerce_prefilter = use_commerce_prefilter
-        self.commerce_threshold = commerce_threshold
-
-        # Lazy load commerce detector if enabled
-        if use_commerce_prefilter:
-            self._ensure_commerce_detector_loaded()
-
-    @classmethod
-    def _ensure_commerce_detector_loaded(cls):
-        """
-        Lazy load the commerce detector singleton.
-
-        Thread-safe loading using double-checked locking pattern.
-        """
-        if cls._commerce_detector is not None:
-            return
-
-        with cls._commerce_detector_lock:
-            # Double-check after acquiring lock
-            if cls._commerce_detector is not None:
-                return
-
-            try:
-                from filters.common.commerce_prefilter.v1.inference import CommercePrefilterSLM
-                logger.info("Loading commerce prefilter SLM...")
-                cls._commerce_detector = CommercePrefilterSLM()
-                logger.info("Commerce prefilter loaded successfully")
-            except FileNotFoundError:
-                logger.warning(
-                    "Commerce prefilter model not found. "
-                    "Train it first with: python -m filters.common.commerce_prefilter.training.train"
-                )
-                cls._commerce_detector = None
-            except Exception as e:
-                logger.error(f"Failed to load commerce prefilter: {e}")
-                cls._commerce_detector = None
-
-    def check_commerce(self, article: Dict) -> Tuple[bool, str, Optional[float]]:
-        """
-        Check if article is commerce/promotional content.
-
-        Args:
-            article: Dict with 'title' and 'content'/'text' keys
-
-        Returns:
-            (is_commerce, reason, score)
-            - (True, "commerce_content_0.87", 0.87): Detected as commerce
-            - (False, "", None): Not commerce or detector not available
-        """
-        if not self.use_commerce_prefilter or self._commerce_detector is None:
-            return (False, "", None)
-
-        result = self._commerce_detector.is_commerce(article)
-        score = result["score"]
-
-        if result["is_commerce"]:
-            return (True, f"commerce_content_{score:.2f}", score)
-
-        return (False, "", score)
 
     @staticmethod
     def validate_article(article) -> Tuple[bool, str]:

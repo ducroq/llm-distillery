@@ -87,7 +87,7 @@ scoring:
       description: "How well-researched and documented is the content?"
       gatekeeper: true
       gatekeeper_threshold: 3
-      gatekeeper_max_score: 3.0
+      gatekeeper_max_score: 4.0  # Raised from 3.0 — evidence_quality MAE 1.31 caused excessive false gating (#23)
 
   tiers:
     high:
