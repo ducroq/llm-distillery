@@ -53,6 +53,8 @@ class FilterDataset(Dataset):
         use_head_tail: bool = False,
         head_tokens: int = 256,
         tail_tokens: int = 256,
+        sample_weight_scale: float = 0.0,
+        dimension_weights: List[float] = None,
     ):
         """
         Args:
@@ -63,6 +65,11 @@ class FilterDataset(Dataset):
             use_head_tail: Whether to apply head+tail extraction
             head_tokens: Number of tokens to keep from beginning
             tail_tokens: Number of tokens to keep from end
+            sample_weight_scale: Scale for score-based sample weighting (0 = disabled).
+                Weight per sample = 1.0 + WA * scale, where WA is the weighted average
+                of oracle labels. Higher-scoring articles get more influence on the loss.
+            dimension_weights: Weights per dimension for WA computation (from config).
+                Required when sample_weight_scale > 0. If None, uses equal weights.
         """
         self.tokenizer = tokenizer
         self.max_length = max_length
@@ -70,6 +77,7 @@ class FilterDataset(Dataset):
         self.use_head_tail = use_head_tail
         self.head_tokens = head_tokens
         self.tail_tokens = tail_tokens
+        self.sample_weight_scale = sample_weight_scale
         self.examples = []
 
         # Load examples
@@ -84,6 +92,20 @@ class FilterDataset(Dataset):
             self.dimension_names = self.examples[0]["dimension_names"]
         else:
             raise ValueError(f"No examples found in {data_path}")
+
+        # Compute per-sample weights if score-based weighting is enabled
+        self.sample_weights = None
+        if sample_weight_scale > 0:
+            if dimension_weights is None:
+                dimension_weights = [1.0 / self.num_dimensions] * self.num_dimensions
+            self.sample_weights = []
+            for ex in self.examples:
+                wa = sum(l * w for l, w in zip(ex["labels"], dimension_weights))
+                self.sample_weights.append(1.0 + wa * sample_weight_scale)
+            # Log weight distribution
+            weights = self.sample_weights
+            print(f"  Sample weights: min={min(weights):.2f} max={max(weights):.2f} "
+                  f"mean={sum(weights)/len(weights):.2f}")
 
     def __len__(self) -> int:
         return len(self.examples)
@@ -122,11 +144,16 @@ class FilterDataset(Dataset):
         # Convert labels to tensor
         labels = torch.tensor(example["labels"], dtype=torch.float32)
 
-        return {
+        item = {
             "input_ids": encoding["input_ids"].squeeze(0),
             "attention_mask": encoding["attention_mask"].squeeze(0),
             "labels": labels,
         }
+
+        if self.sample_weights is not None:
+            item["weight"] = torch.tensor(self.sample_weights[idx], dtype=torch.float32)
+
+        return item
 
 
 class FilterModel(torch.nn.Module):
@@ -253,6 +280,7 @@ def train_epoch(
     scheduler,
     device,
     dimension_names: List[str],
+    use_sample_weights: bool = False,
 ):
     """Train for one epoch."""
     model.train()
@@ -261,6 +289,8 @@ def train_epoch(
     all_predictions = []
     all_labels = []
 
+    use_weighted_loss = use_sample_weights
+
     progress = tqdm(dataloader, desc="Training")
     for batch in progress:
         # Move to device
@@ -268,15 +298,22 @@ def train_epoch(
         attention_mask = batch["attention_mask"].to(device)
         labels = batch["labels"].to(device)
 
-        # Forward pass
-        outputs = model(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            labels=labels,
-        )
-
-        loss = outputs.loss
-        predictions = outputs.logits
+        if use_weighted_loss:
+            # Compute weighted MSE externally — don't pass labels to model
+            weights = batch["weight"].to(device)
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+            predictions = outputs.logits
+            per_sample_mse = torch.mean((predictions - labels) ** 2, dim=1)
+            loss = torch.mean(per_sample_mse * weights)
+        else:
+            # Use model's internal MSE loss (default, backwards compatible)
+            outputs = model(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                labels=labels,
+            )
+            loss = outputs.loss
+            predictions = outputs.logits
 
         # Check for NaN
         if torch.isnan(loss):
@@ -441,6 +478,14 @@ def main():
         default=256,
         help="Number of tokens to keep from end (default: 256)",
     )
+    parser.add_argument(
+        "--sample-weight-scale",
+        type=float,
+        default=0.0,
+        help="Scale for score-based sample weighting (default: 0 = disabled). "
+             "Weight = 1 + WA * scale. Use 2-3 for needle-in-haystack filters "
+             "with extreme class imbalance (e.g. nature_recovery).",
+    )
 
     args = parser.parse_args()
 
@@ -509,6 +554,15 @@ def main():
     if args.use_head_tail:
         print(f"Head+tail extraction enabled: {args.head_tokens} + {args.tail_tokens} tokens")
 
+    # Extract dimension weights from config for sample weighting
+    dimension_weights_list = None
+    if args.sample_weight_scale > 0:
+        print(f"Sample weighting enabled: scale={args.sample_weight_scale}")
+        dimension_weights_list = [
+            config["scoring"]["dimensions"][dim].get("weight", 1.0 / len(dimension_names))
+            for dim in dimension_names
+        ]
+
     train_dataset = FilterDataset(
         args.data_dir / "train.jsonl",
         tokenizer,
@@ -517,6 +571,8 @@ def main():
         use_head_tail=args.use_head_tail,
         head_tokens=args.head_tokens,
         tail_tokens=args.tail_tokens,
+        sample_weight_scale=args.sample_weight_scale,
+        dimension_weights=dimension_weights_list,
     )
     val_dataset = FilterDataset(
         args.data_dir / "val.jsonl",
@@ -666,6 +722,7 @@ def main():
             scheduler,
             device,
             dimension_names,
+            use_sample_weights=args.sample_weight_scale > 0,
         )
 
         print(f"\nTraining metrics:")
@@ -735,6 +792,7 @@ def main():
         "use_head_tail": args.use_head_tail,
         "head_tokens": args.head_tokens if args.use_head_tail else None,
         "tail_tokens": args.tail_tokens if args.use_head_tail else None,
+        "sample_weight_scale": args.sample_weight_scale,
     }
 
     metadata_path = args.output_dir / "training_metadata.json"
