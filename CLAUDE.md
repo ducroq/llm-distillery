@@ -36,13 +36,14 @@
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
 | **belonging** | v1 | 0.49 | 7.4K articles | Deployed (HF Hub, private) |
 | **nature_recovery** | v2 | 0.53 | 3.5K articles | Deployed (HF Hub, private) — v1 had no discrimination (#41), v2 uses sample weighting |
-| **foresight** | v1 | 0.75 | 3.5K articles | Deployed (HF Hub, private) |
+| **foresight** | v1 | 0.75 | 3.5K articles | PARKED — captures governance solutions, not foresight; merging into broadened Solutions lens (#43) |
 
 ### In Development (priority: ovr.news tabs)
 
 | Filter | Version | Status | Target |
 |--------|---------|--------|--------|
 | **thriving** | v1 | PARKED indefinitely — orthogonal lens design caused bimodal distribution (ADR-015); uplifting v7 stays as Thriving tab |  |
+| **sustainability_technology → solutions** | v4 | Design phase — broaden from clean-tech to include governance/community solutions (#43) | ovr.news Solutions tab |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring; rename to augmented-engineering at next bump | Separate product (not ovr.news) |
 
 ## Key Decisions
