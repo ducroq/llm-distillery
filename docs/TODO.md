@@ -51,10 +51,12 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 
 ### In Active Development (priority: ovr.news tabs)
 - [x] **belonging v1** - Deployed, val MAE 0.49 (calibrated), 7,370 articles. Next: ovr.news tab
-- [x] **nature_recovery v1** - Deployed to Hub + gpu-server
-  - Val MAE 0.54 (calibrated 0.507), probe MAE 0.50, 3,280 articles
-  - Hub: `jeergrvgreg/nature-recovery-filter-v1` (private)
-  - Remaining: ovr.news Recovery tab frontend integration
+- [x] **nature_recovery v2** - Deployed to Hub + gpu-server + sadalsuud (2026-04-16)
+  - Val MAE 0.53 (calibrated), probe MAE 0.49, 3,517 articles
+  - v1 had zero discrimination (#41); v2 uses sample weighting (scale=2)
+  - Recall@20: 0.70 (v1: 0.55), NDCG@10: 0.86 (v1: 0.71), false negatives: 17% (v1: 41%)
+  - Hub: `jeergrvgreg/nature-recovery-filter-v2` (private)
+  - Remaining: normalization (needs production CDF), ovr.news Recovery tab frontend
 - [x] **uplifting v7** - ADR-010 prompt rewrite, deployed with hybrid inference (2026-04-06)
   - v7 prompt: scope check, anti-hallucination, reframed assessment dimensions
   - Hybrid inference: probe MAE 1.10, threshold 1.00, 0.5% FN, 1.07x speedup
@@ -73,10 +75,9 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - Oracle scored 473 production MEDIUM+ articles with Gemini Flash
   - Smooth distribution (bell curve centered at WA 4.8), no bimodality
   - Next: train on gpu-server, calibrate, retrain probe, deploy
-- [ ] **nature_recovery v2** - Training data ready (3,517 articles = v1 3,280 + 237 enrichment)
-  - Oracle scored 237 production MEDIUM+ articles with Gemini Flash
-  - Bimodal distribution (student over-scored noise) — valuable corrective signal
-  - Next: train on gpu-server, calibrate, retrain probe, deploy
+- [x] **nature_recovery v2** - Trained, calibrated, deployed (2026-04-16)
+  - Sample weighting (scale=2) + active learning enrichment (237 articles)
+  - Remaining: normalization (needs production CDF), hybrid threshold recalibration
 
 ### Other Filters
 - [ ] ~~**future-of-education**~~ - DROPPED: education stories land naturally in Breakthroughs (research)
@@ -113,6 +114,7 @@ Post-hoc isotonic regression to correct MSE score compression at inference time.
 - [x] **investment-risk v6 calibration** - Fitted on 1,045 val articles, val MAE 0.497 -> 0.465 (+6.5%)
 - [x] **belonging v1 calibration** - Fitted on 738 val articles, val MAE 0.534 -> 0.489 (+8.3%)
 - [x] **nature_recovery v1 calibration** - Fitted on 328 val articles, val MAE 0.540 -> 0.507 (+6.2%)
+- [x] **nature_recovery v2 calibration** - Fitted on 352 val articles, val MAE 0.632 -> 0.533 (+15.7%)
 
 ## Hybrid Inference Pipeline (ADR-006)
 
@@ -134,6 +136,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **Investment-risk v6 probe** - Trained for Gemma-3-1B, MAE 0.557, threshold 1.50
 - [x] **Belonging v1 probe** - Trained for Gemma-3-1B, MAE 0.54
 - [x] **Nature_recovery v1 probe** - Trained for Gemma-3-1B, MAE 0.50
+- [x] **Nature_recovery v2 probe** - Retrained for v2 model, MAE 0.49 (early stop epoch 24)
 - [x] **Foresight v1 probe** - Trained for Gemma-3-1B, threshold 2.25
 - [x] **Foresight v1 calibration** - Fitted, calibration.json committed with filter package
 - [x] **Uplifting v7 probe** - Trained for Gemma-3-1B, MAE 1.10, threshold 1.00 (#34)
@@ -187,6 +190,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **uplifting v7 normalization** - Fitted on 73,986 production articles (2026-04-06)
 - [x] **foresight v1 normalization** - Fitted on 623 articles (thin LUT, improves as data accumulates)
 - [x] **nature_recovery v1 normalization** - Refitted on 76,500 articles (still clamped — extreme needle filter, #32)
+- [ ] **nature_recovery v2 normalization** - Pending: needs production CDF after NexusMind switches to v2
 
 ## Documentation
 

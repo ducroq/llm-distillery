@@ -35,7 +35,7 @@
 | **investment-risk** | v6 | 0.47 | 10.4K articles | Deployed (HF Hub, private) |
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
 | **belonging** | v1 | 0.49 | 7.4K articles | Deployed (HF Hub, private) |
-| **nature_recovery** | v1 | 0.54 | 3.3K articles | Deployed (HF Hub, private) |
+| **nature_recovery** | v2 | 0.53 | 3.5K articles | Deployed (HF Hub, private) — v1 had no discrimination (#41), v2 uses sample weighting |
 | **foresight** | v1 | 0.75 | 3.5K articles | Deployed (HF Hub, private) |
 
 ### In Development (priority: ovr.news tabs)

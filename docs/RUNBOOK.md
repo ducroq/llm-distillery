@@ -19,9 +19,13 @@ The upload script automatically verifies Hub loading after upload. If verificati
 
 ### 2. Copy to gpu-server
 
+**IMPORTANT:** Always scp to the **parent** directory, not the target directory itself.
+`scp -r source/dir/ dest/dir/` creates `dest/dir/dir/` if `dest/dir/` already exists.
+`scp -r source/dir/ dest/` creates `dest/dir/` correctly.
+
 ```bash
-scp -r filters/common/ gpu-server:~/NexusMind/filters/common/
-scp -r filters/{name}/v{N}/ gpu-server:~/NexusMind/filters/{name}/v{N}/
+scp -r filters/common/ gpu-server:~/NexusMind/filters/
+scp -r filters/{name}/v{N}/ gpu-server:~/NexusMind/filters/{name}/
 ssh gpu-server "sudo systemctl restart nexusmind-scorer"
 ```
 
@@ -30,8 +34,8 @@ Use `scp`, not `rsync` (rsync has dup() errors on gpu-server).
 ### 3. Copy to sadalsuud
 
 ```bash
-scp -r filters/common/ sadalsuud:~/local_dev/NexusMind/filters/common/
-scp -r filters/{name}/v{N}/ sadalsuud:~/local_dev/NexusMind/filters/{name}/v{N}/
+scp -r filters/common/ sadalsuud:~/local_dev/NexusMind/filters/
+scp -r filters/{name}/v{N}/ sadalsuud:~/local_dev/NexusMind/filters/{name}/
 ```
 
 sadalsuud uses Hub inference — do not include `model/` directories in the SCP payload. venv at `~/local_dev/NexusMind/venv/`.

@@ -1,0 +1,113 @@
+[
+  {
+    "epoch": 1,
+    "train": {
+      "mae": 1.426428198814392,
+      "rmse": 2.086134910583496,
+      "recovery_evidence_mae": 1.6595609188079834,
+      "recovery_evidence_rmse": 2.403942346572876,
+      "measurable_outcomes_mae": 1.2947832345962524,
+      "measurable_outcomes_rmse": 1.8812425136566162,
+      "ecological_significance_mae": 1.4176803827285767,
+      "ecological_significance_rmse": 2.1006956100463867,
+      "restoration_scale_mae": 1.2557872533798218,
+      "restoration_scale_rmse": 1.7700715065002441,
+      "human_agency_mae": 1.5947062969207764,
+      "human_agency_rmse": 2.4014906883239746,
+      "protection_durability_mae": 1.3360512256622314,
+      "protection_durability_rmse": 1.8656119108200073,
+      "loss": 33.030995143746786
+    },
+    "val": {
+      "mae": 0.9701088666915894,
+      "rmse": 1.4784619808197021,
+      "recovery_evidence_mae": 0.9960585236549377,
+      "recovery_evidence_rmse": 1.598850965499878,
+      "measurable_outcomes_mae": 0.9862200021743774,
+      "measurable_outcomes_rmse": 1.4966230392456055,
+      "ecological_significance_mae": 0.9546711444854736,
+      "ecological_significance_rmse": 1.4687527418136597,
+      "restoration_scale_mae": 0.7730115652084351,
+      "restoration_scale_rmse": 1.1465855836868286,
+      "human_agency_mae": 1.0881685018539429,
+      "human_agency_rmse": 1.6376386880874634,
+      "protection_durability_mae": 1.0225234031677246,
+      "protection_durability_rmse": 1.4714410305023193,
+      "loss": 2.1858495236797766
+    }
+  },
+  {
+    "epoch": 2,
+    "train": {
+      "mae": 0.8958449959754944,
+      "rmse": 1.3075768947601318,
+      "recovery_evidence_mae": 0.8808498382568359,
+      "recovery_evidence_rmse": 1.3196287155151367,
+      "measurable_outcomes_mae": 0.9115745425224304,
+      "measurable_outcomes_rmse": 1.3008939027786255,
+      "ecological_significance_mae": 0.8817005157470703,
+      "ecological_significance_rmse": 1.3271572589874268,
+      "restoration_scale_mae": 0.7801862359046936,
+      "restoration_scale_rmse": 1.1112563610076904,
+      "human_agency_mae": 1.038061499595642,
+      "human_agency_rmse": 1.4986944198608398,
+      "protection_durability_mae": 0.8826970458030701,
+      "protection_durability_rmse": 1.2579658031463623,
+      "loss": 11.752827587537467
+    },
+    "val": {
+      "mae": 1.0591191053390503,
+      "rmse": 1.3062366247177124,
+      "recovery_evidence_mae": 1.116910696029663,
+      "recovery_evidence_rmse": 1.3473237752914429,
+      "measurable_outcomes_mae": 0.9381809234619141,
+      "measurable_outcomes_rmse": 1.2544755935668945,
+      "ecological_significance_mae": 1.1572456359863281,
+      "ecological_significance_rmse": 1.3616291284561157,
+      "restoration_scale_mae": 0.8874178528785706,
+      "restoration_scale_rmse": 1.0624442100524902,
+      "human_agency_mae": 1.134841799736023,
+      "human_agency_rmse": 1.4514429569244385,
+      "protection_durability_mae": 1.1201179027557373,
+      "protection_durability_rmse": 1.3262828588485718,
+      "loss": 1.7062541490251368
+    }
+  },
+  {
+    "epoch": 3,
+    "train": {
+      "mae": 0.6550171375274658,
+      "rmse": 0.9694706201553345,
+      "recovery_evidence_mae": 0.6484630107879639,
+      "recovery_evidence_rmse": 0.9887582063674927,
+      "measurable_outcomes_mae": 0.6946350336074829,
+      "measurable_outcomes_rmse": 1.0009938478469849,
+      "ecological_significance_mae": 0.6358126401901245,
+      "ecological_significance_rmse": 0.9602958559989929,
+      "restoration_scale_mae": 0.5701643228530884,
+      "restoration_scale_rmse": 0.8236151933670044,
+      "human_agency_mae": 0.7400051951408386,
+      "human_agency_rmse": 1.0991212129592896,
+      "protection_durability_mae": 0.6410226225852966,
+      "protection_durability_rmse": 0.9225131273269653,
+      "loss": 6.342717501588843
+    },
+    "val": {
+      "mae": 0.6324291825294495,
+      "rmse": 0.9829030632972717,
+      "recovery_evidence_mae": 0.6559502482414246,
+      "recovery_evidence_rmse": 1.0266478061676025,
+      "measurable_outcomes_mae": 0.6685123443603516,
+      "measurable_outcomes_rmse": 1.003017544746399,
+      "ecological_significance_mae": 0.6034284234046936,
+      "ecological_significance_rmse": 0.9806704521179199,
+      "restoration_scale_mae": 0.5187615752220154,
+      "restoration_scale_rmse": 0.7690894603729248,
+      "human_agency_mae": 0.7341328263282776,
+      "human_agency_rmse": 1.1274470090866089,
+      "protection_durability_mae": 0.6137897372245789,
+      "protection_durability_rmse": 0.9550867676734924,
+      "loss": 0.9660984123633667
+    }
+  }
+]

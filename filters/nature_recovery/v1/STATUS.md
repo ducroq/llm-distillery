@@ -148,6 +148,46 @@ sustainability_technology scores *technologies* via LCSA (readiness, cost, lifec
 
 ---
 
+## v2 Retraining (2026-04-15)
+
+**Problem:** v1 model had zero discrimination in production — raw scores maxed at 6.52, 98.6% of 34,977 articles scored below 1.0 (#41). The recovery lens on ovr.news was effectively empty.
+
+**Root cause:** Extreme class imbalance in training data. 95% of articles had WA 0-1 (noise). Standard MSE training learned to predict near-zero for everything — the MSE-optimal strategy when nearly all targets are zero. See `memory/sample-weighting-needle-filters.md` for full analysis.
+
+**Fix:** Two changes combined:
+1. **Active learning enrichment** — 237 production MEDIUM+ articles added (v1 3,280 → v2 3,517 total, WA>2 from 4.8% to 8.5%)
+2. **Score-based sample weighting** — `--sample-weight-scale 2` (weight = 1 + WA × 2). Positive articles went from 5% to ~41% of total loss contribution.
+
+**Training:** Gemma-3-1B + LoRA, 3 epochs on gpu-server, best model at epoch 3.
+
+### v1 vs v2 comparison
+
+Overall MAE favors v1 (0.448 vs 0.534) but is misleading — v1 scored low MAE by predicting near-zero for everything. Ranking metrics show the real improvement:
+
+| Metric | v1 | v2 | Improvement |
+|--------|-----|-----|-------------|
+| Overall MAE | 0.448 | 0.534 | worse (misleading) |
+| MEDIUM+ MAE | 2.490 | 1.874 | **+25%** |
+| Recall@10 | 0.50 | 0.60 | **+20%** |
+| Recall@20 | 0.55 | 0.70 | **+27%** |
+| Recall@50 | 0.64 | 0.76 | **+19%** |
+| NDCG@10 | 0.712 | 0.861 | **+21%** |
+| NDCG@20 | 0.755 | 0.851 | **+13%** |
+| False negatives (oracle>=2, student<2) | 41% | 17% | **-24pp** |
+| Score range | [0, 5.08] | [0.01, 6.25] | wider |
+
+**Key takeaway:** For needle-in-haystack filters, MAE is the wrong metric. Recall@k and NDCG measure what actually matters — does the lens show the right articles? v2 finds 70% of the top-20 articles (v1: 55%) and misses only 17% of positives (v1: 41%).
+
+### Remaining steps for v2 deployment
+- [ ] Fit calibration (isotonic regression on val set)
+- [ ] Retrain e5-small embedding probe
+- [ ] Fit normalization (production CDF)
+- [ ] Upload to HuggingFace Hub
+- [ ] Deploy to sadalsuud + gpu-server
+- [ ] Update config.yaml version to 2.0
+
+---
+
 ## Key Files
 
 | File | Purpose |
