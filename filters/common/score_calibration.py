@@ -143,6 +143,7 @@ def apply_calibration(
         val = float(raw_scores[i])
         if not np.isfinite(val):
             logger.warning(f"Non-finite raw score for dimension '{dim_name}': {val}")
+            calibrated[i] = 0.0
             continue
         bp = dims[dim_name]
         calibrated[i] = np.interp(val, bp["x"], bp["y"])
