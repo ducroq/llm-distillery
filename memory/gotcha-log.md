@@ -91,13 +91,13 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 
 ---
 
-## SCP Creates Nested Directories When Target Exists (Mar 2026)
+## SCP Creates Nested Directories When Target Exists (Mar 2026, recurred Apr 2026)
 
-**Problem**: `scp -r filters/thriving/v1/ gpu-server:~/llm-distillery/filters/thriving/v1/` creates `v1/v1/` nesting. Hit twice: filter directory and model directory.
+**Problem**: `scp -r source/dir/ dest/dir/` creates `dir/dir/` nesting. Hit three times: filter directory, model directory, and nature_recovery v2 model copy from gpu-server.
 
 **Root cause**: When the target directory already exists, `scp -r source/ target/` copies `source` INTO `target` rather than merging contents.
 
-**Fix**: Either create parent only (`mkdir -p .../thriving`) and let scp create `v1/`, or scp individual files. Always verify with `ls` after copying.
+**Fix**: Always scp to the PARENT directory: `scp -r source/dir/ dest/` (not `dest/dir/`). RUNBOOK.md updated 2026-04-15 with correct patterns. Promoted to feedback memory.
 
 ---
 
@@ -118,6 +118,16 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 **Root cause**: The systemd service runs with a different environment than an interactive SSH session. Key differences: working directory, PYTHONPATH, HF_HUB_OFFLINE, PATH, and available GPU memory (other services may claim VRAM). Interactive testing bypasses these constraints, so "it works when I run it" doesn't guarantee it works in production.
 
 **Fix**: Always test through the actual execution context after deploying changes: `sudo systemctl restart nexusmind-scorer && journalctl -u nexusmind-scorer -f`. Check the service's EnvironmentFile and WorkingDirectory in the unit file, not just interactive shell behavior.
+
+---
+
+## MAE Is Misleading for Needle-in-Haystack Filters (Apr 2026)
+
+**Problem**: nature_recovery v1 had val MAE 0.54 — looks great. But in production, 98.6% of articles scored below 1.0. The model had zero discrimination. v2 has "worse" MAE (0.63) but dramatically better ranking (Recall@20: 0.70 vs 0.55).
+
+**Root cause**: MAE treats all errors equally. When 95% of articles are noise with oracle WA ~0, predicting zero for everything gives low MAE. The model is "accurate" on noise but useless on the articles that matter.
+
+**Fix**: For needle filters, use ranking metrics: Recall@k, NDCG@k, false negative rate on MEDIUM+. Documented in filter development guide (Issue 4). Overall MAE is still fine for balanced filters (uplifting, belonging, etc.).
 
 ---
 
