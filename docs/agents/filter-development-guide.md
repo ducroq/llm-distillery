@@ -1553,9 +1553,10 @@ python scripts/prepare_training_data.py \
 
 ```bash
 PYTHONPATH=. python training/train.py \
-  --config filters/{filter_name}/v1/config.yaml \
+  --filter filters/{filter_name}/v1 \
   --data-dir datasets/training/{filter_name}_v1 \
-  --output-dir filters/{filter_name}/v1/model
+  --use-head-tail --epochs 3 \
+  --sample-weight-scale 0  # Set to 2-3 for needle-in-haystack filters (see Issue 4)
 ```
 
 > **Important**: Use `PYTHONPATH=.` when running from project root. On gpu-server, activate venv first. See `docs/WAY-OF-WORKING.md` for GPU server access patterns.
@@ -1655,6 +1656,48 @@ python -m training.evaluate \
 1. Check postfilter tier thresholds
 2. Analyze confusion matrix (which tiers confused?)
 3. Add tier-boundary examples to training data
+
+#### Issue 4: Needle-in-haystack filter has no discrimination
+
+**Symptom:** Model predicts near-zero for everything. Low MAE but no score spread — production articles cluster at 0-1 with no useful ranking. The filter appears to "work" by MAE but is useless for curation.
+
+**Diagnosis:** Check training data balance:
+```bash
+python -c "
+import json
+weights = [1/N] * N  # or actual dimension weights from config
+with open('datasets/training/{name}_v{N}/train.jsonl', encoding='utf-8') as f:
+    was = [sum(l*w for l,w in zip(json.loads(line)['labels'], weights)) for line in f]
+below_1 = sum(1 for w in was if w < 1.0)
+above_2 = sum(1 for w in was if w >= 2.0)
+print(f'Below 1: {100*below_1/len(was):.0f}%, Above 2: {100*above_2/len(was):.0f}%')
+"
+```
+
+**Root cause:** Standard MSE loss treats all samples equally. When >60% of training data has WA < 1.0, the model learns that predicting near-zero minimizes total loss. The two-stage pipeline (probe + model) doesn't help because the probe is trained *after* the model, on the model's outputs.
+
+**Fix:** Use `--sample-weight-scale` to upweight positive articles in the loss:
+
+```bash
+PYTHONPATH=. python training/train.py \
+    --filter filters/{name}/v{N} \
+    --data-dir datasets/training/{name}_v{N} \
+    --use-head-tail --epochs 3 \
+    --sample-weight-scale 2
+```
+
+Weight per sample = `1.0 + WA * scale`. Recommended scale values:
+
+| Training data profile | % below WA 1 | % above WA 2 | Recommended scale |
+|----------------------|---------------|--------------|-------------------|
+| Balanced (most filters) | <30% | >20% | 0 (not needed) |
+| Mildly skewed | 30-50% | 10-20% | 1 |
+| Needle filter | 50-70% | 5-10% | 2 |
+| Extreme needle | >70% | <5% | 3 |
+
+**Verified on:** nature_recovery v1→v2. Scale=2 improved Recall@20 from 0.55 to 0.70 and NDCG@10 from 0.71 to 0.86. See `filters/nature_recovery/v1/STATUS.md` for full comparison.
+
+**Important:** When using sample weighting, do NOT rely on overall MAE to judge model quality — it will appear worse because the model is no longer optimizing for the noise majority. Use ranking metrics instead: Recall@k, NDCG@k, and false negative rate on MEDIUM+ articles.
 
 ### Output
 
