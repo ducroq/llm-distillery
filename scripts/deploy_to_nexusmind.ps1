@@ -43,6 +43,15 @@ if (-not (Test-Path $SourceDir)) {
 Write-Host "=== Deploying $FilterName $Version to NexusMind ===" -ForegroundColor Cyan
 Write-Host ""
 
+# Sanity: refuse to ship uncommitted changes (matches bash-side check).
+$dirtyUnstaged  = git -C $DistilleryRoot diff --quiet -- $FilterPath; $dirtyUnstagedExit  = $LASTEXITCODE
+$dirtyStaged    = git -C $DistilleryRoot diff --cached --quiet -- $FilterPath; $dirtyStagedExit    = $LASTEXITCODE
+if ($dirtyUnstagedExit -ne 0 -or $dirtyStagedExit -ne 0) {
+    Write-Host "ERROR: uncommitted changes in $FilterPath. Commit first, then re-run." -ForegroundColor Red
+    git -C $DistilleryRoot status --short $FilterPath | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    exit 1
+}
+
 # Step 0: Verify package is internally consistent (issue #44)
 # Catches v_new config x v_old weights mismatches before copying.
 Write-Host "0. Verifying filter package..." -ForegroundColor Yellow

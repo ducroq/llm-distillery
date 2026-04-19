@@ -94,6 +94,10 @@ See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed reco
 ```bash
 pip install -r requirements.txt
 
+# One-time per clone: enable the commit-msg hook that blocks unverified "deploy"
+# claims (see .githooks/commit-msg, llm-distillery#44 for background).
+git config core.hooksPath .githooks
+
 # Configure: add HF token to config/credentials/secrets.ini
 # Oracle scoring
 python -m ground_truth.batch_scorer --filter filters/{name}/v{N} --source datasets/raw/master_dataset.jsonl

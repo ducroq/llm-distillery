@@ -48,6 +48,17 @@ fi
 echo "=== Deploying ${FILTER_NAME} ${VERSION} to NexusMind ==="
 echo ""
 
+# Sanity: refuse to ship uncommitted changes in the filter dir. Otherwise a dirty
+# working tree in llm-distillery propagates unreviewed code to NexusMind, and the
+# NexusMind-side origin-diff gate would not catch it (since the code reached there
+# via file copy, not via git).
+if ! git -C "$DISTILLERY_ROOT" diff --quiet -- "$FILTER_PATH" \
+   || ! git -C "$DISTILLERY_ROOT" diff --cached --quiet -- "$FILTER_PATH"; then
+    echo "ERROR: uncommitted changes in $FILTER_PATH. Commit first, then re-run."
+    git -C "$DISTILLERY_ROOT" status --short "$FILTER_PATH" | sed 's/^/  /'
+    exit 1
+fi
+
 # Step 0: Verify package is internally consistent (issue #44)
 # Catches v_new config x v_old weights mismatches before copying.
 echo "0. Verifying filter package..."

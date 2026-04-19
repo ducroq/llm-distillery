@@ -60,12 +60,15 @@ if [ ! -f "$VERIFY" ]; then
 fi
 
 FAILED=0
+# Per-invocation temp file so parallel commits don't clobber each other.
+LOG_FILE=$(mktemp -t commit-msg-verify.XXXXXX 2>/dev/null || echo "/tmp/commit-msg-verify-$$.log")
+trap 'rm -f "$LOG_FILE"' EXIT
 while IFS= read -r d; do
     [ -z "$d" ] && continue
     echo "  verifying $d ..."
-    if ! (cd "$REPO_ROOT" && PYTHONPATH=. python "$VERIFY" --filter "$d" --check-hub > /tmp/commit-msg-verify.log 2>&1); then
+    if ! (cd "$REPO_ROOT" && PYTHONPATH=. python "$VERIFY" --filter "$d" --check-hub > "$LOG_FILE" 2>&1); then
         echo "  [FAIL] $d"
-        sed 's/^/    /' /tmp/commit-msg-verify.log
+        sed 's/^/    /' "$LOG_FILE"
         FAILED=$((FAILED + 1))
     fi
 done <<< "$STAGED_FILTER_DIRS"
