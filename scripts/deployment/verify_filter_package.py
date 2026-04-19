@@ -12,9 +12,22 @@ Static checks (always run):
   4. base_scorer.py FILTER_VERSION matches the directory version.
 
 Hub check (run when --check-hub is passed):
-  5. HfApi().repo_info(repo_id) succeeds.
-  6. Hub last_modified is after local training_history.json mtime — catches the case where
-     the repo exists but the new weights were never uploaded (stale Hub state).
+  5. HfApi().repo_info(repo_id) succeeds; auth errors (401/403/Gated) are distinguished
+     from "repo does not exist" (404).
+  6. Hub last_modified is after local adapter_model.safetensors mtime — catches the case
+     where the repo exists but the new weights were never uploaded. Anchored on the
+     adapter file (written by training, never by git checkout or data-prep scripts) rather
+     than training_history.json (git-tracked, its mtime resets on any checkout and would
+     produce false FAILs on fresh clones).
+
+Known limitations:
+  - check_imports detects cross-version references on lines beginning with `from` / `import`
+    only. A continuation line inside a parenthesized multi-line import (`from filters.X.vN
+    import (\n    Bad,\n)`) is not inspected. The `from` line itself IS inspected, so the
+    #44 failure mode (whole file copied from v_prev) is still caught.
+  - check_inference_hub_repo_id matches the typed default in the __init__ signature
+    (`repo_id: str = "..."`). A module-level constant (`DEFAULT_REPO_ID = "..."` used as
+    the default) would be missed. All current filters use the typed-default pattern.
 
 Exit code is non-zero if any check fails. Intended to run as the first step of any
 deploy action, and as a pre-commit gate for commits that claim "deploy".
@@ -139,7 +152,7 @@ def check_base_scorer_version(filter_dir: Path, version: str) -> tuple[bool, str
 
 
 def check_hub(filter_dir: Path, repo_id: str | None, token: str | None) -> list[tuple[bool, str]]:
-    """Verify repo exists on Hub and was updated after local training_history.json."""
+    """Verify repo exists on Hub and was updated after local adapter_model.safetensors."""
     results: list[tuple[bool, str]] = []
     if not repo_id:
         results.append((False, "hub: cannot check — no repo_id extracted from inference_hub.py"))
@@ -147,7 +160,11 @@ def check_hub(filter_dir: Path, repo_id: str | None, token: str | None) -> list[
 
     try:
         from huggingface_hub import HfApi
-        from huggingface_hub.utils import RepositoryNotFoundError
+        from huggingface_hub.utils import (
+            GatedRepoError,
+            HfHubHTTPError,
+            RepositoryNotFoundError,
+        )
     except ImportError:
         results.append((False, "hub: huggingface_hub not installed"))
         return results
@@ -156,7 +173,19 @@ def check_hub(filter_dir: Path, repo_id: str | None, token: str | None) -> list[
     try:
         info = api.repo_info(repo_id=repo_id, repo_type="model")
     except RepositoryNotFoundError:
-        results.append((False, f"hub: repo {repo_id!r} not found (or token lacks access)"))
+        # True 404. Also returned by Hub when the token can't see a private repo (by design,
+        # to avoid leaking repo existence). Mention both possibilities.
+        results.append((False, f"hub: repo {repo_id!r} not found — check repo name, or that HF_TOKEN can access it if private"))
+        return results
+    except GatedRepoError:
+        results.append((False, f"hub: repo {repo_id!r} is gated — token needs access grant"))
+        return results
+    except HfHubHTTPError as e:
+        status = e.response.status_code if getattr(e, "response", None) is not None else "?"
+        if status in (401, 403):
+            results.append((False, f"hub: auth error (HTTP {status}) on {repo_id!r} — HF_TOKEN missing or lacks access"))
+        else:
+            results.append((False, f"hub: HTTP {status} on {repo_id!r} — {e}"))
         return results
     except Exception as e:
         results.append((False, f"hub: repo_info({repo_id!r}) failed — {type(e).__name__}: {e}"))
@@ -164,30 +193,35 @@ def check_hub(filter_dir: Path, repo_id: str | None, token: str | None) -> list[
 
     results.append((True, f"hub: {repo_id} exists"))
 
-    history_path = filter_dir / "training_history.json"
-    if not history_path.exists():
-        results.append((True, "hub: skip freshness check (no training_history.json)"))
+    # Anchor freshness on the adapter weights file itself: written by training, untracked
+    # by git (model/ is not in the repo), so its mtime is NOT reset by `git checkout`.
+    # training_history.json would be wrong here — it's git-tracked and its mtime resets
+    # on every checkout, producing false FAILs on fresh clones. See verify_filter_package
+    # module docstring for the full rationale.
+    adapter_path = filter_dir / "model" / "adapter_model.safetensors"
+    if not adapter_path.exists():
+        results.append((True, f"hub: skip freshness check (no local {adapter_path.name} to compare against)"))
         return results
 
-    local_mtime = datetime.fromtimestamp(history_path.stat().st_mtime, tz=timezone.utc)
+    local_mtime = datetime.fromtimestamp(adapter_path.stat().st_mtime, tz=timezone.utc)
     hub_mtime = info.last_modified
     if hub_mtime is None:
-        results.append((False, f"hub: repo has no last_modified timestamp — can't verify freshness"))
+        results.append((False, "hub: repo has no last_modified timestamp — can't verify freshness"))
         return results
 
-    # Hub last_modified must be AFTER local training finished.
-    # If the local training artefact is newer than Hub, the upload hasn't happened.
+    # Hub last_modified must be AFTER the local adapter was written.
+    # If the local adapter is newer than Hub, the upload hasn't happened since re-training.
     if hub_mtime >= local_mtime:
         results.append((
             True,
-            f"hub: last_modified {hub_mtime.isoformat()} >= local training_history "
+            f"hub: last_modified {hub_mtime.isoformat()} >= local adapter "
             f"{local_mtime.isoformat()}",
         ))
     else:
         results.append((
             False,
-            f"hub: last_modified {hub_mtime.isoformat()} is OLDER than local "
-            f"training_history {local_mtime.isoformat()} — weights likely not uploaded",
+            f"hub: last_modified {hub_mtime.isoformat()} is OLDER than local adapter "
+            f"{local_mtime.isoformat()} — weights likely not uploaded since last training",
         ))
     return results
 
