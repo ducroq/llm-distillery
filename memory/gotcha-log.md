@@ -159,6 +159,18 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 
 ---
 
+## deploy_to_nexusmind.sh Regressed BFloat16 Fix Owned by NexusMind (2026-04-19)
+
+**Problem**: `deploy_to_nexusmind.sh` copies `filters/common/` from llm-distillery to the NexusMind checkout. llm-distillery's `filter_base_scorer.py` lacked a BFloat16 → float32 cast (`outputs.logits.float().cpu().numpy()`) that NexusMind had added in `68e3d5d` (2026-04-16). Running the deploy script for nature_recovery v2 today silently overwrote the fixed NexusMind copy with the broken llm-distillery copy. Production `/filter/nature_recovery/score` started returning 500s with `TypeError: Got unsupported ScalarType BFloat16`.
+
+**Root cause**: `filters/common/filter_base_scorer.py` exists in both repos, but NexusMind had been evolved without back-porting fixes to llm-distillery. The deploy script blindly copies the entire `filters/common/` tree with no "NexusMind-owns" carve-out. NexusMind's own gotcha-log actually notes this pattern ("filter_base_scorer.py can't be synced from distillery"), but the rule was docs-only — no script enforcement.
+
+**Fix** (immediate): Today I ported the `.float()` cast to llm-distillery (`b98fc6f`) so `filters/common/` is consistent both sides, and restored it on NexusMind (`2d9a11f`). Production verified via smoke test (nature_recovery wa=4.31, belonging wa=6.48).
+
+**Fix** (durable — follow-up issue): `deploy_to_nexusmind.sh` should either (a) refuse to copy `filters/common/` if a `.nexusmind-owns` manifest is present naming files the distillery must not ship, or (b) stop shipping `filters/common/` entirely and require NexusMind to maintain its own version. Open issue pending.
+
+---
+
 ## rsync dup() Errors from Windows Git Bash (Recurred 2026-04-19, NexusMind)
 
 **Problem**: `NexusMind/scripts/deploy_filters.sh` fails with `rsync: dup() in/out/err failed` / `connection unexpectedly closed (0 bytes received so far)` when run from Windows Git Bash targeting gpu-server — even though gpu-server is reachable via plain SSH.
