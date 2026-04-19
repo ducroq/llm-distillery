@@ -294,7 +294,10 @@ class FilterBaseScorer(ABC):
 
         with torch.no_grad():
             outputs = self.model(**inputs)
-            raw_scores = outputs.logits[0].cpu().numpy()
+            # .float() before .numpy() — BFloat16 models (sustainability_technology v3,
+            # others trained with bf16) would otherwise raise TypeError: Got unsupported
+            # ScalarType BFloat16. Matches NexusMind 68e3d5d.
+            raw_scores = outputs.logits[0].float().cpu().numpy()
 
         return self._process_raw_scores(raw_scores, result)
 
@@ -385,7 +388,8 @@ class FilterBaseScorer(ABC):
 
                 with torch.no_grad():
                     outputs = self.model(**inputs)
-                    batch_scores = outputs.logits.cpu().numpy()
+                    # See single-article path above — BFloat16 → float32 cast required.
+                    batch_scores = outputs.logits.float().cpu().numpy()
 
                 for j, idx in enumerate(batch_indices):
                     raw_scores = batch_scores[j]
