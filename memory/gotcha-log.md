@@ -131,6 +131,16 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 
 ---
 
+## Memory Claimed "Shipped" But Feature Only Existed in Running Process (Apr 2026)
+
+**Problem**: Agent memory can state a feature is "shipped and working" based on a point-in-time test during a session. If the feature lives only in a running process (not persisted to the deployed codebase), it disappears on restart. Future sessions that trust the memory never re-verify.
+
+**Root cause**: Memory records a session observation as deployed state. There's no mechanism to distinguish "I tested this once" from "this is persistently deployed."
+
+**Fix** (v1.9.0 self-verifying memory): Never write "shipped"/"deployed"/"live" in memory based on a session observation alone. Qualify: *"responded correctly during session — verify persistence after restart."* Include a verification command in an HTML comment so future sessions can check before trusting: `<!-- verify: curl https://endpoint | grep expected -->`. The `/curate` skill now scans for unverified state claims and runs verify commands automatically.
+
+---
+
 ## [RESOLVED] train.py --output-dir Creates Nested model/model/ (Apr 2026)
 
 **Problem**: `--output-dir filters/foresight/v1/model` saves adapter to `model/model/`. Then `--resume-from filters/foresight/v1/model/model` looks for `model/model/model/`.

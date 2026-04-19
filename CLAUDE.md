@@ -1,7 +1,11 @@
-# CLAUDE.md - LLM Distillery
+---
+stack: Python 3.12, PyTorch, Transformers, PEFT/LoRA
+status: Production
+repo: github.com/ducroq/llm-distillery
+framework: agent-ready-projects v1.9.0
+---
 
-- **Status**: Production
-- **agent-ready-projects**: v1.7.0
+# CLAUDE.md - LLM Distillery
 
 ## What Is This?
 

@@ -16,6 +16,10 @@ Check for context rot from *previous* sessions. This catches what the session-fo
 2. **Stale memory**: Check modification dates of files in `memory/`. Flag any that haven't been modified in 30+ days — they may be outdated. (Use `git log -1 --format=%ci -- <file>` for each.)
 3. **Lingering gotchas**: Read the gotcha log. Flag any unresolved entries older than 14 days — they're either fixed (mark `[RESOLVED]`) or stuck (surface to the user).
 4. **Ground truth drift**: If the project file has a "Ground Truth Designations" table, verify each listed file exists and has been modified more recently than the artifacts that defer to it. Flag any where a downstream artifact is newer than its source of truth.
+5. **Unverified state claims**: Scan memory files for state claims ("shipped," "deployed," "live," "running," "working in production"). For each claim found:
+   - **Has `<!-- verify: ... -->` comment**: Run the command. Report **PASS** or **FAIL**. If FAIL, flag the entry for correction or removal — the claimed state is no longer true. If the command errors (non-zero exit, command not found, no output), report **ERROR** and flag for investigation — the verify command itself may be stale.
+   - **Has `<!-- verify: manual — ... -->` comment**: Flag as **MANUAL CHECK NEEDED** with the noted reason. Surface to the engineer.
+   - **No verification comment**: Flag as **UNVERIFIED**. These claims decay immediately after the session that wrote them. Suggest adding a `<!-- verify: -->` comment or requalifying the claim as a session observation.
 
 Report findings before proceeding. Don't fix anything in this step — just surface what's stale so the engineer can decide.
 
@@ -69,6 +73,7 @@ Skip if Step 0 already ran a full freshness check. Otherwise, spot-check that pa
 
 Summarize what you changed:
 - **Freshness**: Dead references, stale memory files, lingering gotchas, ground truth drift (from Step 0)
+- **Verification**: State claims checked — N passed, N failed, N unverified, N manual check needed (from Step 0)
 - **Gotchas**: New entries added, entries resolved or promoted
 - **Memory index**: Updates made
 - **Doc sync**: CLAUDE.md, RUNBOOK, production filters table updates made or flagged (from Step 4)
