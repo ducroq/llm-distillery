@@ -1,0 +1,92 @@
+#!/bin/bash
+# commit-msg hook: block "deploy"-class claims unless verified.
+#
+# Rationale (llm-distillery#44, 2026-04-19): a commit message saying "Deployed
+# to HuggingFace Hub" does not make the upload happen. Prior to this hook, a
+# session could write the claim based on intent, the upload never ran, and
+# production served stale weights for days.
+#
+# Gate: if the commit message contains deploy-class words AND the staged diff
+# touches any filters/*/v*/ directory, re-run verify_filter_package.py with
+# --check-hub against each affected filter. Block the commit if verification
+# fails for any of them.
+#
+# Escape hatch: re-run with `git commit --no-verify` if you really know what
+# you're doing. The hook is a floor, not a replacement for the
+# claim-requires-verify discipline. Do not make --no-verify a habit.
+#
+# Install: this file is checked in at .githooks/commit-msg. Enable for the
+# repo with `git config core.hooksPath .githooks` (one-time per clone).
+
+set -euo pipefail
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Strip comment lines that git adds to the template — users never mean those.
+STRIPPED=$(echo "$COMMIT_MSG" | grep -vE '^\s*#' || true)
+
+# Case-insensitive match against deploy-class words. Word boundaries to avoid
+# matching "redeployable" etc., though false positives here just trigger verify
+# which is cheap for already-good packages.
+if ! echo "$STRIPPED" | grep -iqE '\b(deploy|deployed|deploying|ship|shipped|shipping|upload|uploaded|uploading|live in production|released)\b'; then
+    exit 0
+fi
+
+# Find staged filter version directories. Each touched file's filters/{name}/v{N}/
+# parent is collected, unique.
+STAGED_FILTER_DIRS=$(git diff --cached --name-only \
+    | awk -F/ '$1=="filters" && $3 ~ /^v[0-9]+$/ {print $1"/"$2"/"$3}' \
+    | sort -u)
+
+if [ -z "$STAGED_FILTER_DIRS" ]; then
+    # Deploy-class word but no filter change staged. Could be a doc/script
+    # commit — let it through, but remind.
+    echo "commit-msg: deploy-class word detected but no filters/*/v*/ changes staged — letting through."
+    echo "  (Hook only blocks when filter packages are being modified.)"
+    exit 0
+fi
+
+echo "commit-msg: deploy-class word detected in message; verifying staged filters..."
+
+# Prefer repo-root-relative invocation for the verify script so running hooks
+# from subdirectories still resolves.
+REPO_ROOT=$(git rev-parse --show-toplevel)
+VERIFY="$REPO_ROOT/scripts/deployment/verify_filter_package.py"
+
+if [ ! -f "$VERIFY" ]; then
+    echo "commit-msg: ERROR — $VERIFY not found. Cannot verify. Install the script or use --no-verify (discouraged)."
+    exit 1
+fi
+
+FAILED=0
+while IFS= read -r d; do
+    [ -z "$d" ] && continue
+    echo "  verifying $d ..."
+    if ! (cd "$REPO_ROOT" && PYTHONPATH=. python "$VERIFY" --filter "$d" --check-hub > /tmp/commit-msg-verify.log 2>&1); then
+        echo "  [FAIL] $d"
+        sed 's/^/    /' /tmp/commit-msg-verify.log
+        FAILED=$((FAILED + 1))
+    fi
+done <<< "$STAGED_FILTER_DIRS"
+
+if [ "$FAILED" -gt 0 ]; then
+    cat <<EOF
+
+commit-msg: ABORTING — $FAILED filter(s) failed verification while the commit message claims deploy/shipped/uploaded.
+
+Either:
+  1. Run the actual upload (scripts/deployment/upload_to_huggingface.py) and the
+     NexusMind deploy path, THEN commit once both verifications pass.
+  2. Soften the commit message (e.g. "Prepare v_N for deploy" / "Update filter
+     files pending Hub upload").
+  3. Override with \`git commit --no-verify\` if you are absolutely certain the
+     hook is wrong. Note that a prior override caused issue #44 — three days
+     of production scoring wrong weights — so the bar should be very high.
+
+EOF
+    exit 1
+fi
+
+echo "commit-msg: all staged filters verified; commit allowed."
+exit 0

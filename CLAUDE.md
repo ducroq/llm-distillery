@@ -34,7 +34,7 @@ framework: agent-ready-projects v1.9.0
 
 | Filter | Version | MAE | Training Data | Status |
 |--------|---------|-----|---------------|--------|
-| **uplifting** | v7 | — | 5.3K articles | Deployed (HF Hub, private) — hybrid inference added |
+| **uplifting** | v7 | — | 5.3K articles | Deployed to NexusMind via file-copy — no Hub repo (see #47); hybrid inference added |
 | **sustainability_technology** | v3 | 0.72 | 10.6K articles | Deployed (HF Hub, private) |
 | **investment-risk** | v6 | 0.47 | 10.4K articles | Deployed (HF Hub, private) |
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |

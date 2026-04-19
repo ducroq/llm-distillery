@@ -141,6 +141,34 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 
 ---
 
+## Commit Claimed "Deploy to Hub" But Upload Never Ran (#44, 2026-04-19)
+
+**Problem**: Commit `399d739` "Deploy nature_recovery v2 with sample weighting (#41)" states in its body *"Deployed to HuggingFace Hub, gpu-server, sadalsuud."* The Hub upload was never actually executed. For three days production ran v2 config + v2 calibration × v1 weights (pulled from `jeergrvgreg/nature-recovery-filter-v1` by an `inference_hub.py` that had been scaffolded as a copy of v1). Caused NexusMind#155 / #161 scoring anomalies.
+
+**Root cause**: Two failures compounded.
+  1. *Scaffold-by-copy without translation*: all three v2 inference files (`inference.py`, `inference_hub.py`, `inference_hybrid.py`) were copies of their v1 equivalents with `v1` imports and `v1` repo_id left intact.
+  2. *No gate between commit-message intent and actual upload*: the agent wrote "Deployed to Hub" based on intent, not verification. The upload script's post-upload `PeftModel.from_pretrained()` verification never ran because the script wasn't invoked.
+
+**Fix** (2026-04-19):
+  - `scripts/deployment/verify_filter_package.py` — 8 checks (imports match dir version, `repo_id` matches dir version, config/FILTER_VERSION consistency, Hub repo exists, Hub `last_modified` ≥ local `adapter_model.safetensors` mtime).
+  - `scripts/deploy_to_nexusmind.{sh,ps1}` Step 0 runs `verify_filter_package.py --check-hub`; deploy aborts on failure.
+  - `.githooks/commit-msg` refuses any commit whose message contains *deploy/shipped/uploaded* if the staged diff touches filters and verification fails.
+  - See follow-up issues #47, #48, #49.
+
+[PROMOTED to feedback memory: `feedback-claim-requires-verify.md`]
+
+---
+
+## rsync dup() Errors from Windows Git Bash (Recurred 2026-04-19, NexusMind)
+
+**Problem**: `NexusMind/scripts/deploy_filters.sh` fails with `rsync: dup() in/out/err failed` / `connection unexpectedly closed (0 bytes received so far)` when run from Windows Git Bash targeting gpu-server — even though gpu-server is reachable via plain SSH.
+
+**Root cause**: Windows Git Bash / MSYS runtime doesn't cleanly hand rsync's fd management to the Tailscale SSH subprocess. Specific to the workstation runtime, not gpu-server. This is an old gotcha (Feb 2026, originally fixed by switching to scp) that recurred when NexusMind switched the deploy script back to rsync (Apr 2026, to preserve model/ directories via `--exclude`).
+
+**Fix**: Run `deploy_filters.sh` from a Linux host (sadalsuud) instead of Windows. `llm-distillery/scripts/remote_deploy.sh` wraps the SSH hop — single command from the workstation, Linux→Linux rsync inside. Structurally unreachable on Windows now.
+
+---
+
 ## [RESOLVED] train.py --output-dir Creates Nested model/model/ (Apr 2026)
 
 **Problem**: `--output-dir filters/foresight/v1/model` saves adapter to `model/model/`. Then `--resume-from filters/foresight/v1/model/model` looks for `model/model/model/`.
