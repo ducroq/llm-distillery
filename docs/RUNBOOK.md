@@ -6,48 +6,73 @@ Operational how-to for deployment, training, and scoring. For project identity a
 
 ## Deployment to NexusMind
 
-### 1. Upload to HuggingFace Hub
+One-time per clone, enable the commit-msg hook that blocks unverified deploy claims
+(llm-distillery#44 background):
 
 ```bash
-python scripts/deployment/upload_to_huggingface.py \
+git config core.hooksPath .githooks
+```
+
+### 1. Preflight: verify the filter package
+
+```bash
+PYTHONPATH=. python scripts/deployment/verify_filter_package.py \
+    --filter filters/{name}/v{N} --check-hub
+```
+
+Eight checks: imports match dir version, `repo_id` matches dir version, `config.yaml`
+`filter.version` matches, `base_scorer.FILTER_VERSION` matches, Hub repo exists, Hub
+`last_modified` ≥ local `model/adapter_model.safetensors` mtime. Catches the
+v_new-config × v_old-weights class (#44).
+
+### 2. Upload to HuggingFace Hub
+
+```bash
+PYTHONPATH=. python scripts/deployment/upload_to_huggingface.py \
     --filter filters/{name}/v{N} \
     --repo-name jeergrvgreg/{name}-filter-v{N} \
     --token $HF_TOKEN --private
 ```
 
-The upload script automatically verifies Hub loading after upload. If verification fails, check adapter format (must be OLD key format — see ADR-007).
+Script does a post-upload `PeftModel.from_pretrained()` verification. If that
+fails, check adapter format (must be OLD key format — ADR-007). Re-run step 1 with
+`--check-hub` before writing any "deployed" claim in commits or memory.
 
-### 2. Copy to gpu-server
-
-**IMPORTANT:** Always scp to the **parent** directory, not the target directory itself.
-`scp -r source/dir/ dest/dir/` creates `dest/dir/dir/` if `dest/dir/` already exists.
-`scp -r source/dir/ dest/` creates `dest/dir/` correctly.
+### 3. Copy to NexusMind checkout + commit
 
 ```bash
-scp -r filters/common/ gpu-server:~/NexusMind/filters/
-scp -r filters/{name}/v{N}/ gpu-server:~/NexusMind/filters/{name}/
-ssh gpu-server "sudo systemctl restart nexusmind-scorer"
+# bash (runs verify_filter_package.py first, aborts on failure + refuses dirty tree)
+bash scripts/deploy_to_nexusmind.sh {name} v{N}
+
+# or PowerShell
+.\scripts\deploy_to_nexusmind.ps1 {name} v{N}
 ```
 
-Use `scp`, not `rsync` (rsync has dup() errors on gpu-server).
+Then `cd C:/local_dev/NexusMind && git push origin main`.
 
-### 3. Copy to sadalsuud
+### 4. Deploy to gpu-server (via sadalsuud)
 
 ```bash
-scp -r filters/common/ sadalsuud:~/local_dev/NexusMind/filters/
-scp -r filters/{name}/v{N}/ sadalsuud:~/local_dev/NexusMind/filters/{name}/
+# Wrapper that SSHes to sadalsuud, pulls, and runs deploy_filters.sh there.
+# Refuses if your local NexusMind has unpushed filter commits.
+bash scripts/remote_deploy.sh
 ```
 
-sadalsuud uses Hub inference — do not include `model/` directories in the SCP payload. venv at `~/local_dev/NexusMind/venv/`.
+The wrapped `NexusMind/scripts/deploy_filters.sh`:
+- Verifies local HEAD matches `origin/$CURRENT_BRANCH` for `filters/` + `src/filters/` (fails closed on origin-unreachable; set `SKIP_ORIGIN_CHECK=1` to override).
+- rsyncs filters to gpu-server (model/ directories deliberately excluded — weights live out-of-band).
+- Restarts `nexusmind-scorer` systemd service.
+- Round-trips a CODE_REVISION hash via `/health`.
+- Runs a post-deploy smoke test (`deploy/smoke_test_articles.jsonl`) — POSTs known positives, asserts `weighted_average >= 4.0`. Catches "weights loaded but nonsense."
 
-After calibration updates, redeploy `config.yaml` and `calibration.json` to both gpu-server and sadalsuud.
+**Why not run `deploy_filters.sh` directly from the workstation?** Its rsync fails
+intermittently from Windows Git Bash with `dup() in/out/err failed`. `remote_deploy.sh`
+sidesteps by running it on sadalsuud (Linux) instead.
 
-### 4. Verify
+### 5. Monitor
 
 ```bash
-# On gpu-server
 ssh gpu-server "journalctl -u nexusmind-scorer -f"
-
 # In NexusMind
 python scripts/run_filters.py --filter {name} --hub --max-items 50
 ```
@@ -150,4 +175,4 @@ Calibration writes `calibration.json` and `score_scale_factor` to config.yaml. C
 
 ---
 
-*Last updated: 2026-03-28*
+*Last updated: 2026-04-19 (deployment pipeline hardening, #44 follow-up)*

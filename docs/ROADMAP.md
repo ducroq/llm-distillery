@@ -5,7 +5,7 @@
 - **belonging v1 → ovr.news** - Add Belonging tab (filter deployed, frontend work only)
 - **nature_recovery v2** - Deployed (val MAE 0.53 calibrated, Recall@20 0.70) → ovr.news Recovery tab (normalization + frontend)
 - ~~**thriving v1**~~ - PARKED indefinitely. Uplifting v7 stays as Thriving tab. Orthogonal lens design caused bimodal distribution (ADR-015); a fixed v2 would just be uplifting v7 again
-- **foresight v1** - Deployed (val MAE 0.75, 3.5K articles) → ovr.news Foresight tab (frontend only)
+- ~~**foresight v1**~~ - PARKED 2026-04-16 (#43). Captures governance solutions, not foresight. Lens folding into broadened Solutions at sustainability_technology v4.
 
 ## Next (Coming Soon)
 - **cultural-discovery v5** - Active learning enrichment complete (473 articles), training data ready (8,502). Train on gpu-server.

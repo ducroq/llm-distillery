@@ -51,7 +51,7 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 
 ### In Active Development (priority: ovr.news tabs)
 - [x] **belonging v1** - Deployed, val MAE 0.49 (calibrated), 7,370 articles. Next: ovr.news tab
-- [x] **nature_recovery v2** - Deployed to Hub + gpu-server + sadalsuud (2026-04-16)
+- [x] **nature_recovery v2** - Deployed to Hub + gpu-server + sadalsuud (Hub upload actually completed 2026-04-19 after #44; prior commit claimed it without uploading)
   - Val MAE 0.53 (calibrated), probe MAE 0.49, 3,517 articles
   - v1 had zero discrimination (#41); v2 uses sample weighting (scale=2)
   - Recall@20: 0.70 (v1: 0.55), NDCG@10: 0.86 (v1: 0.71), false negatives: 17% (v1: 41%)
