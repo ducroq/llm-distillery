@@ -1,14 +1,14 @@
 """
-Nature Recovery Filter v1 - HuggingFace Hub Inference
+Nature Recovery Filter v2 - HuggingFace Hub Inference
 
 Loads the model directly from HuggingFace Hub for inference.
 Use this when you don't have local model files or want to use a shared model.
 
 Usage:
-    from filters.nature_recovery.v1.inference_hub import NatureRecoveryScorerHub
+    from filters.nature_recovery.v2.inference_hub import NatureRecoveryScorerHub
 
     scorer = NatureRecoveryScorerHub(
-        repo_id="jeergrvgreg/nature-recovery-filter-v1",
+        repo_id="jeergrvgreg/nature-recovery-filter-v2",
         token="hf_..."  # Only needed for private repos
     )
     result = scorer.score_article(article)
@@ -20,7 +20,7 @@ from typing import Optional
 import torch
 
 from filters.common.model_loading import load_lora_hub
-from filters.nature_recovery.v1.base_scorer import BaseNatureRecoveryScorer
+from filters.nature_recovery.v2.base_scorer import BaseNatureRecoveryScorer
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class NatureRecoveryScorerHub(BaseNatureRecoveryScorer):
 
     def __init__(
         self,
-        repo_id: str = "jeergrvgreg/nature-recovery-filter-v1",
+        repo_id: str = "jeergrvgreg/nature-recovery-filter-v2",
         token: Optional[str] = None,
         device: Optional[str] = None,
         use_prefilter: bool = True,
