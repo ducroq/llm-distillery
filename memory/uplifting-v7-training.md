@@ -1,12 +1,14 @@
 ---
 name: uplifting-v7-training
-description: Uplifting v7 training status — evolved into thriving v1 (ADR-012). V7 not deployed, thriving v1 filter created.
+description: Uplifting v7 training history. V7 IS deployed on Hub (hybrid inference added 2026-04) and serves the Thriving tab; thriving v1 was attempted as successor but PARKED (ADR-015).
 type: project
 ---
 
-# Uplifting v7 → Thriving v1
+# Uplifting v7 (current Thriving-tab filter)
 
-## Status: v7 NOT deployed. Evolved into thriving v1 (ADR-012 lens-aligned naming, social_cohesion removed).
+## Status: Deployed to NexusMind (local file copy — v7 has NO HF Hub repo, no inference_hub.py). Hybrid inference added 2026-04. Serves the ovr.news Thriving tab. Thriving v1 was the intended successor but is PARKED indefinitely per ADR-015. **CLAUDE.md currently says "Deployed (HF Hub, private)" which is wrong for v7 — see audit 2026-04-19.** <!-- verify: test -f filters/uplifting/v7/model/adapter_model.safetensors && test -f C:/local_dev/NexusMind/filters/uplifting/v7/model/adapter_model.safetensors && echo PASS || echo FAIL -->
+
+The sections below are kept as training-run history — useful when re-training or comparing future successors, but no longer the current production status.
 
 ## Training complete
 

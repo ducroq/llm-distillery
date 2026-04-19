@@ -43,6 +43,20 @@ if (-not (Test-Path $SourceDir)) {
 Write-Host "=== Deploying $FilterName $Version to NexusMind ===" -ForegroundColor Cyan
 Write-Host ""
 
+# Step 0: Verify package is internally consistent (issue #44)
+# Catches v_new config x v_old weights mismatches before copying.
+Write-Host "0. Verifying filter package..." -ForegroundColor Yellow
+Push-Location $DistilleryRoot
+$env:PYTHONPATH = "."
+python scripts\deployment\verify_filter_package.py --filter $FilterPath --check-hub
+if ($LASTEXITCODE -ne 0) {
+    Pop-Location
+    Write-Error "verify_filter_package failed. Aborting deploy. Fix the package (imports / repo_id / Hub upload) before retrying."
+    exit 1
+}
+Pop-Location
+Write-Host ""
+
 # Step 1: Copy filter folder
 Write-Host "1. Copying filter: $FilterPath" -ForegroundColor Yellow
 if (-not (Test-Path $DestDir)) {

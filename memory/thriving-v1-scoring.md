@@ -1,14 +1,14 @@
 ---
 name: thriving-v1-scoring
-description: Thriving v1 — PAUSED. Best val MAE 0.94 (calibrated), bimodal distribution problem. Uplifting v6 (0.67) remains in production.
+description: Thriving v1 — PARKED indefinitely (ADR-015). Bimodal distribution from orthogonal lens design. Uplifting v7 serves the Thriving tab.
 type: project
 ---
 
 # Thriving v1 Status
 
-## Current State (2026-03-30)
+## Current State (updated 2026-04-19)
 
-**PAUSED.** Two training attempts produced val MAE 1.09 and 0.97 (calibrated 0.94). Not competitive with uplifting v6 (MAE 0.67) which remains deployed. The problem appears to be a bimodal score distribution inherent to the thriving prompt, not a training pipeline issue.
+**PARKED indefinitely** per ADR-015 (lenses as perspectives, not partitions). Two training attempts produced val MAE 1.09 and 0.97 (calibrated 0.94). Root cause turned out to be the orthogonal-lens prompt design (bimodal scores), not the training pipeline. Uplifting v7 remains on the Thriving tab — v7 is deployed on Hub with hybrid inference. <!-- verify: grep -qE "\*\*thriving\*\*.*PARKED indefinitely" CLAUDE.md && echo PASS || echo FAIL -->
 
 ## What We Tried
 

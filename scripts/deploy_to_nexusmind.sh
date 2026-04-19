@@ -48,6 +48,17 @@ fi
 echo "=== Deploying ${FILTER_NAME} ${VERSION} to NexusMind ==="
 echo ""
 
+# Step 0: Verify package is internally consistent (issue #44)
+# Catches v_new config x v_old weights mismatches before copying.
+echo "0. Verifying filter package..."
+(cd "$DISTILLERY_ROOT" && PYTHONPATH=. python scripts/deployment/verify_filter_package.py \
+    --filter "$FILTER_PATH" --check-hub) || {
+    echo "ERROR: verify_filter_package failed. Aborting deploy."
+    echo "  Fix the package (imports / repo_id / Hub upload) before retrying."
+    exit 1
+}
+echo ""
+
 # Step 1: Copy filter folder
 echo "1. Copying filter: ${FILTER_PATH}"
 mkdir -p "$DEST_DIR"

@@ -1,36 +1,55 @@
 # Filter Status
 
+> **CLAUDE.md is authoritative.** This file keeps the extended per-filter MAE / data
+> counts that don't fit in CLAUDE.md; if you just want current production state, read
+> CLAUDE.md's Production Filters table. The tables below must be reconciled against it.
+>
+> <!-- verify: diff <(grep -E "^\| \*\*[a-z_]+" CLAUDE.md | head -20) <(grep -E "^\| [a-z]" memory/filter-status.md | head -20) > /dev/null && echo PASS || echo MANUAL CHECK NEEDED -->
+
 ## Production Filters
 
 | Filter | Ver | MAE | Cal. MAE | Data | Hub Repo | Deployed |
 |--------|-----|-----|----------|------|----------|----------|
-| uplifting | v6 | 0.673 | — | 10.5K | `jeergrvgreg/uplifting-filter-v6` | 2026-02-19 |
-| sustainability_technology | v3 | 0.72 | — | 10.6K | `jeergrvgreg/sustainability-technology-filter-v3` | 2026-02 |
-| investment-risk | v6 | 0.497 | 0.465 | 10.4K | `jeergrvgreg/investment-risk-filter-v6` | 2026-02-21 |
-| cultural-discovery | v4 | 0.74 | — | 8K | `jeergrvgreg/cultural-discovery-filter-v4` | 2026-02 |
+| uplifting | v7 | — | — | 5.3K | (none — file-copy to NexusMind only) | 2026-04 (hybrid inference added) |
+| sustainability_technology | v3 | 0.72 | — | 10.6K | `jeergrvgreg/sustainability-technology-v3` | 2026-02-21 |
+| investment-risk | v6 | 0.497 | 0.465 | 10.4K | `jeergrvgreg/investment-risk-v6` | 2026-02-21 |
+| cultural-discovery | v4 | 0.74 | — | 8K | `jeergrvgreg/cultural-discovery-v4` | 2026-02-20 |
 | belonging | v1 | 0.534 | 0.489 | 7.4K | `jeergrvgreg/belonging-filter-v1` | 2026-03-04 |
-| nature_recovery | v1 | 0.540 | 0.507 | 3.3K | `jeergrvgreg/nature-recovery-filter-v1` | 2026-03-06 |
-| foresight | v1 | 0.744 | 0.75 | 3.5K | `jeergrvgreg/foresight-filter-v1` | 2026-04-04 |
+| nature_recovery | v2 | 0.63 | 0.53 | 3.5K | `jeergrvgreg/nature-recovery-filter-v2` | 2026-04-19 (see #44 for the v1→v2 cleanup) |
+| foresight | v1 | 0.744 | 0.75 | 3.5K | `jeergrvgreg/foresight-filter-v1` | PARKED 2026-04-16 (#43) |
+
+Note: Hub repo naming is inconsistent — some use `{filter}-v{N}`, others use `{filter}-filter-v{N}`. Deploy scripts rely on the name embedded in `inference_hub.py`, so this doesn't break anything, but it's worth normalizing at the next bump.
 
 All use Gemma-3-1B base + LoRA. All have local, Hub, and hybrid inference paths.
 
-## ovr.news Lenses (English names)
+## In Development
 
-| Lens | Filter | Status |
-|------|--------|--------|
-| **Thriving** | uplifting v6 (thriving v1 paused) | Live (v6) |
-| **Belonging** | belonging v1 | Deployed, frontend pending |
-| **Recovery** | nature_recovery v1 | Deployed, frontend pending |
-| **Solutions** | sustainability_technology v3 | Live |
-| **Discovery** | cultural-discovery v4 | Live |
-| **Breakthroughs** | (cross-lens aggregate) | Live |
-| **Foresight** | foresight v1 | Hub deployed, NexusMind + frontend pending (#31, ovr.news#172) |
+| Filter | Ver | Status |
+|--------|-----|--------|
+| thriving | v1 | PARKED indefinitely (ADR-015) — orthogonal lens design caused bimodal distribution |
+| sustainability_technology | v4 | Design phase (#43) — broadened scope (governance/community solutions + clean-tech) |
+| foresight | v1 | PARKED (#43) — merging into sustainability_technology v4 |
 
-## In Development (priority: ovr.news)
+<!-- NOTE: consumer-side concerns (which ovr.news lens/tab uses which filter, frontend rollout)
+     live in the NexusMind and ovr.news repos. This repo produces filters; mapping filters to
+     product surfaces is a downstream concern. -->
 
-| Filter | Ver | Status | ovr.news target |
-|--------|-----|--------|-----------------|
-| thriving | v1 | PAUSED — bimodal distribution (MAE 0.94). Candidate for two-stage scoring fix. | Replaces uplifting v6 on Thriving tab |
+## Repo-wide audit (2026-04-19)
+
+Ran `scripts/deployment/verify_filter_package.py --check-hub` across every `filters/*/v*/`. Current-production filters all pass except uplifting v7 (no Hub repo — production uses file-copy via `deploy_to_nexusmind.sh`, not Hub download; CLAUDE.md's "HF Hub, private" claim for v7 is inaccurate).
+
+**Historical / superseded versions that fail verification** (not in production, low urgency):
+
+- `sustainability_technology/v2` — cross-version imports from v1 (#44 failure mode, pre-v3)
+- `ai-engineering-practice/v2` — `config.yaml filter.version` says 1.0 in a v2 dir
+- `cultural-discovery/v3` — no default `repo_id` in inference_hub.py signature
+- `investment-risk/v5` — references placeholder `your-username/investment-risk-filter-v5` (deploy abandoned mid-flow)
+- `uplifting/v5` — Hub `last_modified` is before local `training_history.json` (weights never uploaded after training re-ran)
+- `signs_of_wisdom/v1` — package structure incomplete (0 checks pass)
+
+These are all superseded by newer versions in production. Clean up or delete at next audit.
+
+<!-- verify: PYTHONPATH=. python scripts/deployment/verify_filter_package.py --filter filters/nature_recovery/v2 --check-hub > /dev/null && echo PASS || echo FAIL -->
 
 ## Other Filters (not ovr.news)
 
