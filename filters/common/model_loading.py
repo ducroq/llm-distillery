@@ -186,7 +186,8 @@ def _build_gemma3_text_classifier(model_name, num_labels, load_kwargs):
             )
 
     # Load config and set classification attributes
-    config = Gemma3TextConfig.from_pretrained(model_name)
+    local_files_only = load_kwargs.get("local_files_only", False)
+    config = Gemma3TextConfig.from_pretrained(model_name, local_files_only=local_files_only)
     config.num_labels = num_labels
     config.problem_type = load_kwargs.get("problem_type", "regression")
 
@@ -195,7 +196,7 @@ def _build_gemma3_text_classifier(model_name, num_labels, load_kwargs):
     if "torch_dtype" in load_kwargs:
         dtype_kwargs["torch_dtype"] = load_kwargs["torch_dtype"]
 
-    passthrough_keys = {"device_map", "revision", "trust_remote_code", "low_cpu_mem_usage"}
+    passthrough_keys = {"device_map", "revision", "trust_remote_code", "low_cpu_mem_usage", "local_files_only"}
     extra_kwargs = {k: v for k, v in load_kwargs.items() if k in passthrough_keys}
 
     model = Gemma3TextForSequenceClassification.from_pretrained(
@@ -317,6 +318,21 @@ def load_lora_local(
         raise RuntimeError(f"Failed to load model: {type(e).__name__}: {e}")
 
 
+def _is_network_error(exc: Exception) -> bool:
+    """True if exc is a transient DNS/connection failure rather than a permanent Hub error."""
+    try:
+        import requests.exceptions
+        if isinstance(exc, requests.exceptions.ConnectionError):
+            return True
+    except ImportError:
+        pass
+    msg = str(exc)
+    return any(tag in msg for tag in (
+        "ConnectionError", "NameResolutionError", "Failed to resolve",
+        "Max retries exceeded", "Network is unreachable",
+    ))
+
+
 def load_lora_hub(
     repo_id: str,
     num_labels: int,
@@ -327,8 +343,9 @@ def load_lora_hub(
     """
     Load a trained LoRA model from HuggingFace Hub.
 
-    Handles adapter config download, base model loading, and PEFT model
-    construction from Hub-hosted adapters.
+    On transient DNS/network failure, retries from the local HF cache
+    (local_files_only=True) so a single bad DNS lookup doesn't kill the filter.
+    Fails only if the cache is also missing.
 
     Args:
         repo_id: HuggingFace repo ID (e.g., "username/model-name")
@@ -341,68 +358,89 @@ def load_lora_hub(
         (model, tokenizer) tuple ready for inference
 
     Raises:
-        RuntimeError: If model loading fails
+        RuntimeError: If model loading fails from both Hub and local cache
     """
-    from peft import PeftModel
-    from huggingface_hub import hf_hub_download
-
     try:
-        logger.info(f"Loading model from HuggingFace Hub: {repo_id}")
-        logger.info(f"Device: {device}")
-
-        # Download and load adapter config
-        config_path = hf_hub_download(
-            repo_id=repo_id,
-            filename="adapter_config.json",
-            token=token,
-        )
-
-        with open(config_path, "r") as f:
-            adapter_config = json.load(f)
-
-        base_model_name = adapter_config["base_model_name_or_path"]
-        logger.info(f"Base model: {base_model_name}")
-
-        # Load tokenizer from base model
-        tokenizer = AutoTokenizer.from_pretrained(
-            base_model_name,
-            token=token,
-        )
-        if tokenizer.pad_token is None:
-            tokenizer.pad_token = tokenizer.eos_token
-
-        # Load base model
-        logger.info("Loading base model...")
-        base_model = load_base_model_for_seq_cls(
-            base_model_name,
-            num_labels=num_labels,
-            problem_type="regression",
-            torch_dtype=torch_dtype,
-        )
-
-        if base_model.config.pad_token_id is None:
-            base_model.config.pad_token_id = tokenizer.pad_token_id
-
-        # Load PEFT model from hub
-        logger.info("Loading LoRA adapter from Hub...")
-        model = PeftModel.from_pretrained(
-            base_model,
-            repo_id,
-            token=token,
-        )
-
-        model = model.to(device)
-        model.eval()
-
-        logger.info("Model loaded successfully")
-        return model, tokenizer
-
+        return _load_lora_hub_impl(repo_id, num_labels, device, token, torch_dtype, local_files_only=False)
     except Exception as e:
-        # Re-raise HuggingFace-specific errors as-is
         from huggingface_hub.errors import RepositoryNotFoundError, GatedRepoError
         if isinstance(e, (RepositoryNotFoundError, GatedRepoError)):
             raise
+        if _is_network_error(e):
+            logger.warning(
+                f"Hub unreachable for {repo_id} — retrying from local cache "
+                f"({type(e).__name__})"
+            )
+            try:
+                return _load_lora_hub_impl(repo_id, num_labels, device, token, torch_dtype, local_files_only=True)
+            except Exception as cache_exc:
+                raise RuntimeError(
+                    f"Hub unreachable and no local cache for {repo_id}: "
+                    f"{type(cache_exc).__name__}: {cache_exc}"
+                ) from e
         raise RuntimeError(
-            f"Failed to load model from Hub ({repo_id}): "
-            f"{type(e).__name__}: {e}"
+            f"Failed to load model from Hub ({repo_id}): {type(e).__name__}: {e}"
         )
+
+
+def _load_lora_hub_impl(
+    repo_id: str,
+    num_labels: int,
+    device,
+    token: Optional[str],
+    torch_dtype,
+    local_files_only: bool,
+) -> Tuple:
+    from peft import PeftModel
+    from huggingface_hub import hf_hub_download
+
+    source = "local cache" if local_files_only else "Hub"
+    logger.info(f"Loading model from HuggingFace {source}: {repo_id}")
+    logger.info(f"Device: {device}")
+
+    config_path = hf_hub_download(
+        repo_id=repo_id,
+        filename="adapter_config.json",
+        token=token,
+        local_files_only=local_files_only,
+    )
+
+    with open(config_path, "r") as f:
+        adapter_config = json.load(f)
+
+    base_model_name = adapter_config["base_model_name_or_path"]
+    logger.info(f"Base model: {base_model_name}")
+
+    tokenizer = AutoTokenizer.from_pretrained(
+        base_model_name,
+        token=token,
+        local_files_only=local_files_only,
+    )
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    logger.info("Loading base model...")
+    base_model = load_base_model_for_seq_cls(
+        base_model_name,
+        num_labels=num_labels,
+        problem_type="regression",
+        torch_dtype=torch_dtype,
+        local_files_only=local_files_only,
+    )
+
+    if base_model.config.pad_token_id is None:
+        base_model.config.pad_token_id = tokenizer.pad_token_id
+
+    logger.info("Loading LoRA adapter from Hub...")
+    model = PeftModel.from_pretrained(
+        base_model,
+        repo_id,
+        token=token,
+        local_files_only=local_files_only,
+    )
+
+    model = model.to(device)
+    model.eval()
+
+    logger.info(f"Model loaded successfully (from {source})")
+    return model, tokenizer
