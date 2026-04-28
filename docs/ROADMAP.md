@@ -12,7 +12,7 @@
 - **cultural-discovery v5** - Active learning enrichment complete (473 articles), training data ready (8,502). Train on gpu-server.
 - **nature_recovery v2 normalization** - Needs production CDF after NexusMind switches to v2
 - **Prefilter structure harmonization (#52)** - Filed 2026-04-28. 7 filters, 5 override-mechanism shapes, 3 with class/version drift. ~12-16h, per-filter migration. Blocks clean per-filter consumption for #51's universal detectors.
-- **Universal obituary detector (#51)** - Filed 2026-04-28. ADR-018 supersede candidate for ADR-004. ~3-4 weeks (labeling-bound).
+- **Universal obituary detector (#51)** - Filed 2026-04-28, simplified to universal block + tunable threshold. Extends ADR-004 (no supersede). ~2-3 weeks calendar (labeling-bound).
 - **Breakthroughs lens** - Best candidate for new ovr.news tab. Blocked on science journalism full-text harvesting (NexusMind#143).
 - ~~**future-of-education v1**~~ - DROPPED: education stories covered by Breakthroughs (research)
 - **ai-engineering-practice v2** - Oracle scoring + training (not ovr.news, separate product)
