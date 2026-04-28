@@ -106,6 +106,35 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
             r'\b(travel app|flight deal|vacation package|tourism promotion)\b',
             r'\b(hotel booking|trip planning|world cup trip)\b',
         ],
+        # Clickbait / listicle framing (#46).
+        # TODO(#51-equivalent): if a universal clickbait detector is built (per
+        # the obituary-detector pattern in issue #51), these regexes will move
+        # to a shared module with per-filter consumption policy. Until then,
+        # per-filter scope. SUSTAINABILITY_OVERRIDE keywords still pass through
+        # — legitimate solar/wind articles with clickbait phrasing are NOT
+        # blocked here (e.g. "You Won't Believe What Solar Panels Are Made Of"
+        # has "solar" in the override list and falls through).
+        # Skipped issue items 7-8 (anti-example overfits on the 22-Carat Gold
+        # body) — items 1-6 catch the same article via the title alone.
+        'clickbait': [
+            # Canonical clickbait phrasing. The .? on contractions matches
+            # "won't" / "wont" / "don't" / "dont".
+            r'\b(you won.?t believe|doctors hate|this one weird|one simple trick)\b',
+            # "Throws away without knowing" — the 22-Carat Gold pattern.
+            r'\bwithout (knowing|realizing|even trying)\b',
+            # Listicle framing: "this common electronic item", "that common mistake".
+            r'\b(this|that) common .{0,40}(item|mistake|thing|food|habit)\b',
+            # "You're probably/likely doing/making/missing X"
+            r"\byou.?re (probably|likely) (doing|making|missing)\b",
+            # "10 things you didn't know" — both halves required, with a
+            # proximity cap (.{0,120}) so a legit "7 Ways Solar Homeowners Are
+            # Cutting Bills" article with a colloquial "you didn't expect..."
+            # later in the body doesn't trip the unbounded .* (review finding,
+            # would have leaked without the bound).
+            r"\b\d+\s+(things|reasons|ways|tricks|secrets|facts)\b.{0,120}\byou (don.?t|didn.?t|never)\b",
+            # "Shocking truth", "mind-blowing fact", etc.
+            r'\b(shocking|amazing|mind.?blowing|jaw.?dropping) (fact|truth|discovery)\b',
+        ],
     }
 
     # Sustainability keywords that override exclusions (context-dependent)
@@ -348,3 +377,117 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
 
         # Very permissive - just needs ONE keyword mention
         return any(kw in text for kw in keywords)
+
+
+def test_prefilter():
+    """Lightweight self-test for the prefilter. Mirror of belonging/v1/prefilter.py
+    style — both will be unified once prefilter shape is harmonized (separate issue
+    filed alongside #46)."""
+
+    prefilter = SustainabilityTechnologyPreFilterV2()
+
+    test_cases = [
+        # Should BLOCK - Clickbait additions from issue #46 (NexusMind#157, #162)
+        # Each one previously bypassed: pure clickbait with no sustainability
+        # keyword, listicle "X Things You Didn't Know" framing, "One Weird Trick".
+        {
+            'title': 'People Throw Away This Common Electronic Item Without Knowing It Holds 450MG of Pure 22-Carat Gold',
+            'text': 'Many household items contain hidden gold, with some everyday electronic devices holding up to '
+                    '450 milligrams of pure 22-carat gold inside. Most people are unaware of the precious metals '
+                    'inside their old gadgets and simply throw them away. Refurbishers and recyclers can extract '
+                    'these materials, but the average consumer rarely thinks about the value sitting in a junk drawer. '
+                    'Experts recommend taking devices to specialist recyclers rather than landfill.',
+            'expected': (False, 'excluded_clickbait')
+        },
+        {
+            'title': '10 Things You Didn\'t Know About Your Phone Battery',
+            'text': 'Smartphone batteries have evolved enormously since the first cellular handsets, but most users '
+                    'have only a passing understanding of how they work. Lithium-ion chemistry remains the dominant '
+                    'choice. Charging habits affect long-term capacity. Heat is the enemy of battery longevity. '
+                    'Modern phones include software safeguards to extend battery life. Manufacturers offer trade-in '
+                    'programs for old devices. Battery replacement is now a common service at most repair shops.',
+            'expected': (False, 'excluded_clickbait')
+        },
+        {
+            'title': 'This One Weird Trick Saves Energy',
+            'text': 'Households across the country are looking for ways to reduce their utility bills as energy '
+                    'prices climb. A single behavioural change recommended by efficiency experts can cut consumption '
+                    'noticeably without any equipment purchase. The trick involves rethinking how appliances are '
+                    'used during peak hours. The savings add up over a billing cycle. Some utilities offer additional '
+                    'rebates for similar behaviour. The approach has been studied for several years.',
+            'expected': (False, 'excluded_clickbait')
+        },
+
+        # Should PASS - Legitimate sustainability content with rhetorical clickbait
+        # phrasing. SUSTAINABILITY_OVERRIDE keyword "solar panel" / "solar" lets it
+        # through. This is intentional per issue #46 design discussion.
+        {
+            'title': 'You Won\'t Believe What Solar Panels Are Actually Made Of',
+            'text': 'Solar panels are everywhere now, but few people stop to think about the materials inside them. '
+                    'The silicon cells, glass layers, and metal frames each have their own production story. The '
+                    'aluminum frames typically come from a separate manufacturing chain than the photovoltaic cells '
+                    'themselves. Recycling old solar panels is becoming a growing industry as the first generation '
+                    'of installations reaches end of life. Manufacturers are also exploring ways to use less rare earths.',
+            'expected': (True, 'passed')
+        },
+
+        # Should PASS - Pattern 5 cross-sentence non-regression. The "X ways" /
+        # "you didn't" listicle pattern is bounded to .{0,120} so a distant
+        # colloquial "you didn't" later in the body doesn't trip clickbait. Pre-
+        # fix (with unbounded .*), this would have hit clickbait. Override on
+        # "solar panel" / "battery storage" also saves it, but cleaner not to
+        # rely on that. Review battery surfaced this case.
+        {
+            'title': '7 Ways Solar Homeowners Are Cutting Bills',
+            'text': 'A growing number of homeowners with solar panel installations are finding new approaches to '
+                    'maximise their savings. Industry analysts have published seven distinct strategies that solar '
+                    'households can adopt this season. The strategies cover battery storage, time-of-use shifting, '
+                    'panel orientation, and inverter upgrades among other techniques. Real installation case studies '
+                    'illustrate each approach. Many years after the initial install, you didn\'t expect the payback '
+                    'period to shrink so dramatically — but new tariff structures have made it real.',
+            'expected': (True, 'passed')
+        },
+
+        # Should PASS - "common misconceptions" pattern would not match the listicle
+        # CLICKBAIT regex (no "this/that common Y item|mistake|thing|food|habit" form),
+        # AND has carbon capture anchor for sustainability check.
+        {
+            'title': 'Common Misconceptions About Carbon Capture',
+            'text': 'Carbon capture and storage technology is the subject of significant debate, with both supporters '
+                    'and critics often citing inaccurate facts. This article addresses several persistent misconceptions '
+                    'about the energy cost of capture, the geological storage capacity, and the timeframe required for '
+                    'commercial deployment. The technology has been operational at industrial scale in several locations '
+                    'for over a decade. Recent advances have lowered the energy penalty considerably.',
+            'expected': (True, 'passed')
+        },
+    ]
+
+    print("Testing Sustainability Technology Pre-Filter v3.0")
+    print("=" * 60)
+
+    passed = 0
+    failed = 0
+
+    for i, test in enumerate(test_cases, 1):
+        result = prefilter.apply_filter(test)
+        expected = test['expected']
+        result_matches = (
+            result[0] == expected[0] and
+            (result[1] == expected[1] or result[1].startswith(expected[1]))
+        )
+        status = "[PASS]" if result_matches else "[FAIL]"
+        if result_matches:
+            passed += 1
+        else:
+            failed += 1
+        print(f"\nTest {i}: {status}")
+        print(f"Title: {test['title'][:70]}...")
+        print(f"Expected: {expected}")
+        print(f"Got:      {result}")
+
+    print("\n" + "=" * 60)
+    print(f"Results: {passed} passed, {failed} failed")
+
+
+if __name__ == "__main__":
+    test_prefilter()
