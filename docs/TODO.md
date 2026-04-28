@@ -199,6 +199,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **foresight v1 normalization** - Fitted on 623 articles (thin LUT, improves as data accumulates)
 - [x] **nature_recovery v1 normalization** - Refitted on 76,500 articles (still clamped — extreme needle filter, #32)
 - [x] **nature_recovery v2 normalization** - Fitted on 1,397 v2 production articles (filter_version=2.0, weighted_average >= 1.5), deployed to sadalsuud + gpu-server (2026-04-28). Patched `fit_normalization.py` with `--filter-version` to exclude v1 leftovers (19,948 articles correctly skipped). Curve: raw range 1.50–7.08, p95=4.49.
+  - [ ] **Follow-up (~2026-04-30)**: sample fresh `filtered_*.jsonl` on sadalsuud and confirm new v2 articles show `normalization_method != null` and `raw_weighted_average != null`. Proves the deployed curve is being applied at runtime. Without this verification we'd be repeating the #44 pattern (claiming deploy without proof).
 
 ## Documentation
 
