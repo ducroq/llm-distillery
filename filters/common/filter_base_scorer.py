@@ -296,7 +296,8 @@ class FilterBaseScorer(ABC):
             outputs = self.model(**inputs)
             # .float() before .numpy() — BFloat16 models (sustainability_technology v3,
             # others trained with bf16) would otherwise raise TypeError: Got unsupported
-            # ScalarType BFloat16. Matches NexusMind 68e3d5d.
+            # ScalarType BFloat16. Originally fixed in 68e3d5d; regressed 2026-04-19 via
+            # deploy_to_nexusmind.sh overwriting with stale llm-distillery copy.
             raw_scores = outputs.logits[0].float().cpu().numpy()
 
         return self._process_raw_scores(raw_scores, result)
