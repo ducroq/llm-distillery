@@ -10,7 +10,7 @@
 
 ## Next (Coming Soon)
 - **cultural-discovery v5** - Active learning enrichment complete (473 articles), training data ready (8,502). Train on gpu-server.
-- **nature_recovery v2 normalization** - Needs production CDF after NexusMind switches to v2
+- ~~**nature_recovery v2 normalization**~~ - Deployed 2026-04-28 (n=1,397 v2 articles; `fit_normalization.py` got `--filter-version` flag)
 - **Prefilter structure harmonization (#52)** - Filed 2026-04-28. 7 filters, 5 override-mechanism shapes, 3 with class/version drift. ~12-16h, per-filter migration. Blocks clean per-filter consumption for #51's universal detectors.
 - **Universal obituary detector (#51)** - Filed 2026-04-28, simplified to universal block + tunable threshold. Extends ADR-004 (no supersede). ~2-3 weeks calendar (labeling-bound).
 - **Breakthroughs lens** - Best candidate for new ovr.news tab. Blocked on science journalism full-text harvesting (NexusMind#143).

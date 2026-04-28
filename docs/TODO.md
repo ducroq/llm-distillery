@@ -198,7 +198,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **uplifting v7 normalization** - Fitted on 73,986 production articles (2026-04-06)
 - [x] **foresight v1 normalization** - Fitted on 623 articles (thin LUT, improves as data accumulates)
 - [x] **nature_recovery v1 normalization** - Refitted on 76,500 articles (still clamped — extreme needle filter, #32)
-- [ ] **nature_recovery v2 normalization** - Pending: needs production CDF after NexusMind switches to v2
+- [x] **nature_recovery v2 normalization** - Fitted on 1,397 v2 production articles (filter_version=2.0, weighted_average >= 1.5), deployed to sadalsuud + gpu-server (2026-04-28). Patched `fit_normalization.py` with `--filter-version` to exclude v1 leftovers (19,948 articles correctly skipped). Curve: raw range 1.50–7.08, p95=4.49.
 
 ## Documentation
 
