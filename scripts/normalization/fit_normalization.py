@@ -36,12 +36,18 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def load_weighted_averages_local(data_dir: Path, filter_name: str, min_score: float = 4.0) -> list:
+def load_weighted_averages_local(
+    data_dir: Path,
+    filter_name: str,
+    min_score: float = 4.0,
+    filter_version: str | None = None,
+) -> list:
     """Load weighted averages from local filtered JSONL files."""
     was = []
     n_raw = 0
     n_fallback = 0
     n_below_threshold = 0
+    n_wrong_version = 0
 
     # Read flat JSONL files (NexusMind#144: flat output, no tier subdirs)
     jsonl_files = sorted(data_dir.glob("filtered_*.jsonl"))
@@ -54,6 +60,9 @@ def load_weighted_averages_local(data_dir: Path, filter_name: str, min_score: fl
                     attrs = article.get("nexus_mind_attributes", {})
                     for key, analysis in attrs.items():
                         if isinstance(analysis, dict) and "weighted_average" in analysis:
+                            if filter_version is not None and analysis.get("filter_version") != filter_version:
+                                n_wrong_version += 1
+                                continue
                             # Use raw_weighted_average to avoid double-normalization
                             raw = analysis.get("raw_weighted_average")
                             wa = raw if raw is not None else analysis["weighted_average"]
@@ -68,6 +77,8 @@ def load_weighted_averages_local(data_dir: Path, filter_name: str, min_score: fl
                 except (json.JSONDecodeError, KeyError):
                     continue
 
+    if n_wrong_version > 0:
+        logger.info(f"Excluded {n_wrong_version} articles not matching filter_version={filter_version}")
     if n_below_threshold > 0:
         logger.info(f"Excluded {n_below_threshold} articles below min_score={min_score}")
     if n_fallback > 0 and n_raw > 0:
@@ -87,16 +98,23 @@ def load_weighted_averages_local(data_dir: Path, filter_name: str, min_score: fl
     return was
 
 
-def load_weighted_averages_ssh(ssh_host: str, remote_dir: str, min_score: float = 4.0) -> list:
+def load_weighted_averages_ssh(
+    ssh_host: str,
+    remote_dir: str,
+    min_score: float = 4.0,
+    filter_version: str | None = None,
+) -> list:
     """Load weighted averages from a remote host via SSH."""
     # Write extraction script to temp file, scp to remote, execute, retrieve results
     script_content = """import json, glob, os, sys
 remote_dir = sys.argv[1]
 min_score = float(sys.argv[2]) if len(sys.argv) > 2 else 4.0
+filter_version = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else None
 was = []
 n_raw = 0
 n_fallback = 0
 n_below = 0
+n_wrong_version = 0
 # Read flat JSONL files (NexusMind#144: flat output, no tier subdirs)
 files = sorted(glob.glob(os.path.join(remote_dir, "filtered_*.jsonl")))
 for fp in files:
@@ -107,6 +125,9 @@ for fp in files:
                 attrs = d.get("nexus_mind_attributes", {})
                 for k, v in attrs.items():
                     if isinstance(v, dict) and "weighted_average" in v:
+                        if filter_version is not None and v.get("filter_version") != filter_version:
+                            n_wrong_version += 1
+                            continue
                         raw = v.get("raw_weighted_average")
                         wa = raw if raw is not None else v["weighted_average"]
                         if wa < min_score:
@@ -121,7 +142,7 @@ for fp in files:
                 pass
 for w in was:
     print(w)
-print("META:raw=%d,fallback=%d,below=%d" % (n_raw, n_fallback, n_below), file=sys.stderr)
+print("META:raw=%d,fallback=%d,below=%d,wrong_version=%d" % (n_raw, n_fallback, n_below, n_wrong_version), file=sys.stderr)
 """
     with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write(script_content)
@@ -131,8 +152,11 @@ print("META:raw=%d,fallback=%d,below=%d" % (n_raw, n_fallback, n_below), file=sy
     try:
         subprocess.run(["scp", local_script, f"{ssh_host}:{remote_script}"],
                        capture_output=True, timeout=30, check=True)
+        ssh_args = ["ssh", ssh_host, "python3", remote_script, remote_dir, str(min_score)]
+        if filter_version is not None:
+            ssh_args.append(filter_version)
         result = subprocess.run(
-            ["ssh", ssh_host, "python3", remote_script, remote_dir, str(min_score)],
+            ssh_args,
             capture_output=True, text=True, timeout=300,
         )
         if result.returncode != 0:
@@ -150,11 +174,14 @@ print("META:raw=%d,fallback=%d,below=%d" % (n_raw, n_fallback, n_below), file=sy
 
     # Parse field-usage metadata from remote script stderr
     import re
-    meta_match = re.search(r"META:raw=(\d+),fallback=(\d+),below=(\d+)", result.stderr or "")
+    meta_match = re.search(r"META:raw=(\d+),fallback=(\d+),below=(\d+),wrong_version=(\d+)", result.stderr or "")
     if meta_match:
         n_raw = int(meta_match.group(1))
         n_fallback = int(meta_match.group(2))
         n_below = int(meta_match.group(3))
+        n_wrong_version = int(meta_match.group(4))
+        if n_wrong_version > 0:
+            logger.info(f"Excluded {n_wrong_version} articles not matching filter_version={filter_version}")
         if n_below > 0:
             logger.info(f"Excluded {n_below} articles below min_score={min_score}")
         if n_fallback > 0 and n_raw > 0:
@@ -203,6 +230,12 @@ def main():
         help="Minimum raw_weighted_average to include (default: 4.0, the MEDIUM threshold). "
              "Use 0.0 to include all scored articles.",
     )
+    parser.add_argument(
+        "--filter-version", type=str, default=None,
+        help="Only include articles where nexus_mind_attributes.<filter>.filter_version "
+             "matches this string (e.g., '2.0'). Required when production has v1 leftovers "
+             "mixed with the current version's output.",
+    )
     args = parser.parse_args()
 
     # Validate inputs
@@ -235,14 +268,19 @@ def main():
 
     # Load production weighted averages
     score_label = f"raw_weighted_average >= {args.min_score}"
+    version_label = f", filter_version={args.filter_version}" if args.filter_version else ""
     if args.ssh:
-        logger.info(f"Loading production data ({score_label}) from {args.ssh}:{args.remote_dir}")
-        source_desc = f"production {score_label} from {args.ssh}:{args.remote_dir}"
-        was = load_weighted_averages_ssh(args.ssh, args.remote_dir, min_score=args.min_score)
+        logger.info(f"Loading production data ({score_label}{version_label}) from {args.ssh}:{args.remote_dir}")
+        source_desc = f"production {score_label}{version_label} from {args.ssh}:{args.remote_dir}"
+        was = load_weighted_averages_ssh(
+            args.ssh, args.remote_dir, min_score=args.min_score, filter_version=args.filter_version,
+        )
     else:
-        logger.info(f"Loading production data ({score_label}) from {args.data_dir}")
-        source_desc = f"production {score_label} from {args.data_dir}"
-        was = load_weighted_averages_local(args.data_dir, filter_name, min_score=args.min_score)
+        logger.info(f"Loading production data ({score_label}{version_label}) from {args.data_dir}")
+        source_desc = f"production {score_label}{version_label} from {args.data_dir}"
+        was = load_weighted_averages_local(
+            args.data_dir, filter_name, min_score=args.min_score, filter_version=args.filter_version,
+        )
 
     if len(was) < 10:
         logger.error(f"Only {len(was)} weighted averages found — need at least 10")
