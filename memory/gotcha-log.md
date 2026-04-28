@@ -181,6 +181,35 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 
 ---
 
+## [RESOLVED] \bRIP\b False-Positive on "rip current" (2026-04-28)
+
+**Problem**: belonging v1 prefilter shipped a `\bRIP\b` pattern in `OBITUARY_PATTERNS` (commit `44b5e21`, #45). The standalone token was meant to catch obituary uses ("Tributes Pour In: RIP Hero"), and the comment said "MUST be uppercase to avoid matching 'rip' as a verb." But every pattern in `OBITUARY_PATTERNS` is compiled with `re.IGNORECASE` at the call site (`prefilter.py` line 262). So `\bRIP\b` matched lowercase "rip" too — including **"rip current"** in beach-safety articles, which would block from belonging.
+
+**Root cause**: A list-of-patterns design plus a global compile flag at the call site means a single "case-sensitive only" token in the list silently becomes case-insensitive. The pattern author can't opt out of the global flag without explicit syntax.
+
+**Fix**: Inline `(?-i:...)` flag scope disables IGNORECASE for that one pattern: `r'(?-i:\bRIP\b)'`. Confirmed with a unit test against "Lifeguards Warn of Rip Currents at Local Beaches" (now passes; pre-fix was blocked). Shipped in `598fa72`.
+
+**Caught by**: post-deploy code-reviewer agent battery flagged it as P2 hypothetical; I noticed IGNORECASE was *already* on, making it a real shipped P0/P1.
+
+**Promoted to**: `feedback-regex-ignorecase-trap.md` (auto-memory). When adding a token to a list-of-patterns compiled with a global flag, check the flag affects all entries; use inline `(?aiLmsux-imsx:...)` to opt out for one entry.
+
+---
+
+## deploy_to_nexusmind.sh Prints Wrong SSH Hints (2026-04-28)
+
+**Problem**: After a successful deploy, the script prints:
+```
+ssh user@sadalsuud "cd ~/NexusMind && git pull origin main"
+ssh jeroen@llm-distiller "cd ~/NexusMind && git pull origin main"
+```
+The first command failed during this session: actual sadalsuud user is implicit (no `user@`), and the path is `/home/jeroen/local_dev/NexusMind/`, not `~/NexusMind/`.
+
+**Root cause**: Hardcoded template strings in `scripts/deploy_to_nexusmind.sh` and `.ps1` post-deploy hints, never updated when the layouts settled. `llm-distiller` may also not be the right alias (haven't verified).
+
+**Fix** (deferred — flag for next deploy-script touch): Update the template strings to reflect actual SSH config + paths. For now, the correct invocation is `ssh sadalsuud "cd /home/jeroen/local_dev/NexusMind && git pull origin main"` followed by `bash scripts/deploy_filters.sh` on sadalsuud (which rsyncs to gpu-server — gpu-server is NOT git-managed, see `memory/MEMORY.md` Cross-Project: NexusMind section).
+
+---
+
 ## [RESOLVED] train.py --output-dir Creates Nested model/model/ (Apr 2026)
 
 **Problem**: `--output-dir filters/foresight/v1/model` saves adapter to `model/model/`. Then `--resume-from filters/foresight/v1/model/model` looks for `model/model/model/`.

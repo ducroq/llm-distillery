@@ -2,14 +2,17 @@
 
 ## Now (Current Sprint) — Priority: ovr.news tabs
 
-- **belonging v1 → ovr.news** - Add Belonging tab (filter deployed, frontend work only)
+- **belonging v1 → ovr.news** - Add Belonging tab (filter deployed, frontend work only). Prefilter obituary leak patched 2026-04-28 (#45).
 - **nature_recovery v2** - Deployed (val MAE 0.53 calibrated, Recall@20 0.70) → ovr.news Recovery tab (normalization + frontend)
+- **sustainability_technology v3** - Prefilter clickbait leak patched 2026-04-28 (#46). v4 retraining still on the cards for classifier-side off-topic (Eiffel Tower etc.)
 - ~~**thriving v1**~~ - PARKED indefinitely. Uplifting v7 stays as Thriving tab. Orthogonal lens design caused bimodal distribution (ADR-015); a fixed v2 would just be uplifting v7 again
 - ~~**foresight v1**~~ - PARKED 2026-04-16 (#43). Captures governance solutions, not foresight. Lens folding into broadened Solutions at sustainability_technology v4.
 
 ## Next (Coming Soon)
 - **cultural-discovery v5** - Active learning enrichment complete (473 articles), training data ready (8,502). Train on gpu-server.
 - **nature_recovery v2 normalization** - Needs production CDF after NexusMind switches to v2
+- **Prefilter structure harmonization (#52)** - Filed 2026-04-28. 7 filters, 5 override-mechanism shapes, 3 with class/version drift. ~12-16h, per-filter migration. Blocks clean per-filter consumption for #51's universal detectors.
+- **Universal obituary detector (#51)** - Filed 2026-04-28. ADR-018 supersede candidate for ADR-004. ~3-4 weeks (labeling-bound).
 - **Breakthroughs lens** - Best candidate for new ovr.news tab. Blocked on science journalism full-text harvesting (NexusMind#143).
 - ~~**future-of-education v1**~~ - DROPPED: education stories covered by Breakthroughs (research)
 - **ai-engineering-practice v2** - Oracle scoring + training (not ovr.news, separate product)
@@ -151,4 +154,4 @@
 
 ---
 
-*Last updated: 2026-04-16*
+*Last updated: 2026-04-28*

@@ -180,6 +180,14 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - investment-risk v5: merged source-based + content-pattern approaches, removed academic source blocking
   - Deployed all production prefilters to NexusMind (sadalsuud + gpu-server)
   - Verified 0 diff between all three locations
+- [x] **Manifest-aware deploy script (#50)** - 2026-04-28. `.nexusmind-owns` at repo root + `--dry-run` + `--force-skip-owned-drift` in both `.sh` and `.ps1`. Lists `filter_base_scorer.py` and `hybrid_scorer.py` (NexusMind-owned). Deploy now exits non-zero on drift between distillery and NexusMind copies.
+- [ ] **Harmonize prefilter structure across all 7 production filters (#52)** - Filed 2026-04-28. Survey shows 5 different override mechanisms, 3 with class/version drift between class name and dir, mixed flat-list vs dict containers. ~12-16h work; per-filter migration in priority order.
+
+## Prefilter Quality (Apr 2026)
+
+- [x] **belonging v1 obituary leak (#45)** - 2026-04-28. 5 bypass classes patched (dies-with-verb, procession, vigil, RIP/rest in peace, killed-in-year), `dies at \d` → `\d+` bug fix, override floor on obit branch. Plus `(?-i:\bRIP\b)` follow-up after the case-insensitive false positive on "rip current".
+- [x] **sustainability_technology v3 clickbait leak (#46)** - 2026-04-28. CLICKBAIT category added with 6 patterns (you-won't-believe, without-knowing, this-common, you're-probably, X-things-you-didn't, shocking-fact). Pattern 5 bounded `.{0,120}` after review caught cross-sentence FP risk.
+- [ ] **Universal obituary detector (#51)** - Filed 2026-04-28. Trained SLM at `filters/common/obituary_detector/v1/` with per-filter consumption policy (block for belonging/uplifting; ignore for cultural-discovery/investment-risk/breakthroughs). ADR-018 to supersede ADR-004's "commerce is the only universal" framing. ~3-4 weeks (labeling is bottleneck).
 
 ## Cross-Filter Normalization (ADR-014)
 
@@ -200,5 +208,5 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 ---
 
-*Last updated: 2026-04-16*
+*Last updated: 2026-04-28*
 
