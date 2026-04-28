@@ -1,37 +1,32 @@
 """
-Sustainability Technology Pre-Filter v2.2
+Sustainability Technology Pre-Filter v3.0
 
-This module defines a pre-filter for evaluating articles related to sustainability technology.
-Fast keyword-based filtering before model inference.
+ADR-018 declarative shape: subclass declares EXCLUSION_PATTERNS,
+OVERRIDE_KEYWORDS, and an optional _filter_specific_final_check() hook;
+BasePreFilter.apply_filter() drives the standard pipeline.
 
-v2.2 Changes:
-- Enhanced product deals detection (Jackery case study)
-- Added: "Green Deals" column detection, "$X savings/discount", urgency language
-- Added: "exclusive/limited + price", "new low price", "starting from $X"
-
-v2.1 Changes:
-- Added product deals exclusion (shopping/price content)
-- Added trade show patterns (CES, IFA, MWC) with sustainability override
-- Expanded consumer electronics brands and product types
-- Expanded sustainability override keywords
-
-v2.0 Changes:
-- Added explicit exclusion patterns for off-topic content
-- Blocks AI/ML infrastructure, consumer electronics, programming tutorials, etc.
-- Added multi-lingual inclusion keywords (20+ languages)
+History:
+- v3.0 (2026-04-28): migrated to declarative BasePreFilter shape (#52,
+  ADR-018). No behavior change vs v2.2 — pattern set, override keywords,
+  and "is sustainability-related" check are identical. Class name stays
+  as ...V2 until the version-drift batch rename (also part of #52).
+- v2.2: enhanced product deals detection (Jackery case study).
+- v2.1: product deals exclusion, trade show patterns with sustainability
+  override, expanded brands/product types and override keywords.
+- v2.0: explicit exclusion patterns for off-topic content; multi-lingual
+  inclusion keywords (20+ languages).
 """
 
-import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from filters.common.base_prefilter import BasePreFilter
 
 
 class SustainabilityTechnologyPreFilterV2(BasePreFilter):
     """
     Pre-filter to evaluate articles on sustainability technology.
-    v2.1: Enhanced exclusions + expanded override protection.
+    v3.0 (declarative shape per ADR-018).
     """
-    VERSION = "2.2"
+    VERSION = "3.0"
 
     # Exclusion patterns - these block articles before sustainability check
     # NOTE: Articles with SUSTAINABILITY_OVERRIDE keywords bypass these exclusions
@@ -137,9 +132,10 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
         ],
     }
 
-    # Sustainability keywords that override exclusions (context-dependent)
-    # If article contains these, it passes even if exclusion patterns match
-    SUSTAINABILITY_OVERRIDE = [
+    # Sustainability keywords that override exclusions (context-dependent).
+    # If article contains any of these substrings (case-insensitive), exclusion
+    # patterns are bypassed. Consumed by BasePreFilter._has_override (ADR-018).
+    OVERRIDE_KEYWORDS = [
         # Carbon & emissions
         'carbon reduction', 'carbon footprint', 'carbon neutral', 'co2 reduction',
         'emission reduction', 'emissions reduction', 'reduce emission', 'ghg',
@@ -168,50 +164,15 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
         self.filter_name = "sustainability_technology_v3"
         self.version = "3.0"
 
-    def apply_filter(self, article: Dict) -> Tuple[bool, str]:
+    def _filter_specific_final_check(self, title: str, text: str) -> Tuple[bool, str]:
         """
-        Determine if article should be sent to LLM for scoring.
-
-        Returns:
-            (should_score, reason)
-            - (True, "passed"): Send to LLM
-            - (False, reason): Block from LLM
+        After exclusions pass, require at least one sustainability keyword
+        anywhere in title+content. Without this, off-topic articles that don't
+        match any exclusion pattern would slip through (e.g. local sports news).
         """
-        # NOTE: Commerce prefilter integration point TBD
-        # Decision postponed until model performance is validated
-
-        text = self._get_combined_clean_text(article)
-        title = article.get('title', '').lower()
-
-        # FIRST: Check exclusions (blocks even if sustainability keywords present)
-        excluded, exclusion_reason = self._is_excluded(title, text)
-        if excluded:
-            return (False, exclusion_reason)
-
-        # SECOND: Check sustainability relevance
-        if not self._is_sustainability_related(text):
-            return (False, "not_sustainability_topic")
-
-        # PASS: Has sustainability evidence AND passed all other checks
-        return (True, "passed")
-
-    def _is_excluded(self, title: str, text: str) -> Tuple[bool, str]:
-        """
-        Check if article matches exclusion patterns.
-        Returns (excluded, reason).
-        """
-        combined = f"{title} {text[:1000]}".lower()
-
-        for category, patterns in self.EXCLUSION_PATTERNS.items():
-            for pattern in patterns:
-                if re.search(pattern, combined, re.IGNORECASE):
-                    # Check if sustainability keywords override the exclusion
-                    if any(kw in combined for kw in self.SUSTAINABILITY_OVERRIDE):
-                        # Has sustainability context, don't exclude
-                        continue
-                    return (True, f"excluded_{category}")
-
-        return (False, "")
+        if self._is_sustainability_related(text):
+            return (True, "")
+        return (False, "not_sustainability_topic")
 
     def _is_sustainability_related(self, text: str) -> bool:
         """Check if article is about climate/sustainability/clean energy (WIDEST NET)"""

@@ -26,13 +26,59 @@ class BasePreFilter:
     """
     Base class for semantic prefilters.
 
-    Provides automatic Unicode sanitization and standard interface.
-    Subclasses should implement apply_filter() method.
+    Two ways to use this class (ADR-018):
+
+    1. **Declarative form (preferred)**: Override the class attributes
+       EXCLUSION_PATTERNS, OVERRIDE_KEYWORDS, POSITIVE_PATTERNS, POSITIVE_THRESHOLD.
+       The default apply_filter() drives the standard pipeline:
+            validate -> length check -> exclusions-with-override
+            -> _filter_specific_final_check (optional hook) -> passed
+
+       Subclasses can override _filter_specific_final_check() for filter-specific
+       logic that runs after exclusions pass (e.g. "is this article actually about
+       climate?"). Patterns compile once in __init__.
+
+    2. **Custom form (legacy / unusual flows)**: Override apply_filter() directly.
+       The pre-#52 filters use this. Migration to the declarative form is tracked
+       per-filter as part of llm-distillery#52.
     """
 
     VERSION = "0.0"  # Override in subclass
     MIN_CONTENT_LENGTH = 300  # Minimum content length to prevent framework leakage
     MAX_PREFILTER_CONTENT = 2000  # Content chars to analyze in prefilter (for efficiency)
+
+    # --- ADR-018 declarative pattern registry (subclasses override these) ---
+
+    # Category -> raw regex patterns. Compiled once in __init__ with re.IGNORECASE.
+    # Note: per-pattern case sensitivity can still be requested via inline
+    # `(?-i:...)` (see memory/feedback-regex-ignorecase-trap.md for why this matters).
+    EXCLUSION_PATTERNS: Dict[str, List[str]] = {}
+
+    # Substring keywords. If any appears (case-insensitive) in title+text, exclusions
+    # are bypassed. Matches `kw.lower() in combined_lower` — substring, not word boundary.
+    OVERRIDE_KEYWORDS: List[str] = []
+
+    # Optional: regex patterns whose total match count is checked against
+    # POSITIVE_THRESHOLD. If POSITIVE_THRESHOLD > 0 and the count meets it, exclusions
+    # are bypassed (e.g. foresight v1's "needs >= 3 positive matches" rule).
+    POSITIVE_PATTERNS: List[str] = []
+    POSITIVE_THRESHOLD: int = 0
+
+    def __init__(self):
+        """Compile EXCLUSION_PATTERNS and POSITIVE_PATTERNS once, upfront.
+
+        Subclasses that override __init__ should call super().__init__() so the
+        compiled patterns are available. Subclasses still using the legacy
+        custom-apply_filter shape are unaffected — their EXCLUSION_PATTERNS/etc.
+        class attrs are empty, so the compiled dicts come out empty and unused.
+        """
+        self._compiled_exclusions: Dict[str, List[re.Pattern]] = {
+            cat: [re.compile(p, re.IGNORECASE) for p in patterns]
+            for cat, patterns in self.EXCLUSION_PATTERNS.items()
+        }
+        self._compiled_positives: List[re.Pattern] = [
+            re.compile(p, re.IGNORECASE) for p in self.POSITIVE_PATTERNS
+        ]
 
     @staticmethod
     def validate_article(article) -> Tuple[bool, str]:
@@ -197,7 +243,11 @@ class BasePreFilter:
         """
         Determine if article should be sent to LLM for scoring.
 
-        Subclasses MUST implement this method.
+        Default implementation drives the ADR-018 standard pipeline:
+            validate -> length check -> exclusions-with-override
+            -> _filter_specific_final_check -> passed
+
+        Subclasses with custom flow can override this entirely (legacy shape).
 
         Args:
             article: Dict with 'title' and 'text'/'content' keys
@@ -207,7 +257,94 @@ class BasePreFilter:
             - (True, "passed"): Send to LLM
             - (False, "reason"): Block with reason string
         """
-        raise NotImplementedError("Subclasses must implement apply_filter()")
+        valid, validation_reason = self.validate_article(article)
+        if not valid:
+            return (False, validation_reason)
+
+        length_ok, length_reason = self.check_content_length(article)
+        if not length_ok:
+            return (False, length_reason)
+
+        text = self._get_combined_clean_text(article)
+        title = article.get('title', '').lower()
+
+        excluded, exc_reason = self._is_excluded(title, text)
+        if excluded:
+            return (False, exc_reason)
+
+        passed_specific, specific_reason = self._filter_specific_final_check(title, text)
+        if not passed_specific:
+            return (False, specific_reason)
+
+        return (True, "passed")
+
+    def _is_excluded(self, title: str, text: str) -> Tuple[bool, str]:
+        """
+        Check title+text against EXCLUSION_PATTERNS, with OVERRIDE_KEYWORDS /
+        POSITIVE_THRESHOLD bypass.
+
+        Returns (excluded, reason). reason is "excluded_<category>" on block,
+        empty string on pass.
+
+        No-op (returns (False, "")) if EXCLUSION_PATTERNS is empty — lets legacy
+        filters that override apply_filter() inherit this base method without
+        side effects.
+        """
+        if not self._compiled_exclusions:
+            return (False, "")
+
+        # Lowercase combined text once for both pattern search and override check.
+        # Patterns are compiled case-insensitively, so searching against the
+        # lowercased string is equivalent and avoids redundant work.
+        combined = f"{title} {text[:1000]}".lower()
+
+        for category, compiled in self._compiled_exclusions.items():
+            for pattern in compiled:
+                if pattern.search(combined):
+                    if self._has_override(combined):
+                        # Override applies — skip this category entirely (not just
+                        # this pattern; legacy sustech behavior).
+                        break
+                    return (True, f"excluded_{category}")
+
+        return (False, "")
+
+    def _has_override(self, combined_lower: str) -> bool:
+        """
+        Decide whether OVERRIDE_KEYWORDS or POSITIVE_THRESHOLD lets the article
+        bypass exclusions.
+
+        OVERRIDE_KEYWORDS are substring matches (case-insensitive). POSITIVE_PATTERNS
+        require a total match count >= POSITIVE_THRESHOLD (only consulted when
+        POSITIVE_THRESHOLD > 0).
+        """
+        if self.OVERRIDE_KEYWORDS:
+            if any(kw.lower() in combined_lower for kw in self.OVERRIDE_KEYWORDS):
+                return True
+        if self.POSITIVE_THRESHOLD > 0 and self._compiled_positives:
+            count = sum(len(p.findall(combined_lower)) for p in self._compiled_positives)
+            if count >= self.POSITIVE_THRESHOLD:
+                return True
+        return False
+
+    def _filter_specific_final_check(self, title: str, text: str) -> Tuple[bool, str]:
+        """
+        Hook for filter-specific logic that runs after exclusions pass.
+
+        Used for things like 'is this article actually about climate?' (sustech)
+        or 'does it mention any in-scope cultural region?' (cultural-discovery).
+
+        Default: always pass. Subclasses override and return (False, reason)
+        to block at this stage.
+
+        Args:
+            title: Lowercased article title.
+            text: Cleaned, lowercased combined title+description+content.
+
+        Returns:
+            (passed, reason). reason is empty string on pass.
+        """
+        return (True, "")
 
     def _get_combined_text(self, article: Dict) -> str:
         """Combine title + description + content/text for analysis"""

@@ -182,6 +182,16 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - Verified 0 diff between all three locations
 - [x] **Manifest-aware deploy script (#50)** - 2026-04-28. `.nexusmind-owns` at repo root + `--dry-run` + `--force-skip-owned-drift` in both `.sh` and `.ps1`. Lists `filter_base_scorer.py` and `hybrid_scorer.py` (NexusMind-owned). Deploy now exits non-zero on drift between distillery and NexusMind copies.
 - [ ] **Harmonize prefilter structure across all 7 production filters (#52)** - Filed 2026-04-28. Survey shows 5 different override mechanisms, 3 with class/version drift between class name and dir, mixed flat-list vs dict containers. ~12-16h work; per-filter migration in priority order.
+  - [x] **ADR-018** (2026-04-28) - Declarative shape decision documented; backwards-compatible BasePreFilter extension chosen
+  - [x] **BasePreFilter extension** (2026-04-28) - EXCLUSION_PATTERNS / OVERRIDE_KEYWORDS / POSITIVE_PATTERNS / POSITIVE_THRESHOLD class attrs + default apply_filter() pipeline + _is_excluded / _has_override / _filter_specific_final_check helpers. All 7 production prefilters import + run unchanged (verified)
+  - [x] **sustainability_technology v3 migrated** (2026-04-28) - 6/6 self-tests pass; behavior preserved
+  - [ ] **belonging v1 migration** - next; flat-list-per-category form, has_exception + positive_count override
+  - [ ] **cultural-discovery v4 migration** - flat-list-per-category, per-pattern if ladder
+  - [ ] **uplifting v7 migration** - flat-list-per-category, pattern-pair override (no count)
+  - [ ] **investment-risk v6 migration** - re-exports v5; needs own class (drift fix at same time)
+  - [ ] **nature_recovery v2 migration** - inline list in method form, no override (simplest); class-name drift fix (V1→V2) at same time
+  - [ ] **foresight v1 migration** - count-then-pattern check (POSITIVE_THRESHOLD = 3)
+  - [ ] **Class-name drift cleanup batch** - sustech V2→V3, nature_recovery V1→V2, investment-risk give v6 own class. Deferred until all migrations done to avoid cross-repo coordination noise (NexusMind tests/unit/test_prefilter.py imports the V2 name)
 
 ## Prefilter Quality (Apr 2026)
 
