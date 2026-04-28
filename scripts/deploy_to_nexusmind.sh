@@ -1,15 +1,20 @@
 #!/bin/bash
 # Deploy a filter from llm-distillery to NexusMind
 #
-# Usage: ./scripts/deploy_to_nexusmind.sh <filter_name> <version> [--push]
+# Usage: ./scripts/deploy_to_nexusmind.sh <filter_name> <version>
+#                                          [--push] [--dry-run]
+#                                          [--force-skip-owned-drift]
 #
 # Examples:
 #   ./scripts/deploy_to_nexusmind.sh uplifting v5
 #   ./scripts/deploy_to_nexusmind.sh sustainability_technology v2 --push
+#   ./scripts/deploy_to_nexusmind.sh nature_recovery v2 --dry-run
 #
 # What it does:
 #   1. Copies filter folder to NexusMind
-#   2. Copies filters/common/ (shared utilities)
+#   2. Copies filters/common/ (shared utilities) — honors .nexusmind-owns
+#      manifest at repo root: listed files are skipped, and the deploy fails
+#      if a listed file has drifted from NexusMind's copy (issue #50).
 #   3. Commits changes to NexusMind repo
 #   4. Optionally pushes and shows pull commands for servers
 
@@ -20,12 +25,35 @@ DISTILLERY_ROOT="C:/local_dev/llm-distillery"
 NEXUSMIND_ROOT="C:/local_dev/NexusMind"
 
 # Parse arguments
-FILTER_NAME="$1"
-VERSION="$2"
-PUSH_FLAG="$3"
+FILTER_NAME=""
+VERSION=""
+PUSH_FLAG=""
+DRY_RUN=0
+FORCE_SKIP_OWNED_DRIFT=0
+for arg in "$@"; do
+    case "$arg" in
+        --push)                       PUSH_FLAG="--push" ;;
+        --dry-run)                    DRY_RUN=1 ;;
+        --force-skip-owned-drift)     FORCE_SKIP_OWNED_DRIFT=1 ;;
+        --*)                          echo "ERROR: unknown flag: $arg"; exit 1 ;;
+        *)
+            if [ -z "$FILTER_NAME" ]; then FILTER_NAME="$arg"
+            elif [ -z "$VERSION" ]; then VERSION="$arg"
+            else echo "ERROR: too many positional args ($arg)"; exit 1
+            fi
+            ;;
+    esac
+done
 
 if [ -z "$FILTER_NAME" ] || [ -z "$VERSION" ]; then
-    echo "Usage: $0 <filter_name> <version> [--push]"
+    echo "Usage: $0 <filter_name> <version> [--push] [--dry-run] [--force-skip-owned-drift]"
+    echo ""
+    echo "Flags:"
+    echo "  --push                      git push origin main on NexusMind after the commit"
+    echo "  --dry-run                   copy files but skip the git add/commit/push in NexusMind"
+    echo "  --force-skip-owned-drift    proceed even if a NexusMind-owned file has drifted"
+    echo "                              (use only after inspecting the drift and deciding"
+    echo "                              the NexusMind copy is the one to keep)"
     echo ""
     echo "Examples:"
     echo "  $0 uplifting v5"
@@ -38,6 +66,10 @@ SOURCE_DIR="${DISTILLERY_ROOT}/${FILTER_PATH}"
 DEST_DIR="${NEXUSMIND_ROOT}/${FILTER_PATH}"
 COMMON_SOURCE="${DISTILLERY_ROOT}/filters/common"
 COMMON_DEST="${NEXUSMIND_ROOT}/filters/common"
+# Defensive: strip any trailing slash so the ${src#$COMMON_SOURCE/} prefix
+# rewrite below works whether the assignment had a trailing slash or not.
+COMMON_SOURCE="${COMMON_SOURCE%/}"
+COMMON_DEST="${COMMON_DEST%/}"
 
 # Validate source exists
 if [ ! -d "$SOURCE_DIR" ]; then
@@ -76,11 +108,80 @@ mkdir -p "$DEST_DIR"
 cp -r "${SOURCE_DIR}/"* "$DEST_DIR/"
 echo "   Copied to: $DEST_DIR"
 
-# Step 2: Copy common utilities
+# Step 2: Copy common utilities, honoring .nexusmind-owns (issue #50).
+# Files listed in .nexusmind-owns evolve independently in NexusMind (e.g. the
+# BFloat16 .float() cast in filter_base_scorer.py) and must NOT be overwritten
+# by a blind sync from this repo.
 echo ""
-echo "2. Copying common utilities: filters/common/"
+echo "2. Copying common utilities: filters/common/ (honoring .nexusmind-owns)"
 mkdir -p "$COMMON_DEST"
-cp -r "${COMMON_SOURCE}/"* "$COMMON_DEST/"
+
+NEXUSMIND_OWNS_FILE="${DISTILLERY_ROOT}/.nexusmind-owns"
+OWNED_PATHS=()
+DRIFT_FOUND=0
+if [ -f "$NEXUSMIND_OWNS_FILE" ]; then
+    while IFS= read -r raw || [ -n "$raw" ]; do
+        line="${raw%%#*}"
+        # Strip trailing CR — the manifest is often edited on Windows and
+        # `read` does not strip \r in Git Bash.
+        line="${line%$'\r'}"
+        # Trim leading/trailing whitespace.
+        line="${line#"${line%%[![:space:]]*}"}"
+        line="${line%"${line##*[![:space:]]}"}"
+        [ -z "$line" ] && continue
+        OWNED_PATHS+=("$line")
+    done < "$NEXUSMIND_OWNS_FILE"
+fi
+
+# Typo guard: every manifest entry must exist on at least one side.
+for owned in "${OWNED_PATHS[@]}"; do
+    if [ ! -f "${DISTILLERY_ROOT}/${owned}" ] && [ ! -f "${NEXUSMIND_ROOT}/${owned}" ]; then
+        echo "ERROR: .nexusmind-owns entry not found on either side: $owned"
+        echo "       (fix the typo or remove the line)"
+        exit 1
+    fi
+done
+
+is_owned() {
+    local rel="$1"
+    for owned in "${OWNED_PATHS[@]}"; do
+        [ "$rel" = "$owned" ] && return 0
+    done
+    return 1
+}
+
+# Walk the source tree and copy file-by-file, skipping owned files. Drift
+# between distillery and NexusMind copies of an owned file is collected and
+# fails the deploy after the loop (unless --force-skip-owned-drift was passed).
+while IFS= read -r src; do
+    rel_inside_common="${src#$COMMON_SOURCE/}"
+    rel_from_root="filters/common/${rel_inside_common}"
+
+    if is_owned "$rel_from_root"; then
+        nm="${NEXUSMIND_ROOT}/${rel_from_root}"
+        if [ -f "$nm" ] && ! diff -q "$src" "$nm" >/dev/null 2>&1; then
+            echo "   DRIFT NexusMind-owned: ${rel_from_root}"
+            DRIFT_FOUND=1
+        else
+            echo "   skip  NexusMind-owned: ${rel_from_root}"
+        fi
+        continue
+    fi
+
+    dest="${COMMON_DEST}/${rel_inside_common}"
+    mkdir -p "$(dirname "$dest")"
+    cp "$src" "$dest"
+done < <(find "$COMMON_SOURCE" -type f -not -path '*/__pycache__/*')
+
+if [ "$DRIFT_FOUND" -eq 1 ] && [ "$FORCE_SKIP_OWNED_DRIFT" -ne 1 ]; then
+    echo ""
+    echo "ERROR: NexusMind-owned files have drifted from this repo (DRIFT lines above)."
+    echo "       Inspect with: diff $COMMON_SOURCE/<file> $COMMON_DEST/<file>"
+    echo "       Then either:"
+    echo "         (a) back-port the NexusMind change to this repo and re-run, or"
+    echo "         (b) re-run with --force-skip-owned-drift to keep NexusMind's copy."
+    exit 1
+fi
 echo "   Copied to: $COMMON_DEST"
 
 # Step 3: Git status in NexusMind
@@ -91,13 +192,21 @@ git status --short
 
 # Step 4: Commit
 echo ""
-echo "4. Committing changes..."
-git add -A
-COMMIT_MSG="Update ${FILTER_NAME} ${VERSION} from llm-distillery"
-git commit -m "$COMMIT_MSG" || echo "   (No changes to commit)"
+if [ "$DRY_RUN" -eq 1 ]; then
+    echo "4. DRY RUN: skipping git add/commit. Inspect $NEXUSMIND_ROOT, then revert with"
+    echo "   'git -C $NEXUSMIND_ROOT checkout -- .' if you do not want to keep the changes."
+else
+    echo "4. Committing changes..."
+    git add -A
+    COMMIT_MSG="Update ${FILTER_NAME} ${VERSION} from llm-distillery"
+    git commit -m "$COMMIT_MSG" || echo "   (No changes to commit)"
+fi
 
 # Step 5: Push if requested
-if [ "$PUSH_FLAG" == "--push" ]; then
+if [ "$DRY_RUN" -eq 1 ]; then
+    echo ""
+    echo "5. DRY RUN: skipping push."
+elif [ "$PUSH_FLAG" == "--push" ]; then
     echo ""
     echo "5. Pushing to origin..."
     git push origin main

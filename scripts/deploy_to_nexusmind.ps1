@@ -1,14 +1,19 @@
 # Deploy a filter from llm-distillery to NexusMind
 #
-# Usage: .\scripts\deploy_to_nexusmind.ps1 <filter_name> <version> [-Push]
+# Usage: .\scripts\deploy_to_nexusmind.ps1 <filter_name> <version>
+#                                           [-Push] [-DryRun]
+#                                           [-ForceSkipOwnedDrift]
 #
 # Examples:
 #   .\scripts\deploy_to_nexusmind.ps1 uplifting v5
 #   .\scripts\deploy_to_nexusmind.ps1 sustainability_technology v2 -Push
+#   .\scripts\deploy_to_nexusmind.ps1 nature_recovery v2 -DryRun
 #
 # What it does:
 #   1. Copies filter folder to NexusMind
-#   2. Copies filters/common/ (shared utilities)
+#   2. Copies filters/common/ (shared utilities) — honors .nexusmind-owns
+#      manifest at repo root: listed files are skipped, and the deploy fails
+#      if a listed file has drifted from NexusMind's copy (issue #50).
 #   3. Commits changes to NexusMind repo
 #   4. Optionally pushes and shows pull commands for servers
 
@@ -19,7 +24,9 @@ param(
     [Parameter(Mandatory=$true, Position=1)]
     [string]$Version,
 
-    [switch]$Push
+    [switch]$Push,
+    [switch]$DryRun,
+    [switch]$ForceSkipOwnedDrift
 )
 
 $ErrorActionPreference = "Stop"
@@ -33,6 +40,10 @@ $SourceDir = Join-Path $DistilleryRoot $FilterPath
 $DestDir = Join-Path $NexusMindRoot $FilterPath
 $CommonSource = Join-Path $DistilleryRoot "filters\common"
 $CommonDest = Join-Path $NexusMindRoot "filters\common"
+# Defensive: strip any trailing backslash so the Substring offset below is
+# correct whether the join inserted one or not.
+$CommonSource = $CommonSource.TrimEnd('\')
+$CommonDest = $CommonDest.TrimEnd('\')
 
 # Validate source exists
 if (-not (Test-Path $SourceDir)) {
@@ -79,13 +90,74 @@ if (-not (Test-Path $DestDir)) {
 Copy-Item -Path "$SourceDir\*" -Destination $DestDir -Recurse -Force
 Write-Host "   Copied to: $DestDir" -ForegroundColor Green
 
-# Step 2: Copy common utilities
+# Step 2: Copy common utilities, honoring .nexusmind-owns (issue #50).
+# Files listed in .nexusmind-owns evolve independently in NexusMind (e.g. the
+# BFloat16 .float() cast in filter_base_scorer.py) and must NOT be overwritten
+# by a blind sync from this repo.
 Write-Host ""
-Write-Host "2. Copying common utilities: filters\common\" -ForegroundColor Yellow
+Write-Host "2. Copying common utilities: filters\common\ (honoring .nexusmind-owns)" -ForegroundColor Yellow
 if (-not (Test-Path $CommonDest)) {
     New-Item -ItemType Directory -Path $CommonDest -Force | Out-Null
 }
-Copy-Item -Path "$CommonSource\*" -Destination $CommonDest -Recurse -Force
+
+$ManifestPath = Join-Path $DistilleryRoot ".nexusmind-owns"
+$OwnedPaths = @()
+if (Test-Path $ManifestPath) {
+    Get-Content $ManifestPath | ForEach-Object {
+        $line = ($_ -split '#', 2)[0].Trim()
+        if ($line) { $OwnedPaths += $line }
+    }
+}
+
+# Typo guard: every manifest entry must exist on at least one side.
+foreach ($owned in $OwnedPaths) {
+    $distSide = Join-Path $DistilleryRoot ($owned -replace '/', '\')
+    $nmSide   = Join-Path $NexusMindRoot ($owned -replace '/', '\')
+    if (-not (Test-Path $distSide) -and -not (Test-Path $nmSide)) {
+        Write-Error "ERROR: .nexusmind-owns entry not found on either side: $owned (fix the typo or remove the line)"
+        exit 1
+    }
+}
+
+$OwnedSet = @{}
+foreach ($p in $OwnedPaths) { $OwnedSet[$p] = $true }
+$script:DriftFound = $false
+
+# Walk the source tree and copy file-by-file, skipping owned files. Any drift
+# between distillery and NexusMind copies of an owned file is collected and
+# fails the deploy after the loop (unless -ForceSkipOwnedDrift was passed).
+Get-ChildItem -Path $CommonSource -Recurse -File |
+    Where-Object { $_.FullName -notmatch '\\__pycache__\\' } |
+    ForEach-Object {
+        $relInside = $_.FullName.Substring($CommonSource.Length + 1) -replace '\\', '/'
+        $relFromRoot = "filters/common/$relInside"
+
+        if ($OwnedSet.ContainsKey($relFromRoot)) {
+            $nm = Join-Path $NexusMindRoot ($relFromRoot -replace '/', '\')
+            if ((Test-Path $nm) -and (Get-FileHash -Algorithm SHA256 $_.FullName).Hash -ne (Get-FileHash -Algorithm SHA256 $nm).Hash) {
+                Write-Host "   DRIFT NexusMind-owned: $relFromRoot" -ForegroundColor Red
+                $script:DriftFound = $true
+            } else {
+                Write-Host "   skip  NexusMind-owned: $relFromRoot" -ForegroundColor DarkGray
+            }
+            return
+        }
+
+        $destFull = Join-Path $CommonDest ($relInside -replace '/', '\')
+        $destDir = Split-Path $destFull -Parent
+        if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+        Copy-Item -Path $_.FullName -Destination $destFull -Force
+    }
+
+if ($script:DriftFound -and -not $ForceSkipOwnedDrift) {
+    Write-Host ""
+    Write-Host "ERROR: NexusMind-owned files have drifted from this repo (DRIFT lines above)." -ForegroundColor Red
+    Write-Host "       Inspect with: Compare-Object (Get-Content $CommonSource\<file>) (Get-Content $CommonDest\<file>)" -ForegroundColor Red
+    Write-Host "       Then either:" -ForegroundColor Red
+    Write-Host "         (a) back-port the NexusMind change to this repo and re-run, or" -ForegroundColor Red
+    Write-Host "         (b) re-run with -ForceSkipOwnedDrift to keep NexusMind's copy." -ForegroundColor Red
+    exit 1
+}
 Write-Host "   Copied to: $CommonDest" -ForegroundColor Green
 
 # Step 3: Git status in NexusMind
@@ -96,18 +168,26 @@ git status --short
 
 # Step 4: Commit
 Write-Host ""
-Write-Host "4. Committing changes..." -ForegroundColor Yellow
-git add -A
-$CommitMsg = "Update $FilterName $Version from llm-distillery"
-$commitResult = git commit -m $CommitMsg 2>&1
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "   Committed: $CommitMsg" -ForegroundColor Green
+if ($DryRun) {
+    Write-Host "4. DRY RUN: skipping git add/commit. Inspect $NexusMindRoot, then revert with" -ForegroundColor DarkGray
+    Write-Host "   'git -C $NexusMindRoot checkout -- .' if you do not want to keep the changes." -ForegroundColor DarkGray
 } else {
-    Write-Host "   (No changes to commit)" -ForegroundColor DarkGray
+    Write-Host "4. Committing changes..." -ForegroundColor Yellow
+    git add -A
+    $CommitMsg = "Update $FilterName $Version from llm-distillery"
+    $commitResult = git commit -m $CommitMsg 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "   Committed: $CommitMsg" -ForegroundColor Green
+    } else {
+        Write-Host "   (No changes to commit)" -ForegroundColor DarkGray
+    }
 }
 
 # Step 5: Push if requested
-if ($Push) {
+if ($DryRun) {
+    Write-Host ""
+    Write-Host "5. DRY RUN: skipping push." -ForegroundColor DarkGray
+} elseif ($Push) {
     Write-Host ""
     Write-Host "5. Pushing to origin..." -ForegroundColor Yellow
     git push origin main

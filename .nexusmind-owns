@@ -1,0 +1,19 @@
+# Files in this repo that NexusMind owns.
+#
+# scripts/deploy_to_nexusmind.{sh,ps1} read this manifest and refuse to copy
+# the listed files into the NexusMind checkout, even though they live under
+# filters/common/ here. NexusMind evolves these files independently for
+# production-runtime concerns (BFloat16 casts, normalization plumbing) and a
+# blind sync from llm-distillery silently regresses production. See
+# llm-distillery#50 and the 2026-04-19 entry in memory/gotcha-log.md for the
+# incident that motivated this manifest.
+#
+# Format: one path per line, relative to the llm-distillery repo root. Forward
+# slashes. `#` starts a comment; blank lines ignored. The deploy scripts will
+# refuse to start if a listed path doesn't exist on either side (typo guard).
+#
+# Cross-reference: NexusMind/memory/patterns.md "Filter Sync" section is the
+# upstream of this list. Update both when adding entries.
+
+filters/common/filter_base_scorer.py
+filters/common/hybrid_scorer.py

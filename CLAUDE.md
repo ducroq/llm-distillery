@@ -29,6 +29,7 @@ framework: agent-ready-projects v1.9.0
 - **Use `load_base_model_for_seq_cls()`** from `filters/common/model_loading.py`. Never use `AutoModelForSequenceClassification` directly — Gemma-3-1B's `gemma3_text` config isn't in the Auto mapping.
 - **Keep PEFT adapters in OLD key format.** `.lora_A.weight` / `score.weight`, not `.lora_A.default.weight`. Never run `resave_adapter.py` before Hub upload — it breaks `PeftModel.from_pretrained()`.
 - **Fit `calibration.json` after every training run.** Isotonic regression on the val set. Commit with the filter package. The base scorer auto-loads it.
+- **Respect `.nexusmind-owns`.** Files listed in the manifest at repo root (e.g. `filters/common/filter_base_scorer.py`, `filters/common/hybrid_scorer.py`) evolve independently in NexusMind for production-runtime concerns. The deploy scripts skip them; do not edit them here unless you intend to back-port from NexusMind. Issue #50 codified this after a 2026-04-19 prod regression.
 
 ## Production Filters
 
