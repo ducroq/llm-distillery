@@ -168,9 +168,26 @@ class BelongingPreFilterV1(BasePreFilter):
         r'\b(obituary|obituaries|in memoriam)\b',
         r'\b(funeral|funeral mass|funeral service|memorial service)\b',
         r'\b(passed away|laid to rest|death notice)\b',
-        r'\b(dies aged|died aged|dies at \d|died at \d)\b',
+        # \d+ (was \d) — single-digit version failed on two-digit ages like
+        # "Dies at 99" / "Dies at 73", which is the common case (#45).
+        r'\b(dies aged|died aged|dies at \d+|died at \d+)\b',
+        # Verb-form variants of "dies" not anchored by "aged"/"at N" (#45).
+        # "Hong Kong Activist Dies After Decades of Protest", "Dies Following
+        # Long Illness", "Dies in Crash", "Dies While Hiking".
+        r'\b(dies|died) (after|following|in|while)\b',
         r'\b(survived by|in loving memory|paying tribute|pays tribute)\b',
         r'\b(mourners?|mourning|condolences)\b',
+        # Procession/vigil — strong death-context signal, low FP risk (#45).
+        r'\b(procession|candlelight vigil|memorial vigil)\b',
+        # "Rest in peace" / "RIP" — high signal, low FP. The standalone "RIP"
+        # token requires uppercase to avoid matching "rip" as a verb.
+        r'\b(rest in peace)\b',
+        r'\bRIP\b',
+        # "Killed in <year>" — historical-tragedy commemoration framing
+        # ("Family Killed in 1976 Bombing Remembered"). Anchored to a 4-digit
+        # year to keep FP risk low; bare "killed in <place>" would over-match
+        # current conflict reporting (#45 item 8).
+        r'\b(killed|murdered|assassinated) in \d{4}\b',
     ]
 
     # === MULTILINGUAL PATTERNS (Dutch, German, French) ===
@@ -341,9 +358,15 @@ class BelongingPreFilterV1(BasePreFilter):
             if not has_exception and positive_count < 2:
                 return False, "online_only"
 
-        # Obituary/funeral
+        # Obituary/funeral — require at least one *confirming* belonging positive
+        # signal even when an exception keyword is present. Without the pos>=1
+        # floor, generic exception words like "generation"/"elder" appearing in
+        # cultural-figure obits (e.g. "post-Rivera generation") would override
+        # the obit block (#45). Heritage funerals carry many positive signals so
+        # remain unaffected.
         if self._has_obituary_patterns(combined_text):
-            if not has_exception and positive_count < 2:
+            block = positive_count < 2 and not (has_exception and positive_count >= 1)
+            if block:
                 return False, "obituary_funeral"
 
         # Multilingual block patterns
@@ -551,6 +574,51 @@ def test_prefilter():
                     'songs passed down through heritage. The multigenerational gathering at the funeral brought '
                     'together families who had scattered, reconnecting them with their ancestral home and traditions.',
             'expected': (True, 'passed')
+        },
+
+        # Should BLOCK - Obituary leak cases from issue #45 (NexusMind#156)
+        # Each one previously bypassed: dies-with-verb-variant, procession,
+        # killed-in-year, two-digit age in dies-at-N, cultural-figure obit
+        # tripping bare "generation" exception.
+        {
+            'title': 'Hong Kong Activist Dies After Decades of Protest',
+            'text': 'A prominent pro-democracy figure passed away this week after suffering health complications. '
+                    'The activist had been involved in protest movements since the 1980s, organizing demonstrations '
+                    'and public campaigns over four decades. Statements have been issued by political groups '
+                    'acknowledging the loss. The activist is remembered for sustained advocacy work spanning generations.',
+            'expected': (False, 'obituary_funeral')
+        },
+        {
+            'title': 'Silent Procession Held for Stabbed Man',
+            'text': 'A silent procession took place in the city center today following the stabbing death of a local '
+                    'resident last week. Hundreds gathered to walk in solemn formation along the high street. The '
+                    'route ended at the location where the incident occurred. Local officials joined the procession '
+                    'alongside family members and friends.',
+            'expected': (False, 'obituary_funeral')
+        },
+        {
+            'title': 'Family Killed in 1976 Bombing Remembered',
+            'text': 'Half a century after the bombing that killed a family of four, descendants and local historians '
+                    'gathered at the memorial site. The event marked the anniversary of the attack which claimed '
+                    'lives during the height of the conflict. A wreath was laid at the plaque, and a moment of '
+                    'silence observed. Speeches recalled the victims and the broader toll of that period.',
+            'expected': (False, 'obituary_funeral')
+        },
+        {
+            'title': 'Mexican Muralist Dies at 99',
+            'text': 'Melchor Peredo Garcia, the Mexican muralist whose large-scale public works adorned several state '
+                    'government buildings, has died at the age of 99. Born in Veracruz, his career spanned more than '
+                    'seven decades. He was a contemporary of figures from the post-Rivera generation and contributed '
+                    'to the indigenismo aesthetic. His murals depict pre-Columbian themes and rural life.',
+            'expected': (False, 'obituary_funeral')
+        },
+        {
+            'title': 'Moya Brennan of Clannad Dies at 73',
+            'text': 'Moya Brennan, the lead singer of Irish folk band Clannad, has died at age 73 after a short '
+                    'illness. Brennan was the eldest of nine children from the musical Brennan family, which gave '
+                    'rise to both Clannad and her sister Enya\'s solo career. Across five decades the band brought '
+                    'traditional Irish music to global audiences. Tributes have come in from across the music world.',
+            'expected': (False, 'obituary_funeral')
         },
 
         # Should BLOCK - Online only community (may also match self_help due to "build community")
