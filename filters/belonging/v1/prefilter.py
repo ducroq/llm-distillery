@@ -163,6 +163,8 @@ class BelongingPreFilterV1(BasePreFilter):
     ]
 
     # === OBITUARY / FUNERAL PATTERNS ===
+    # TODO(#51): extract to a shared trained obituary detector with per-filter
+    # consumption policy. Until then, regex hold-the-line lives here.
 
     OBITUARY_PATTERNS = [
         r'\b(obituary|obituaries|in memoriam)\b',
@@ -180,9 +182,12 @@ class BelongingPreFilterV1(BasePreFilter):
         # Procession/vigil — strong death-context signal, low FP risk (#45).
         r'\b(procession|candlelight vigil|memorial vigil)\b',
         # "Rest in peace" / "RIP" — high signal, low FP. The standalone "RIP"
-        # token requires uppercase to avoid matching "rip" as a verb.
+        # token MUST be uppercase to avoid matching "rip current" (beach safety,
+        # very common) or "rip the page" — but these patterns are compiled with
+        # re.IGNORECASE in __init__, so use an inline (?-i:) to force case-
+        # sensitivity for this token only.
         r'\b(rest in peace)\b',
-        r'\bRIP\b',
+        r'(?-i:\bRIP\b)',
         # "Killed in <year>" — historical-tragedy commemoration framing
         # ("Family Killed in 1976 Bombing Remembered"). Anchored to a 4-digit
         # year to keep FP risk low; bare "killed in <place>" would over-match
@@ -618,6 +623,34 @@ def test_prefilter():
                     'illness. Brennan was the eldest of nine children from the musical Brennan family, which gave '
                     'rise to both Clannad and her sister Enya\'s solo career. Across five decades the band brought '
                     'traditional Irish music to global audiences. Tributes have come in from across the music world.',
+            'expected': (False, 'obituary_funeral')
+        },
+
+        # Should PASS - "rip current" must NOT match the standalone RIP pattern.
+        # Beach safety articles are common; the inline (?-i:) flag on RIP keeps
+        # IGNORECASE off for that token only. Pre-fix, this was blocked.
+        {
+            'title': 'Lifeguards Warn of Rip Currents at Local Beaches',
+            'text': 'Coastal authorities are reminding swimmers about the dangers of rip currents this summer. '
+                    'Several beach communities have installed new warning signs explaining how to identify and '
+                    'escape a rip current. Local surf clubs are organizing free water-safety workshops for families. '
+                    'The lifeguard service has expanded patrol hours along the popular stretches of coastline. '
+                    'Many beachgoers may not realize how powerful a rip can be, particularly during high tide.',
+            'expected': (True, 'passed')
+        },
+
+        # Should BLOCK - Override-logic isolation test. Article matches ONE obit
+        # pattern (dies at \d+) and trips the "generation" exception keyword,
+        # but carries no actual belonging signal (positive_count = 0). The
+        # pos>=1 floor on the obit branch must block this even with the
+        # exception. Pre-fix (without the floor), this would have passed.
+        {
+            'title': 'Op-Ed: How a Generation Lost Its Voice as the Author Dies at 84',
+            'text': 'When the columnist died at 84 last week, she carried with her a particular generation\'s '
+                    'sensibility. Her work for several decades influenced political writing and rhetorical style. '
+                    'Editors at the publication she served for thirty years have issued statements about her '
+                    'contribution to journalism. The newsroom plans an editorial retrospective next month. The '
+                    'literary world will be poorer without her acid wit and her willingness to call out hypocrisy.',
             'expected': (False, 'obituary_funeral')
         },
 
