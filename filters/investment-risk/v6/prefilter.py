@@ -127,7 +127,14 @@ class InvestmentRiskPreFilterV6(BasePreFilter):
     # Title/content keywords that suggest investment relevance — override
     # blocked-source decisions when present.
     INVESTMENT_KEYWORDS = [
-        r'\bfed\b',
+        # `the fed` / `fed <finance-context>` / `federal reserve` — bare
+        # `\bfed\b` previously fired on "fed up" / "force-fed" / "underfed"
+        # in unrelated articles, bypassing blocked-source rules. Tightened
+        # to require Fed-as-shorthand context (text is lowercased before
+        # matching, so case-sensitive disambiguation is unavailable).
+        r'\bfederal reserve\b',
+        r'\bthe fed\b',
+        r'\bfed (?:rate|chair|hike|cut|pivot|decision|policy|meeting|signals?|said|outlook)\b',
         r'\becb\b',
         r'interest rate',
         r'inflation',
@@ -275,6 +282,13 @@ class InvestmentRiskPreFilterV6(BasePreFilter):
         source_combined = f"{source} {source_type} {article_id}"
         text_combined = f"{title} {content}"
 
+        # Reason-string contract for sections 2/3/4 below: the embedded
+        # `pattern` / `keyword` is the raw regex string from a class-level
+        # constant (NOT user input), so injection isn't a concern. But the
+        # raw regex contains metacharacters (`\b`, `(`, `|`, etc.) — callers
+        # logging or pattern-matching against the reason should treat it as
+        # opaque, NOT as a sanitised display string.
+
         # 2. Allowed source -> immediate pass with matched-pattern reason
         for pattern in self.ALLOWED_SOURCE_PATTERNS:
             if re.search(pattern, source_combined, re.IGNORECASE):
@@ -322,6 +336,12 @@ class InvestmentRiskPreFilterV6(BasePreFilter):
                 self.EXCEPTION_PATTERNS_PER_CATEGORY.get(category, [])
             )
         return stats
+
+    # Cross-filter consistency: every other migrated filter exposes
+    # `get_statistics`. Investment-risk v5 historically used `get_stats`;
+    # both names point at the same method so callers using either
+    # convention work correctly.
+    get_statistics = get_stats
 
 
 # Backward-compat aliases. Existing code (including v6/base_scorer.py) imports
