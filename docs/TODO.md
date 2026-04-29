@@ -190,7 +190,8 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - [x] **uplifting v7 migrated** (2026-04-29) - 12/12 self-tests pass; behavior preserved. Same EXCLUSION_PATTERNS + EXCEPTION_PATTERNS_PER_CATEGORY pattern as CD v4 for the 3 pattern-with-exception categories (corporate_finance, military_security, crime_violence); 4th category (pure_speculation) is count-based (speculation_count >= 3 AND outcome_count == 0) and stays as separate class attrs with an inline check after the dict iteration. classify_content_type preserved. ThrivingPreFilterV1 (which subclasses UpliftingPreFilterV7) verified working. Surfaced bug: Dutch `munitie` and similar multilingual patterns lack `\b` boundaries — fire on English substrings like "co-MMUNITIE-s" (preserved as-is; tracked under Prefilter Quality).
   - [x] **investment-risk v6 migrated + class drift fix** (2026-04-29) - 11/11 self-tests pass; behavior preserved. v6 now has its own InvestmentRiskPreFilterV6 class (was a re-export of V5). Backward-compat aliases (InvestmentRiskPreFilterV5 = V6, InvestmentRiskPreFilter = V6) + legacy prefilter()/get_stats() functions kept so existing imports don't break. base_scorer.py updated to reference V6 directly. Data-shape harmonization only — apply_filter stays custom because the source-based flow + matched-pattern reason strings + title-only clickbait don't fit the base pipeline.
   - [x] **nature_recovery v2 migrated** (2026-04-29) - 6/6 self-tests pass; behavior preserved. Single text-pattern category (disaster_no_recovery) with one parallel exception list (recovery framing) lives in EXCLUSION_PATTERNS / EXCEPTION_PATTERNS_PER_CATEGORY. Custom apply_filter retained because: (1) nature-relatedness check runs FIRST in the original order — base's final-check hook runs LAST and would change reason precedence; (2) reason strings are bare category names (not "excluded_<category>"); (3) original v2 doesn't call `check_content_length` — same gap as CD v4 (tracked under Prefilter Quality). Class-name drift V1→V2 deferred to the cleanup batch as planned.
-  - [ ] **foresight v1 migration** - count-then-pattern check (POSITIVE_THRESHOLD = 3)
+  - [x] **foresight v1 migrated** (2026-04-29) - 10/10 self-tests pass; behavior preserved. Six block categories in EXCLUSION_PATTERNS dict; six positive-signal categories in custom POSITIVE_PATTERN_GROUPS dict (NOT base's POSITIVE_PATTERNS slot — semantics differ: foresight counts distinct *categories* with at least one match, while base's POSITIVE_THRESHOLD counts total matches). apply_filter stays custom for the distinct-categories-fired override + two pass reasons (`passed_positive_signals` for >=3 categories, `passed` for the no-block fall-through) + URL-based domain exclusions.
+  - [x] **All 7 production filters now migrated** (2026-04-29) - sustech v3, belonging v1, cultural-discovery v4, uplifting v7, investment-risk v6 (+ class drift fix), nature_recovery v2, foresight v1. Only the deferred class-name drift cleanup batch remains as #52 work.
   - [ ] **Class-name drift cleanup batch** - sustech V2→V3, nature_recovery V1→V2 still pending. (investment-risk v6 own class — DONE 2026-04-29 as part of its #52 migration.) Deferred until remaining migrations done to avoid cross-repo coordination noise (NexusMind tests/unit/test_prefilter.py imports the V2 name).
 
 ## Prefilter Quality (Apr 2026)
@@ -424,4 +425,81 @@ keywords (duplicate `deforestation` in the original list preserved
 verbatim), 1 disaster regex, 1 recovery-exception regex.
 
 Next: foresight v1 (count-based override — `POSITIVE_THRESHOLD = 3`).
+
+## #52 foresight v1 migration notes (2026-04-29)
+
+Seventh and final per-filter migration. Foresight's "count-based override"
+turned out to NOT fit BasePreFilter's POSITIVE_THRESHOLD slot — the
+semantics differ:
+
+- Base `POSITIVE_THRESHOLD`: bypass when `sum(p.findall() for p in
+  POSITIVE_PATTERNS) >= POSITIVE_THRESHOLD` — total match count.
+- Foresight v1: bypass when `count(group_name for group in
+  POSITIVE_PATTERN_GROUPS if any pattern in group matches) >= 3` —
+  distinct categories with at least one hit.
+
+A single repeated keyword in one foresight category counts as 1, not as N.
+Migrating to base's semantics would have changed the bypass behavior —
+some articles with 3+ matches all in one category would start bypassing
+where they previously didn't, and vice versa.
+
+Settled on: data-shape harmonization with a **custom slot**
+(`POSITIVE_PATTERN_GROUPS`, not `POSITIVE_PATTERNS`) so the difference is
+visible at the class definition. Six block categories DID move into
+`EXCLUSION_PATTERNS` cleanly (no per-category exceptions). Custom
+apply_filter retained for the distinct-categories-fired logic, the two
+pass reasons (`passed_positive_signals` vs `passed`), and URL-based
+domain exclusions.
+
+Behavior preservation: 10/10 self-test pass; pattern counts
+bit-for-bit identical to baseline (4/4/3/4/3/3 block; 8/4/4/6/3/15
+positive; 8/5 domain).
+
+## #52 retrospective (2026-04-29) — what we learned
+
+**All 7 production filters now share a consistent EXCLUSION_PATTERNS data
+shape**, even though only sustech v3 ended up using BasePreFilter's full
+declarative pipeline. The other 6 retained custom apply_filter for one
+or more of these reasons:
+
+| Reason for custom apply_filter | Filters affected |
+|---|---|
+| URL-based domain exclusions | belonging v1, CD v4, uplifting v7, foresight v1 |
+| Per-category exception lists | CD v4, uplifting v7, investment-risk v6 |
+| Per-category positive-count thresholds | belonging v1 |
+| Count-based block (not pattern-with-exception) | uplifting v7 (pure_speculation), foresight v1 (positive_categories) |
+| Source-based filtering on non-URL field | investment-risk v6 |
+| Matched-pattern reason strings (`allowed_source:reuters`) | investment-risk v6 |
+| Title-only checks | investment-risk v6 (clickbait), belonging v1 (#45 obit) |
+| Reason-precedence ordering depends on flow | nature_recovery v2 |
+| Bare reason strings (no `excluded_` prefix) | belonging v1, CD v4, uplifting v7, NR v2, foresight v1 |
+| Distinct pass reasons (`passed_positive_signals` etc.) | foresight v1 |
+| Existing `check_content_length` gap to preserve | CD v4, NR v2 |
+
+**The harmonization is in the *data*, not the *control flow*.** This is
+the right call given the genuine variety of filter logic. ADR-018
+explicitly permits "custom form" precisely for this case. Future filter
+authors can:
+
+1. Read EXCLUSION_PATTERNS to see what each filter blocks.
+2. Read EXCEPTION_PATTERNS_PER_CATEGORY (or POSITIVE_PATTERN_GROUPS, or
+   the filter-specific override slot) to see what pulls articles back through.
+3. Read apply_filter for the specific control flow this filter needs.
+
+That third step is no longer about hunting compiled-regex attributes and
+helper methods scattered through the file.
+
+**Surfaced bugs (preserved for zero-behavior-change scope; tracked under
+Prefilter Quality):**
+- CD v4 missing `check_content_length` call (regression vs v3).
+- nature_recovery v2 missing `check_content_length` call.
+- uplifting v7 multilingual `\b` boundary leak (Dutch `munitie` matches
+  inside English "co-MMUNITIE-s"; same bug shape as RIP/rip-current #45).
+
+**Remaining #52 work:**
+- Class-name drift cleanup batch: sustech V2→V3, nature_recovery V1→V2.
+  Deferred until cross-repo coordination with NexusMind (whose
+  `tests/unit/test_prefilter.py` imports the V2 / V1 names).
+- The three Prefilter Quality follow-ups above can be picked up with the
+  next version bump on each filter.
 

@@ -1,6 +1,23 @@
 """
 Foresight Pre-Filter v1.0
 
+ADR-018 declarative shape (data-only): the six text-pattern exclusion
+categories live in EXCLUSION_PATTERNS dict (compiled by BasePreFilter.__init__),
+and the six positive-signal pattern groups live in POSITIVE_PATTERN_GROUPS
+(compiled locally — semantics differ from base's POSITIVE_PATTERNS, see below).
+
+apply_filter stays custom because:
+
+- The override mechanism is "distinct positive *categories* with at least one
+  match >= 3", not base's "total POSITIVE_PATTERNS match count >= POSITIVE_THRESHOLD".
+  A single repeated keyword would inflate base's count but counts as one category
+  here. Different semantics, so POSITIVE_PATTERN_GROUPS is a custom slot rather
+  than shadowing base's POSITIVE_PATTERNS.
+- Two distinct pass reasons: "passed_positive_signals" (>=3 categories fire)
+  and "passed" (no block patterns triggered, no strong positive signals
+  either). Base pipeline returns just "passed".
+- URL-based domain exclusions run before content checks.
+
 Passes content likely to contain foresighted decision-making:
 - Government policy with long-term framing
 - Institutional reform and governance changes
@@ -15,20 +32,35 @@ Blocks content unlikely to contain decision-making context:
 - Crime reporting, breaking news events
 - Personal finance, individual advice
 - Social media chatter, listicles
+
+History:
+- v1.0 (2026-04-29): migrated to declarative BasePreFilter shape (#52, ADR-018).
+  No behavior change — pattern set, override semantics ("distinct positive
+  categories >= 3"), iteration order, and pass-reason distinction all preserved.
+  Self-test 10/10 passes; pattern counts identical (4/4/3/4/3/3 block;
+  8/4/4/6/3/15 positive; 8/5 domain).
+- v1.0 prior: hand-crafted seeds + soft caps + anti-hallucination prompt rule
+  (foresight-v1-lessons memory entry).
 """
 
 import re
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 from filters.common.base_prefilter import BasePreFilter
 
 
 class ForesightPreFilterV1(BasePreFilter):
-    """Fast rule-based pre-filter for foresight content"""
+    """Fast rule-based pre-filter for foresight content.
+
+    v1.0 (declarative-shape exclusion data per ADR-018; custom apply_filter
+    retained for distinct-categories-fired override semantics, two pass
+    reasons, and URL-based domain exclusions).
+    """
 
     VERSION = "1.0"
 
-    # === DOMAIN EXCLUSIONS (unlikely to contain governance decisions) ===
+    # === DOMAIN EXCLUSIONS (URL-based) ===
+    # Unlikely to contain governance decisions.
 
     SPORTS_ENTERTAINMENT_DOMAINS = [
         'espn.com',
@@ -49,140 +81,127 @@ class ForesightPreFilterV1(BasePreFilter):
         'creditkarma.com',
     ]
 
-    # === BLOCK PATTERNS (content without decision-making context) ===
+    # === ADR-018 EXCLUSION_PATTERNS ===
+    # Six block categories without per-category exceptions. Iteration order
+    # matches the legacy apply_filter() check order: sports, entertainment,
+    # crime, product_launch, listicle, social_media. Category keys match the
+    # (False, "<reason>") tuples this filter emits — no "excluded_" prefix.
+    EXCLUSION_PATTERNS = {
+        'sports': [
+            r'\b(scored a goal|final score|match result|championship game)\b',
+            r'\b(transfer window|transfer fee|signed a contract|free agent)\b',
+            r'\b(premier league|champions league|world cup|olympics|nba|nfl|mlb)\b',
+            r'\b(playoff|tournament bracket|relegation|promotion race)\b',
+        ],
+        'entertainment': [
+            r'\b(box office|opening weekend|movie review|film review)\b',
+            r'\b(album release|concert tour|grammy|oscar nomination)\b',
+            r'\b(celebrity|paparazzi|red carpet|gossip)\b',
+            r'\b(streaming premiere|netflix|disney\+|hulu)\b.*\b(release|premiere|season)\b',
+        ],
+        'crime': [
+            r'\b(mugshot|police chase|manhunt|crime scene)\b',
+            r'\b(murder suspect|robbery conviction|homicide investigation)\b',
+            r'\b(prison sentence|sentenced to \d+ years)\b',
+        ],
+        'product_launch': [
+            r'\b(unboxing|specs reveal|benchmark results?|hands-on review)\b',
+            r'\b(price starts at \$|available in stores|buy now|add to cart)\b',
+            r'\b(iphone \d|galaxy s\d|pixel \d)\b.*\b(release|launch|review)\b',
+            r'\b(product launch)\b.*\b(device|gadget|app|software|hardware)\b',
+        ],
+        'listicle': [
+            r'\b\d+ (best|top|ways to|tips for|reasons why|things you)\b',
+            r"\b(you won't believe|everything you need to know about|here's why you should)\b",
+            r'\b(ultimate guide to|definitive guide to)\b',
+        ],
+        'social_media': [
+            r'\b(went viral|trending on|twitter reacts|tiktok trend)\b',
+            r'\b(followers|likes and shares|engagement rate)\b',
+            r'\b(meme|viral video|social media storm)\b',
+        ],
+    }
 
-    SPORTS_PATTERNS = [
-        r'\b(scored a goal|final score|match result|championship game)\b',
-        r'\b(transfer window|transfer fee|signed a contract|free agent)\b',
-        r'\b(premier league|champions league|world cup|olympics|nba|nfl|mlb)\b',
-        r'\b(playoff|tournament bracket|relegation|promotion race)\b',
-    ]
+    # === POSITIVE PATTERN GROUPS ===
+    # Six categories of foresight-positive signals. The override fires when
+    # at least three distinct categories have any match (NOT when the total
+    # match count is >=3 — see module docstring). Compiled locally because
+    # the semantics differ from BasePreFilter.POSITIVE_PATTERNS (which counts
+    # total matches via POSITIVE_THRESHOLD). Custom slot avoids confusion.
+    POSITIVE_PATTERN_GROUPS = {
+        'policy_governance': [
+            # Policy and governance
+            r'\b(government policy|public policy|policy reform|policy change)\b',
+            r'\b(legislation|regulatory reform|constitutional|amendment)\b',
+            r'\b(parliament|congress|senate|cabinet|ministry)\b',
+            r'\b(governance|institutional reform|institutional change)\b',
+            # Long-term framing
+            r'\b(long-term|long term|decade-long|multi-year|multi-decade)\b',
+            r'\b(generational|intergenerational|future generations)\b',
+            r'\b(2030|2040|2050|2060|2070|2080|2100)\b',
+            r'\b(\d+ year plan|\d+-year strategy|\d+ year horizon)\b',
+        ],
+        'course_correction': [
+            r'\b(reversed|reversal|U-turn|u-turn|policy shift)\b',
+            r'\b(admitted failure|acknowledged mistake|changed course)\b',
+            r'\b(lessons learned|learned from|evidence showed)\b',
+            r'\b(reformed|overhauled|redesigned|restructured)\b',
+        ],
+        'education': [
+            r'\b(curriculum reform|education reform|education policy)\b',
+            r'\b(school system|education system|national curriculum)\b',
+            r'\b(teacher training|pedagogy|educational research)\b',
+            r'\b(knowledge transfer|capacity building|skills for the future)\b',
+        ],
+        'intergenerational': [
+            r'\b(pension reform|pension system|retirement system)\b',
+            r'\b(sovereign wealth fund|trust fund|endowment)\b',
+            r'\b(climate agreement|climate policy|emissions target)\b',
+            r'\b(infrastructure investment|infrastructure plan)\b',
+            r'\b(debt brake|fiscal rule|balanced budget)\b',
+            r'\b(future generations commissioner|ombudsman)\b',
+        ],
+        'indigenous_governance': [
+            r'\b(indigenous governance|indigenous knowledge|traditional management)\b',
+            r'\b(aboriginal|first nations|native title)\b',
+            r'\b(land rights|land management|stewardship)\b',
+        ],
+        'multilingual_positive': [
+            # Dutch
+            r'\b(overheidsbeleid|beleidshervorming|wetgeving|grondwet)\b',
+            r'\b(lange termijn|generaties|toekomstige generaties)\b',
+            r'\b(onderwijshervorming|curriculum|pensioenstelsel)\b',
+            # German
+            r'\b(regierungspolitik|politikreform|gesetzgebung|verfassung)\b',
+            r'\b(langfristig|generationen|zukünftige generationen)\b',
+            r'\b(bildungsreform|lehrplan|rentensystem|schuldenbremse)\b',
+            # French
+            r'\b(politique gouvernementale|réforme|législation|constitution)\b',
+            r'\b(long terme|générations|générations futures)\b',
+            r'\b(réforme éducative|programme scolaire|système de retraite)\b',
+            # Portuguese
+            r'\b(política governamental|reforma|legislação|constituição)\b',
+            r'\b(longo prazo|gerações|gerações futuras)\b',
+            r'\b(reforma educacional|currículo|sistema previdenciário)\b',
+            # Spanish
+            r'\b(política gubernamental|reforma|legislación|constitución)\b',
+            r'\b(largo plazo|generaciones|generaciones futuras)\b',
+            r'\b(reforma educativa|currículo|sistema de pensiones)\b',
+        ],
+    }
 
-    ENTERTAINMENT_PATTERNS = [
-        r'\b(box office|opening weekend|movie review|film review)\b',
-        r'\b(album release|concert tour|grammy|oscar nomination)\b',
-        r'\b(celebrity|paparazzi|red carpet|gossip)\b',
-        r'\b(streaming premiere|netflix|disney\+|hulu)\b.*\b(release|premiere|season)\b',
-    ]
-
-    CRIME_PATTERNS = [
-        r'\b(mugshot|police chase|manhunt|crime scene)\b',
-        r'\b(murder suspect|robbery conviction|homicide investigation)\b',
-        r'\b(prison sentence|sentenced to \d+ years)\b',
-    ]
-
-    PRODUCT_LAUNCH_PATTERNS = [
-        r'\b(unboxing|specs reveal|benchmark results?|hands-on review)\b',
-        r'\b(price starts at \$|available in stores|buy now|add to cart)\b',
-        r'\b(iphone \d|galaxy s\d|pixel \d)\b.*\b(release|launch|review)\b',
-        r'\b(product launch)\b.*\b(device|gadget|app|software|hardware)\b',
-    ]
-
-    LISTICLE_PATTERNS = [
-        r'\b\d+ (best|top|ways to|tips for|reasons why|things you)\b',
-        r"\b(you won't believe|everything you need to know about|here's why you should)\b",
-        r'\b(ultimate guide to|definitive guide to)\b',
-    ]
-
-    SOCIAL_MEDIA_PATTERNS = [
-        r'\b(went viral|trending on|twitter reacts|tiktok trend)\b',
-        r'\b(followers|likes and shares|engagement rate)\b',
-        r'\b(meme|viral video|social media storm)\b',
-    ]
-
-    # === POSITIVE SIGNAL PATTERNS (foresight indicators) ===
-
-    POLICY_GOVERNANCE_PATTERNS = [
-        # Policy and governance
-        r'\b(government policy|public policy|policy reform|policy change)\b',
-        r'\b(legislation|regulatory reform|constitutional|amendment)\b',
-        r'\b(parliament|congress|senate|cabinet|ministry)\b',
-        r'\b(governance|institutional reform|institutional change)\b',
-
-        # Long-term framing
-        r'\b(long-term|long term|decade-long|multi-year|multi-decade)\b',
-        r'\b(generational|intergenerational|future generations)\b',
-        r'\b(2030|2040|2050|2060|2070|2080|2100)\b',
-        r'\b(\d+ year plan|\d+-year strategy|\d+ year horizon)\b',
-    ]
-
-    COURSE_CORRECTION_PATTERNS = [
-        r'\b(reversed|reversal|U-turn|u-turn|policy shift)\b',
-        r'\b(admitted failure|acknowledged mistake|changed course)\b',
-        r'\b(lessons learned|learned from|evidence showed)\b',
-        r'\b(reformed|overhauled|redesigned|restructured)\b',
-    ]
-
-    EDUCATION_PATTERNS = [
-        r'\b(curriculum reform|education reform|education policy)\b',
-        r'\b(school system|education system|national curriculum)\b',
-        r'\b(teacher training|pedagogy|educational research)\b',
-        r'\b(knowledge transfer|capacity building|skills for the future)\b',
-    ]
-
-    INTERGENERATIONAL_PATTERNS = [
-        r'\b(pension reform|pension system|retirement system)\b',
-        r'\b(sovereign wealth fund|trust fund|endowment)\b',
-        r'\b(climate agreement|climate policy|emissions target)\b',
-        r'\b(infrastructure investment|infrastructure plan)\b',
-        r'\b(debt brake|fiscal rule|balanced budget)\b',
-        r'\b(future generations commissioner|ombudsman)\b',
-    ]
-
-    INDIGENOUS_GOVERNANCE_PATTERNS = [
-        r'\b(indigenous governance|indigenous knowledge|traditional management)\b',
-        r'\b(aboriginal|first nations|native title)\b',
-        r'\b(land rights|land management|stewardship)\b',
-    ]
-
-    # === MULTILINGUAL POSITIVE PATTERNS ===
-
-    MULTILINGUAL_POSITIVE_PATTERNS = [
-        # Dutch
-        r'\b(overheidsbeleid|beleidshervorming|wetgeving|grondwet)\b',
-        r'\b(lange termijn|generaties|toekomstige generaties)\b',
-        r'\b(onderwijshervorming|curriculum|pensioenstelsel)\b',
-
-        # German
-        r'\b(regierungspolitik|politikreform|gesetzgebung|verfassung)\b',
-        r'\b(langfristig|generationen|zukünftige generationen)\b',
-        r'\b(bildungsreform|lehrplan|rentensystem|schuldenbremse)\b',
-
-        # French
-        r'\b(politique gouvernementale|réforme|législation|constitution)\b',
-        r'\b(long terme|générations|générations futures)\b',
-        r'\b(réforme éducative|programme scolaire|système de retraite)\b',
-
-        # Portuguese
-        r'\b(política governamental|reforma|legislação|constituição)\b',
-        r'\b(longo prazo|gerações|gerações futuras)\b',
-        r'\b(reforma educacional|currículo|sistema previdenciário)\b',
-
-        # Spanish
-        r'\b(política gubernamental|reforma|legislación|constitución)\b',
-        r'\b(largo plazo|generaciones|generaciones futuras)\b',
-        r'\b(reforma educativa|currículo|sistema de pensiones)\b',
-    ]
+    # Number of distinct positive-signal categories required to bypass blocks.
+    # 3 of 6 → meaningful signal density without requiring all categories.
+    POSITIVE_CATEGORIES_THRESHOLD = 3
 
     def __init__(self):
-        """Initialize pre-filter with compiled regex patterns"""
+        """Compile POSITIVE_PATTERN_GROUPS; base compiles EXCLUSION_PATTERNS
+        into self._compiled_exclusions."""
         super().__init__()
-
-        # Block patterns
-        self.sports_regex = [re.compile(p, re.IGNORECASE) for p in self.SPORTS_PATTERNS]
-        self.entertainment_regex = [re.compile(p, re.IGNORECASE) for p in self.ENTERTAINMENT_PATTERNS]
-        self.crime_regex = [re.compile(p, re.IGNORECASE) for p in self.CRIME_PATTERNS]
-        self.product_launch_regex = [re.compile(p, re.IGNORECASE) for p in self.PRODUCT_LAUNCH_PATTERNS]
-        self.listicle_regex = [re.compile(p, re.IGNORECASE) for p in self.LISTICLE_PATTERNS]
-        self.social_media_regex = [re.compile(p, re.IGNORECASE) for p in self.SOCIAL_MEDIA_PATTERNS]
-
-        # Positive patterns
-        self.policy_regex = [re.compile(p, re.IGNORECASE) for p in self.POLICY_GOVERNANCE_PATTERNS]
-        self.correction_regex = [re.compile(p, re.IGNORECASE) for p in self.COURSE_CORRECTION_PATTERNS]
-        self.education_regex = [re.compile(p, re.IGNORECASE) for p in self.EDUCATION_PATTERNS]
-        self.intergenerational_regex = [re.compile(p, re.IGNORECASE) for p in self.INTERGENERATIONAL_PATTERNS]
-        self.indigenous_regex = [re.compile(p, re.IGNORECASE) for p in self.INDIGENOUS_GOVERNANCE_PATTERNS]
-        self.multilingual_positive_regex = [re.compile(p, re.IGNORECASE) for p in self.MULTILINGUAL_POSITIVE_PATTERNS]
+        self._compiled_positive_groups: Dict[str, List[re.Pattern]] = {
+            cat: [re.compile(p, re.IGNORECASE) for p in patterns]
+            for cat, patterns in self.POSITIVE_PATTERN_GROUPS.items()
+        }
 
     def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """
@@ -192,61 +211,66 @@ class ForesightPreFilterV1(BasePreFilter):
         Designed to be permissive — the oracle prompt handles false positives
         via soft content-type caps.
 
-        Args:
-            article: Dict with 'title' and 'text'/'content' keys
+        Custom flow (not BasePreFilter.apply_filter): the distinct-categories-fired
+        override + two-tier pass reasons + URL domain exclusions don't fit the
+        standard pipeline.
 
         Returns:
             (should_score, reason)
-            - (True, "passed"): Send to LLM
-            - (False, "reason"): Block with reason
+            - (True, "passed_positive_signals"): >=3 distinct positive-signal
+                  categories fired — pass even if blocks would also fire
+            - (True, "passed"): No blocks triggered, weak/no positive signal
+            - (False, "<category>"): Block with reason (sports / entertainment
+                  / crime / product_launch / listicle / social_media /
+                  excluded_domain_*)
         """
-        # Check article structure
+        # Validate article structure
         is_valid, validation_reason = self.validate_article(article)
         if not is_valid:
             return False, validation_reason
 
-        # Check content length
+        # Content length
         passed, reason = self.check_content_length(article)
         if not passed:
             return False, reason
 
-        # Check domain exclusions
+        # Domain exclusions
         url = article.get('url', '')
         if url:
             domain_block = self._check_domain_exclusions(url)
             if domain_block:
                 return False, domain_block
 
-        # Get combined text for analysis
+        # Combined cleaned text
         combined_text = self._get_combined_clean_text(article)
 
-        # Count positive signals
-        positive_count = self._count_positive_signals(combined_text)
+        # Count distinct positive-signal CATEGORIES that fire (not total matches).
+        # Important: a single repeated keyword in one category counts as 1 here,
+        # not as N. Differs from BasePreFilter.POSITIVE_THRESHOLD semantics.
+        positive_categories = sum(
+            1
+            for compiled in self._compiled_positive_groups.values()
+            if self.has_any_pattern(combined_text, compiled)
+        )
 
-        # If strong positive signals, always pass (even if block patterns match)
-        if positive_count >= 3:
+        # Strong positive signals — pass with distinct reason, even if blocks
+        # would also fire.
+        if positive_categories >= self.POSITIVE_CATEGORIES_THRESHOLD:
             return True, "passed_positive_signals"
 
-        # Check block patterns — only block if NO positive signals
-        if positive_count == 0:
-            if self.has_any_pattern(combined_text, self.sports_regex):
-                return False, "sports"
-            if self.has_any_pattern(combined_text, self.entertainment_regex):
-                return False, "entertainment"
-            if self.has_any_pattern(combined_text, self.crime_regex):
-                return False, "crime"
-            if self.has_any_pattern(combined_text, self.product_launch_regex):
-                return False, "product_launch"
-            if self.has_any_pattern(combined_text, self.listicle_regex):
-                return False, "listicle"
-            if self.has_any_pattern(combined_text, self.social_media_regex):
-                return False, "social_media"
+        # Block patterns — only consulted when there are NO positive signals
+        # at all. Articles with 1-2 categories of positive signals pass through
+        # to the oracle for nuanced judgment.
+        if positive_categories == 0:
+            for category, compiled_patterns in self._compiled_exclusions.items():
+                if self.has_any_pattern(combined_text, compiled_patterns):
+                    return False, category
 
-        # Pass everything else — the oracle handles nuance
+        # Default: pass. The oracle handles nuance.
         return True, "passed"
 
     def _check_domain_exclusions(self, url: str) -> str:
-        """Check if URL is from an excluded domain"""
+        """Check if URL is from an excluded domain. Returns reason or empty string."""
         url_lower = url.lower()
 
         for domain in self.SPORTS_ENTERTAINMENT_DOMAINS:
@@ -259,45 +283,22 @@ class ForesightPreFilterV1(BasePreFilter):
 
         return ""
 
-    def _count_positive_signals(self, text: str) -> int:
-        """Count how many foresight-positive signal CATEGORIES are present.
-
-        Returns the number of distinct pattern groups that fired (0-6),
-        not the total number of individual matches. This prevents a single
-        repeated keyword from inflating the count.
-        """
-        count = 0
-        for group in [
-            self.policy_regex,
-            self.correction_regex,
-            self.education_regex,
-            self.intergenerational_regex,
-            self.indigenous_regex,
-            self.multilingual_positive_regex,
-        ]:
-            if self.has_any_pattern(text, group):
-                count += 1
-        return count
-
     def get_statistics(self) -> Dict:
         """Return filter statistics"""
         return {
             'version': self.VERSION,
+            'positive_categories_threshold': self.POSITIVE_CATEGORIES_THRESHOLD,
             'block_patterns': {
-                'sports': len(self.SPORTS_PATTERNS),
-                'entertainment': len(self.ENTERTAINMENT_PATTERNS),
-                'crime': len(self.CRIME_PATTERNS),
-                'product_launch': len(self.PRODUCT_LAUNCH_PATTERNS),
-                'listicle': len(self.LISTICLE_PATTERNS),
-                'social_media': len(self.SOCIAL_MEDIA_PATTERNS),
+                category: len(patterns)
+                for category, patterns in self.EXCLUSION_PATTERNS.items()
             },
             'positive_patterns': {
-                'policy_governance': len(self.POLICY_GOVERNANCE_PATTERNS),
-                'course_correction': len(self.COURSE_CORRECTION_PATTERNS),
-                'education': len(self.EDUCATION_PATTERNS),
-                'intergenerational': len(self.INTERGENERATIONAL_PATTERNS),
-                'indigenous_governance': len(self.INDIGENOUS_GOVERNANCE_PATTERNS),
-                'multilingual': len(self.MULTILINGUAL_POSITIVE_PATTERNS),
+                # Reported with the legacy stats key name (`multilingual` for
+                # the multilingual_positive group) for backward-compat with
+                # any consumer that reads stats dicts. Internal class-attr
+                # name is `multilingual_positive` for clarity.
+                ('multilingual' if cat == 'multilingual_positive' else cat): len(patterns)
+                for cat, patterns in self.POSITIVE_PATTERN_GROUPS.items()
             },
             'domain_exclusions': {
                 'sports_entertainment': len(self.SPORTS_ENTERTAINMENT_DOMAINS),
