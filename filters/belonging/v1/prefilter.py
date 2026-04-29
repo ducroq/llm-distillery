@@ -229,7 +229,7 @@ class BelongingPreFilterV1(BasePreFilter):
     }
 
     # === EXCEPTION PATTERNS — bypass any exclusion when present ===
-    # Distinct from POSITIVE_PATTERNS: exception detection is binary (any match
+    # Distinct from POSITIVE_SIGNAL_PATTERNS: exception detection is binary (any match
     # -> bypass), positive signals are counted.
     EXCEPTION_PATTERNS = [
         # Genuine community organizing
@@ -248,13 +248,16 @@ class BelongingPreFilterV1(BasePreFilter):
     ]
 
     # === POSITIVE SIGNAL PATTERNS — counted, used in threshold checks ===
-    # Note: this attribute name shadows BasePreFilter.POSITIVE_PATTERNS (the
-    # ADR-018 single-bypass slot). Belonging consumes the count via per-category
-    # thresholds rather than the base POSITIVE_THRESHOLD binary bypass — and
-    # POSITIVE_THRESHOLD stays at 0, so base's _has_override never fires on
-    # this list. Patterns get compiled into self._compiled_positives by
-    # super().__init__(); belonging reads them from there in apply_filter().
-    POSITIVE_PATTERNS = [
+    # Renamed from POSITIVE_PATTERNS (which shadowed BasePreFilter's slot of
+    # the same name) to make the semantic difference explicit. Base's
+    # POSITIVE_PATTERNS feeds an "any-match-bypasses-exclusions" count check
+    # gated by POSITIVE_THRESHOLD. Belonging's signals feed *per-category*
+    # threshold checks in apply_filter — same data shape, different consumption.
+    # The shadow was inert (POSITIVE_THRESHOLD stays at 0 so base never read
+    # it), but a future maintainer setting POSITIVE_THRESHOLD > 0 would have
+    # silently activated base semantics on this list. Renaming closes that
+    # trap. Compiled locally into self._compiled_positive_signals.
+    POSITIVE_SIGNAL_PATTERNS = [
         # Community bonds
         r'\b(neighbor|neighbours|neighborly|neighbourhood)\b',
         r'\b(piazza|town square|village square|community center)\b',
@@ -290,10 +293,13 @@ class BelongingPreFilterV1(BasePreFilter):
 
     def __init__(self):
         """Compile belonging-specific patterns; base compiles EXCLUSION_PATTERNS
-        and POSITIVE_PATTERNS into self._compiled_exclusions / _compiled_positives."""
+        into self._compiled_exclusions."""
         super().__init__()
         self._compiled_exceptions = [
             re.compile(p, re.IGNORECASE) for p in self.EXCEPTION_PATTERNS
+        ]
+        self._compiled_positive_signals = [
+            re.compile(p, re.IGNORECASE) for p in self.POSITIVE_SIGNAL_PATTERNS
         ]
         self._compiled_multilingual_positives = [
             re.compile(p, re.IGNORECASE) for p in self.MULTILINGUAL_POSITIVE_PATTERNS
@@ -330,7 +336,7 @@ class BelongingPreFilterV1(BasePreFilter):
         combined_text = self._get_combined_clean_text(article)
 
         positive_count = (
-            self.count_pattern_matches(combined_text, self._compiled_positives)
+            self.count_pattern_matches(combined_text, self._compiled_positive_signals)
             + self.count_pattern_matches(combined_text, self._compiled_multilingual_positives)
         )
         has_exception = self.has_any_pattern(combined_text, self._compiled_exceptions)
@@ -418,7 +424,7 @@ class BelongingPreFilterV1(BasePreFilter):
             'tourism_domains': len(self.TRAVEL_TOURISM_DOMAINS),
             'self_help_domains': len(self.SELF_HELP_DOMAINS),
             'exception_patterns': len(self.EXCEPTION_PATTERNS),
-            'positive_patterns': len(self.POSITIVE_PATTERNS),
+            'positive_patterns': len(self.POSITIVE_SIGNAL_PATTERNS),
             'multilingual_positive_patterns': len(self.MULTILINGUAL_POSITIVE_PATTERNS),
         }
         for category, patterns in self.EXCLUSION_PATTERNS.items():

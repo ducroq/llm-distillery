@@ -239,17 +239,19 @@ class CulturalDiscoveryPreFilterV4(BasePreFilter):
         ],
     }
 
-    # === POSITIVE CULTURAL DISCOVERY INDICATORS ===
-    # Used by classify_content_type() to flag articles with strong discovery
-    # value (count >= 2 -> "cultural_discovery").
+    # === DISCOVERY PATTERNS ===
+    # Used by classify_content_type() to flag articles with strong cultural-
+    # discovery value (count >= 2 -> "cultural_discovery").
     #
-    # Note: this attribute name shadows BasePreFilter.POSITIVE_PATTERNS (the
-    # ADR-018 single-bypass slot). CD consumes the count via classify_content_type
-    # rather than the base POSITIVE_THRESHOLD bypass — and POSITIVE_THRESHOLD
-    # stays at 0, so base's _has_override never reads it. Patterns get compiled
-    # into self._compiled_positives by super().__init__(); CD reads them from
-    # there directly.
-    POSITIVE_PATTERNS = [
+    # Renamed from POSITIVE_PATTERNS (which shadowed BasePreFilter's slot of
+    # the same name) to make the semantic difference explicit. Base's
+    # POSITIVE_PATTERNS feeds an "any-match-bypasses-exclusions" count gated
+    # by POSITIVE_THRESHOLD. CD's discovery patterns feed classify_content_type's
+    # tier assignment instead — different consumption, separate slot. The shadow
+    # was inert (POSITIVE_THRESHOLD stays at 0), but a future maintainer setting
+    # POSITIVE_THRESHOLD > 0 would have silently activated base bypass semantics.
+    # Renaming closes that trap. Compiled locally into self._compiled_discovery.
+    DISCOVERY_PATTERNS = [
         # Archaeological discoveries
         r'\b(discovered|unearthed|excavated|found)\b',
         r'\b(archaeological find|ancient site|artifact)\b',
@@ -269,13 +271,16 @@ class CulturalDiscoveryPreFilterV4(BasePreFilter):
     ]
 
     def __init__(self):
-        """Compile per-category exceptions; base compiles EXCLUSION_PATTERNS
-        and POSITIVE_PATTERNS into self._compiled_exclusions / _compiled_positives."""
+        """Compile per-category exceptions + discovery patterns; base compiles
+        EXCLUSION_PATTERNS into self._compiled_exclusions."""
         super().__init__()
         self._compiled_exceptions_per_category: Dict[str, List[re.Pattern]] = {
             cat: [re.compile(p, re.IGNORECASE) for p in patterns]
             for cat, patterns in self.EXCEPTION_PATTERNS_PER_CATEGORY.items()
         }
+        self._compiled_discovery: List[re.Pattern] = [
+            re.compile(p, re.IGNORECASE) for p in self.DISCOVERY_PATTERNS
+        ]
 
     def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """
@@ -334,7 +339,7 @@ class CulturalDiscoveryPreFilterV4(BasePreFilter):
         combined_text = f"{title} {text}".lower()
 
         # Cultural discovery boost takes precedence over exclusion classification.
-        if self.count_pattern_matches(combined_text, self._compiled_positives) >= 2:
+        if self.count_pattern_matches(combined_text, self._compiled_discovery) >= 2:
             return "cultural_discovery"
 
         for category, compiled_patterns in self._compiled_exclusions.items():
@@ -372,7 +377,7 @@ class CulturalDiscoveryPreFilterV4(BasePreFilter):
             'vc_startup_domains': len(self.VC_STARTUP_DOMAINS),
             'defense_domains': len(self.DEFENSE_DOMAINS),
             'code_hosting_domains': len(self.CODE_HOSTING_DOMAINS),
-            'positive_patterns': len(self.POSITIVE_PATTERNS),
+            'discovery_patterns': len(self.DISCOVERY_PATTERNS),
         }
         for category, patterns in self.EXCLUSION_PATTERNS.items():
             stats[f'{category}_patterns'] = len(patterns)
