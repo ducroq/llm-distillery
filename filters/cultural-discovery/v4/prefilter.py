@@ -226,7 +226,14 @@ class CulturalDiscoveryPreFilterV4(BasePreFilter):
             r'\b(public access|public benefit|educational purpose)\b',
             r'\b(charitable|foundation|endowment)\b',
             r'\b(repatriation|returned|restitution|provenance)\b',
-            r'\b(colonial|looted|stolen|illicit)\b',
+            # `looted|stolen|illicit` are art-crime-specific; bare `colonial`
+            # was previously in this list but is far too broad — it bypasses
+            # celebrity_art on any article mentioning "colonial mansion",
+            # "colonial cuisine", "colonial era", etc. Surrounding patterns
+            # (repatriation/restitution/provenance/origin country/rightful
+            # owner/cultural property) already cover legitimate art-
+            # restitution framing without colonial as a bare anchor.
+            r'\b(looted|stolen|illicit)\b',
             r'\b(origin country|rightful owner|cultural property)\b',
             r'\b(public donation|museum acquisition|gift to nation)\b',
             r'\b(permanent collection|public display|open access)\b',
