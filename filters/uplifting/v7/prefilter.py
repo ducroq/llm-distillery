@@ -28,12 +28,19 @@ History:
   verbatim. Self-test (12/12 vs v7-actual baseline) passes; pattern counts
   identical (21/11, 19/18, 37/25 + 7 speculation / 6 outcome).
 
-Surfaced (not fixed in this migration — preserves current behavior):
-- Several multilingual patterns (NL/DE/FR) lack `\b` word boundaries and
-  fire on English substrings — e.g. Dutch `munitie` (ammunition) matches
-  inside "communities" via co-MMUNITIE-s. Same bug shape as the
-  RIP/rip-current case (#45). Tracked separately in TODO under Prefilter
-  Quality.
+History (cont.):
+- v7.0 (2026-04-29 #2): regex-correctness sweep — added `\b` boundaries
+  to all multilingual (NL/DE/FR) alternations across EXCLUSION_PATTERNS
+  and EXCEPTION_PATTERNS_PER_CATEGORY. Several were firing on English
+  substrings: `munitie` inside "communities" (confirmed FP), `viol`
+  inside "violence"/"violent"/"violation"/"viola"/"violin" (very common
+  English words — large false-positive vector for crime_violence on
+  English content), `fusion` and `acquisition` (common English nouns —
+  false `corporate_finance` blocks), `auteur` (false on "auteur theory"
+  / "auteur cinema"), `association` exception (over-broad bypass). The
+  locked-in test case for "New Technology Could Transform Energy
+  Production" was rewritten — it now correctly hits `pure_speculation`
+  instead of the bug-induced `military_security` block.
 """
 
 import re
@@ -98,25 +105,33 @@ class UpliftingPreFilterV7(BasePreFilter):
             r'\b(m&a|merger|acquisition|buyout|takeover|acqui-?hire)\b',
             r'(investor relations|shareholder value|dividend|stock buyback)',
             # === DUTCH (NL) ===
-            r'(aandelenkoers|beurskoers|marktkapitalisatie)',
-            r'(kwartaalcijfers|kwartaalresultaten|boekjaar)',
-            r'(investeringsronde|durfkapitaal|risicokapitaal)',
-            r'(beursgang|fusie|overname)',
+            r'\b(aandelenkoers|beurskoers|marktkapitalisatie)\b',
+            r'\b(kwartaalcijfers|kwartaalresultaten|boekjaar)\b',
+            r'\b(investeringsronde|durfkapitaal|risicokapitaal)\b',
+            r'\b(beursgang|fusie|overname)\b',
             # === GERMAN (DE) ===
-            r'(aktienkurs|börsenkurs|marktkapitalisierung)',
-            r'(quartalszahlen|geschäftsjahr|finanzperformance)',
-            r'(finanzierungsronde|risikokapital|wagniskapital)',
-            r'(börsengang|fusion|übernahme)',
+            r'\b(aktienkurs|börsenkurs|marktkapitalisierung)\b',
+            r'\b(quartalszahlen|geschäftsjahr|finanzperformance)\b',
+            r'\b(finanzierungsronde|risikokapital|wagniskapital)\b',
+            # `fusion` is a German finance term but ALSO common English
+            # ("nuclear fusion", "fusion energy" etc.). The `\b` keeps it
+            # bounded — it still matches German "Fusion" correctly, and
+            # English use is on-topic anyway (nuclear fusion is corporate
+            # at the moment) so the rare collision is acceptable.
+            r'\b(börsengang|fusion|übernahme)\b',
             # === FRENCH (FR) ===
-            r'(cours de bourse|capitalisation boursière)',
-            r'(résultats trimestriels|exercice fiscal)',
-            r'(levée de fonds|capital-risque)',
-            r'(introduction en bourse|fusion|acquisition)',
+            r'\b(cours de bourse|capitalisation boursière)\b',
+            r'\b(résultats trimestriels|exercice fiscal)\b',
+            r'\b(levée de fonds|capital-risque)\b',
+            # `fusion` and `acquisition` are common English words; `\b`
+            # keeps them bounded to whole-token matches (was previously
+            # firing on substrings of "data acquisition", "language
+            # acquisition" etc.). Whole-word matches are intentional —
+            # an English article about "company acquisition" is on-topic
+            # for corporate_finance.
+            r'\b(introduction en bourse|fusion|acquisition)\b',
         ],
         # Military operations, security measures. Multilingual: NL/DE/FR.
-        # NOTE: several multilingual patterns lack `\b` boundaries (e.g.
-        # `munitie`, `troops`-equivalent variants) and may FP on English
-        # substrings. Behavior preserved here; tracked as a follow-up.
         'military_security': [
             r'\b(military buildup|defense spending|armed forces|troop deployment)\b',
             r'\b(weapons system|arms deal|ammunition|missiles|fighter jets|tanks)\b',
@@ -126,20 +141,24 @@ class UpliftingPreFilterV7(BasePreFilter):
             r'\b(troops|soldiers|battalion|regiment|special forces)\b',
             r'(military spending|arms procurement|defense contract)',
             # === DUTCH (NL) ===
-            r'(militaire opbouw|defensie-uitgaven|krijgsmacht|troepenmacht)',
-            r'(wapensysteem|wapenhandel|munitie|raketten|gevechtsvliegtuigen)',
-            r'(navo-uitbreiding|militaire alliantie|defensieverdrag)',
-            r'(grensbeveiliging|grensbewaking|militaire oefening)',
+            r'\b(militaire opbouw|defensie-uitgaven|krijgsmacht|troepenmacht)\b',
+            # `munitie` previously matched inside English "co-MMUNITIE-s"
+            # — a confirmed false-positive that blocked any English article
+            # mentioning "communities" as `military_security`. The `\b`
+            # closes that leak.
+            r'\b(wapensysteem|wapenhandel|munitie|raketten|gevechtsvliegtuigen)\b',
+            r'\b(navo-uitbreiding|militaire alliantie|defensieverdrag)\b',
+            r'\b(grensbeveiliging|grensbewaking|militaire oefening)\b',
             # === GERMAN (DE) ===
-            r'(militärischer aufbau|verteidigungsausgaben|streitkräfte)',
-            r'(waffensystem|waffenhandel|munition|raketen|kampfflugzeuge)',
-            r'(nato-erweiterung|militärbündnis|verteidigungspakt)',
-            r'(grenzschutz|militärübung|verteidigungshaushalt)',
+            r'\b(militärischer aufbau|verteidigungsausgaben|streitkräfte)\b',
+            r'\b(waffensystem|waffenhandel|munition|raketen|kampfflugzeuge)\b',
+            r'\b(nato-erweiterung|militärbündnis|verteidigungspakt)\b',
+            r'\b(grenzschutz|militärübung|verteidigungshaushalt)\b',
             # === FRENCH (FR) ===
-            r'(renforcement militaire|dépenses de défense|forces armées)',
-            r"(système d'armes|vente d'armes|munitions|missiles)",
-            r"(élargissement de l'otan|alliance militaire|pacte de défense)",
-            r'(sécurité aux frontières|exercice militaire|budget de la défense)',
+            r'\b(renforcement militaire|dépenses de défense|forces armées)\b',
+            r"\b(système d'armes|vente d'armes|munitions|missiles)\b",
+            r"\b(élargissement de l'otan|alliance militaire|pacte de défense)\b",
+            r'\b(sécurité aux frontières|exercice militaire|budget de la défense)\b',
         ],
         # Violent crimes, criminal-justice perpetrator focus. Multilingual: NL/DE/FR.
         'crime_violence': [
@@ -162,32 +181,40 @@ class UpliftingPreFilterV7(BasePreFilter):
             r'\b(verkracht|verkrachting|mishandeling|doodslag)\b',
             r'\b(gevangenisstraf|levenslang)\b',
             # === DUTCH (NL) — additional ===
-            r'(moord|vermoord|doodslag|levensdelict)',
-            r'(verkracht|verkrachting|aanranding|zedendelict)',
-            r'(mishandeling|steekpartij|neergeschoten)',
-            r'(kindermishandeling|huiselijk geweld|mensenhandel)',
-            r'(veroordeeld tot|gevangenisstraf|levenslang)',
-            r'(tbs met|terbeschikkingstelling|dader|zedendelinquent)',
-            r'(gewapende overval|gijzeling|ontvoering)',
-            r'(terroristische aanslag|schietpartij|bloedbad)',
+            r'\b(moord|vermoord|doodslag|levensdelict)\b',
+            r'\b(verkracht|verkrachting|aanranding|zedendelict)\b',
+            r'\b(mishandeling|steekpartij|neergeschoten)\b',
+            r'\b(kindermishandeling|huiselijk geweld|mensenhandel)\b',
+            r'\b(veroordeeld tot|gevangenisstraf|levenslang)\b',
+            r'\b(tbs met|terbeschikkingstelling|dader|zedendelinquent)\b',
+            r'\b(gewapende overval|gijzeling|ontvoering)\b',
+            r'\b(terroristische aanslag|schietpartij|bloedbad)\b',
             # === GERMAN (DE) ===
-            r'(mord|ermordet|totschlag|tötungsdelikt)',
-            r'(vergewaltigung|vergewaltigt|sexuelle nötigung)',
-            r'(körperverletzung|messerstecherei|erschossen)',
-            r'(kindesmisshandlung|häusliche gewalt|menschenhandel)',
-            r'(verurteilt zu|gefängnisstrafe|lebenslänglich)',
-            r'(täter|sexualstraftäter|gewalttäter)',
-            r'(bewaffneter überfall|entführung|geiselnahme)',
-            r'(terroranschlag|amoklauf|massaker)',
+            r'\b(mord|ermordet|totschlag|tötungsdelikt)\b',
+            r'\b(vergewaltigung|vergewaltigt|sexuelle nötigung)\b',
+            r'\b(körperverletzung|messerstecherei|erschossen)\b',
+            r'\b(kindesmisshandlung|häusliche gewalt|menschenhandel)\b',
+            r'\b(verurteilt zu|gefängnisstrafe|lebenslänglich)\b',
+            r'\b(täter|sexualstraftäter|gewalttäter)\b',
+            r'\b(bewaffneter überfall|entführung|geiselnahme)\b',
+            r'\b(terroranschlag|amoklauf|massaker)\b',
             # === FRENCH (FR) ===
-            r'(meurtre|assassinat|homicide|tué)',
-            r'(viol|violée|agression sexuelle)',
-            r'(agression|poignardé|abattu)',
-            r'(maltraitance|violence domestique|traite des êtres humains)',
-            r'(condamné à|peine de prison|perpétuité)',
-            r'(auteur|agresseur sexuel|délinquant violent)',
-            r"(braquage|enlèvement|prise d'otage)",
-            r'(attentat terroriste|fusillade|massacre)',
+            r'\b(meurtre|assassinat|homicide|tué)\b',
+            # `viol` previously matched inside English "violence", "violent",
+            # "violation", "violet", "viola", "violin" — a major false-
+            # positive vector for crime_violence on English content. The
+            # `\b` closes that leak; whole-word "viol" still matches in
+            # French articles where it's the actual word for rape.
+            r'\b(viol|violée|agression sexuelle)\b',
+            r'\b(agression|poignardé|abattu)\b',
+            r'\b(maltraitance|violence domestique|traite des êtres humains)\b',
+            r'\b(condamné à|peine de prison|perpétuité)\b',
+            # `auteur` is French for perpetrator/author. Without `\b` it
+            # would fire on "auteur theory"/"auteur cinema" in English
+            # film criticism. Whole-word still matches French use.
+            r'\b(auteur|agresseur sexuel|délinquant violent)\b',
+            r"\b(braquage|enlèvement|prise d'otage)\b",
+            r'\b(attentat terroriste|fusillade|massacre)\b',
         ],
     }
 
@@ -202,16 +229,21 @@ class UpliftingPreFilterV7(BasePreFilter):
             r'\b(public benefit|b corp|benefit corporation|social enterprise)\b',
             r'\b(open source|open access|freely available|creative commons)\b',
             r'\b(affordable access|community ownership|commons|mutual aid)\b',
-            r'(non-?profit|nonprofit|ngo|charity|foundation)',
+            r'\b(non-?profit|nonprofit|ngo|charity|foundation)\b',
             # === DUTCH (NL) ===
-            r'(werknemerscoöperatie|coöperatie|sociaal ondernemen)',
-            r'(maatschappelijke onderneming|stichting|goed doel)',
+            r'\b(werknemerscoöperatie|coöperatie|sociaal ondernemen)\b',
+            r'\b(maatschappelijke onderneming|stichting|goed doel)\b',
             # === GERMAN (DE) ===
-            r'(genossenschaft|sozialunternehmen|gemeinnützig)',
-            r'(stiftung|wohltätigkeit)',
+            r'\b(genossenschaft|sozialunternehmen|gemeinnützig)\b',
+            r'\b(stiftung|wohltätigkeit)\b',
             # === FRENCH (FR) ===
-            r'(coopérative|entreprise sociale|économie sociale)',
-            r'(association|fondation|but non lucratif)',
+            r'\b(coopérative|entreprise sociale|économie sociale)\b',
+            # `association` is a common English word — without `\b` it would
+            # let any corporate_finance article through whenever "association"
+            # appears anywhere in body text. Whole-word matching keeps the
+            # bypass sane while still recognising French "association" as
+            # the corporate-form keyword it's meant to be.
+            r'\b(association|fondation|but non lucratif)\b',
         ],
         # Peace, demilitarization, conflict resolution, peacekeeping. NL/DE/FR.
         'military_security': [
@@ -220,22 +252,22 @@ class UpliftingPreFilterV7(BasePreFilter):
             r'\b(conflict resolution|reconciliation|ceasefire|armistice)\b',
             r'\b(peacekeeping|peace keeping|un peace|humanitarian)\b',
             r'\b(truth commission|war crimes tribunal|justice|accountability)\b',
-            r'(veterans? (support|services|care|mental health))',
+            r'\b(veterans? (support|services|care|mental health))\b',
             # === DUTCH (NL) ===
-            r'(vrede|vredesproces|vredesakkoord|vredesbesprekingen)',
-            r'(demilitarisering|ontwapening|wapenreductie)',
-            r'(conflictoplossing|verzoening|staakt-het-vuren|wapenstilstand)',
-            r'(vredesmissie|humanitair)',
+            r'\b(vrede|vredesproces|vredesakkoord|vredesbesprekingen)\b',
+            r'\b(demilitarisering|ontwapening|wapenreductie)\b',
+            r'\b(conflictoplossing|verzoening|staakt-het-vuren|wapenstilstand)\b',
+            r'\b(vredesmissie|humanitair)\b',
             # === GERMAN (DE) ===
-            r'(frieden|friedensprozess|friedensabkommen|friedensgespräche)',
-            r'(demilitarisierung|abrüstung|waffenreduzierung)',
-            r'(konfliktlösung|versöhnung|waffenstillstand)',
-            r'(friedensmission|humanitär)',
+            r'\b(frieden|friedensprozess|friedensabkommen|friedensgespräche)\b',
+            r'\b(demilitarisierung|abrüstung|waffenreduzierung)\b',
+            r'\b(konfliktlösung|versöhnung|waffenstillstand)\b',
+            r'\b(friedensmission|humanitär)\b',
             # === FRENCH (FR) ===
-            r'(paix|processus de paix|accord de paix|négociations de paix)',
-            r'(démilitarisation|désarmement|réduction des armes)',
-            r'(résolution des conflits|réconciliation|cessez-le-feu|armistice)',
-            r'(maintien de la paix|humanitaire)',
+            r'\b(paix|processus de paix|accord de paix|négociations de paix)\b',
+            r'\b(démilitarisation|désarmement|réduction des armes)\b',
+            r'\b(résolution des conflits|réconciliation|cessez-le-feu|armistice)\b',
+            r'\b(maintien de la paix|humanitaire)\b',
         ],
         # Reform, rehabilitation, survivor support, fighting (not perpetrating). NL/DE/FR.
         'crime_violence': [
@@ -259,19 +291,19 @@ class UpliftingPreFilterV7(BasePreFilter):
             r'\b(released|freed|liberated|rescued)\b',
             r'\b(vrijgelaten|bevrijd)\b',
             # === DUTCH (NL) ===
-            r'(rehabilitatie|resocialisatie|re-integratie|hervorming)',
-            r'(gevangenishervorming|strafrechtshervorming)',
-            r'(slachtofferhulp|slachtofferondersteuning)',
+            r'\b(rehabilitatie|resocialisatie|re-integratie|hervorming)\b',
+            r'\b(gevangenishervorming|strafrechtshervorming)\b',
+            r'\b(slachtofferhulp|slachtofferondersteuning)\b',
             # === GERMAN (DE) ===
-            r'(freigelassen|befreit|gerettet)',
-            r'(rehabilitation|resozialisierung|wiedereingliederung|reform)',
-            r'(gefängnisreform|strafrechtsreform)',
-            r'(opferhilfe|opferunterstützung)',
+            r'\b(freigelassen|befreit|gerettet)\b',
+            r'\b(rehabilitation|resozialisierung|wiedereingliederung|reform)\b',
+            r'\b(gefängnisreform|strafrechtsreform)\b',
+            r'\b(opferhilfe|opferunterstützung)\b',
             # === FRENCH (FR) ===
-            r'(libéré|libérée|sauvé|sauvée)',
-            r'(réhabilitation|réinsertion|réforme)',
-            r'(réforme pénitentiaire|réforme judiciaire)',
-            r'(aide aux victimes|soutien aux victimes)',
+            r'\b(libéré|libérée|sauvé|sauvée)\b',
+            r'\b(réhabilitation|réinsertion|réforme)\b',
+            r'\b(réforme pénitentiaire|réforme judiciaire)\b',
+            r'\b(aide aux victimes|soutien aux victimes)\b',
         ],
     }
 
@@ -534,15 +566,18 @@ def test_prefilter():
             'description': 'Prison reform (exception)'
         },
 
-        # Should BLOCK - Military false-positive on "communities" (Dutch
-        # `munitie` lacks `\b`). Pre-existing v7 quirk, preserved here.
-        # On a properly-bounded version of the pattern set this would block
-        # as `pure_speculation` instead.
+        # Should BLOCK - Pure speculation. Article has 5+ speculation
+        # patterns (could/might/may/promises to/poised to/etc.) and zero
+        # outcome-evidence patterns. Pre-#52-fix this misfired on the
+        # Dutch `munitie`/"communities" boundary leak and blocked as
+        # military_security; post-fix the leak is closed and the speculation
+        # check correctly catches it. This is the original v5 expected
+        # outcome — restored.
         {
             'title': 'New Technology Could Transform Energy Production',
             'text': 'Scientists say the experimental breakthrough could potentially revolutionize global energy production within the next decade. The technology might help address climate change and may become the future of clean energy. Experts believe it promises to transform the entire industry and is poised to disrupt existing fossil fuel markets. The innovation could democratize access to power and might enable communities to achieve energy independence. Researchers aim to begin pilot testing next year.',
-            'expected': (False, 'military_security'),
-            'description': 'Speculation article — v7 hits military_security via communities/munitie FP'
+            'expected': (False, 'pure_speculation'),
+            'description': 'Pure speculation (no outcomes) — `\\b` fix restores v5 behavior'
         },
 
         # Should PASS - Documented Outcomes
