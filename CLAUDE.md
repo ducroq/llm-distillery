@@ -67,6 +67,7 @@ framework: agent-ready-projects v1.9.0
 - **Cross-filter percentile normalization** — non-linear mapping from production CDF; supersedes score_scale_factor (ADR-014)
 - **Lenses as perspectives, not partitions** — overlap between lenses is correct; never exclude adjacent lens content in oracle prompts (ADR-015)
 - **Drop tier assignments** — filters output pass/block + continuous score only; tiers add no value over the score itself (ADR-016)
+- **Declarative prefilter shape** — extend `BasePreFilter` with `EXCLUSION_PATTERNS` / `OVERRIDE_KEYWORDS` / `POSITIVE_PATTERNS` / `POSITIVE_THRESHOLD` class attrs; standard `apply_filter()` pipeline lives on the base (ADR-018, #52)
 
 See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed records.
 
@@ -82,7 +83,7 @@ See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed reco
 | Deploying to NexusMind or gpu-server | `docs/RUNBOOK.md` — deployment, training, scoring how-to |
 | Training on GPU server | `memory/gpu-server.md` — venv, PYTHONPATH, HF_HUB_OFFLINE |
 | Debugging model loading or PEFT issues | `memory/gemma3-model.md` — Auto mapping fix, key format details |
-| Making architectural decisions | `docs/adr/README.md` — 17 settled ADRs |
+| Making architectural decisions | `docs/adr/README.md` — 18 settled ADRs |
 | Checking priorities or planning work | `docs/TODO.md` and `docs/ROADMAP.md` |
 | Understanding system design | `docs/ARCHITECTURE.md` |
 | Reviewing work quality | `docs/checklists/` — architect, test, implement, QA gates |
@@ -130,4 +131,4 @@ This project is a source project for [agentic-engineering](https://github.com/du
 
 ---
 
-*Last updated: 2026-04-28*
+*Last updated: 2026-04-29*

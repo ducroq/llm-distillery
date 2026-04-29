@@ -210,6 +210,28 @@ The first command failed during this session: actual sadalsuud user is implicit 
 
 ---
 
+## fit_normalization.py Blends Across Filter Versions (2026-04-29)
+
+**Problem**: When fitting nature_recovery v2 normalization, production output had 145K v2 articles + 19,948 v1 leftovers (the rolling window straddled the 2026-04-16 v1→v2 cutover). Running `fit_normalization.py` as it stood would have silently merged both into the same percentile CDF.
+
+**Root cause**: `scripts/normalization/fit_normalization.py` filtered articles by `min_score` only, not by `filter_version`. Filter version transitions aren't atomic in the production filtered/ output, so any new-version normalization fit must explicitly scope to that version.
+
+**Fix** (commit `c4e4a0f`): added `--filter-version` flag (defaults to None for backwards compat). Both `load_weighted_averages_local()` and `load_weighted_averages_ssh()` now check `analysis["filter_version"]`. Will be useful at every future version bump.
+
+---
+
+## v2 Filter Without normalization.json Looks Like a raw_weighted_average Bug (2026-04-29)
+
+**Problem**: Investigating nature_recovery v2 normalization, found production output showing `raw_weighted_average: null` and `normalization_method: null` for 100% of v2 articles after 2026-04-17 (~129K articles, 12 days). Looked like the #36 "raw_weighted_average passthrough" fix had regressed.
+
+**Root cause**: Not a bug — by design. `filters/common/filter_base_scorer.py` doesn't write `raw_weighted_average` at all (only `weighted_average`). The `raw_weighted_average` and `normalization_method` fields are added downstream by NexusMind's runtime *only when normalization is being applied*. When a filter has no `normalization.json`, NexusMind stores the raw score in `weighted_average` and leaves the audit-only `raw_weighted_average` field null. Confirmed by reading `_create_empty_result()` and `_process_raw_scores()` in `filter_base_scorer.py`.
+
+**Fix**: Use `weighted_average` directly when fitting the *first* normalization for a freshly-deployed filter version. The `fit_normalization.py` fallback path already handles this (line 59 — `wa = raw if raw is not None else analysis["weighted_average"]`). The script will warn about "Mixed fields" but that's expected during the v1→v2 transition window.
+
+**Implication**: A filter that ships a new version without normalization.json will have null `raw_weighted_average` for as long as it takes to fit the first curve. Don't mistake this for a regression.
+
+---
+
 ## [RESOLVED] train.py --output-dir Creates Nested model/model/ (Apr 2026)
 
 **Problem**: `--output-dir filters/foresight/v1/model` saves adapter to `model/model/`. Then `--resume-from filters/foresight/v1/model/model` looks for `model/model/model/`.

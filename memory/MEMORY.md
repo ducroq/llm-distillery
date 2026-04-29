@@ -45,7 +45,7 @@ Loaded every session. Topic files loaded on demand via triggers below.
 | `scripts/oracle/average_oracle_runs.py` | Multi-run oracle score averaging |
 | `filters/common/score_normalization.py` | Cross-filter percentile normalization (ADR-014) |
 | `scripts/normalization/fit_normalization.py` | Fit normalization CDF from production data |
-| `docs/adr/README.md` | ADR index (001-017) |
+| `docs/adr/README.md` | ADR index (001-018) |
 
 ## Cross-Project: NexusMind
 
@@ -82,12 +82,15 @@ _(none yet)_
 - Lens-aligned filter naming at version bumps — ADR-012
 - Cross-filter percentile normalization, supersedes score_scale_factor — ADR-014 (2026-03-30)
 - Thriving v1 paused, bimodal distribution problem — uplifting v6 stays (2026-03-30)
+- Declarative prefilter shape via BasePreFilter extension — ADR-018 (2026-04-28). Per-filter migration in progress (#52); sustainability_technology v3 done, 6 to go.
 
 ## Next Up (from ROADMAP "Now")
 
 - **foresight v1** — PARKED (#43, 2026-04-16). Captures governance solutions, not foresight; merging into broadened Solutions lens at sustainability_technology v4. <!-- verify: grep -qE "\*\*foresight\*\*.*PARKED" CLAUDE.md && echo PASS || echo FAIL -->
 - **nature_recovery v2** — DEPLOYED to Hub 2026-04-19 after #44 fix (v2 package referenced v1 imports + repo_id before). <!-- verify: PYTHONPATH=. python scripts/deployment/verify_filter_package.py --filter filters/nature_recovery/v2 --check-hub > /dev/null && echo PASS || echo FAIL -->
-- **nature_recovery normalization** — FIXED (#32 closed 2026-04-09). Refit covers full score range (354 articles, x: 0.10–10.0). gpu-server scorer verified producing differentiated scores.
+- **nature_recovery v1 normalization** — FIXED (#32 closed 2026-04-09). Refit covers full score range (354 articles, x: 0.10–10.0). gpu-server scorer verified producing differentiated scores.
+- **nature_recovery v2 normalization** — FITTED 2026-04-29 on 1,397 v2 production articles (filter_version=2.0, weighted_average≥1.5; raw range 1.50–7.08, p95=4.49). Patched `fit_normalization.py` with `--filter-version` to exclude v1 leftovers (#52 follow-up). Deployed to sadalsuud + gpu-server. <!-- verify: test -f filters/nature_recovery/v2/normalization.json && echo PASS || echo FAIL -->
+- **prefilter shape harmonization** (#52) — IN PROGRESS. ADR-018 + BasePreFilter extension shipped 2026-04-28. sustainability_technology v3 migrated. 6 filters remaining: belonging v1 next, then cultural-discovery v4 / uplifting v7 / investment-risk v6 / nature_recovery v2 / foresight v1; class-name drift batch cleanup deferred. <!-- verify: grep -q "ADR-018" filters/common/base_prefilter.py && echo PASS || echo FAIL -->
 - **raw_weighted_average** — Now passed through gpu-server API → sadalsuud pipeline → filtered output (#36 closed 2026-04-09). Normalization fitting script prefers it to avoid double-normalization.
 - **thriving v1** — PAUSED. Candidate for two-stage scoring fix. See `memory/thriving-v1-scoring.md`.
 - **#24** — ONNX Runtime INT8 or smaller base model retraining
