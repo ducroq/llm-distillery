@@ -187,7 +187,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - [x] **sustainability_technology v3 migrated** (2026-04-28) - 6/6 self-tests pass; behavior preserved
   - [x] **belonging v1 migrated** (2026-04-29) - 19/19 self-tests pass; behavior preserved. Data shape (EXCLUSION_PATTERNS dict, base-compiled patterns) harmonized; apply_filter stays custom because per-category positive-count thresholds + URL-based domain exclusions + obituary floor rule don't fit the base pipeline (ADR-018 explicitly permits this).
   - [x] **cultural-discovery v4 migrated** (2026-04-29) - 10/10 self-tests pass; behavior preserved. Data shape harmonized: EXCLUSION_PATTERNS dict + parallel EXCEPTION_PATTERNS_PER_CATEGORY dict (per-category exceptions don't fit base's single OVERRIDE_KEYWORDS slot). CULTURAL_DISCOVERY_BOOST_PATTERNS renamed to POSITIVE_PATTERNS so base compiles them. classify_content_type() preserved. Surfaced regression vs v3: v4's apply_filter doesn't call check_content_length (preserved as-is in this commit; tracked separately under Prefilter Quality below).
-  - [ ] **uplifting v7 migration** - flat-list-per-category, pattern-pair override (no count)
+  - [x] **uplifting v7 migrated** (2026-04-29) - 12/12 self-tests pass; behavior preserved. Same EXCLUSION_PATTERNS + EXCEPTION_PATTERNS_PER_CATEGORY pattern as CD v4 for the 3 pattern-with-exception categories (corporate_finance, military_security, crime_violence); 4th category (pure_speculation) is count-based (speculation_count >= 3 AND outcome_count == 0) and stays as separate class attrs with an inline check after the dict iteration. classify_content_type preserved. ThrivingPreFilterV1 (which subclasses UpliftingPreFilterV7) verified working. Surfaced bug: Dutch `munitie` and similar multilingual patterns lack `\b` boundaries — fire on English substrings like "co-MMUNITIE-s" (preserved as-is; tracked under Prefilter Quality).
   - [ ] **investment-risk v6 migration** - re-exports v5; needs own class (drift fix at same time)
   - [ ] **nature_recovery v2 migration** - inline list in method form, no override (simplest); class-name drift fix (V1→V2) at same time
   - [ ] **foresight v1 migration** - count-then-pattern check (POSITIVE_THRESHOLD = 3)
@@ -198,6 +198,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **belonging v1 obituary leak (#45)** - 2026-04-28. 5 bypass classes patched (dies-with-verb, procession, vigil, RIP/rest in peace, killed-in-year), `dies at \d` → `\d+` bug fix, override floor on obit branch. Plus `(?-i:\bRIP\b)` follow-up after the case-insensitive false positive on "rip current".
 - [x] **sustainability_technology v3 clickbait leak (#46)** - 2026-04-28. CLICKBAIT category added with 6 patterns (you-won't-believe, without-knowing, this-common, you're-probably, X-things-you-didn't, shocking-fact). Pattern 5 bounded `.{0,120}` after review caught cross-sentence FP risk.
 - [ ] **cultural-discovery v4 missing content_length check** - Surfaced during #52 migration (2026-04-29). v4's `apply_filter` skips the `check_content_length` call that v3 had — short articles bypass the 300-char minimum and go straight to pattern matching. Likely unintentional regression when v4 was created. Low priority (oracle handles short articles fine; just slightly wasteful), but worth a one-line fix at the next CD version bump.
+- [ ] **uplifting v7 multilingual `\b` boundary leak** - Surfaced during #52 migration (2026-04-29). Several Dutch/German/French patterns in v7's military_security / corporate_finance / crime_violence lists are written without `\b` word boundaries (e.g. `(wapensysteem|...|munitie|...)` for Dutch military). Result: Dutch `munitie` matches inside the English word "communities" (co-MMUNITIE-s), turning any English article mentioning communities into a military FP. Same bug shape as the RIP/rip-current case (#45). Fix: add `\b` boundaries to the multilingual alternations. Audit all 3 multilingual exclusion lists at next uplifting version bump (or do a focused regex-audit pass across all filters — this is likely not v7-only). Tracked alongside ADR-018 #52 work.
 - [ ] **Universal obituary detector (#51)** - Filed 2026-04-28, design simplified 2026-04-28. Trained SLM at `filters/common/obituary_detector/v1/` (mirrors `commerce_prefilter` shape). **Universal block with tunable threshold** — accept ~1-3% recall cost on cultural-discovery / investment-risk / breakthroughs to clean ~14% noise on belonging + uplifting. Per-filter consumption deferred unless measurement proves it necessary. Extends ADR-004 (no supersede). ~2-3 weeks calendar, ~1.5 weeks engineer time (labeling is bottleneck).
 
 ## Cross-Filter Normalization (ADR-014)
@@ -294,4 +295,50 @@ references `CulturalDiscoveryPreFilterV4` as a class symbol +
 attr names internally — no cross-version import.
 
 Next: uplifting v7 (flat-list-per-category, pattern-pair override — no count).
+
+## #52 uplifting v7 migration notes (2026-04-29)
+
+Uplifting v7 is the fourth migrated prefilter. Same shape as CD v4 for 3 of
+4 categories, with one extra wrinkle: a count-based block.
+
+1. **Three pattern-with-exception categories.** corporate_finance,
+   military_security, crime_violence — all use the
+   `EXCLUSION_PATTERNS` + `EXCEPTION_PATTERNS_PER_CATEGORY` pair, identical
+   to CD v4's structure.
+
+2. **One count-based block (pure_speculation).** Doesn't fit the
+   pattern-with-exception shape. Outcome-evidence patterns are a parallel
+   *count* check, not a per-pattern exception. Kept as separate
+   `SPECULATION_PATTERNS` / `OUTCOME_EVIDENCE_PATTERNS` class attrs;
+   inline check after the exclusion-dict iteration:
+   `speculation_count >= 3 AND outcome_count == 0`.
+
+3. **classify_content_type preserved.** Has a custom first-check ordering:
+   "peace_process" wins when both military_security pattern AND its
+   exception fire (e.g. military buildup article that's actually a peace
+   accord). Standard category iteration follows. Speculation classification
+   uses a looser threshold (>=2 / <=1) than apply_filter (>=3 / 0).
+
+4. **Subclass ThrivingPreFilterV1 verified.** `filters/thriving/v1/prefilter.py`
+   inherits from UpliftingPreFilterV7 with only a VERSION override. Public
+   API preserved, so the subclass still works post-migration (verified with
+   a smoke test exercising all 4 categories).
+
+5. **Surfaced bug: multilingual `\b` boundary leak.** Dutch `munitie`
+   (without `\b`) matches inside English "communities". Pre-existing v7
+   FP — preserved here, tracked separately under Prefilter Quality.
+   Same bug shape as the RIP/rip-current case (#45). Audit all 3
+   multilingual exclusion lists at next uplifting version bump.
+
+Behavior preservation verified by 12/12 self-test pass plus identical
+pattern counts (21/11, 19/18, 37/25 across the three pattern-with-exception
+categories; 7 speculation; 6 outcome-evidence; 8/4/6 domain counts).
+
+No additional downstream consumers (verified via grep): only
+`base_scorer.py` references `UpliftingPreFilterV7` directly, plus
+`thriving/v1/prefilter.py` via inheritance — neither reaches into private
+attrs.
+
+Next: investment-risk v6 (re-exports v5; needs own class — class-name drift
+fix is part of the migration).
 
