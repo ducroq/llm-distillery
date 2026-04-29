@@ -1,6 +1,11 @@
 """
 Belonging Pre-Filter v1.0
 
+ADR-018 declarative shape (partial): exclusion patterns are declared as the
+EXCLUSION_PATTERNS category dict and compiled by BasePreFilter.__init__.
+apply_filter() stays custom because belonging uses per-category positive-signal
+thresholds and URL-based domain exclusions that don't fit the base pipeline.
+
 Blocks content that commodifies or commercializes belonging:
 - Wellness industry (longevity hacks, Blue Zone diet tips, biohacking)
 - Professional networking (LinkedIn, conferences, career social capital)
@@ -9,6 +14,13 @@ Blocks content that commodifies or commercializes belonging:
 - Corporate (company culture, team building, workplace belonging)
 
 Passes content showing organic community bonds, intergenerational ties, and rootedness.
+
+History:
+- v1.0 (2026-04-29): migrated to declarative BasePreFilter shape (#52, ADR-018).
+  No behavior change — pattern set, exception/positive lists, and per-category
+  thresholds preserved verbatim. Existing self-tests (19/19) still pass.
+- Earlier v1.0 work: obituary tightening + RIP false-positive fix (#45),
+  multilingual block + positive lists, exception pattern overrides.
 """
 
 import re
@@ -18,11 +30,15 @@ from filters.common.base_prefilter import BasePreFilter
 
 
 class BelongingPreFilterV1(BasePreFilter):
-    """Fast rule-based pre-filter for belonging content"""
+    """Fast rule-based pre-filter for belonging content.
+
+    v1.0 (declarative-shape exclusion data per ADR-018; custom apply_filter
+    retained for per-category positive-count thresholds and domain blocking).
+    """
 
     VERSION = "1.0"
 
-    # === DOMAIN EXCLUSIONS ===
+    # === DOMAIN EXCLUSIONS (URL-based) ===
 
     WELLNESS_DOMAINS = [
         'mindbodygreen.com',
@@ -61,154 +77,184 @@ class BelongingPreFilterV1(BasePreFilter):
         'zenhabits.net',
     ]
 
-    # === WELLNESS INDUSTRY PATTERNS ===
-    # Note: Patterns should be specific enough to avoid false negatives
+    # === ADR-018 EXCLUSION_PATTERNS ===
+    # Iteration order matches the legacy apply_filter() check order. Category
+    # keys match the (False, "<reason>") tuples this filter emits — no
+    # "excluded_" prefix because callers (NexusMind tagging, prefilter eval)
+    # match these strings directly.
+    #
+    # PHILOSOPHY: When in doubt, let it through — the LLM oracle handles edge
+    # cases. Patterns should be specific enough to avoid false negatives.
+    EXCLUSION_PATTERNS = {
+        # Longevity/biohacking, health optimization (specific phrases, not
+        # generic words).
+        'wellness_industry': [
+            r'\b(longevity hacks?|longevity secrets?|longevity tips?)\b',
+            r'\b(biohacks?|biohacking|life extension)\b',
+            r'\b(anti-aging|anti aging|reverse aging)\b',
+            r'\b(blue zone diet|okinawa diet|mediterranean diet secrets)\b',
+            r'\b(centenarian secrets|secrets of the longest-lived|secrets to living longer)\b',
+            r'\b(health hack|wellness hack|wellness routine|wellness protocol)\b',
+            r'\b(fasting protocol|caloric restriction for longevity)\b',
+            r'\b(sleep hack|sleep optimization protocol)\b',
+            r'\b(nootropic|peptide therapy|supplement stack)\b',
+        ],
+        # Career networking + business community framing.
+        'networking_professional': [
+            r'\b(build your network|networking tips|networking event)\b',
+            r'\b(linkedin|professional network|business network)\b',
+            r'\b(social capital|career capital|professional connections)\b',
+            r'\b(mastermind group|accountability partner|mentor network)\b',
+            r'\b(startup ecosystem|founder community|entrepreneur community)\b',
+            r'\b(coworking|co-working|wework)\b',
+            r'\b(industry conference|networking conference)\b',
+        ],
+        # Tourism / travel-guide framing. "authentic community" intentionally
+        # NOT included — it appears in positive belonging articles too.
+        'tourism_consumption': [
+            r'\b(visit okinawa|travel to sardinia|nicoya tourism)\b',
+            r'\b(blue zone tour|blue zone travel|blue zone destination)\b',
+            r'\b(ikaria greece travel|loma linda visit)\b',
+            r'\b(cultural tourism|wellness tourism|wellness retreat)\b',
+            r'\b(destination wellness|retreat center|wellness resort)\b',
+            r'\b(immersive travel experience|experiential travel)\b',
+            r'\b(travel guide|travel itinerary|travel tips)\b',
+            r'\b(best time to visit|where to stay in)\b',
+            r'\b(bucket list destination|must-visit destination)\b',
+        ],
+        # Find-your-tribe and personal-development framing.
+        'self_help': [
+            r'\b(find your tribe|build your tribe|create your tribe)\b',
+            r'\b(build community|building community|create community)\b',
+            r'\b(combat loneliness|overcome loneliness|loneliness epidemic)\b',
+            r'\b(make friends|how to make friends|finding friends)\b',
+            r'\b(life design|lifestyle design|design your life)\b',
+            r'\b(personal development|self-improvement|self-help)\b',
+            r'\b(intentional living|intentional community)\b.*\b(tips|guide|how to)\b',
+            r'\b(your ikigai|find your ikigai|discover your ikigai)\b',
+            r'\b(your purpose|find your purpose|discover your purpose)\b',
+        ],
+        # Workplace-belonging / HR framing.
+        'corporate_belonging': [
+            r'\b(company culture|corporate culture|workplace culture)\b',
+            r'\b(employee engagement|employee experience|employee belonging)\b',
+            r'\b(team building|team bonding|offsite)\b',
+            r'\b(psychological safety|workplace community)\b',
+            r'\b(hr strategy|people strategy|talent management)\b',
+            r'\b(retention strategy|engagement strategy)\b',
+            r'\b(dei initiative|diversity initiative|inclusion program)\b',
+        ],
+        # Online-only "community" framing — virtual / digital tribe etc.
+        'online_only': [
+            r'\b(discord server|discord community|slack community)\b',
+            r'\b(online community|virtual community|digital community)\b',
+            r'\b(facebook group|subreddit|reddit community)\b',
+            r'\b(online tribe|virtual tribe|digital tribe)\b',
+            r'\b(digital nomad community|remote work community)\b',
+            r'\b(online membership|virtual membership)\b',
+        ],
+        # Obituary / funeral framing.
+        # TODO(#51): extract to a shared trained obituary detector. Until then,
+        # regex hold-the-line lives here.
+        'obituary_funeral': [
+            r'\b(obituary|obituaries|in memoriam)\b',
+            r'\b(funeral|funeral mass|funeral service|memorial service)\b',
+            r'\b(passed away|laid to rest|death notice)\b',
+            # \d+ (was \d) — single-digit version failed on two-digit ages like
+            # "Dies at 99" / "Dies at 73", which is the common case (#45).
+            r'\b(dies aged|died aged|dies at \d+|died at \d+)\b',
+            # Verb-form variants of "dies" not anchored by "aged"/"at N" (#45).
+            # "Hong Kong Activist Dies After Decades of Protest", "Dies Following
+            # Long Illness", "Dies in Crash", "Dies While Hiking".
+            r'\b(dies|died) (after|following|in|while)\b',
+            r'\b(survived by|in loving memory|paying tribute|pays tribute)\b',
+            r'\b(mourners?|mourning|condolences)\b',
+            # Procession/vigil — strong death-context signal, low FP risk (#45).
+            r'\b(procession|candlelight vigil|memorial vigil)\b',
+            # "Rest in peace" / "RIP" — high signal, low FP. The standalone "RIP"
+            # token MUST be uppercase to avoid matching "rip current" (beach safety,
+            # very common) or "rip the page" — but these patterns are compiled with
+            # re.IGNORECASE in __init__, so use an inline (?-i:) to force case-
+            # sensitivity for this token only.
+            r'\b(rest in peace)\b',
+            r'(?-i:\bRIP\b)',
+            # "Killed in <year>" — historical-tragedy commemoration framing
+            # ("Family Killed in 1976 Bombing Remembered"). Anchored to a 4-digit
+            # year to keep FP risk low; bare "killed in <place>" would over-match
+            # current conflict reporting (#45 item 8).
+            r'\b(killed|murdered|assassinated) in \d{4}\b',
+        ],
+        # Multilingual wellness / self-help / professional-networking framing
+        # (Dutch, German, French).
+        'multilingual_block': [
+            r'\b(levensgeluk tips|zelfhulp|persoonlijke ontwikkeling)\b',
+            r'\b(netwerken voor je carrière|zakelijk netwerk)\b',
+            r'\b(langlebigkeit|selbsthilfe|persönlichkeitsentwicklung)\b',
+            r'\b(netzwerken|karriere netzwerk|berufliches netzwerk)\b',
+            r'\b(longévité secrets|développement personnel|aide personnelle)\b',
+            r'\b(réseautage professionnel|réseau professionnel)\b',
+        ],
+    }
 
-    WELLNESS_PATTERNS = [
-        # Longevity/biohacking (specific phrases)
-        r'\b(longevity hacks?|longevity secrets?|longevity tips?)\b',
-        r'\b(biohacks?|biohacking|life extension)\b',
-        r'\b(anti-aging|anti aging|reverse aging)\b',
-        r'\b(blue zone diet|okinawa diet|mediterranean diet secrets)\b',
-        r'\b(centenarian secrets|secrets of the longest-lived|secrets to living longer)\b',
+    # Per-category positive-signal count needed to bypass that category's block.
+    # Belonging uses thresholds rather than the binary OVERRIDE_KEYWORDS bypass
+    # because individual positive signals (community/intergenerational/rooted-
+    # place) vary in strength — a single keyword isn't enough to override e.g.
+    # a corporate-belonging block, but several together are.
+    # 'obituary_funeral' uses a custom rule (see apply_filter) and is omitted.
+    POSITIVE_COUNT_THRESHOLDS = {
+        'wellness_industry': 3,
+        'networking_professional': 3,
+        'tourism_consumption': 3,
+        'self_help': 2,
+        'corporate_belonging': 3,
+        'online_only': 2,
+        'multilingual_block': 2,
+    }
 
-        # Health optimization (specific phrases, not generic words)
-        r'\b(health hack|wellness hack|wellness routine|wellness protocol)\b',
-        r'\b(fasting protocol|caloric restriction for longevity)\b',
-        r'\b(sleep hack|sleep optimization protocol)\b',
-        r'\b(nootropic|peptide therapy|supplement stack)\b',
+    # === EXCEPTION PATTERNS — bypass any exclusion when present ===
+    # Distinct from POSITIVE_PATTERNS: exception detection is binary (any match
+    # -> bypass), positive signals are counted.
+    EXCEPTION_PATTERNS = [
+        # Genuine community organizing
+        r'\b(mutual aid|mutual-aid)\b',
+        r'\b(community organizing|grassroots)\b',
+        r'\b(worker cooperative|worker-owned)\b',
+        r'\b(village council|town meeting|parish)\b',
+        # Intergenerational
+        r'\b(grandparent|grandmother|grandfather|elder)\b',
+        r'\b(generation|generational|multigenerational)\b',
+        r'\b(traditional knowledge|ancestral|heritage)\b',
+        # Place-based
+        r'\b(hometown|home village|native village)\b',
+        r'\b(family farm|homestead|ancestral home)\b',
+        r'\b(decades in|years in the same|generations of)\b',
     ]
 
-    # === PROFESSIONAL NETWORKING PATTERNS ===
-
-    NETWORKING_PATTERNS = [
-        # Career networking
-        r'\b(build your network|networking tips|networking event)\b',
-        r'\b(linkedin|professional network|business network)\b',
-        r'\b(social capital|career capital|professional connections)\b',
-        r'\b(mastermind group|accountability partner|mentor network)\b',
-
-        # Business community
-        r'\b(startup ecosystem|founder community|entrepreneur community)\b',
-        r'\b(coworking|co-working|wework)\b',
-        r'\b(industry conference|networking conference)\b',
-    ]
-
-    # === TOURISM PATTERNS ===
-    # Note: Avoid "authentic community" - appears in positive belonging articles too
-
-    TOURISM_PATTERNS = [
-        # Blue Zone tourism (specific)
-        r'\b(visit okinawa|travel to sardinia|nicoya tourism)\b',
-        r'\b(blue zone tour|blue zone travel|blue zone destination)\b',
-        r'\b(ikaria greece travel|loma linda visit)\b',
-
-        # Experience tourism (specific tourism phrases)
-        r'\b(cultural tourism|wellness tourism|wellness retreat)\b',
-        r'\b(destination wellness|retreat center|wellness resort)\b',
-        r'\b(immersive travel experience|experiential travel)\b',
-
-        # Travel guide language (combined with location context)
-        r'\b(travel guide|travel itinerary|travel tips)\b',
-        r'\b(best time to visit|where to stay in)\b',
-        r'\b(bucket list destination|must-visit destination)\b',
-    ]
-
-    # === SELF-HELP PATTERNS ===
-
-    SELF_HELP_PATTERNS = [
-        # Find your tribe
-        r'\b(find your tribe|build your tribe|create your tribe)\b',
-        r'\b(build community|building community|create community)\b',
-        r'\b(combat loneliness|overcome loneliness|loneliness epidemic)\b',
-        r'\b(make friends|how to make friends|finding friends)\b',
-
-        # Personal development
-        r'\b(life design|lifestyle design|design your life)\b',
-        r'\b(personal development|self-improvement|self-help)\b',
-        r'\b(intentional living|intentional community)\b.*\b(tips|guide|how to)\b',
-
-        # Individualistic framing
-        r'\b(your ikigai|find your ikigai|discover your ikigai)\b',
-        r'\b(your purpose|find your purpose|discover your purpose)\b',
-    ]
-
-    # === CORPORATE PATTERNS ===
-
-    CORPORATE_PATTERNS = [
-        # Workplace belonging
-        r'\b(company culture|corporate culture|workplace culture)\b',
-        r'\b(employee engagement|employee experience|employee belonging)\b',
-        r'\b(team building|team bonding|offsite)\b',
-        r'\b(psychological safety|workplace community)\b',
-
-        # HR/management
-        r'\b(hr strategy|people strategy|talent management)\b',
-        r'\b(retention strategy|engagement strategy)\b',
-        r'\b(dei initiative|diversity initiative|inclusion program)\b',
-    ]
-
-    # === ONLINE-ONLY PATTERNS ===
-
-    ONLINE_ONLY_PATTERNS = [
-        # Virtual communities
-        r'\b(discord server|discord community|slack community)\b',
-        r'\b(online community|virtual community|digital community)\b',
-        r'\b(facebook group|subreddit|reddit community)\b',
-        r'\b(online tribe|virtual tribe|digital tribe)\b',
-
-        # Remote/digital lifestyle
-        r'\b(digital nomad community|remote work community)\b',
-        r'\b(online membership|virtual membership)\b',
-    ]
-
-    # === OBITUARY / FUNERAL PATTERNS ===
-    # TODO(#51): extract to a shared trained obituary detector with per-filter
-    # consumption policy. Until then, regex hold-the-line lives here.
-
-    OBITUARY_PATTERNS = [
-        r'\b(obituary|obituaries|in memoriam)\b',
-        r'\b(funeral|funeral mass|funeral service|memorial service)\b',
-        r'\b(passed away|laid to rest|death notice)\b',
-        # \d+ (was \d) — single-digit version failed on two-digit ages like
-        # "Dies at 99" / "Dies at 73", which is the common case (#45).
-        r'\b(dies aged|died aged|dies at \d+|died at \d+)\b',
-        # Verb-form variants of "dies" not anchored by "aged"/"at N" (#45).
-        # "Hong Kong Activist Dies After Decades of Protest", "Dies Following
-        # Long Illness", "Dies in Crash", "Dies While Hiking".
-        r'\b(dies|died) (after|following|in|while)\b',
-        r'\b(survived by|in loving memory|paying tribute|pays tribute)\b',
-        r'\b(mourners?|mourning|condolences)\b',
-        # Procession/vigil — strong death-context signal, low FP risk (#45).
-        r'\b(procession|candlelight vigil|memorial vigil)\b',
-        # "Rest in peace" / "RIP" — high signal, low FP. The standalone "RIP"
-        # token MUST be uppercase to avoid matching "rip current" (beach safety,
-        # very common) or "rip the page" — but these patterns are compiled with
-        # re.IGNORECASE in __init__, so use an inline (?-i:) to force case-
-        # sensitivity for this token only.
-        r'\b(rest in peace)\b',
-        r'(?-i:\bRIP\b)',
-        # "Killed in <year>" — historical-tragedy commemoration framing
-        # ("Family Killed in 1976 Bombing Remembered"). Anchored to a 4-digit
-        # year to keep FP risk low; bare "killed in <place>" would over-match
-        # current conflict reporting (#45 item 8).
-        r'\b(killed|murdered|assassinated) in \d{4}\b',
-    ]
-
-    # === MULTILINGUAL PATTERNS (Dutch, German, French) ===
-
-    MULTILINGUAL_BLOCK_PATTERNS = [
-        # Dutch wellness/self-help
-        r'\b(levensgeluk tips|zelfhulp|persoonlijke ontwikkeling)\b',
-        r'\b(netwerken voor je carrière|zakelijk netwerk)\b',
-
-        # German wellness/self-help
-        r'\b(langlebigkeit|selbsthilfe|persönlichkeitsentwicklung)\b',
-        r'\b(netzwerken|karriere netzwerk|berufliches netzwerk)\b',
-
-        # French wellness/self-help
-        r'\b(longévité secrets|développement personnel|aide personnelle)\b',
-        r'\b(réseautage professionnel|réseau professionnel)\b',
+    # === POSITIVE SIGNAL PATTERNS — counted, used in threshold checks ===
+    # Note: this attribute name shadows BasePreFilter.POSITIVE_PATTERNS (the
+    # ADR-018 single-bypass slot). Belonging consumes the count via per-category
+    # thresholds rather than the base POSITIVE_THRESHOLD binary bypass — and
+    # POSITIVE_THRESHOLD stays at 0, so base's _has_override never fires on
+    # this list. Patterns get compiled into self._compiled_positives by
+    # super().__init__(); belonging reads them from there in apply_filter().
+    POSITIVE_PATTERNS = [
+        # Community bonds
+        r'\b(neighbor|neighbours|neighborly|neighbourhood)\b',
+        r'\b(piazza|town square|village square|community center)\b',
+        r'\b(church community|parish|congregation|mosque|temple|synagogue)\b',
+        r'\b(mutual aid|helping each other|look after each other)\b',
+        # Intergenerational
+        r'\b(grandchildren|grandparents|great-grandmother|great-grandfather)\b',
+        r'\b(passed down|handed down|taught me|learned from)\b',
+        r'\b(family recipe|traditional craft|elder wisdom)\b',
+        # Rootedness
+        r'\b(born and raised|grew up here|never left)\b',
+        r'\b(same house|same street|same village)\b',
+        r'\b(family land|ancestral|for generations)\b',
+        # Slow presence
+        r'\b(sunday dinner|family meal|shared meal|gathering)\b',
+        r'\b(ritual|tradition|every week|every day)\b',
     ]
 
     MULTILINGUAL_POSITIVE_PATTERNS = [
@@ -216,170 +262,85 @@ class BelongingPreFilterV1(BasePreFilter):
         r'\b(gemeenschap|buurt|dorpsleven|buren)\b',
         r'\b(grootouders|oma|opa|generaties)\b',
         r'\b(thuisdorp|geboortedorp|familieboerderij)\b',
-
         # German belonging
         r'\b(gemeinschaft|nachbarschaft|dorfgemeinschaft|heimat)\b',
         r'\b(großeltern|oma|opa|generationen)\b',
         r'\b(heimatdorf|familienhof|verwurzelt)\b',
-
         # French belonging
         r'\b(communauté|voisinage|vie de village|quartier)\b',
         r'\b(grands-parents|mamie|papi|générations)\b',
         r'\b(village natal|ferme familiale|enracinement)\b',
     ]
 
-    # === EXCEPTION PATTERNS (allow through despite triggers) ===
-
-    EXCEPTION_PATTERNS = [
-        # Genuine community organizing
-        r'\b(mutual aid|mutual-aid)\b',
-        r'\b(community organizing|grassroots)\b',
-        r'\b(worker cooperative|worker-owned)\b',
-        r'\b(village council|town meeting|parish)\b',
-
-        # Intergenerational
-        r'\b(grandparent|grandmother|grandfather|elder)\b',
-        r'\b(generation|generational|multigenerational)\b',
-        r'\b(traditional knowledge|ancestral|heritage)\b',
-
-        # Place-based
-        r'\b(hometown|home village|native village)\b',
-        r'\b(family farm|homestead|ancestral home)\b',
-        r'\b(decades in|years in the same|generations of)\b',
-    ]
-
-    # === POSITIVE SIGNAL PATTERNS (boost pass likelihood) ===
-
-    POSITIVE_PATTERNS = [
-        # Community bonds
-        r'\b(neighbor|neighbours|neighborly|neighbourhood)\b',
-        r'\b(piazza|town square|village square|community center)\b',
-        r'\b(church community|parish|congregation|mosque|temple|synagogue)\b',
-        r'\b(mutual aid|helping each other|look after each other)\b',
-
-        # Intergenerational
-        r'\b(grandchildren|grandparents|great-grandmother|great-grandfather)\b',
-        r'\b(passed down|handed down|taught me|learned from)\b',
-        r'\b(family recipe|traditional craft|elder wisdom)\b',
-
-        # Rootedness
-        r'\b(born and raised|grew up here|never left)\b',
-        r'\b(same house|same street|same village)\b',
-        r'\b(family land|ancestral|for generations)\b',
-
-        # Slow presence
-        r'\b(sunday dinner|family meal|shared meal|gathering)\b',
-        r'\b(ritual|tradition|every week|every day)\b',
-    ]
-
     def __init__(self):
-        """Initialize pre-filter with compiled regex patterns"""
-        # Block patterns (English)
-        self.wellness_regex = [re.compile(p, re.IGNORECASE) for p in self.WELLNESS_PATTERNS]
-        self.networking_regex = [re.compile(p, re.IGNORECASE) for p in self.NETWORKING_PATTERNS]
-        self.tourism_regex = [re.compile(p, re.IGNORECASE) for p in self.TOURISM_PATTERNS]
-        self.self_help_regex = [re.compile(p, re.IGNORECASE) for p in self.SELF_HELP_PATTERNS]
-        self.corporate_regex = [re.compile(p, re.IGNORECASE) for p in self.CORPORATE_PATTERNS]
-        self.online_only_regex = [re.compile(p, re.IGNORECASE) for p in self.ONLINE_ONLY_PATTERNS]
-        self.obituary_regex = [re.compile(p, re.IGNORECASE) for p in self.OBITUARY_PATTERNS]
-
-        # Multilingual block patterns
-        self.multilingual_block_regex = [re.compile(p, re.IGNORECASE) for p in self.MULTILINGUAL_BLOCK_PATTERNS]
-
-        # Exception and positive patterns
-        self.exception_regex = [re.compile(p, re.IGNORECASE) for p in self.EXCEPTION_PATTERNS]
-        self.positive_regex = [re.compile(p, re.IGNORECASE) for p in self.POSITIVE_PATTERNS]
-        self.multilingual_positive_regex = [re.compile(p, re.IGNORECASE) for p in self.MULTILINGUAL_POSITIVE_PATTERNS]
+        """Compile belonging-specific patterns; base compiles EXCLUSION_PATTERNS
+        and POSITIVE_PATTERNS into self._compiled_exclusions / _compiled_positives."""
+        super().__init__()
+        self._compiled_exceptions = [
+            re.compile(p, re.IGNORECASE) for p in self.EXCEPTION_PATTERNS
+        ]
+        self._compiled_multilingual_positives = [
+            re.compile(p, re.IGNORECASE) for p in self.MULTILINGUAL_POSITIVE_PATTERNS
+        ]
 
     def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """
         Determine if article should be sent to LLM for labeling.
 
-        Args:
-            article: Dict with 'title' and 'text'/'content' keys
+        Custom flow (not BasePreFilter.apply_filter): per-category positive-
+        count thresholds + URL-based domain exclusions + obituary floor rule
+        don't fit the standard pipeline. ADR-018 explicitly permits custom
+        apply_filter() for filters with non-standard control flow.
 
         Returns:
             (should_label, reason)
             - (True, "passed"): Send to LLM
-            - (False, "reason"): Block with reason
+            - (False, "<category>"): Block with category as reason
         """
-        # Check article structure
         is_valid, validation_reason = self.validate_article(article)
         if not is_valid:
             return False, validation_reason
 
-        # Check content length
         passed, reason = self.check_content_length(article)
         if not passed:
             return False, reason
 
-        # Check domain exclusions
         url = article.get('url', '')
         if url:
             domain_block = self._check_domain_exclusions(url)
             if domain_block:
                 return False, domain_block
 
-        # Get combined text for analysis
         combined_text = self._get_combined_clean_text(article)
 
-        # Count positive signals (English + multilingual)
-        positive_count = self._count_positive_signals(combined_text)
-        positive_count += self._count_multilingual_positive_signals(combined_text)
+        positive_count = (
+            self.count_pattern_matches(combined_text, self._compiled_positives)
+            + self.count_pattern_matches(combined_text, self._compiled_multilingual_positives)
+        )
+        has_exception = self.has_any_pattern(combined_text, self._compiled_exceptions)
 
-        # Check for exceptions that override blocks
-        has_exception = self.has_any_pattern(combined_text, self.exception_regex)
+        # Iterate exclusions in declared order; first blocking category wins.
+        for category, compiled_patterns in self._compiled_exclusions.items():
+            if not self.has_any_pattern(combined_text, compiled_patterns):
+                continue
 
-        # Check block patterns (in order of priority)
-        # Block if pattern matches AND no exception AND insufficient positive signals
+            if category == 'obituary_funeral':
+                # Obituary/funeral — require at least one *confirming* belonging
+                # positive signal even when an exception keyword is present.
+                # Without the pos>=1 floor, generic exception words like
+                # "generation"/"elder" appearing in cultural-figure obits
+                # (e.g. "post-Rivera generation") would override the obit block
+                # (#45). Heritage funerals carry many positive signals so
+                # remain unaffected.
+                blocked = positive_count < 2 and not (has_exception and positive_count >= 1)
+                if blocked:
+                    return False, "obituary_funeral"
+                continue
 
-        # Wellness industry
-        if self._has_wellness_patterns(combined_text):
-            if not has_exception and positive_count < 3:
-                return False, "wellness_industry"
+            threshold = self.POSITIVE_COUNT_THRESHOLDS[category]
+            if not has_exception and positive_count < threshold:
+                return False, category
 
-        # Professional networking
-        if self._has_networking_patterns(combined_text):
-            if not has_exception and positive_count < 3:
-                return False, "networking_professional"
-
-        # Tourism
-        if self._has_tourism_patterns(combined_text):
-            if not has_exception and positive_count < 3:
-                return False, "tourism_consumption"
-
-        # Self-help (slightly lower threshold - more likely to have borderline content)
-        if self._has_self_help_patterns(combined_text):
-            if not has_exception and positive_count < 2:
-                return False, "self_help"
-
-        # Corporate
-        if self._has_corporate_patterns(combined_text):
-            if not has_exception and positive_count < 3:
-                return False, "corporate_belonging"
-
-        # Online-only (block unless exception or strong positive signals)
-        if self._has_online_only_patterns(combined_text):
-            if not has_exception and positive_count < 2:
-                return False, "online_only"
-
-        # Obituary/funeral — require at least one *confirming* belonging positive
-        # signal even when an exception keyword is present. Without the pos>=1
-        # floor, generic exception words like "generation"/"elder" appearing in
-        # cultural-figure obits (e.g. "post-Rivera generation") would override
-        # the obit block (#45). Heritage funerals carry many positive signals so
-        # remain unaffected.
-        if self._has_obituary_patterns(combined_text):
-            block = positive_count < 2 and not (has_exception and positive_count >= 1)
-            if block:
-                return False, "obituary_funeral"
-
-        # Multilingual block patterns
-        if self.has_any_pattern(combined_text, self.multilingual_block_regex):
-            if not has_exception and positive_count < 2:
-                return False, "multilingual_block"
-
-        # Passed all filters
         return True, "passed"
 
     def _check_domain_exclusions(self, url: str) -> str:
@@ -404,62 +365,21 @@ class BelongingPreFilterV1(BasePreFilter):
 
         return ""
 
-    def _has_wellness_patterns(self, text: str) -> bool:
-        """Check if text contains wellness industry patterns"""
-        return self.has_any_pattern(text, self.wellness_regex)
-
-    def _has_networking_patterns(self, text: str) -> bool:
-        """Check if text contains professional networking patterns"""
-        return self.has_any_pattern(text, self.networking_regex)
-
-    def _has_tourism_patterns(self, text: str) -> bool:
-        """Check if text contains tourism patterns"""
-        return self.has_any_pattern(text, self.tourism_regex)
-
-    def _has_self_help_patterns(self, text: str) -> bool:
-        """Check if text contains self-help patterns"""
-        return self.has_any_pattern(text, self.self_help_regex)
-
-    def _has_corporate_patterns(self, text: str) -> bool:
-        """Check if text contains corporate belonging patterns"""
-        return self.has_any_pattern(text, self.corporate_regex)
-
-    def _has_online_only_patterns(self, text: str) -> bool:
-        """Check if text contains online-only community patterns"""
-        return self.has_any_pattern(text, self.online_only_regex)
-
-    def _has_obituary_patterns(self, text: str) -> bool:
-        """Check if text contains obituary/funeral patterns"""
-        return self.has_any_pattern(text, self.obituary_regex)
-
-    def _count_positive_signals(self, text: str) -> int:
-        """Count how many positive belonging signals are present (English)"""
-        return self.count_pattern_matches(text, self.positive_regex)
-
-    def _count_multilingual_positive_signals(self, text: str) -> int:
-        """Count multilingual positive belonging signals (Dutch, German, French)"""
-        return self.count_pattern_matches(text, self.multilingual_positive_regex)
-
     def get_statistics(self) -> Dict:
         """Return filter statistics"""
-        return {
+        stats = {
             'version': self.VERSION,
             'wellness_domains': len(self.WELLNESS_DOMAINS),
             'networking_domains': len(self.PROFESSIONAL_NETWORKING_DOMAINS),
             'tourism_domains': len(self.TRAVEL_TOURISM_DOMAINS),
             'self_help_domains': len(self.SELF_HELP_DOMAINS),
-            'wellness_patterns': len(self.WELLNESS_PATTERNS),
-            'networking_patterns': len(self.NETWORKING_PATTERNS),
-            'tourism_patterns': len(self.TOURISM_PATTERNS),
-            'self_help_patterns': len(self.SELF_HELP_PATTERNS),
-            'corporate_patterns': len(self.CORPORATE_PATTERNS),
-            'online_only_patterns': len(self.ONLINE_ONLY_PATTERNS),
-            'obituary_patterns': len(self.OBITUARY_PATTERNS),
-            'multilingual_block_patterns': len(self.MULTILINGUAL_BLOCK_PATTERNS),
             'exception_patterns': len(self.EXCEPTION_PATTERNS),
             'positive_patterns': len(self.POSITIVE_PATTERNS),
             'multilingual_positive_patterns': len(self.MULTILINGUAL_POSITIVE_PATTERNS),
         }
+        for category, patterns in self.EXCLUSION_PATTERNS.items():
+            stats[f'{category}_patterns'] = len(patterns)
+        return stats
 
 
 def test_prefilter():

@@ -185,7 +185,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - [x] **ADR-018** (2026-04-28) - Declarative shape decision documented; backwards-compatible BasePreFilter extension chosen
   - [x] **BasePreFilter extension** (2026-04-28) - EXCLUSION_PATTERNS / OVERRIDE_KEYWORDS / POSITIVE_PATTERNS / POSITIVE_THRESHOLD class attrs + default apply_filter() pipeline + _is_excluded / _has_override / _filter_specific_final_check helpers. All 7 production prefilters import + run unchanged (verified)
   - [x] **sustainability_technology v3 migrated** (2026-04-28) - 6/6 self-tests pass; behavior preserved
-  - [ ] **belonging v1 migration** - next; flat-list-per-category form, has_exception + positive_count override
+  - [x] **belonging v1 migrated** (2026-04-29) - 19/19 self-tests pass; behavior preserved. Data shape (EXCLUSION_PATTERNS dict, base-compiled patterns) harmonized; apply_filter stays custom because per-category positive-count thresholds + URL-based domain exclusions + obituary floor rule don't fit the base pipeline (ADR-018 explicitly permits this).
   - [ ] **cultural-discovery v4 migration** - flat-list-per-category, per-pattern if ladder
   - [ ] **uplifting v7 migration** - flat-list-per-category, pattern-pair override (no count)
   - [ ] **investment-risk v6 migration** - re-exports v5; needs own class (drift fix at same time)
@@ -220,4 +220,36 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 ---
 
 *Last updated: 2026-04-29*
+
+## #52 belonging v1 migration notes (2026-04-29)
+
+Belonging is the second prefilter migrated to ADR-018 declarative shape.
+Diverged from sustech v3's "fully declarative" template in two ways:
+
+1. **Data shape only.** Exclusion patterns moved into `EXCLUSION_PATTERNS`
+   dict (compiled once by base `__init__`); per-category counts dropped from
+   `get_statistics()` and rebuilt from the dict. Iteration order preserved.
+2. **Custom apply_filter retained.** Belonging uses per-category
+   positive-signal thresholds (3/3/3/2/3/2/special), not BasePreFilter's
+   binary `OVERRIDE_KEYWORDS` bypass. Plus URL-based domain exclusions and
+   the obit `pos>=1`-floor-when-exception-present rule. None of that fits
+   the standard `apply_filter()` pipeline; ADR-018 explicitly allows
+   "custom form" for this. The harmonization is at the *data* layer; the
+   *control* layer stays specialized.
+
+`POSITIVE_PATTERNS` class attr was kept (shadows `BasePreFilter.POSITIVE_PATTERNS`)
+so base compiles it into `_compiled_positives`. `POSITIVE_THRESHOLD` stays at
+0, so base's `_has_override` never reads it — belonging consumes the
+compiled list directly via `count_pattern_matches`. Documented at the class
+attr.
+
+Pattern preservation verified by counts (9/7/9/9/7/6/11/6 exclusion
+categories; 10 exceptions; 12 positives; 9 multilingual positives — all
+identical to baseline) and 19/19 self-test pass.
+
+No downstream consumers reference the renamed private attrs (verified via
+grep across the repo); only the public class symbol + `apply_filter()`
+contract are used by `base_scorer.py` and `verify_belonging_v1.py`.
+
+Next: cultural-discovery v4.
 
