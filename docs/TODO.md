@@ -186,7 +186,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - [x] **BasePreFilter extension** (2026-04-28) - EXCLUSION_PATTERNS / OVERRIDE_KEYWORDS / POSITIVE_PATTERNS / POSITIVE_THRESHOLD class attrs + default apply_filter() pipeline + _is_excluded / _has_override / _filter_specific_final_check helpers. All 7 production prefilters import + run unchanged (verified)
   - [x] **sustainability_technology v3 migrated** (2026-04-28) - 6/6 self-tests pass; behavior preserved
   - [x] **belonging v1 migrated** (2026-04-29) - 19/19 self-tests pass; behavior preserved. Data shape (EXCLUSION_PATTERNS dict, base-compiled patterns) harmonized; apply_filter stays custom because per-category positive-count thresholds + URL-based domain exclusions + obituary floor rule don't fit the base pipeline (ADR-018 explicitly permits this).
-  - [ ] **cultural-discovery v4 migration** - flat-list-per-category, per-pattern if ladder
+  - [x] **cultural-discovery v4 migrated** (2026-04-29) - 10/10 self-tests pass; behavior preserved. Data shape harmonized: EXCLUSION_PATTERNS dict + parallel EXCEPTION_PATTERNS_PER_CATEGORY dict (per-category exceptions don't fit base's single OVERRIDE_KEYWORDS slot). CULTURAL_DISCOVERY_BOOST_PATTERNS renamed to POSITIVE_PATTERNS so base compiles them. classify_content_type() preserved. Surfaced regression vs v3: v4's apply_filter doesn't call check_content_length (preserved as-is in this commit; tracked separately under Prefilter Quality below).
   - [ ] **uplifting v7 migration** - flat-list-per-category, pattern-pair override (no count)
   - [ ] **investment-risk v6 migration** - re-exports v5; needs own class (drift fix at same time)
   - [ ] **nature_recovery v2 migration** - inline list in method form, no override (simplest); class-name drift fix (V1→V2) at same time
@@ -197,6 +197,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 
 - [x] **belonging v1 obituary leak (#45)** - 2026-04-28. 5 bypass classes patched (dies-with-verb, procession, vigil, RIP/rest in peace, killed-in-year), `dies at \d` → `\d+` bug fix, override floor on obit branch. Plus `(?-i:\bRIP\b)` follow-up after the case-insensitive false positive on "rip current".
 - [x] **sustainability_technology v3 clickbait leak (#46)** - 2026-04-28. CLICKBAIT category added with 6 patterns (you-won't-believe, without-knowing, this-common, you're-probably, X-things-you-didn't, shocking-fact). Pattern 5 bounded `.{0,120}` after review caught cross-sentence FP risk.
+- [ ] **cultural-discovery v4 missing content_length check** - Surfaced during #52 migration (2026-04-29). v4's `apply_filter` skips the `check_content_length` call that v3 had — short articles bypass the 300-char minimum and go straight to pattern matching. Likely unintentional regression when v4 was created. Low priority (oracle handles short articles fine; just slightly wasteful), but worth a one-line fix at the next CD version bump.
 - [ ] **Universal obituary detector (#51)** - Filed 2026-04-28, design simplified 2026-04-28. Trained SLM at `filters/common/obituary_detector/v1/` (mirrors `commerce_prefilter` shape). **Universal block with tunable threshold** — accept ~1-3% recall cost on cultural-discovery / investment-risk / breakthroughs to clean ~14% noise on belonging + uplifting. Per-filter consumption deferred unless measurement proves it necessary. Extends ADR-004 (no supersede). ~2-3 weeks calendar, ~1.5 weeks engineer time (labeling is bottleneck).
 
 ## Cross-Filter Normalization (ADR-014)
@@ -251,5 +252,46 @@ No downstream consumers reference the renamed private attrs (verified via
 grep across the repo); only the public class symbol + `apply_filter()`
 contract are used by `base_scorer.py` and `verify_belonging_v1.py`.
 
-Next: cultural-discovery v4.
+## #52 cultural-discovery v4 migration notes (2026-04-29)
+
+CD v4 is the third migrated prefilter. Same partial-declarative shape as
+belonging — exclusion data harmonized, custom `apply_filter` retained.
+But the divergence from base differs:
+
+1. **Per-category exception lists.** Each exclusion category
+   (appropriation_debate, political_conflict, tourism_fluff, celebrity_art)
+   has its own escape-hatch list — celebrity_art has philanthropy /
+   repatriation exceptions, political_conflict has reconciliation / peace
+   exceptions, etc. BasePreFilter's single `OVERRIDE_KEYWORDS` slot is
+   global; CD's exceptions are category-scoped. Modeled with a parallel
+   `EXCEPTION_PATTERNS_PER_CATEGORY` dict keyed by exclusion-category name,
+   compiled in `__init__` into `_compiled_exceptions_per_category`.
+
+2. **classify_content_type method preserved.** Distinct from apply_filter
+   — used (currently only by self-tests, but kept for API stability) to
+   tag articles as `cultural_discovery` (>=2 positive boost matches) or
+   one of the four exclusion categories or `general`. Rewritten on the
+   new dict-based structure.
+
+3. **CULTURAL_DISCOVERY_BOOST_PATTERNS → POSITIVE_PATTERNS.** Same trick
+   as belonging: rename so base's `__init__` compiles them into
+   `_compiled_positives`. POSITIVE_THRESHOLD stays at 0, so base's
+   `_has_override` never reads them — only `classify_content_type` does.
+
+4. **Surfaced bug: missing content-length check.** v3's `apply_filter`
+   called `check_content_length` first; v4's does not. Looks like an
+   unintentional regression when v4 was created. **Preserved as-is in
+   this migration commit** (scope: zero behavior change). Tracked above
+   under "Prefilter Quality" as a separate one-line fix at next CD bump.
+
+Behavior preservation verified by 10/10 self-test pass plus identical
+pattern counts (11/14, 17/12, 15/14, 15/14 across the four categories;
+12 positives; 8/4/6 domain counts).
+
+No downstream consumers (verified via grep): only `base_scorer.py`
+references `CulturalDiscoveryPreFilterV4` as a class symbol +
+`apply_filter()` call. Older CD versions (v1/v2/v3) keep their old
+attr names internally — no cross-version import.
+
+Next: uplifting v7 (flat-list-per-category, pattern-pair override — no count).
 
