@@ -306,9 +306,12 @@ class CulturalDiscoveryPreFilterV4(BasePreFilter):
             if domain_result:
                 return False, domain_result
 
-        # Get text content
+        # Get text content (truncated for prefilter efficiency — full body
+        # would run ~60 patterns × article_length per article, which doesn't
+        # scale on RSS-scraped full-text content). Matches uplifting v7's
+        # truncation pattern.
         title = article.get('title', '')
-        text = article.get('text', article.get('content', ''))
+        text = article.get('text', article.get('content', ''))[:self.MAX_PREFILTER_CONTENT]
         combined_text = f"{title} {text}".lower()
 
         # Iterate exclusions in declared order; first blocking category wins.
@@ -335,7 +338,7 @@ class CulturalDiscoveryPreFilterV4(BasePreFilter):
         - "general"
         """
         title = article.get('title', '')
-        text = article.get('text', article.get('content', ''))
+        text = article.get('text', article.get('content', ''))[:self.MAX_PREFILTER_CONTENT]
         combined_text = f"{title} {text}".lower()
 
         # Cultural discovery boost takes precedence over exclusion classification.
