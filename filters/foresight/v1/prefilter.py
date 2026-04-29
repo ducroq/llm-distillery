@@ -81,6 +81,13 @@ class ForesightPreFilterV1(BasePreFilter):
         'creditkarma.com',
     ]
 
+    # Mapping consumed by BasePreFilter._check_domain_exclusions (hoisted
+    # from per-filter copies). Iteration order = legacy check order.
+    DOMAIN_EXCLUSIONS = {
+        "excluded_domain_sports_entertainment": SPORTS_ENTERTAINMENT_DOMAINS,
+        "excluded_domain_personal_finance": PERSONAL_FINANCE_DOMAINS,
+    }
+
     # === ADR-018 EXCLUSION_PATTERNS ===
     # Six block categories without per-category exceptions. Iteration order
     # matches the legacy apply_filter() check order: sports, entertainment,
@@ -268,20 +275,6 @@ class ForesightPreFilterV1(BasePreFilter):
 
         # Default: pass. The oracle handles nuance.
         return True, "passed"
-
-    def _check_domain_exclusions(self, url: str) -> str:
-        """Check if URL is from an excluded domain. Returns reason or empty string."""
-        url_lower = url.lower()
-
-        for domain in self.SPORTS_ENTERTAINMENT_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_sports_entertainment"
-
-        for domain in self.PERSONAL_FINANCE_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_personal_finance"
-
-        return ""
 
     def get_statistics(self) -> Dict:
         """Return filter statistics"""

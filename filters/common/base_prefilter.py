@@ -64,6 +64,14 @@ class BasePreFilter:
     POSITIVE_PATTERNS: List[str] = []
     POSITIVE_THRESHOLD: int = 0
 
+    # Optional URL-based domain blocking. Keys are reason strings (typically
+    # `excluded_domain_<category>`), values are lists of domain substrings —
+    # `domain in url_lower` semantics, no anchoring. Iteration is in declared
+    # order; first match wins. Use via `_check_domain_exclusions(url)`.
+    # Subclasses can either declare the dict directly or build it from
+    # per-category lists for stats-friendly access.
+    DOMAIN_EXCLUSIONS: Dict[str, List[str]] = {}
+
     def __init__(self):
         """Compile EXCLUSION_PATTERNS and POSITIVE_PATTERNS once, upfront.
 
@@ -239,13 +247,35 @@ class BasePreFilter:
 
         return (True, "passed")
 
+    def _check_domain_exclusions(self, url: str) -> str:
+        """Check if URL belongs to a domain in DOMAIN_EXCLUSIONS.
+
+        Returns the matching reason string (the dict key — typically
+        `excluded_domain_<category>`), or empty string if no match. Iterates
+        in declared order; first match wins. Empty/missing url returns "".
+
+        Hoisted from per-filter implementations under llm-distillery#52
+        review-battery cleanup. Filters with no domain rules can leave the
+        DOMAIN_EXCLUSIONS class attr empty (the default) — this method
+        becomes a no-op returning "".
+        """
+        if not url:
+            return ""
+        url_lower = url.lower()
+        for reason, domains in self.DOMAIN_EXCLUSIONS.items():
+            for domain in domains:
+                if domain in url_lower:
+                    return reason
+        return ""
+
     def apply_filter(self, article: Dict) -> Tuple[bool, str]:
         """
         Determine if article should be sent to LLM for scoring.
 
         Default implementation drives the ADR-018 standard pipeline:
-            validate -> length check -> exclusions-with-override
-            -> _filter_specific_final_check -> passed
+            validate -> length check -> _pre_exclusion_check
+            -> exclusions-with-override -> _filter_specific_final_check
+            -> passed
 
         Subclasses with custom flow can override this entirely (legacy shape).
 
@@ -267,6 +297,10 @@ class BasePreFilter:
 
         text = self._get_combined_clean_text(article)
         title = article.get('title', '').lower()
+
+        passed_pre, pre_reason = self._pre_exclusion_check(title, text)
+        if not passed_pre:
+            return (False, pre_reason)
 
         excluded, exc_reason = self._is_excluded(title, text)
         if excluded:
@@ -326,6 +360,30 @@ class BasePreFilter:
             if count >= self.POSITIVE_THRESHOLD:
                 return True
         return False
+
+    def _pre_exclusion_check(self, title: str, text: str) -> Tuple[bool, str]:
+        """
+        Hook for filter-specific logic that runs BEFORE the exclusion loop.
+
+        Symmetric counterpart to `_filter_specific_final_check`. Use this when
+        a filter has a *gate-in* check that should short-circuit before any
+        exclusion runs — e.g. nature_recovery's "is this article about nature
+        at all?" check, where off-topic articles should be tagged
+        `not_nature_topic` regardless of which exclusion category their text
+        might also trip.
+
+        Default: always pass. Subclasses override and return (False, reason)
+        to block at this stage. Reason strings should be bare (no prefix);
+        the base pipeline returns them verbatim.
+
+        Args:
+            title: Lowercased article title.
+            text: Cleaned, lowercased combined title+description+content.
+
+        Returns:
+            (passed, reason). reason is empty string on pass.
+        """
+        return (True, "")
 
     def _filter_specific_final_check(self, title: str, text: str) -> Tuple[bool, str]:
         """

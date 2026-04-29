@@ -78,6 +78,14 @@ class CulturalDiscoveryPreFilterV4(BasePreFilter):
         'medium.com/tag/programming',
     ]
 
+    # Mapping consumed by BasePreFilter._check_domain_exclusions (hoisted
+    # from per-filter copies). Iteration order = legacy check order.
+    DOMAIN_EXCLUSIONS = {
+        "excluded_domain_vc_startup": VC_STARTUP_DOMAINS,
+        "excluded_domain_defense": DEFENSE_DOMAINS,
+        "excluded_domain_code": CODE_HOSTING_DOMAINS,
+    }
+
     # === ADR-018 EXCLUSION_PATTERNS ===
     # Iteration order matches the legacy apply_filter() order: appropriation
     # FIRST (more specific than political conflict), then political_conflict,
@@ -361,24 +369,6 @@ class CulturalDiscoveryPreFilterV4(BasePreFilter):
             return category
 
         return "general"
-
-    def _check_domain_exclusions(self, url: str) -> str:
-        """Check if URL belongs to an excluded domain. Returns reason or empty string."""
-        url_lower = url.lower()
-
-        for domain in self.VC_STARTUP_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_vc_startup"
-
-        for domain in self.DEFENSE_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_defense"
-
-        for domain in self.CODE_HOSTING_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_code"
-
-        return ""
 
     def get_statistics(self) -> Dict:
         """Return filter statistics"""

@@ -86,6 +86,15 @@ class BelongingPreFilterV1(BasePreFilter):
         'zenhabits.net',
     ]
 
+    # Mapping consumed by BasePreFilter._check_domain_exclusions (hoisted
+    # from per-filter copies). Iteration order = legacy check order.
+    DOMAIN_EXCLUSIONS = {
+        "excluded_domain_wellness": WELLNESS_DOMAINS,
+        "excluded_domain_networking": PROFESSIONAL_NETWORKING_DOMAINS,
+        "excluded_domain_tourism": TRAVEL_TOURISM_DOMAINS,
+        "excluded_domain_self_help": SELF_HELP_DOMAINS,
+    }
+
     # === ADR-018 EXCLUSION_PATTERNS ===
     # Iteration order matches the legacy apply_filter() check order. Category
     # keys match the (False, "<reason>") tuples this filter emits — no
@@ -392,28 +401,6 @@ class BelongingPreFilterV1(BasePreFilter):
         """
         title_raw = article.get('title') or ''
         return bool(re.search(r'\bRIP\b', title_raw))  # NO re.IGNORECASE
-
-    def _check_domain_exclusions(self, url: str) -> str:
-        """Check if URL is from an excluded domain, return reason or empty string"""
-        url_lower = url.lower()
-
-        for domain in self.WELLNESS_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_wellness"
-
-        for domain in self.PROFESSIONAL_NETWORKING_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_networking"
-
-        for domain in self.TRAVEL_TOURISM_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_tourism"
-
-        for domain in self.SELF_HELP_DOMAINS:
-            if domain in url_lower:
-                return "excluded_domain_self_help"
-
-        return ""
 
     def get_statistics(self) -> Dict:
         """Return filter statistics"""
