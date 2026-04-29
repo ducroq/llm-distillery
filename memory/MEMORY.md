@@ -71,7 +71,8 @@ Loaded every session. Topic files loaded on demand via triggers below.
      Format: "if [situation], then [what to do] — promoted from gotcha-log YYYY-MM-DD"
      Retire entries once they appear in their destination. -->
 
-_(none yet)_
+- if [landing a non-trivial migration or refactor], then [fire code-reviewer + refactoring-guide + security-auditor in parallel before considering it shipped — they have non-overlapping blind spots] — promoted from gotcha-log 2026-04-29
+- if [a regex correctness bug is found], then [audit siblings in the same file/author-style — same-shape bugs cluster] — promoted from gotcha-log 2026-04-29 (recurrence of #45 RIP issue → today's multilingual sweep)
 
 ## Active Decisions
 
@@ -82,7 +83,7 @@ _(none yet)_
 - Lens-aligned filter naming at version bumps — ADR-012
 - Cross-filter percentile normalization, supersedes score_scale_factor — ADR-014 (2026-03-30)
 - Thriving v1 paused, bimodal distribution problem — uplifting v6 stays (2026-03-30)
-- Declarative prefilter shape via BasePreFilter extension — ADR-018 (2026-04-28). Per-filter migration in progress (#52); sustainability_technology v3 done, 6 to go.
+- Declarative prefilter shape via BasePreFilter extension — ADR-018 (2026-04-28). Per-filter migration COMPLETE 2026-04-29 (#52, all 7 production filters); review-battery follow-ups also landed (RIP guard repair, POSITIVE_PATTERNS shadow rename, CD v4 truncation, uplifting v7 multilingual `\b` boundary sweep, investment-risk cleanups, CD v4 colonial tightening, `_check_domain_exclusions` hoist, `_pre_exclusion_check` hook). Class-name drift cleanup (sustech V2→V3, NR V1→V2) and per-category exception extension to `_is_excluded` (potential ADR-019) deferred — see `docs/TODO.md` "Post-#52 Review-Battery Followups".
 
 ## Next Up (from ROADMAP "Now")
 
@@ -90,7 +91,7 @@ _(none yet)_
 - **nature_recovery v2** — DEPLOYED to Hub 2026-04-19 after #44 fix (v2 package referenced v1 imports + repo_id before). <!-- verify: PYTHONPATH=. python scripts/deployment/verify_filter_package.py --filter filters/nature_recovery/v2 --check-hub > /dev/null && echo PASS || echo FAIL -->
 - **nature_recovery v1 normalization** — FIXED (#32 closed 2026-04-09). Refit covers full score range (354 articles, x: 0.10–10.0). gpu-server scorer verified producing differentiated scores.
 - **nature_recovery v2 normalization** — FITTED 2026-04-29 on 1,397 v2 production articles (filter_version=2.0, weighted_average≥1.5; raw range 1.50–7.08, p95=4.49). Patched `fit_normalization.py` with `--filter-version` to exclude v1 leftovers (#52 follow-up). Deployed to sadalsuud + gpu-server. <!-- verify: test -f filters/nature_recovery/v2/normalization.json && echo PASS || echo FAIL -->
-- **prefilter shape harmonization** (#52) — IN PROGRESS. ADR-018 + BasePreFilter extension shipped 2026-04-28. sustainability_technology v3 migrated. 6 filters remaining: belonging v1 next, then cultural-discovery v4 / uplifting v7 / investment-risk v6 / nature_recovery v2 / foresight v1; class-name drift batch cleanup deferred. <!-- verify: grep -q "ADR-018" filters/common/base_prefilter.py && echo PASS || echo FAIL -->
+- **prefilter shape harmonization** (#52) — COMPLETE 2026-04-29. All 7 production filters migrated to declarative shape; review-battery follow-ups also landed (8 commits). Remaining work: class-name drift cleanup batch (sustech V2→V3, NR V1→V2 — gated on NexusMind cross-repo coordination) and potential `_is_excluded` extension for per-category exceptions (deferred to ADR-019 design). See `docs/TODO.md` "Post-#52 Review-Battery Followups" for the full punch-list status. <!-- verify: grep -q "ADR-018" filters/common/base_prefilter.py && grep -q "DOMAIN_EXCLUSIONS" filters/common/base_prefilter.py && echo PASS || echo FAIL -->
 - **raw_weighted_average** — Now passed through gpu-server API → sadalsuud pipeline → filtered output (#36 closed 2026-04-09). Normalization fitting script prefers it to avoid double-normalization.
 - **thriving v1** — PAUSED. Candidate for two-stage scoring fix. See `memory/thriving-v1-scoring.md`.
 - **#24** — ONNX Runtime INT8 or smaller base model retraining

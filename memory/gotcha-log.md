@@ -251,3 +251,34 @@ The first command failed during this session: actual sadalsuud user is implicit 
 **Root cause**: `train.py` appends `/model` to the output dir for the adapter save path. Both `--output-dir` and `--resume-from` do this, so the nesting doubles each time.
 
 **Fix**: train.py now strips trailing `model` from both `--output-dir` and `--resume-from` before appending. Either path form works now.
+
+---
+
+## Multi-Agent Review Battery Catches Issues Single Reviewer Misses (2026-04-29)
+
+**Problem**: After landing seven prefilter-migration commits under #52 (claimed zero behavior change, all self-tests passing), I asked for a review battery — code-reviewer, refactoring-guide, and security-auditor agents fired in parallel against the same diff. Each found different real issues that the other two had not flagged.
+
+- **code-reviewer** caught that the `(?-i:\bRIP\b)` "fix" from `598fa72` was inert in production because `_get_combined_clean_text` lowercases input before pattern matching — pattern never fires on real input. The original review battery in 2026-04-28 also flagged it, but only as P2 hypothetical; deeper trace this time showed it was P1 in production.
+- **refactoring-guide** caught that `POSITIVE_PATTERNS` shadowing `BasePreFilter.POSITIVE_PATTERNS` in belonging v1 + CD v4 was a semantic trap waiting for a future maintainer to set `POSITIVE_THRESHOLD > 0`.
+- **security-auditor** caught that `munitie`/communities was just one of many unbounded multilingual alternations — `viol` (matches violence/violet/viola/violin), `acquisition`, `fusion`, `auteur`, `association` were all unbounded. Several were actively producing false positives in production.
+
+The agents had non-overlapping blind spots. Code-reviewer focused on logic correctness; refactoring-guide focused on architecture/naming; security-auditor focused on adversarial inputs. Running them sequentially and synthesising findings would have surfaced the same issues, but firing in parallel halved the wall-clock time.
+
+**Root cause**: A single reviewer's perspective is bounded by the framing they bring. Asking three agents with different framings produces three distinct review reports; their union catches more than any single one. None of them are smarter than a careful human reviewer, but in the time it takes a human to read the diff once, all three reports have landed.
+
+**Fix**: When landing a non-trivial migration or refactor, default to firing all three (code-reviewer / refactoring-guide / security-auditor) in parallel rather than picking one. Each cost ~1 minute of background time and ~$0.30 of agent cost; the issues caught (one production bug, one semantic trap, several real false-positive vectors) were worth the spend several times over.
+
+**Promoted to**: `feedback-multi-agent-review-default.md` (auto-memory, this session).
+
+---
+
+## When a Regex Bug is Found, Audit Siblings (2026-04-29, recurrence)
+
+**Problem**: Today's audit of one named bug (`munitie` matching inside "communities") surfaced *five* additional unbounded multilingual patterns in the same file (`viol`, `acquisition`, `fusion`, `auteur`, `association` exception). All had the same shape: an alternation `(a|b|c)` without `\b` anchors, where one or more of the alternation tokens happened to be a substring of common English words.
+
+**Root cause**: The same code-author hand wrote all the multilingual patterns in a similar style. Whatever invariant they missed for one pattern (forgetting `\b`), they missed for all of them. The original `598fa72` fix for one specific instance (`\bRIP\b`) didn't prompt a sweep; the bug recurred at scale until the security-auditor agent did the systematic check.
+
+**Fix**: When a regex correctness bug is found, the next move is "audit the siblings" — find every pattern in the same file (or written in the same style by the same author) and check if it has the same shape. Cheap; usually catches more than the original report.
+
+**Promoted to**: `feedback-regex-ignorecase-trap.md` updated with this generalisation (2026-04-29 follow-up).
+
