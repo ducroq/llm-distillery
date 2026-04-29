@@ -53,4 +53,4 @@ class BaseInvestmentRiskScorer(FilterBaseScorer):
         spec = importlib.util.spec_from_file_location("prefilter", prefilter_path)
         prefilter_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(prefilter_module)
-        self.prefilter = prefilter_module.InvestmentRiskPreFilterV5()
+        self.prefilter = prefilter_module.InvestmentRiskPreFilterV6()

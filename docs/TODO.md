@@ -188,10 +188,10 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - [x] **belonging v1 migrated** (2026-04-29) - 19/19 self-tests pass; behavior preserved. Data shape (EXCLUSION_PATTERNS dict, base-compiled patterns) harmonized; apply_filter stays custom because per-category positive-count thresholds + URL-based domain exclusions + obituary floor rule don't fit the base pipeline (ADR-018 explicitly permits this).
   - [x] **cultural-discovery v4 migrated** (2026-04-29) - 10/10 self-tests pass; behavior preserved. Data shape harmonized: EXCLUSION_PATTERNS dict + parallel EXCEPTION_PATTERNS_PER_CATEGORY dict (per-category exceptions don't fit base's single OVERRIDE_KEYWORDS slot). CULTURAL_DISCOVERY_BOOST_PATTERNS renamed to POSITIVE_PATTERNS so base compiles them. classify_content_type() preserved. Surfaced regression vs v3: v4's apply_filter doesn't call check_content_length (preserved as-is in this commit; tracked separately under Prefilter Quality below).
   - [x] **uplifting v7 migrated** (2026-04-29) - 12/12 self-tests pass; behavior preserved. Same EXCLUSION_PATTERNS + EXCEPTION_PATTERNS_PER_CATEGORY pattern as CD v4 for the 3 pattern-with-exception categories (corporate_finance, military_security, crime_violence); 4th category (pure_speculation) is count-based (speculation_count >= 3 AND outcome_count == 0) and stays as separate class attrs with an inline check after the dict iteration. classify_content_type preserved. ThrivingPreFilterV1 (which subclasses UpliftingPreFilterV7) verified working. Surfaced bug: Dutch `munitie` and similar multilingual patterns lack `\b` boundaries — fire on English substrings like "co-MMUNITIE-s" (preserved as-is; tracked under Prefilter Quality).
-  - [ ] **investment-risk v6 migration** - re-exports v5; needs own class (drift fix at same time)
+  - [x] **investment-risk v6 migrated + class drift fix** (2026-04-29) - 11/11 self-tests pass; behavior preserved. v6 now has its own InvestmentRiskPreFilterV6 class (was a re-export of V5). Backward-compat aliases (InvestmentRiskPreFilterV5 = V6, InvestmentRiskPreFilter = V6) + legacy prefilter()/get_stats() functions kept so existing imports don't break. base_scorer.py updated to reference V6 directly. Data-shape harmonization only — apply_filter stays custom because the source-based flow + matched-pattern reason strings + title-only clickbait don't fit the base pipeline.
   - [ ] **nature_recovery v2 migration** - inline list in method form, no override (simplest); class-name drift fix (V1→V2) at same time
   - [ ] **foresight v1 migration** - count-then-pattern check (POSITIVE_THRESHOLD = 3)
-  - [ ] **Class-name drift cleanup batch** - sustech V2→V3, nature_recovery V1→V2, investment-risk give v6 own class. Deferred until all migrations done to avoid cross-repo coordination noise (NexusMind tests/unit/test_prefilter.py imports the V2 name)
+  - [ ] **Class-name drift cleanup batch** - sustech V2→V3, nature_recovery V1→V2 still pending. (investment-risk v6 own class — DONE 2026-04-29 as part of its #52 migration.) Deferred until remaining migrations done to avoid cross-repo coordination noise (NexusMind tests/unit/test_prefilter.py imports the V2 name).
 
 ## Prefilter Quality (Apr 2026)
 
@@ -341,4 +341,49 @@ attrs.
 
 Next: investment-risk v6 (re-exports v5; needs own class — class-name drift
 fix is part of the migration).
+
+## #52 investment-risk v6 migration notes (2026-04-29)
+
+Investment-risk is the fifth migrated prefilter and the most structurally
+divergent so far. Two things landed in this commit:
+
+1. **Drift fix** — v6 was a thin re-export of v5 (importlib trick because
+   the hyphen in `investment-risk` blocks normal imports). v6 now has its
+   own `InvestmentRiskPreFilterV6` class. Backward-compat aliases
+   (`InvestmentRiskPreFilterV5 = V6`, `InvestmentRiskPreFilter = V6`) plus
+   legacy `prefilter()` / `get_stats()` functions preserved so existing
+   imports keep working — including v6/base_scorer.py's import via
+   importlib (now updated to call `InvestmentRiskPreFilterV6` directly).
+
+2. **Migration to declarative shape** — but only data-shape harmonization;
+   apply_filter stays custom for three reasons:
+     - **Source-based filtering** runs against `source` / `source_type` /
+       `id` fields, not URL or text. Has its own early-return flow:
+       allowed-source -> pass, investment-keyword -> pass, blocked-source
+       -> block, all before content patterns.
+     - **Reasons include matched-pattern info** —
+       `allowed_source:reuters`, `investment_keyword:recession`,
+       `blocked_source:github`. The base pipeline's `excluded_<category>`
+       shape would lose this signal.
+     - **Clickbait operates on title only**, not combined text. Stays as
+       a separate class attr with its own check below the EXCLUSION_PATTERNS
+       iteration.
+
+Three text-pattern categories did get the dict treatment:
+fomo_speculation (8 patterns, no exceptions), stock_picking (6 patterns,
+12 macro-context exceptions), affiliate_conflict (4 patterns, no
+exceptions). The macro_context list is the only per-category exception
+this filter has — modeled as `EXCEPTION_PATTERNS_PER_CATEGORY['stock_picking']`.
+
+`(True, "default_allow")` and `(True, "passed")` are intentionally
+distinct — investment-risk reports the *reason* an article passed, not
+just the fact that it did. Default-allow means "no source/keyword/pattern
+fired, falling through to the philosophy: when in doubt, score it."
+
+Behavior preservation verified by 11/11 self-test pass plus identical
+pattern counts (19 blocked sources, 25 allowed, 30 keywords; 8/0, 6/12,
+4/0 across pattern-with-optional-exception categories; 5 clickbait).
+
+Next: nature_recovery v2 (inline list in method form — simplest of the
+remaining; class-name drift fix V1→V2 deferred to the cleanup batch).
 
