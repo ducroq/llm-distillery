@@ -85,6 +85,18 @@ Loaded every session. Topic files loaded on demand via triggers below.
 - Thriving v1 paused, bimodal distribution problem — uplifting v6 stays (2026-03-30)
 - Declarative prefilter shape via BasePreFilter extension — ADR-018 (2026-04-28). Per-filter migration COMPLETE 2026-04-29 (#52, all 7 production filters); review-battery follow-ups also landed (RIP guard repair, POSITIVE_PATTERNS shadow rename, CD v4 truncation, uplifting v7 multilingual `\b` boundary sweep, investment-risk cleanups, CD v4 colonial tightening, `_check_domain_exclusions` hoist, `_pre_exclusion_check` hook). Class-name drift cleanup (sustech V2→V3, NR V1→V2) and per-category exception extension to `_is_excluded` (potential ADR-019) deferred — see `docs/TODO.md` "Post-#52 Review-Battery Followups".
 
+## Next Session Pickup (set 2026-04-29 EOD, do 2026-04-30)
+
+Pickup order, in priority:
+
+1. **NR v2 normalization runtime verification** — first thing, ~5 min. Sample fresh `filtered_*.jsonl` on sadalsuud and confirm v2 articles show `normalization_method != null` + `raw_weighted_average != null`. Same discipline as the #44 lesson — proves the deployed curve is actually being applied at runtime. Tracked in `docs/TODO.md` under "Cross-Filter Normalization (ADR-014)" → nature_recovery v2.
+
+2. **Then pivot based on appetite** (pick one):
+   - **llm-distillery**: #47 — add `inference_hub.py` to `filters/uplifting/v7/` (template from `filters/nature_recovery/v2/inference_hub.py`), upload weights to Hub via `scripts/deployment/upload_to_huggingface.py`, verify with `verify_filter_package.py --check-hub`. Closes the lone non-Hub-deployed production filter. ~1 hour.
+   - **NexusMind**: #53 option 2 — filter-discovery normalization so it picks one canonical name when both `investment-risk` and `investment_risk` exist. Removes the time bomb that the symlink band-aid currently masks. Medium effort.
+
+3. **Open & non-urgent**: #51 (universal obituary detector — labeling bottleneck), class-name drift cleanup (sustech V2→V3, NR V1→V2), ADR-019 design (`_is_excluded` per-category extension), CD v4 + NR v2 missing `check_content_length`.
+
 ## Next Up (from ROADMAP "Now")
 
 - **foresight v1** — PARKED (#43, 2026-04-16). Captures governance solutions, not foresight; merging into broadened Solutions lens at sustainability_technology v4. <!-- verify: grep -qE "\*\*foresight\*\*.*PARKED" CLAUDE.md && echo PASS || echo FAIL -->
