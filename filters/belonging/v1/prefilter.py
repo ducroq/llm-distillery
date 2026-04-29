@@ -16,11 +16,20 @@ Blocks content that commodifies or commercializes belonging:
 Passes content showing organic community bonds, intergenerational ties, and rootedness.
 
 History:
-- v1.0 (2026-04-29): migrated to declarative BasePreFilter shape (#52, ADR-018).
-  No behavior change — pattern set, exception/positive lists, and per-category
-  thresholds preserved verbatim. Existing self-tests (19/19) still pass.
-- Earlier v1.0 work: obituary tightening + RIP false-positive fix (#45),
-  multilingual block + positive lists, exception pattern overrides.
+- v1.0 (2026-04-29 #2): RIP guard repair. Removed dead in-list
+  `(?-i:\\bRIP\\b)` pattern (inert because text is lowercased before
+  pattern matching) and added `_uppercase_rip_in_title()` — case-sensitive
+  check on the raw title, consulted alongside the obituary_funeral
+  category. Two new test cases (uppercase RIP obit blocks; lowercase
+  rip-current still passes). 20/20 self-tests pass. See gotcha-log
+  "[RESOLVED] \\bRIP\\b" entry, fix #2.
+- v1.0 (2026-04-29 #1): migrated to declarative BasePreFilter shape
+  (#52, ADR-018). No behavior change — pattern set, exception/positive
+  lists, and per-category thresholds preserved verbatim. 19/19 self-tests.
+- Earlier v1.0 work: obituary tightening + RIP false-positive fix #1
+  (#45 / `598fa72` — turned out to also break the obituary signal,
+  superseded by the 2026-04-29 #2 repair above), multilingual block +
+  positive lists, exception pattern overrides.
 """
 
 import re
@@ -177,7 +186,14 @@ class BelongingPreFilterV1(BasePreFilter):
             # re.IGNORECASE in __init__, so use an inline (?-i:) to force case-
             # sensitivity for this token only.
             r'\b(rest in peace)\b',
-            r'(?-i:\bRIP\b)',
+            # NOTE: case-sensitive `\bRIP\b` is checked separately in
+            # apply_filter() against the raw (un-lowercased) title — see
+            # `_uppercase_rip_in_title()`. The previous in-list `(?-i:\bRIP\b)`
+            # was inert because `_get_combined_clean_text` lowercases input
+            # before pattern matching, so the inline `(?-i:)` could never see
+            # uppercase chars. The standalone-token RIP signal is rare-but-
+            # strong; the title-only case-sensitive check restores intent
+            # without re-introducing the "rip current" / "rip the page" FP.
             # "Killed in <year>" — historical-tragedy commemoration framing
             # ("Family Killed in 1976 Bombing Remembered"). Anchored to a 4-digit
             # year to keep FP risk low; bare "killed in <place>" would over-match
@@ -319,9 +335,17 @@ class BelongingPreFilterV1(BasePreFilter):
         )
         has_exception = self.has_any_pattern(combined_text, self._compiled_exceptions)
 
+        # Case-sensitive uppercase-RIP check on the raw title — runs alongside
+        # the obituary_funeral category. See _uppercase_rip_in_title for why
+        # this lives outside EXCLUSION_PATTERNS.
+        rip_in_raw_title = self._uppercase_rip_in_title(article)
+
         # Iterate exclusions in declared order; first blocking category wins.
         for category, compiled_patterns in self._compiled_exclusions.items():
-            if not self.has_any_pattern(combined_text, compiled_patterns):
+            category_fired = self.has_any_pattern(combined_text, compiled_patterns)
+            if category == 'obituary_funeral' and rip_in_raw_title:
+                category_fired = True
+            if not category_fired:
                 continue
 
             if category == 'obituary_funeral':
@@ -342,6 +366,26 @@ class BelongingPreFilterV1(BasePreFilter):
                 return False, category
 
         return True, "passed"
+
+    @staticmethod
+    def _uppercase_rip_in_title(article: Dict) -> bool:
+        """Detect uppercase `RIP` token in the raw title — case-sensitive.
+
+        Lives outside EXCLUSION_PATTERNS because base pattern compilation uses
+        re.IGNORECASE and apply_filter feeds patterns lowercased text via
+        `_get_combined_clean_text`. An inline `(?-i:)` flag on the *pattern*
+        can't help because the *input string* has already been lowercased — by
+        the time the regex engine sees it, "RIP" has become "rip" and the
+        case-sensitive check has no uppercase to match.
+
+        The fix is to skip lowercasing for this one signal: read the raw title
+        directly off the article and search with a case-sensitive `\\bRIP\\b`.
+        Title only (not body) keeps the FP risk minimal — body text occasionally
+        all-caps for emphasis, but titles in obit contexts use "RIP" deliberately
+        as a recognised acronym.
+        """
+        title_raw = article.get('title') or ''
+        return bool(re.search(r'\bRIP\b', title_raw))  # NO re.IGNORECASE
 
     def _check_domain_exclusions(self, url: str) -> str:
         """Check if URL is from an excluded domain, return reason or empty string"""
@@ -546,9 +590,25 @@ def test_prefilter():
             'expected': (False, 'obituary_funeral')
         },
 
-        # Should PASS - "rip current" must NOT match the standalone RIP pattern.
-        # Beach safety articles are common; the inline (?-i:) flag on RIP keeps
-        # IGNORECASE off for that token only. Pre-fix, this was blocked.
+        # Should BLOCK - uppercase RIP token in title is a strong obit signal.
+        # Pre-repair, this would have passed because the in-list `(?-i:\bRIP\b)`
+        # pattern was inert (text was lowercased before pattern matching).
+        # Repair: title-only case-sensitive `\bRIP\b` check via
+        # _uppercase_rip_in_title. Article has no positive belonging signal
+        # (positive_count == 0), so the obituary floor blocks.
+        {
+            'title': 'Tributes Pour In: RIP Hero Of Local Sports Coverage',
+            'text': 'Hundreds of messages have appeared on social media following the announcement '
+                    'this morning. Industry colleagues have been sharing their reactions throughout '
+                    'the day. Officials confirmed the news in a brief statement, with further details '
+                    'expected later this week. Several outlets are preparing longer-form remembrances. '
+                    'The community gathered to recognise the contribution made over many decades.',
+            'expected': (False, 'obituary_funeral')
+        },
+
+        # Should PASS - lowercase "rip currents" must NOT match the case-
+        # sensitive RIP check (preserved post-repair). Beach safety articles
+        # are common; this is the original #45-follow-up regression case.
         {
             'title': 'Lifeguards Warn of Rip Currents at Local Beaches',
             'text': 'Coastal authorities are reminding swimmers about the dangers of rip currents this summer. '

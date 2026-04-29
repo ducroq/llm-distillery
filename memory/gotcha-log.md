@@ -187,11 +187,23 @@ Problems encountered and resolved. Format: Problem → Root cause → Fix.
 
 **Root cause**: A list-of-patterns design plus a global compile flag at the call site means a single "case-sensitive only" token in the list silently becomes case-insensitive. The pattern author can't opt out of the global flag without explicit syntax.
 
-**Fix**: Inline `(?-i:...)` flag scope disables IGNORECASE for that one pattern: `r'(?-i:\bRIP\b)'`. Confirmed with a unit test against "Lifeguards Warn of Rip Currents at Local Beaches" (now passes; pre-fix was blocked). Shipped in `598fa72`.
+**Fix #1 (incomplete)**: Inline `(?-i:...)` flag scope disables IGNORECASE for that one pattern: `r'(?-i:\bRIP\b)'`. Confirmed with a unit test against "Lifeguards Warn of Rip Currents at Local Beaches" (passes). Shipped in `598fa72`.
 
 **Caught by**: post-deploy code-reviewer agent battery flagged it as P2 hypothetical; I noticed IGNORECASE was *already* on, making it a real shipped P0/P1.
 
 **Promoted to**: `feedback-regex-ignorecase-trap.md` (auto-memory). When adding a token to a list-of-patterns compiled with a global flag, check the flag affects all entries; use inline `(?aiLmsux-imsx:...)` to opt out for one entry.
+
+**Fix #2 (actual repair, 2026-04-29)**: Code-reviewer agent during the #52 migration audit caught that fix #1 was *also* broken: `_get_combined_clean_text` lowercases input via `combined_text.lower()` before pattern matching. By the time the regex engine sees the string, "RIP" has become "rip" — there are no uppercase chars left for `(?-i:)` to enforce against. The pattern was inert in production: never blocked uppercase RIP, but also never tripped on rip-currents (because nothing matched at all). The "rip current" test passed for the wrong reason.
+
+The real fix needs the input string to retain case. Done by reading the raw title directly off the article (skipping `_get_combined_clean_text`) and running a case-sensitive `\bRIP\b` against it. Title-only because body text occasionally all-caps for emphasis; titles use "RIP" deliberately as a recognised acronym, so FP risk is minimal there. Lives in `_uppercase_rip_in_title()` and is consulted alongside the obituary_funeral category in `apply_filter`. The dead in-list `(?-i:\bRIP\b)` pattern was removed.
+
+Two test cases added to `belonging/v1/prefilter.py::test_prefilter`:
+- Positive: "Tributes Pour In: RIP Hero..." with no positive belonging signal → blocks as `obituary_funeral` (would have passed pre-repair).
+- Regression: "Lifeguards Warn of Rip Currents..." → still passes.
+
+20/20 self-tests pass post-repair (was 19/19 pre-repair).
+
+**Lesson**: When a pattern has case-sensitivity intent, check the *whole pipeline* — not just the regex flag at compile time. If the input string is normalized upstream (lowercased, stripped, etc.), inline regex flags can't recover information that's already gone. Verifying with a pure regex unit test is not enough; integration matters. Generalises to: any per-pattern requirement that conflicts with global preprocessing.
 
 ---
 
