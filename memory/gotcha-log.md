@@ -282,3 +282,57 @@ The agents had non-overlapping blind spots. Code-reviewer focused on logic corre
 
 **Promoted to**: `feedback-regex-ignorecase-trap.md` updated with this generalisation (2026-04-29 follow-up).
 
+---
+
+## Investment-Risk v6 Hyphen/Underscore Path Divergence Took Scorer Down on Restart (2026-04-29)
+
+**Problem**: After a successful `remote_deploy.sh` push to gpu-server, the scorer service failed to come up. journalctl: `CRITICAL - Missing model weights: investment-risk/v6/model. RuntimeError: Cannot start scorer: 1 filter(s) missing model weights: investment-risk/v6/model.` The 90s health check timed out and `remote_deploy.sh` reported "Scorer failed to become healthy". Production scoring was DOWN until I applied a manual fix.
+
+**Root cause**: gpu-server has TWO directory layouts for investment-risk v6 — both under `/home/hcl/NexusMind/filters/`:
+- `investment-risk/v6/` (hyphen) — historically held just the prefilter code; no `model/` dir
+- `investment_risk/v6/` (underscore) — has the actual `model/` weights (`adapter_model.safetensors` etc.)
+
+Why both exist: per the project memory ("Cross-Project: NexusMind", line 59 of `memory/MEMORY.md`), gpu-server is documented to use the underscore variant. But llm-distillery uses the hyphen (the actual repo dir is `filters/investment-risk/v6/`), so deploys propagate the hyphen variant. They've coexisted as parallel filesystem state for a while.
+
+What changed today: the migration commit `36874bc` (investment-risk v6 own class + declarative shape) included `inference_hub.py`, `base_scorer.py`, `config.yaml`, `calibration.json`, `inference.py`, `inference_hybrid.py`, model config files, and probe pickle. The deploy_to_nexusmind.sh + remote_deploy.sh chain shipped all these to gpu-server's `investment-risk/v6/` (hyphen). NexusMind's filter discovery now sees BOTH `investment-risk` and `investment_risk` as separate, fully-equipped filters in the discovered list. The strict "all filters at startup must have model weights" check (added at some point — gate tightening?) then fired on the hyphen variant because `investment-risk/v6/model/` was missing.
+
+Pre-deploy, the hyphen path was just stub code that the discovery either skipped or treated as a no-op. Today's deploy made it look real enough to be discovered → strict check → death.
+
+**Fix (band-aid, applied 2026-04-29 14:04 UTC)**: symlink the model dir from underscore to hyphen on gpu-server:
+```
+ssh gpu-server "ln -s ../../investment_risk/v6/model /home/hcl/NexusMind/filters/investment-risk/v6/model"
+sudo systemctl restart nexusmind-scorer
+```
+Restart succeeded; `/health` returns `"status":"healthy"`; `Model validation passed: all 8 filters have weights`.
+
+**Why this is a band-aid, not a fix**: the structural problem is unresolved. There are still TWO `investment-risk` / `investment_risk` filter directories on gpu-server. The discovery loads both. Same symptom could recur on any future deploy that touches investment-risk, on any other filter where similar drift exists, or whenever someone "cleans up" the symlink without realising it's load-bearing.
+
+**Proper fixes (deferred — see issue filed alongside this entry)**:
+1. **Filesystem cleanup on gpu-server**: pick one canonical name (probably `investment_risk` underscore since that's what hcl set up originally), delete the other, and patch the deploy_filters.sh rsync source-of-truth to write only that name. Risky — might break dashboard / ovr.news if they hardcode the hyphen.
+2. **NexusMind discovery normalization**: have the filter discovery normalize hyphens/underscores to one canonical name and refuse to load the duplicate. Cleaner, doesn't require filesystem cleanup.
+3. **llm-distillery dir rename**: rename `filters/investment-risk/` → `filters/investment_risk/`. Aligns with the underscore convention. Touches every reference to the path; non-trivial.
+
+**Lesson**: When two filesystem layouts represent the "same" thing through history, every deploy that bootstraps the formerly-stub side risks tripping a check that was previously dormant. The fix is to make one of them not-a-filter, not to maintain both. Filesystem-divergence between dev/staging/prod is the same shape — when the deploy makes them look more similar, latent assumptions get exercised.
+
+**Companion lesson** (auto-deploy verify): `remote_deploy.sh`'s 90s health-check timeout caught this fast. Without that check, the broken state would have been silent until someone hit the API or noticed scoring stalling. The sadalsuud→gpu-server "unreachable" warning earlier in the deploy output was a red herring (rsync did succeed; the warning was about a separate connectivity probe). Always trust the *health check* over the intermediate warnings.
+
+---
+
+## NexusMind CI Has Been Red Since 2026-04-28 (sustech v3 migration; surfaced 2026-04-29)
+
+**Problem**: Today's NexusMind push (6 deploy commits) triggered a CI failure email. Investigation shows CI has actually been red since 2026-04-28 — every NexusMind CI run since the first sustech v3 declarative-shape deploy has failed the same 2 tests. Today's push inherited the failure rather than introducing it.
+
+**Failing tests** (`tests/unit/test_prefilter.py::TestSustainabilityPrefilter`):
+- `test_passes_ev_article` — expects pass on a ~95-char EV article
+- `test_passes_climate_article` — expects pass on a ~90-char climate article
+
+**Root cause**: llm-distillery commit `e0eebd0` (sustech v3 → declarative BasePreFilter shape, ADR-018) made sustech v3 use the base `apply_filter` pipeline, which calls `check_content_length` with `MIN_CONTENT_LENGTH = 300`. The pre-existing NexusMind tests use article fixtures well below 300 chars; they pass on ANY non-trivially-bounded prefilter (which the old sustech custom apply_filter was). The migration tightened length enforcement and made these short-content tests fail.
+
+**Detection lag**: pushed to llm-distillery 2026-04-28; deployed to NexusMind same day; NexusMind CI failed; the failure email was missed or batched. A week of subsequent NexusMind deploys (each running CI, each red) didn't surface the regression until today's deploy notification was actively read. So: CI alerts going unread for several days = red CI shipped to production for several days.
+
+**Fix (proper, not yet applied)**: pad NexusMind test fixtures to ≥300 chars. They're testing "EV article passes" and "climate article passes" — the test contract is correct, just the fixture content is too short to trip the length gate. ~10 lines of test-file change in the NexusMind repo.
+
+**Filed as**: separate follow-up issue alongside the path-divergence one — both surfaced by the same deploy, both need separate resolution paths.
+
+**Lesson**: When a migration tightens a precondition (e.g., adds a length check), the downstream test suite that exercised the old looser version will start failing. That's the correct behavior — the test failures *are* the migration evidence. But if downstream CI alerts go unread, the red state persists silently. Two prevention angles: (a) explicitly look at downstream CI after every cross-repo deploy, not just self-tests; (b) have downstream tests fixture-padded with content that's safely above any plausible MIN_CONTENT_LENGTH so they're robust to upstream tightening. Both should be standard discipline going forward.
+
