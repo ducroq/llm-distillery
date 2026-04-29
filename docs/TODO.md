@@ -189,7 +189,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
   - [x] **cultural-discovery v4 migrated** (2026-04-29) - 10/10 self-tests pass; behavior preserved. Data shape harmonized: EXCLUSION_PATTERNS dict + parallel EXCEPTION_PATTERNS_PER_CATEGORY dict (per-category exceptions don't fit base's single OVERRIDE_KEYWORDS slot). CULTURAL_DISCOVERY_BOOST_PATTERNS renamed to POSITIVE_PATTERNS so base compiles them. classify_content_type() preserved. Surfaced regression vs v3: v4's apply_filter doesn't call check_content_length (preserved as-is in this commit; tracked separately under Prefilter Quality below).
   - [x] **uplifting v7 migrated** (2026-04-29) - 12/12 self-tests pass; behavior preserved. Same EXCLUSION_PATTERNS + EXCEPTION_PATTERNS_PER_CATEGORY pattern as CD v4 for the 3 pattern-with-exception categories (corporate_finance, military_security, crime_violence); 4th category (pure_speculation) is count-based (speculation_count >= 3 AND outcome_count == 0) and stays as separate class attrs with an inline check after the dict iteration. classify_content_type preserved. ThrivingPreFilterV1 (which subclasses UpliftingPreFilterV7) verified working. Surfaced bug: Dutch `munitie` and similar multilingual patterns lack `\b` boundaries — fire on English substrings like "co-MMUNITIE-s" (preserved as-is; tracked under Prefilter Quality).
   - [x] **investment-risk v6 migrated + class drift fix** (2026-04-29) - 11/11 self-tests pass; behavior preserved. v6 now has its own InvestmentRiskPreFilterV6 class (was a re-export of V5). Backward-compat aliases (InvestmentRiskPreFilterV5 = V6, InvestmentRiskPreFilter = V6) + legacy prefilter()/get_stats() functions kept so existing imports don't break. base_scorer.py updated to reference V6 directly. Data-shape harmonization only — apply_filter stays custom because the source-based flow + matched-pattern reason strings + title-only clickbait don't fit the base pipeline.
-  - [ ] **nature_recovery v2 migration** - inline list in method form, no override (simplest); class-name drift fix (V1→V2) at same time
+  - [x] **nature_recovery v2 migrated** (2026-04-29) - 6/6 self-tests pass; behavior preserved. Single text-pattern category (disaster_no_recovery) with one parallel exception list (recovery framing) lives in EXCLUSION_PATTERNS / EXCEPTION_PATTERNS_PER_CATEGORY. Custom apply_filter retained because: (1) nature-relatedness check runs FIRST in the original order — base's final-check hook runs LAST and would change reason precedence; (2) reason strings are bare category names (not "excluded_<category>"); (3) original v2 doesn't call `check_content_length` — same gap as CD v4 (tracked under Prefilter Quality). Class-name drift V1→V2 deferred to the cleanup batch as planned.
   - [ ] **foresight v1 migration** - count-then-pattern check (POSITIVE_THRESHOLD = 3)
   - [ ] **Class-name drift cleanup batch** - sustech V2→V3, nature_recovery V1→V2 still pending. (investment-risk v6 own class — DONE 2026-04-29 as part of its #52 migration.) Deferred until remaining migrations done to avoid cross-repo coordination noise (NexusMind tests/unit/test_prefilter.py imports the V2 name).
 
@@ -198,6 +198,7 @@ Two-stage pipeline: fast embedding probe (Stage 1) + fine-tuned model (Stage 2).
 - [x] **belonging v1 obituary leak (#45)** - 2026-04-28. 5 bypass classes patched (dies-with-verb, procession, vigil, RIP/rest in peace, killed-in-year), `dies at \d` → `\d+` bug fix, override floor on obit branch. Plus `(?-i:\bRIP\b)` follow-up after the case-insensitive false positive on "rip current".
 - [x] **sustainability_technology v3 clickbait leak (#46)** - 2026-04-28. CLICKBAIT category added with 6 patterns (you-won't-believe, without-knowing, this-common, you're-probably, X-things-you-didn't, shocking-fact). Pattern 5 bounded `.{0,120}` after review caught cross-sentence FP risk.
 - [ ] **cultural-discovery v4 missing content_length check** - Surfaced during #52 migration (2026-04-29). v4's `apply_filter` skips the `check_content_length` call that v3 had — short articles bypass the 300-char minimum and go straight to pattern matching. Likely unintentional regression when v4 was created. Low priority (oracle handles short articles fine; just slightly wasteful), but worth a one-line fix at the next CD version bump.
+- [ ] **nature_recovery v2 missing content_length check** - Same gap as CD v4. v2's apply_filter doesn't call `check_content_length`. Likely the original was written without the base helper in mind. Low priority; bundle with the V1→V2 class rename at the next nature_recovery version bump or cleanup batch.
 - [ ] **uplifting v7 multilingual `\b` boundary leak** - Surfaced during #52 migration (2026-04-29). Several Dutch/German/French patterns in v7's military_security / corporate_finance / crime_violence lists are written without `\b` word boundaries (e.g. `(wapensysteem|...|munitie|...)` for Dutch military). Result: Dutch `munitie` matches inside the English word "communities" (co-MMUNITIE-s), turning any English article mentioning communities into a military FP. Same bug shape as the RIP/rip-current case (#45). Fix: add `\b` boundaries to the multilingual alternations. Audit all 3 multilingual exclusion lists at next uplifting version bump (or do a focused regex-audit pass across all filters — this is likely not v7-only). Tracked alongside ADR-018 #52 work.
 - [ ] **Universal obituary detector (#51)** - Filed 2026-04-28, design simplified 2026-04-28. Trained SLM at `filters/common/obituary_detector/v1/` (mirrors `commerce_prefilter` shape). **Universal block with tunable threshold** — accept ~1-3% recall cost on cultural-discovery / investment-risk / breakthroughs to clean ~14% noise on belonging + uplifting. Per-filter consumption deferred unless measurement proves it necessary. Extends ADR-004 (no supersede). ~2-3 weeks calendar, ~1.5 weeks engineer time (labeling is bottleneck).
 
@@ -386,4 +387,41 @@ pattern counts (19 blocked sources, 25 allowed, 30 keywords; 8/0, 6/12,
 
 Next: nature_recovery v2 (inline list in method form — simplest of the
 remaining; class-name drift fix V1→V2 deferred to the cleanup batch).
+
+## #52 nature_recovery v2 migration notes (2026-04-29)
+
+Sixth migrated prefilter. Simplest of the lot — single text-pattern
+category with a single recovery-pattern exception, plus a permissive
+nature-relatedness gate.
+
+The structure looked like a clean fit for *fully declarative* shape (sustech
+v3 style — base apply_filter + `_filter_specific_final_check` for the
+nature gate). But three behavior-preservation concerns ruled that out:
+
+1. **Order**: nature-relatedness check runs FIRST today; base pipeline
+   would run it LAST (via `_filter_specific_final_check`). Articles that
+   are both off-topic and disaster-themed would change blocking reason
+   from `not_nature_topic` to `excluded_disaster_no_recovery` — a
+   user-observable change, no matter how rare.
+2. **Reason strings**: current returns are bare (`"disaster_no_recovery"`,
+   `"not_nature_topic"`); base prepends `excluded_<category>`.
+3. **Content-length gap**: current v2 doesn't call `check_content_length`
+   (same gap as CD v4 — see Prefilter Quality follow-ups). Base pipeline
+   would add the call — also a behavior change.
+
+Settled on data-shape harmonization with a custom apply_filter, same
+strategy as belonging / CD v4 / uplifting v7 / investment-risk. The
+disaster category fits the EXCLUSION_PATTERNS + EXCEPTION_PATTERNS_PER_CATEGORY
+shape cleanly even though it's the only category in this filter.
+
+Class-name drift (file v2 / class V1 / VERSION="1.0") preserved as planned
+— part of the deferred cleanup batch alongside sustech V2→V3, gated on
+NexusMind cross-repo coordination since their `tests/unit/test_prefilter.py`
+imports the V1 name.
+
+Behavior preservation: 6/6 self-test pass. Pattern counts: 33 nature
+keywords (duplicate `deforestation` in the original list preserved
+verbatim), 1 disaster regex, 1 recovery-exception regex.
+
+Next: foresight v1 (count-based override — `POSITIVE_THRESHOLD = 3`).
 
