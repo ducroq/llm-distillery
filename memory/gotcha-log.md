@@ -336,3 +336,38 @@ Restart succeeded; `/health` returns `"status":"healthy"`; `Model validation pas
 
 **Lesson**: When a migration tightens a precondition (e.g., adds a length check), the downstream test suite that exercised the old looser version will start failing. That's the correct behavior — the test failures *are* the migration evidence. But if downstream CI alerts go unread, the red state persists silently. Two prevention angles: (a) explicitly look at downstream CI after every cross-repo deploy, not just self-tests; (b) have downstream tests fixture-padded with content that's safely above any plausible MIN_CONTENT_LENGTH so they're robust to upstream tightening. Both should be standard discipline going forward.
 
+---
+
+## Yesterday's Band-Aid Was Never Actually Applied — Overnight Outage (2026-04-29 → 2026-04-30)
+
+**Problem**: Site rebuild chain broken since 2026-04-29 18:34 local. Five consecutive NexusMind cron triggers (19:06, 21:06, 00:16, 03:36, 07:16) all failed → ovrnews-summarize never fired → site ~13h stale. Same `RuntimeError: Cannot start scorer: 1 filter(s) missing model weights: investment-risk/v6/model` as yesterday's incident — the "Fix (band-aid, applied 2026-04-29 14:04 UTC)" entry above documents the exact symlink command that supposedly resolved this.
+
+**Root cause**: The symlink was never actually created on gpu-server. Forensic evidence:
+- `ls -la /home/hcl/NexusMind/filters/investment-risk/v6/` showed no `model` entry (neither dir nor symlink) when checked 2026-04-30 ~05:48 UTC.
+- Directory mtime was `Apr 29 13:59` — the deploy timestamp. If a symlink had been created at 14:04 UTC and removed later, the mtime would have advanced. It hadn't moved.
+- The `ln -s ../../investment_risk/v6/model …` command succeeded immediately when run today, proving the target name was free.
+
+What actually happened yesterday: the gotcha-log entry was written based on intent, not execution. The scorer was running on warm config from the 13:59 deploy (which had loaded filter weights into RAM at boot before the strict precondition gate was added — the running process didn't re-validate). For ~4.5h the warm process kept serving requests. At 18:34 local, a restart cycle (likely the `ExecStopPost=systemctl start ollama.service` chain or a system event) cycled the service. On fresh start, the strict weight check fired against the still-missing path → death → 13h outage.
+
+**Why it bypassed yesterday's verify gate**: the `<!-- verify: ... -->` line in MEMORY.md checked `curl -fs http://localhost:8000/health` AND `grep -q _uppercase_rip_in_title /home/hcl/NexusMind/filters/belonging/v1/prefilter.py`. Both passed — the running scorer was healthy on warm config; the belonging-side regex was correctly deployed. Neither check tested the symlink. The verify was wrong-shaped: it could PASS while the central claim ("symlink in place") was false.
+
+**Fix (actually applied 2026-04-30 05:48 UTC)**:
+```
+ssh gpu-server "ln -s ../../investment_risk/v6/model /home/hcl/NexusMind/filters/investment-risk/v6/model"
+ssh gpu-server "sudo systemctl restart nexusmind-scorer"
+```
+Captured outputs (this is the deploy-claim verification trail the rule requires):
+- `ls -la …/investment-risk/v6/model` → `lrwxrwxrwx 1 hcl hcl 30 Apr 30 05:48 …/model -> ../../investment_risk/v6/model`
+- `readlink -f …/investment-risk/v6/model` → `…/investment_risk/v6/model`
+- `test -r …/investment-risk/v6/model/adapter_model.safetensors` → exit 0
+- `systemctl is-active nexusmind-scorer` → `active`
+- `curl -fs http://localhost:8000/health` → `{"status":"healthy","cuda_available":true,"device":"cuda",…}` with all 8 filters discovered.
+
+**Lessons** (two distinct, both general):
+
+1. **Verify gates must verify the specific claim, not adjacent state.** A useful gate has the property that "the verify passes" implies "the claim is true". A gate that checks scorer health + a different filter's regex while the claim is "symlink X exists" is uncorrelated — both can be true while the claim is false. Heuristic: if you can construct a state where the verify passes and the claim is false, the verify is wrong. Captured into `feedback-claim-requires-verify.md` as point #4.
+
+2. **Remote-infra band-aids are deploys.** A gotcha-log entry that says *"applied <timestamp>: ssh gpu-server '...'"* is a deploy claim. The `.githooks/commit-msg` backstop only catches commits with deploy-words touching `filters/*/v*/` — it does not see memory/gotcha-log content, and cannot reach remote hosts. The discipline of pasting the captured ssh output into the entry is the only available gate. Captured into `feedback-claim-requires-verify.md` as point #5.
+
+**Cost**: 13h site staleness; second occurrence in 24h of the #44 pattern. The `.githooks/commit-msg` hook from #44 worked exactly as designed — it just doesn't cover this surface area. A pre-commit hook that scans staged memory/gotcha-log content for `applied <UTC timestamp>: ssh` strings without an accompanying captured-output block could be a structural backstop; deferred for now (behavioral rule first, structural only if recurrence continues).
+
