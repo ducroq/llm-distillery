@@ -284,7 +284,7 @@ The agents had non-overlapping blind spots. Code-reviewer focused on logic corre
 
 ---
 
-## Investment-Risk v6 Hyphen/Underscore Path Divergence Took Scorer Down on Restart (2026-04-29)
+## [RESOLVED 2026-04-30 by NexusMind 2d3c666] Investment-Risk v6 Hyphen/Underscore Path Divergence Took Scorer Down on Restart (2026-04-29)
 
 **Problem**: After a successful `remote_deploy.sh` push to gpu-server, the scorer service failed to come up. journalctl: `CRITICAL - Missing model weights: investment-risk/v6/model. RuntimeError: Cannot start scorer: 1 filter(s) missing model weights: investment-risk/v6/model.` The 90s health check timed out and `remote_deploy.sh` reported "Scorer failed to become healthy". Production scoring was DOWN until I applied a manual fix.
 

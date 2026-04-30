@@ -146,7 +146,20 @@
       "Bash(PYTHONPATH=. :/Users/scbry/AppData/Local/Programs/Python/Python313/python.exe:*)",
       "Bash(gh repo:*)",
       "Bash(do:*)",
-      "Bash(gh:*)"
+      "Bash(gh:*)",
+      "Bash(git status:*)",
+      "Bash(mkdir -p \"C:\\\\local_dev\\\\ovr.news\\\\docs\\\\articles\")",
+      "Bash(cp \"C:\\\\local_dev\\\\llm-distillery\\\\docs\\\\articles\\\\needle-in-haystack-draft.md\" \"C:\\\\local_dev\\\\ovr.news\\\\docs\\\\articles\\\\needle-in-haystack-draft.md\")",
+      "Bash(MSYS_NO_PATHCONV=1 PYTHONPATH=. python scripts/calibration/fit_calibration.py --filter filters/nature_recovery/v2 --data-dir datasets/training/nature_recovery_v2 --test-data datasets/training/nature_recovery_v2/test.jsonl)",
+      "Bash(mkdir -p C:/local_dev/llm-distillery/.claude/skills/test-verify-memory)",
+      "Bash(cp -r C:/local_dev/agent-ready-projects/templates/test-fixtures C:/local_dev/llm-distillery/.claude/skills/test-verify-memory/)",
+      "Read(//c/local_dev/NexusMind/filters/nature_recovery/**)",
+      "Read(//c/local_dev/NexusMind/filters/nature_recovery/v2/**)",
+      "Bash(chmod +x C:/local_dev/llm-distillery/scripts/remote_deploy.sh)",
+      "Bash(chmod +x .githooks/commit-msg)",
+      "Bash(git config *)",
+      "PowerShell(Get-Content *)",
+      "Bash(git *)"
     ],
     "deny": [],
     "ask": []
