@@ -371,3 +371,33 @@ Captured outputs (this is the deploy-claim verification trail the rule requires)
 
 **Cost**: 13h site staleness; second occurrence in 24h of the #44 pattern. The `.githooks/commit-msg` hook from #44 worked exactly as designed — it just doesn't cover this surface area. A pre-commit hook that scans staged memory/gotcha-log content for `applied <UTC timestamp>: ssh` strings without an accompanying captured-output block could be a structural backstop; deferred for now (behavioral rule first, structural only if recurrence continues).
 
+---
+
+## #53 Structural Fix Lands; Symlink Band-Aid Retired (2026-04-30)
+
+**Resolution of the two-day saga above.** After the 13h overnight outage and a ~2h afternoon repeat (same root cause: rsync `--delete` deleted the symlink because `*/model/` exclude only matches directories, not symlinks), the user said "no more band-aids" and asked for the proper #53 fix.
+
+**The fix** (NexusMind commit 2d3c666):
+- `FilterLoader.discover_filters()` now groups directories by canonical name (`name.replace('-', '_')`) and collapses collisions to one entry. Winner = most complete artifacts (model weights present > calibration present > alphabetical name asc, so hyphen wins ties to match llm-distillery's canonical convention).
+- Loser variant recorded in `_alias_map`. New `resolve_name(name)` returns the registered key for either variant.
+- `get_filter_config()`, `get_scorer()`, and the gpu-server API endpoints `/filter/{name}/score` are alias-aware — both `investment-risk` and `investment_risk` route to the same scorer.
+- Startup weight-validation walks registered (deduped) entries only. No more false-positive crash on the empty hyphen directory.
+
+**Verification trail** (eating the dog food):
+- `pytest tests/unit/test_shared_infrastructure.py` → 85 passed (includes 4 new tests for collision-with-weights, no-weights tiebreak, resolve_name, get_filter_config aliasing).
+- Smoke test against real local NexusMind/filters/ dir on Windows: 7 filters discovered, alias map populated.
+- `bash scripts/deploy_filters.sh` from sadalsuud: hash-mismatch deploy, scorer restarted, post-deploy smoke test passed all 7 filters including `investment_risk: wa=5.73 in expected range`.
+- Live scorer journal on gpu-server confirms: `WARNING: Filter directory variants collide ... using 'investment_risk' ... ignoring ['investment-risk']`, `Discovered filters: [..., investment_risk, ...]` (7 entries, no duplicate), `Filter aliases (variant -> registered): {'investment-risk': 'investment_risk'}`, `Model validation passed: all 7 filters have weights`.
+- `ls /home/hcl/NexusMind/filters/investment-risk/v6/` shows **no `model` entry** — the deploy's rsync deleted the symlink as predicted, and the system runs cleanly without it.
+
+**What this leaves obsolete**:
+- The symlink at `gpu-server:/home/hcl/NexusMind/filters/investment-risk/v6/model`. Will get nuked by every deploy_filters.sh rsync; fine, no longer needed.
+- The defensive comments in earlier MEMORY.md / gotcha-log entries about "applied band-aid symlink" — replaced with structural verify gate.
+
+**What's still open** (deferred, separate PRs):
+- `deploy_filters.sh` rsync `--delete` deletes symlinks despite `*/model/` exclude. Real bug but no acute harm now that no symlink is needed.
+- `nexusmind.service.d/override.conf` wait loop is broken for `Type=oneshot` services (`is-active --quiet` returns non-zero for `activating` state). Means the collision-prevention against ovrnews-summarize has been silently no-op since it was added. Needs `[[ "$(systemctl is-active ...)" =~ ^(active|activating)$ ]]` or `systemctl show -p ActiveState --value`.
+- The longer-term canonical alignment: migrate weights to `investment-risk/v6/model/` (matches llm-distillery's source-of-truth convention), remove the `investment_risk/` directory entirely, then the discovery winner flips to hyphen and everything matches.
+
+**Lesson** (the meta one). Two separate failure modes had to align for the outage to recur: (a) discovery treated the two variants as separate filters, (b) startup gate crashed instead of warning. The band-aid (symlink) addressed neither — it just patched the symptom. Removing the band-aid took *both* fixes (or in this case, eliminating the duplication so the gate has only one thing to validate). Pattern: when a band-aid has to be re-applied after every deploy, the band-aid is *load-bearing for the wrong abstraction*; find the abstraction it's papering over and fix that instead.
+
