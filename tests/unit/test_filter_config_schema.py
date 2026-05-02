@@ -60,6 +60,30 @@ REQUIRED_SCORING_KEYS = {
     "score_scale_factor", # linear fallback when percentile normalization is off
 }
 
+# --- Known source-type vocabulary (NexusMind#189) -----------------------
+# Optional `source_filter:` top-level block — when present, its
+# `excluded_source_types: [...]` entries must be drawn from this set.
+# Source-of-truth for the vocabulary lives in FluxusSource:
+#   - tag-based + domain-based: src/quality/heuristic_scorer.py classify_type
+#   - declarative aggregator types: config/app.yaml (apis.*)
+#
+# When FluxusSource adds a new value (e.g., a `social` aggregator class),
+# add it here in the same PR to keep the gate in lockstep.
+
+KNOWN_SOURCE_TYPES = {
+    # News
+    "news_major", "news_regional", "news_global",
+    "wire_service", "public_broadcaster",
+    # Aggregators
+    "aggregator", "developer_aggregator", "firehose_aggregator",
+    # Specialized
+    "academic", "government", "ngo", "think_tank",
+    # Tech / repos
+    "code_repo", "tech_industry",
+    # Other
+    "blog_independent", "social", "unknown",
+}
+
 # --- Known-drift exemptions ---------------------------------------------
 # Each entry = (filter, version, issue_code). Issue codes follow the
 # convention used in _violations(). Tuples here are ACCEPTED; they don't
@@ -118,6 +142,29 @@ def _violations(cfg: dict) -> set[str]:
     else:
         issues.add("scoring_type:not_a_dict")
 
+    # source_filter section — optional (NexusMind#189). When present, its
+    # contents must conform: excluded_source_types is a list of known
+    # vocabulary strings, shadow_mode is a bool.
+    sf = cfg.get("source_filter")
+    if sf is not None:
+        if not isinstance(sf, dict):
+            issues.add("source_filter_type:not_a_dict")
+        else:
+            excluded = sf.get("excluded_source_types")
+            if excluded is None:
+                issues.add("source_filter_missing:excluded_source_types")
+            elif not isinstance(excluded, list):
+                issues.add("source_filter_type:excluded_not_list")
+            else:
+                for entry in excluded:
+                    if not isinstance(entry, str):
+                        issues.add("source_filter_type:excluded_item_not_str")
+                    elif entry not in KNOWN_SOURCE_TYPES:
+                        issues.add(f"source_filter_unknown_type:{entry}")
+            shadow_mode = sf.get("shadow_mode")
+            if shadow_mode is not None and not isinstance(shadow_mode, bool):
+                issues.add("source_filter_type:shadow_mode_not_bool")
+
     return issues
 
 
@@ -159,6 +206,100 @@ def test_active_filter_config_conforms_or_is_exempt(filter_name, version):
         f"  Unexpected violations: {sorted(unexpected)}\n"
         f"  Fix the config, or add to EXEMPTIONS with justification."
     )
+
+
+class TestSourceFilterValidation:
+    """Tests for the optional source_filter: block (NexusMind#189).
+
+    These do not exercise actual filter configs — they call _violations()
+    directly on synthetic configs to lock in the validation rules ahead
+    of Phase 1 (when 7 filter configs gain real source_filter blocks).
+    """
+
+    def _base_config(self) -> dict:
+        """Minimal valid-ish config so we can layer source_filter on top."""
+        return {
+            "filter": {"name": "test", "version": "v1"},
+            "prefilter": {},
+            "oracle": {},
+            "preprocessing": {},
+            "scoring": {
+                "dimensions": {},
+                "gatekeepers": {},
+                "tiers": {},
+                "score_scale_factor": 1.0,
+            },
+            "training": {},
+            "hybrid_inference": {},
+            "deployment": {},
+        }
+
+    def test_absent_source_filter_is_valid(self):
+        """source_filter is optional — its absence triggers no violation."""
+        cfg = self._base_config()
+        sf_issues = {i for i in _violations(cfg) if i.startswith("source_filter")}
+        assert sf_issues == set()
+
+    def test_well_formed_source_filter_passes(self):
+        cfg = self._base_config()
+        cfg["source_filter"] = {
+            "excluded_source_types": ["code_repo", "developer_aggregator"],
+            "shadow_mode": True,
+        }
+        sf_issues = {i for i in _violations(cfg) if i.startswith("source_filter")}
+        assert sf_issues == set()
+
+    def test_excluded_types_must_be_list(self):
+        cfg = self._base_config()
+        cfg["source_filter"] = {"excluded_source_types": "code_repo"}  # str not list
+        assert "source_filter_type:excluded_not_list" in _violations(cfg)
+
+    def test_excluded_types_must_be_known_vocabulary(self):
+        cfg = self._base_config()
+        # Valid + invalid mixed — only the invalid entry is flagged.
+        cfg["source_filter"] = {
+            "excluded_source_types": ["code_repo", "code_rep"],  # typo
+        }
+        v = _violations(cfg)
+        assert "source_filter_unknown_type:code_rep" in v
+        assert "source_filter_unknown_type:code_repo" not in v  # valid one passes
+
+    def test_excluded_types_items_must_be_strings(self):
+        cfg = self._base_config()
+        cfg["source_filter"] = {"excluded_source_types": ["code_repo", 42]}
+        assert "source_filter_type:excluded_item_not_str" in _violations(cfg)
+
+    def test_excluded_source_types_required_when_block_present(self):
+        cfg = self._base_config()
+        cfg["source_filter"] = {"shadow_mode": True}
+        assert "source_filter_missing:excluded_source_types" in _violations(cfg)
+
+    def test_shadow_mode_must_be_bool(self):
+        cfg = self._base_config()
+        cfg["source_filter"] = {
+            "excluded_source_types": ["code_repo"],
+            "shadow_mode": "yes",  # str not bool
+        }
+        assert "source_filter_type:shadow_mode_not_bool" in _violations(cfg)
+
+    def test_shadow_mode_omitted_is_valid(self):
+        cfg = self._base_config()
+        cfg["source_filter"] = {"excluded_source_types": ["code_repo"]}
+        sf_issues = {i for i in _violations(cfg) if i.startswith("source_filter")}
+        assert sf_issues == set()
+
+    def test_source_filter_must_be_dict(self):
+        cfg = self._base_config()
+        cfg["source_filter"] = ["code_repo"]  # list at top
+        assert "source_filter_type:not_a_dict" in _violations(cfg)
+
+    def test_all_known_vocabulary_values_accepted(self):
+        """Every entry in KNOWN_SOURCE_TYPES must validate cleanly. This
+        prevents typos in the vocabulary set itself."""
+        cfg = self._base_config()
+        cfg["source_filter"] = {"excluded_source_types": sorted(KNOWN_SOURCE_TYPES)}
+        sf_issues = {i for i in _violations(cfg) if i.startswith("source_filter")}
+        assert sf_issues == set()
 
 
 def test_no_stale_exemptions():
