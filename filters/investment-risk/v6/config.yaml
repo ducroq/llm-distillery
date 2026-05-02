@@ -14,6 +14,14 @@ filter:
     - Harmonized code with v6 template (calibration, model_loading, error handling)
     - Same training data (10K articles from v5)
 
+# Per-filter source-type allowlist (NexusMind#189). investment-risk is
+# the ONLY filter that keeps firehose_aggregator (GDELT geopolitical /
+# sanctions / conflict feeds are legitimate risk signals). Excludes only
+# code_repo and developer_aggregator. shadow_mode=true logs only.
+source_filter:
+  excluded_source_types: [code_repo, developer_aggregator]
+  shadow_mode: true
+
 # Scoring dimensions and weights (6 orthogonal dimensions, unchanged from v5)
 scoring:
   score_scale_factor: 1.2652  # 10.0 / 7.90 (calibrated max)

@@ -24,6 +24,12 @@ filter:
     - Prompt display names: evidence_level -> "Outcome Verification", benefit_distribution -> "Inclusive Reach"
     - JSON field names unchanged for backwards compatibility (evidence_level, benefit_distribution)
 
+# Per-filter source-type allowlist (NexusMind#189). shadow_mode=true logs
+# would-be exclusions without enforcing — flipped during Phase 4 rollout.
+source_filter:
+  excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
+  shadow_mode: true
+
 prefilter:
   enabled: true
   expected_pass_rate: 0.20

@@ -26,6 +26,15 @@ filter:
     - head_tail preprocessing added (256+256 tokens)
     - target_samples increased to 10000
 
+# Per-filter source-type allowlist (NexusMind#189). Excludes only the
+# three new aggregator-style types. The generic "aggregator" type is
+# intentionally NOT excluded — production data shows positive-news
+# outlets like positive_news_tiny_buddha / sunny_skyz tagged that way,
+# which are exactly the content this filter wants. shadow_mode=true.
+source_filter:
+  excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
+  shadow_mode: true
+
 prefilter:
   enabled: true
   expected_pass_rate: 0.15

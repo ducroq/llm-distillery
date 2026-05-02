@@ -4,6 +4,13 @@ filter:
   description: "LCSA-based climate tech assessment with Gemma-3-1B and isotonic calibration"
   framework: "Life Cycle Sustainability Assessment (LCSA)"
 
+# Per-filter source-type allowlist (NexusMind#189). Aggregator stays
+# allowed (techcrunch-style coverage is legitimate); only the three
+# explicitly-bad types are excluded. shadow_mode=true logs only.
+source_filter:
+  excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
+  shadow_mode: true
+
 scoring:
   score_scale_factor: 1.3535  # 10.0 / 7.39 (calibrated max)
 

@@ -41,6 +41,14 @@ filter:
     - ovr.news (Wisdom tab)
     - Busara
 
+# Per-filter source-type allowlist (NexusMind#189). Excludes only the
+# three new aggregator-style types. The generic "aggregator" is left in
+# because production data shows it catches legitimate niche-content
+# outlets, not just wire-style firehose. shadow_mode=true.
+source_filter:
+  excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
+  shadow_mode: true
+
 prefilter:
   enabled: true
   expected_pass_rate: ~0.15
