@@ -71,16 +71,24 @@ REQUIRED_SCORING_KEYS = {
 # add it here in the same PR to keep the gate in lockstep.
 
 KNOWN_SOURCE_TYPES = {
-    # News
+    # News — all emitted by classify_type() via tags/categories/tld
     "news_major", "news_regional", "news_global",
     "wire_service", "public_broadcaster",
-    # Aggregators
+    # Aggregators — three new types from NexusMind#189
     "aggregator", "developer_aggregator", "firehose_aggregator",
-    # Specialized
+    # Specialized — academic/government emitted by classify_type();
+    # think_tank emitted by classify_type() via tag; ngo is reserved
+    # forward-planning vocabulary (no emitter today, but accepted in
+    # filter configs to avoid blocking future use).
     "academic", "government", "ngo", "think_tank",
-    # Tech / repos
+    # Tech / repos — code_repo emitted by classify_type() via domain;
+    # tech_industry not emitted by classify_type() but heavily used in
+    # FluxusSource's credibility.yaml manual_overrides (e.g., heise.de,
+    # techcrunch.com, dev.to platform_types entry).
     "code_repo", "tech_industry",
-    # Other
+    # Other — blog_independent emitted by classify_type() via tag;
+    # social emitted via platform_types (bsky.app, mastodon.social);
+    # unknown is the catch-all default.
     "blog_independent", "social", "unknown",
 }
 
