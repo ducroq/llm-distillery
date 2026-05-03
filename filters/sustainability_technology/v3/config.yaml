@@ -6,10 +6,12 @@ filter:
 
 # Per-filter source-type allowlist (NexusMind#189). Aggregator stays
 # allowed (techcrunch-style coverage is legitimate); only the three
-# explicitly-bad types are excluded. shadow_mode=true logs only.
+# explicitly-bad types are excluded. Phase 4a — enforcing after 4 cycles
+# of shadow-mode evidence (6 medium-tier losses, all noise: Windows 11,
+# iPhone, GitHub repos).
 source_filter:
   excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
-  shadow_mode: true
+  shadow_mode: false
 
 scoring:
   score_scale_factor: 1.3535  # 10.0 / 7.39 (calibrated max)

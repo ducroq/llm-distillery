@@ -17,11 +17,13 @@ filter:
     (process quality), not just what outcomes occurred. Education, knowledge transfer, and
     capacity building are core expressions of foresight.
 
-# Per-filter source-type allowlist (NexusMind#189). shadow_mode=true logs
-# would-be exclusions without enforcing — flipped during Phase 4 rollout.
+# Per-filter source-type allowlist (NexusMind#189). Phase 4a — enforcing
+# after 4 cycles of shadow-mode evidence (0 medium-tier losses, 2 noise
+# items). Belonging/cultural-discovery/uplifting still on shadow_mode=true
+# pending a corroboration check.
 source_filter:
   excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
-  shadow_mode: true
+  shadow_mode: false
 
 prefilter:
   enabled: true

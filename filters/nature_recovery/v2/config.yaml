@@ -31,12 +31,12 @@ filter:
 
 # Per-filter source-type allowlist (NexusMind#189). Excludes items from
 # aggregator-style sources whose identity makes them unsuitable for
-# constructive scoring. shadow_mode=true logs would-be exclusions without
-# enforcing — flipped to false during the staged rollout (Phase 4).
+# constructive scoring. shadow_mode flipped to false in Phase 4a after
+# 4 production cycles showed 0 articles ≥4.0 score would be lost.
 # Vocabulary set: llm-distillery/tests/unit/test_filter_config_schema.py
 source_filter:
   excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
-  shadow_mode: true
+  shadow_mode: false
 
 prefilter:
   enabled: true
