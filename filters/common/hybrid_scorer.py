@@ -21,9 +21,11 @@ Usage:
             }
 """
 
+import inspect
 import logging
 import time
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from filters.common.embedding_stage import EmbeddingStage, ScreeningResult
@@ -77,6 +79,44 @@ class HybridScorer(ABC):
         )
 
         self.threshold = config.get("threshold", 3.0)
+
+    @property
+    def filter_dir(self) -> Path:
+        """The concrete subclass's directory (e.g. filters/uplifting/v7/).
+
+        Mirrors `FilterBaseScorer.filter_dir`, so wrappers can resolve sibling
+        artifacts (normalization.json, config.yaml) on either base type via the
+        same public API. See gotcha-log "Manifest as Anti-Pattern" (2026-05-04).
+
+        Assumes the HybridScorer subclass file (e.g. inference_hybrid.py) and
+        its composed stage2_scorer's subclass file (inference.py) live in the
+        same directory. All current subclasses satisfy this; the assumption
+        would break for a hypothetical cross-version probe harness, in which
+        case `self.filter_dir` and `self.stage2_scorer.filter_dir` would
+        diverge — fix would be to override here.
+        """
+        return Path(inspect.getfile(type(self))).parent
+
+    @property
+    def FILTER_NAME(self) -> str:
+        """Delegate to the composed stage2 scorer.
+
+        Promoted from a NexusMind-side fallback chain (2026-05-04 review)
+        so wrappers can call `scorer.FILTER_NAME` uniformly on either base
+        type. Same shape as the existing implicit delegations
+        (`stage2_scorer.DIMENSION_WEIGHTS` etc.) used internally.
+        """
+        return self.stage2_scorer.FILTER_NAME
+
+    @property
+    def TIER_THRESHOLDS(self) -> List[Tuple[str, float, str]]:
+        """Delegate to the composed stage2 scorer.
+
+        Promoted from a NexusMind-side fallback chain (2026-05-04 review).
+        Wrappers that reassign tier on a normalized weighted average (e.g.
+        ProductionScorer per ADR-014) read this directly.
+        """
+        return self.stage2_scorer.TIER_THRESHOLDS
 
     @abstractmethod
     def _create_stage2_scorer(self):

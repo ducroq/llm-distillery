@@ -227,7 +227,7 @@ Items surfaced by the multi-agent code review of the migration commits (2026-04-
 - [x] **foresight v1 normalization** - Fitted on 623 articles (thin LUT, improves as data accumulates)
 - [x] **nature_recovery v1 normalization** - Refitted on 76,500 articles (still clamped — extreme needle filter, #32)
 - [x] **nature_recovery v2 normalization** - Fitted on 1,397 v2 production articles (filter_version=2.0, weighted_average >= 1.5), deployed to sadalsuud + gpu-server (2026-04-28). Patched `fit_normalization.py` with `--filter-version` to exclude v1 leftovers (19,948 articles correctly skipped). Curve: raw range 1.50–7.08, p95=4.49.
-  - [ ] **Follow-up (~2026-04-30)**: sample fresh `filtered_*.jsonl` on sadalsuud and confirm new v2 articles show `normalization_method != null` and `raw_weighted_average != null`. Proves the deployed curve is being applied at runtime. Without this verification we'd be repeating the #44 pattern (claiming deploy without proof).
+  - [x] **Follow-up VERIFIED 2026-05-04**: sustainability_technology JSONL on sadalsuud (1142 articles, 19:22 UTC pipeline run) shows `weighted_average=1.81`, `raw_weighted_average=4.42`, `normalization_method="percentile"` — both audit fields populated end-to-end for the first time since 2026-04-16. The verification revealed that the runtime application code itself had been silently deleted from NexusMind and gone unnoticed for 18 days; fix landed via Path B extraction into `NexusMind/src/scoring/production_scorer.py` wrapper class (NexusMind merge `0e80d92`). All 7 filters now populate the audit fields. See `memory/gotcha-log.md` "Manifest as Anti-Pattern" entry for full diagnosis.
 
 ## Documentation
 

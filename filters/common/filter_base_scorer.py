@@ -73,9 +73,25 @@ class FilterBaseScorer(ABC):
 
     # --- Directory resolution ---
 
-    def _get_filter_dir(self) -> Path:
-        """Return the concrete subclass's directory (not the common/ dir)."""
+    @property
+    def filter_dir(self) -> Path:
+        """The concrete subclass's directory (not the common/ dir).
+
+        Public API for wrappers (e.g. NexusMind's ProductionScorer) that need
+        to find sibling artifacts like normalization.json or config.yaml without
+        relying on the FILTER_NAME constant. See gotcha-log "Manifest as
+        Anti-Pattern" (2026-05-04) for why this is exposed publicly.
+        """
         return Path(inspect.getfile(type(self))).parent
+
+    def _get_filter_dir(self) -> Path:
+        """Backward-compat alias for the public `filter_dir` property.
+
+        Subclasses still call `self._get_filter_dir()`; new code should prefer
+        the property. Kept as a method (not removed) to avoid touching every
+        per-filter base_scorer.py at this version bump.
+        """
+        return self.filter_dir
 
     # --- Property for HybridScorer compatibility ---
 
@@ -89,7 +105,7 @@ class FilterBaseScorer(ABC):
     def _compute_prompt_hash(self):
         """Compute a short hash of the prompt file for provenance tracking."""
         self.prompt_hash = None
-        filter_dir = self._get_filter_dir()
+        filter_dir = self.filter_dir
         for name in ("prompt-compressed.md", "prompt.md"):
             prompt_path = filter_dir / name
             if prompt_path.exists():
@@ -117,7 +133,7 @@ class FilterBaseScorer(ABC):
     def _load_calibration(self):
         """Load score calibration if calibration.json exists in the filter directory."""
         self.calibration = None
-        cal_path = self._get_filter_dir() / "calibration.json"
+        cal_path = self.filter_dir / "calibration.json"
         if cal_path.exists():
             from filters.common.score_calibration import load_calibration
             self.calibration = load_calibration(str(cal_path))
@@ -138,7 +154,7 @@ class FilterBaseScorer(ABC):
 
     def _load_preprocessing_config(self):
         """Load preprocessing config from config.yaml."""
-        config_path = self._get_filter_dir() / "config.yaml"
+        config_path = self.filter_dir / "config.yaml"
 
         self.use_head_tail = False
         self.head_tokens = 256

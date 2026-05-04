@@ -109,9 +109,10 @@ cp -r "${SOURCE_DIR}/"* "$DEST_DIR/"
 echo "   Copied to: $DEST_DIR"
 
 # Step 2: Copy common utilities, honoring .nexusmind-owns (issue #50).
-# Files listed in .nexusmind-owns evolve independently in NexusMind (e.g. the
-# BFloat16 .float() cast in filter_base_scorer.py) and must NOT be overwritten
-# by a blind sync from this repo.
+# Files listed in .nexusmind-owns evolve independently in NexusMind and must
+# NOT be overwritten by a blind sync from this repo. The manifest is empty by
+# default — see gotcha-log "Manifest as Anti-Pattern" (2026-05-04). When an
+# entry is added, pair it with a tracked issue and a deadline to remove it.
 echo ""
 echo "2. Copying common utilities: filters/common/ (honoring .nexusmind-owns)"
 mkdir -p "$COMMON_DEST"
@@ -131,6 +132,16 @@ if [ -f "$NEXUSMIND_OWNS_FILE" ]; then
         [ -z "$line" ] && continue
         OWNED_PATHS+=("$line")
     done < "$NEXUSMIND_OWNS_FILE"
+fi
+
+# Surface manifest state explicitly. Empty is the steady state — a positive
+# log line turns "no skip" into an active confirmation rather than a silent
+# absence. (Refactoring-guide review, 2026-05-04: the original failure mode
+# was "mechanism present, divergence reason evaporated, no one noticed.")
+if [ ${#OWNED_PATHS[@]} -eq 0 ]; then
+    echo "   .nexusmind-owns is empty — all common files will be synced."
+else
+    echo "   .nexusmind-owns: ${#OWNED_PATHS[@]} entr$( [ ${#OWNED_PATHS[@]} -eq 1 ] && echo 'y' || echo 'ies' ) skipped: ${OWNED_PATHS[*]}"
 fi
 
 # Typo guard: every manifest entry must exist on at least one side.

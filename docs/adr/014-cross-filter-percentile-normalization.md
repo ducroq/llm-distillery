@@ -46,7 +46,7 @@ Root causes are structural: different oracle prompts, different gatekeeper caps,
 | **Stored as** | `calibration.json` | `normalization.json` |
 | **Applied** | Before weighted average | After weighted average |
 
-The inference pipeline becomes: raw prediction → calibrate (ADR-008) → weighted average → normalize (ADR-014) → display_rank.
+The inference pipeline becomes: raw prediction → calibrate (ADR-008) → weighted average → gatekeeper cap → normalize (ADR-014) → reassign tier on normalized → display_rank. Calibration and gatekeeper run inside `FilterBaseScorer` (shared); normalization and tier reassignment run inside NexusMind's `ProductionScorer` wrapper (production-only). See "Implementation" below.
 
 ## How It Works
 
@@ -126,8 +126,11 @@ No other filters' normalization files need to change. For a brand new filter wit
 - `filters/common/score_normalization.py` — fit CDF, apply normalization, save/load (reuses patterns from `score_calibration.py`)
 - `filters/{name}/v{N}/normalization.json` — per-filter CDF lookup table (schema: `{"x": [...], "y": [...], "n_articles": int, "fitted_from": str, "fitted_at": str}`, where x = raw WA scores, y = normalized 0-10 scores)
 - `scripts/normalization/fit_normalization.py` — CLI tool: reads production MEDIUM+ data from sadalsuud, fits CDF, saves JSON
-- NexusMind `filter_base_scorer.py`: apply normalization after weighted average computation. Set `score_scale_factor` to 1.0 for all filters (superseded).
-- NexusMind `display_ranking.py`: `max(score, analysis["weighted_average"])` now works correctly because normalized scores are comparable across filters
+- **NexusMind `src/scoring/production_scorer.py`** (the application site, since 2026-05-04): a wrapper class that composes any `FilterBaseScorer`/`HybridScorer` instance, loads `normalization.json` (with `_MIN_NORMALIZATION_ARTICLES = 200` safety valve, llm-distillery#167), reads `score_scale_factor` from `config.yaml`, and post-processes scoring output to replace `weighted_average` with the normalized value, populate `raw_weighted_average` for audit, and set `normalization_method ∈ {"percentile", "scale_factor", "none"}`. Tier is reassigned on the normalized weighted average so `tier`/`weighted_average` stay coherent for consumers that route on tier (e.g. Aegis) or display tier badges next to scores. `filter_base_scorer.py` itself is pure shared math — model + calibration + gatekeeper + raw weighted average + tier assignment on raw — and is identical between repos.
+  - The original 2026-03-30 placement was inside `NexusMind/filters/common/filter_base_scorer.py`. That conflated shared model logic with NexusMind-only runtime concerns and required `.nexusmind-owns` to mask the divergence; the manifest mechanism then hid the 2026-04-16 silent revert of the application code for 18 days. The wrapper extraction (NexusMind merge `0e80d92`) eliminates the divergence and lets the manifest go empty.
+  - Ordering invariant unchanged: normalization runs **after** calibration, gatekeeper, and weighted average computation.
+- Set `score_scale_factor` to 1.0 for all filters with a fitted `normalization.json` (superseded for those filters; retained as fallback path for filters without one, e.g. fresh version bumps before the first CDF is fitted).
+- NexusMind `display_ranking.py`: `max(score, analysis["weighted_average"])` now works correctly because normalized scores are comparable across filters.
 
 ## References
 

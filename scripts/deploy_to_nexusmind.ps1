@@ -91,9 +91,10 @@ Copy-Item -Path "$SourceDir\*" -Destination $DestDir -Recurse -Force
 Write-Host "   Copied to: $DestDir" -ForegroundColor Green
 
 # Step 2: Copy common utilities, honoring .nexusmind-owns (issue #50).
-# Files listed in .nexusmind-owns evolve independently in NexusMind (e.g. the
-# BFloat16 .float() cast in filter_base_scorer.py) and must NOT be overwritten
-# by a blind sync from this repo.
+# Files listed in .nexusmind-owns evolve independently in NexusMind and must
+# NOT be overwritten by a blind sync from this repo. The manifest is empty by
+# default — see gotcha-log "Manifest as Anti-Pattern" (2026-05-04). When an
+# entry is added, pair it with a tracked issue and a deadline to remove it.
 Write-Host ""
 Write-Host "2. Copying common utilities: filters\common\ (honoring .nexusmind-owns)" -ForegroundColor Yellow
 if (-not (Test-Path $CommonDest)) {
@@ -107,6 +108,17 @@ if (Test-Path $ManifestPath) {
         $line = ($_ -split '#', 2)[0].Trim()
         if ($line) { $OwnedPaths += $line }
     }
+}
+
+# Surface manifest state explicitly. Empty is the steady state — a positive
+# log line turns "no skip" into an active confirmation rather than a silent
+# absence. (Refactoring-guide review, 2026-05-04: the original failure mode
+# was "mechanism present, divergence reason evaporated, no one noticed.")
+if ($OwnedPaths.Count -eq 0) {
+    Write-Host "   .nexusmind-owns is empty - all common files will be synced." -ForegroundColor Green
+} else {
+    $entryWord = if ($OwnedPaths.Count -eq 1) { "entry" } else { "entries" }
+    Write-Host "   .nexusmind-owns: $($OwnedPaths.Count) $entryWord skipped: $($OwnedPaths -join ', ')" -ForegroundColor Yellow
 }
 
 # Typo guard: every manifest entry must exist on at least one side.
