@@ -13,6 +13,11 @@ source_filter:
   excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
   shadow_mode: false
 
+prefilter:
+  enabled: true
+  expected_pass_rate: 0.20
+  description: "Blocks off-topic and shopping content; wide sustainability keyword net passes tech and policy coverage"
+
 scoring:
   score_scale_factor: 1.3535  # 10.0 / 7.39 (calibrated max)
 
@@ -63,9 +68,10 @@ scoring:
       translate: false
 
   gatekeepers:
-    - dimension: technology_readiness_level
-      min_threshold: 3.0
-      caps_overall_at: 2.9
+    trl_gatekeeper:
+      dimension: technology_readiness_level
+      threshold: 3.0
+      max_score: 2.2  # Raw cap matching base_scorer.py GATEKEEPER_CAP; scaled to ~2.97 by score_scale_factor 1.3535 (just below medium tier 3.0)
       reason: "Lab-only technologies cannot achieve high overall sustainability scores"
 
 oracle:
@@ -92,3 +98,13 @@ hybrid_inference:
     threshold: 1.25  # Will be recalibrated after training
   stage2:
     model: "current"  # Uses existing SustainabilityTechnologyScorer
+
+deployment:
+  inference_time: "~20ms"
+  inference_time_hybrid: "~12ms avg"
+  cost_per_article: "$0.00"
+  use_cases:
+    - "Climate tech assessment for investment due diligence"
+    - "Sustainable technology trend monitoring"
+    - "Counter-programming to greenwashing with LCSA-grounded scoring"
+    - "ovr.news Sustainability tab"

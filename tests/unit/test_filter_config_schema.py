@@ -101,13 +101,10 @@ KNOWN_SOURCE_TYPES = {
 # When fixing a drift during the B migration, remove the exemption(s) in
 # the same commit as the config fix.
 
-EXEMPTIONS = {
-    # sustainability_technology v3 — the oldest filter, missing newer sections
-    ("sustainability_technology", "v3", "missing_top_level:prefilter"),
-    ("sustainability_technology", "v3", "missing_top_level:deployment"),
-    ("sustainability_technology", "v3", "scoring_type:gatekeepers_is_list_not_dict"),
-
-}
+EXEMPTIONS: set[tuple[str, str, str]] = set()
+# Migration B complete (2026-05-04): all 7 active filters conform to the
+# canonical schema. Add an exemption here only with a written justification
+# explaining why the deviation is intentional and what would unblock removal.
 
 
 def _violations(cfg: dict) -> set[str]:
