@@ -24,11 +24,14 @@ filter:
     - Prompt display names: evidence_level -> "Outcome Verification", benefit_distribution -> "Inclusive Reach"
     - JSON field names unchanged for backwards compatibility (evidence_level, benefit_distribution)
 
-# Per-filter source-type allowlist (NexusMind#189). shadow_mode=true logs
-# would-be exclusions without enforcing — flipped during Phase 4 rollout.
+# Per-filter source-type allowlist (NexusMind#189). Phase 4b enforcing
+# from 2026-05-04 12:30 CEST after FluxusSource#78 cache-poisoning fix
+# (post-fix shadow showed 7 medium-tier / 0 high-tier would-be losses,
+# all firehose noise: pop-psychology, scattered protest blurbs, supply-
+# chain wire stories that are covered by primary sources elsewhere).
 source_filter:
   excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
-  shadow_mode: true
+  shadow_mode: false
 
 prefilter:
   enabled: true

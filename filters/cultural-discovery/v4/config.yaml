@@ -44,10 +44,13 @@ filter:
 # Per-filter source-type allowlist (NexusMind#189). Excludes only the
 # three new aggregator-style types. The generic "aggregator" is left in
 # because production data shows it catches legitimate niche-content
-# outlets, not just wire-style firehose. shadow_mode=true.
+# outlets, not just wire-style firehose. Phase 4b enforcing from
+# 2026-05-04 12:30 CEST after FluxusSource#78 cache-poisoning fix
+# (post-fix shadow showed 4 medium-tier / 0 high-tier would-be losses;
+# the prior 1 high-tier loss disappeared with the fix).
 source_filter:
   excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
-  shadow_mode: true
+  shadow_mode: false
 
 prefilter:
   enabled: true

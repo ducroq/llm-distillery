@@ -30,10 +30,13 @@ filter:
 # three new aggregator-style types. The generic "aggregator" type is
 # intentionally NOT excluded — production data shows positive-news
 # outlets like positive_news_tiny_buddha / sunny_skyz tagged that way,
-# which are exactly the content this filter wants. shadow_mode=true.
+# which are exactly the content this filter wants. Phase 4b enforcing
+# from 2026-05-04 12:30 CEST after FluxusSource#78 cache-poisoning fix
+# (post-fix shadow showed 2 medium-tier / 0 high-tier would-be losses,
+# all firehose noise).
 source_filter:
   excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
-  shadow_mode: true
+  shadow_mode: false
 
 prefilter:
   enabled: true
