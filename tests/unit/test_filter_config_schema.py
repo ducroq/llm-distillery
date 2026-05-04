@@ -107,10 +107,6 @@ EXEMPTIONS = {
     ("sustainability_technology", "v3", "missing_top_level:deployment"),
     ("sustainability_technology", "v3", "scoring_type:gatekeepers_is_list_not_dict"),
 
-    # investment-risk v6 — drift-y naming
-    ("investment-risk", "v6", "missing_top_level:oracle"),
-    ("investment-risk", "v6", "unexpected_top_level:ground_truth"),
-    ("investment-risk", "v6", "missing_top_level:preprocessing"),
 }
 
 

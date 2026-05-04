@@ -154,10 +154,14 @@ prefilter:
     - non_financial
 
 # Ground truth generation
-ground_truth:
-  oracle_model: "gemini-flash"
+oracle:
+  recommended: gemini-flash
   target_labeled: 10000
   sample_strategy: "random + screen+merge"
+
+preprocessing:
+  head_tail:
+    enabled: false  # investment-risk uses default tokenizer truncation
 
 # Training configuration
 training:
