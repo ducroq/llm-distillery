@@ -17,10 +17,13 @@ filter:
 # Per-filter source-type allowlist (NexusMind#189). investment-risk is
 # the ONLY filter that keeps firehose_aggregator (GDELT geopolitical /
 # sanctions / conflict feeds are legitimate risk signals). Excludes only
-# code_repo and developer_aggregator. shadow_mode=true logs only.
+# code_repo and developer_aggregator. Enforcing from 2026-05-04 12:45
+# CEST after FluxusSource#78 cache-poisoning fix; shadow showed only 5
+# would-be exclusions (0 medium / 0 high) — all GitHub or HN-linked
+# items, none of which carry distinct risk signal vs primary coverage.
 source_filter:
   excluded_source_types: [code_repo, developer_aggregator]
-  shadow_mode: true
+  shadow_mode: false
 
 # Scoring dimensions and weights (6 orthogonal dimensions, unchanged from v5)
 scoring:
