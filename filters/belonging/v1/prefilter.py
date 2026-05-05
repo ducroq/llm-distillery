@@ -36,6 +36,7 @@ import re
 from typing import Dict, Tuple
 
 from filters.common.base_prefilter import BasePreFilter
+from filters.common.obit_signal import OBIT_PATTERNS, uppercase_rip_in_title
 
 
 class BelongingPreFilterV1(BasePreFilter):
@@ -171,44 +172,14 @@ class BelongingPreFilterV1(BasePreFilter):
             r'\b(digital nomad community|remote work community)\b',
             r'\b(online membership|virtual membership)\b',
         ],
-        # Obituary / funeral framing.
-        # TODO(#51): extract to a shared trained obituary detector. Until then,
-        # regex hold-the-line lives here.
-        'obituary_funeral': [
-            r'\b(obituary|obituaries|in memoriam)\b',
-            r'\b(funeral|funeral mass|funeral service|memorial service)\b',
-            r'\b(passed away|laid to rest|death notice)\b',
-            # \d+ (was \d) — single-digit version failed on two-digit ages like
-            # "Dies at 99" / "Dies at 73", which is the common case (#45).
-            r'\b(dies aged|died aged|dies at \d+|died at \d+)\b',
-            # Verb-form variants of "dies" not anchored by "aged"/"at N" (#45).
-            # "Hong Kong Activist Dies After Decades of Protest", "Dies Following
-            # Long Illness", "Dies in Crash", "Dies While Hiking".
-            r'\b(dies|died) (after|following|in|while)\b',
-            r'\b(survived by|in loving memory|paying tribute|pays tribute)\b',
-            r'\b(mourners?|mourning|condolences)\b',
-            # Procession/vigil — strong death-context signal, low FP risk (#45).
-            r'\b(procession|candlelight vigil|memorial vigil)\b',
-            # "Rest in peace" / "RIP" — high signal, low FP. The standalone "RIP"
-            # token MUST be uppercase to avoid matching "rip current" (beach safety,
-            # very common) or "rip the page" — but these patterns are compiled with
-            # re.IGNORECASE in __init__, so use an inline (?-i:) to force case-
-            # sensitivity for this token only.
-            r'\b(rest in peace)\b',
-            # NOTE: case-sensitive `\bRIP\b` is checked separately in
-            # apply_filter() against the raw (un-lowercased) title — see
-            # `_uppercase_rip_in_title()`. The previous in-list `(?-i:\bRIP\b)`
-            # was inert because `_get_combined_clean_text` lowercases input
-            # before pattern matching, so the inline `(?-i:)` could never see
-            # uppercase chars. The standalone-token RIP signal is rare-but-
-            # strong; the title-only case-sensitive check restores intent
-            # without re-introducing the "rip current" / "rip the page" FP.
-            # "Killed in <year>" — historical-tragedy commemoration framing
-            # ("Family Killed in 1976 Bombing Remembered"). Anchored to a 4-digit
-            # year to keep FP risk low; bare "killed in <place>" would over-match
-            # current conflict reporting (#45 item 8).
-            r'\b(killed|murdered|assassinated) in \d{4}\b',
-        ],
+        # Obituary / funeral framing — patterns hoisted to
+        # filters/common/obit_signal.py so belonging and the NexusMind#199
+        # cross-lens measurement probe share one canonical pattern source.
+        # See that module for per-pattern rationale and the case-sensitive
+        # uppercase-RIP-in-title check (consumed below in apply_filter).
+        # TODO(#51): if the trained universal obituary detector ships,
+        # belonging consumes its `_is_obituary` signal instead.
+        'obituary_funeral': OBIT_PATTERNS,
         # Multilingual wellness / self-help / professional-networking framing
         # (Dutch, German, French).
         'multilingual_block': [
@@ -384,23 +355,17 @@ class BelongingPreFilterV1(BasePreFilter):
 
     @staticmethod
     def _uppercase_rip_in_title(article: Dict) -> bool:
-        """Detect uppercase `RIP` token in the raw title — case-sensitive.
+        """Thin wrapper: case-sensitive `\\bRIP\\b` check on the raw title.
 
-        Lives outside EXCLUSION_PATTERNS because base pattern compilation uses
-        re.IGNORECASE and apply_filter feeds patterns lowercased text via
-        `_get_combined_clean_text`. An inline `(?-i:)` flag on the *pattern*
-        can't help because the *input string* has already been lowercased — by
-        the time the regex engine sees it, "RIP" has become "rip" and the
-        case-sensitive check has no uppercase to match.
+        The actual case-sensitivity rationale lives in
+        filters/common/obit_signal.py :: uppercase_rip_in_title — see that
+        module's docstring for why this can't live in EXCLUSION_PATTERNS
+        with an inline `(?-i:)` flag.
 
-        The fix is to skip lowercasing for this one signal: read the raw title
-        directly off the article and search with a case-sensitive `\\bRIP\\b`.
-        Title only (not body) keeps the FP risk minimal — body text occasionally
-        all-caps for emphasis, but titles in obit contexts use "RIP" deliberately
-        as a recognised acronym.
+        Kept as a method on this class so existing callers and tests
+        continue to work after the 2026-05-05 hoist.
         """
-        title_raw = article.get('title') or ''
-        return bool(re.search(r'\bRIP\b', title_raw))  # NO re.IGNORECASE
+        return uppercase_rip_in_title(article.get('title') or '')
 
     def get_statistics(self) -> Dict:
         """Return filter statistics"""

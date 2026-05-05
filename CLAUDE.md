@@ -35,7 +35,7 @@ framework: agent-ready-projects v1.9.0
 
 | Filter | Version | MAE | Training Data | Status |
 |--------|---------|-----|---------------|--------|
-| **uplifting** | v7 | — | 5.3K articles | Deployed to NexusMind via file-copy — no Hub repo (see #47); hybrid inference added |
+| **uplifting** | v7 | — | 5.3K articles | Deployed to NexusMind via file-copy — intentionally no Hub repo (NO_HUB sentinel; v7 file-copy from gpu-server skipped training_metadata.json artifacts needed for the model card, and reconstructing them risks fabricating MAE numbers). Hybrid inference added. |
 | **sustainability_technology** | v3 | 0.72 | 10.6K articles | Deployed (HF Hub, private) |
 | **investment-risk** | v6 | 0.47 | 10.4K articles | Deployed (HF Hub, private) |
 | **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
@@ -68,6 +68,7 @@ framework: agent-ready-projects v1.9.0
 - **Lenses as perspectives, not partitions** — overlap between lenses is correct; never exclude adjacent lens content in oracle prompts (ADR-015)
 - **Drop tier assignments** — filters output pass/block + continuous score only; tiers add no value over the score itself (ADR-016)
 - **Declarative prefilter shape** — extend `BasePreFilter` with `EXCLUSION_PATTERNS` / `OVERRIDE_KEYWORDS` / `POSITIVE_PATTERNS` / `POSITIVE_THRESHOLD` class attrs; standard `apply_filter()` pipeline lives on the base (ADR-018, #52)
+- **Per-category exclusion overrides** — `CATEGORY_OVERRIDES` dict (TypedDict-typed) + `_compound_override_applies()` Template Method hook on `BasePreFilter`. Subclasses inject only special-case rules; base owns the fallback chain (compound hook → dict → global `_has_override`). Unblocks belonging/foresight/sustech/cultural-discovery from custom `apply_filter()` (ADR-019, #52)
 
 See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed records.
 
@@ -83,7 +84,7 @@ See `docs/adr/README.md` for full ADR index, `docs/decisions/` for detailed reco
 | Deploying to NexusMind or gpu-server | `docs/RUNBOOK.md` — deployment, training, scoring how-to |
 | Training on GPU server | `memory/gpu-server.md` — venv, PYTHONPATH, HF_HUB_OFFLINE |
 | Debugging model loading or PEFT issues | `memory/gemma3-model.md` — Auto mapping fix, key format details |
-| Making architectural decisions | `docs/adr/README.md` — 18 settled ADRs |
+| Making architectural decisions | `docs/adr/README.md` — 19 settled ADRs |
 | Checking priorities or planning work | `docs/TODO.md` and `docs/ROADMAP.md` |
 | Understanding system design | `docs/ARCHITECTURE.md` |
 | Reviewing work quality | `docs/checklists/` — architect, test, implement, QA gates |
