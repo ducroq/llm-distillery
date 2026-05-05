@@ -84,18 +84,31 @@ Loaded every session. Topic files loaded on demand via triggers below.
 - Cross-filter percentile normalization, supersedes score_scale_factor — ADR-014 (2026-03-30)
 - Thriving v1 paused, bimodal distribution problem — uplifting v6 stays (2026-03-30)
 - Declarative prefilter shape via BasePreFilter extension — ADR-018 (2026-04-28). Per-filter migration COMPLETE 2026-04-29 (#52, all 7 production filters); review-battery follow-ups also landed (RIP guard repair, POSITIVE_PATTERNS shadow rename, CD v4 truncation, uplifting v7 multilingual `\b` boundary sweep, investment-risk cleanups, CD v4 colonial tightening, `_check_domain_exclusions` hoist, `_pre_exclusion_check` hook). Class-name drift cleanup (sustech V2→V3, NR V1→V2) and per-category exception extension to `_is_excluded` (potential ADR-019) deferred — see `docs/TODO.md` "Post-#52 Review-Battery Followups".
+- Cross-repo cleavage rule, post-2026-05-04 manifest-as-anti-pattern incident — production-runtime concerns live in NexusMind wrappers (composition over inheritance), shared math lives in `filters/common/`, `.nexusmind-owns` manifest is the escape hatch (empty by default; entries require tracked issue + deadline). See `memory/gotcha-log.md` "Manifest as Anti-Pattern" entry + closure note for the full lesson and the cross-repo coordination shape that worked.
 
-## Next Session Pickup (set 2026-04-29 EOD, do 2026-04-30)
+## Last Session Recap (2026-05-05)
 
-Pickup order, in priority:
+Cross-repo cleanup of the .nexusmind-owns manifest-anti-pattern landed end-to-end. Scope: extract production-runtime concerns into a NexusMind wrapper (Path B); expose stable wrapper API on shared bases (`filter_dir`, `FILTER_NAME`, `TIER_THRESHOLDS` properties); empty the manifest while keeping the mechanism. Spanned 4 commits across both repos:
 
-1. **NR v2 normalization runtime verification** — first thing, ~5 min. Sample fresh `filtered_*.jsonl` on sadalsuud and confirm v2 articles show `normalization_method != null` + `raw_weighted_average != null`. Same discipline as the #44 lesson — proves the deployed curve is actually being applied at runtime. Tracked in `docs/TODO.md` under "Cross-Filter Normalization (ADR-014)" → nature_recovery v2.
+- llm-distillery `1b7fef8` — manifest empty, public properties, ADR-014 amended, gotcha-log entry
+- NexusMind `63c62f3 → 3471c82 → 18ab194` — sync, wrapper cleanup, fixture fix
+- llm-distillery `2bdd7bf` — docstring honesty fix on `_get_filter_dir` (load-bearing patch site, not alias)
+- llm-distillery `1085bf0` + addendum on `2bdd7bf` — gotcha-log closure note with the meta-lesson on cross-repo API contract changes and `patch.object` patterns
 
-2. **Then pivot based on appetite** (pick one):
-   - **llm-distillery**: #47 — add `inference_hub.py` to `filters/uplifting/v7/` (template from `filters/nature_recovery/v2/inference_hub.py`), upload weights to Hub via `scripts/deployment/upload_to_huggingface.py`, verify with `verify_filter_package.py --check-hub`. Closes the lone non-Hub-deployed production filter. ~1 hour.
-   - **NexusMind**: #53 option 2 — filter-discovery normalization so it picks one canonical name when both `investment-risk` and `investment_risk` exist. Removes the time bomb that the symlink band-aid currently masks. Medium effort.
+Side effects: filed #58 (investment-risk inference.py hardcoded import — pre-existing) and #59 (uplifting_v6 mixed-schema dataset — pre-existing). Both surfaced by tests during the cleanup; neither caused by it.
 
-3. **Open & non-urgent**: #51 (universal obituary detector — labeling bottleneck), class-name drift cleanup (sustech V2→V3, NR V1→V2), ADR-019 design (`_is_excluded` per-category extension), CD v4 + NR v2 missing `check_content_length`.
+## Next Session Pickup (set 2026-05-05 EOD)
+
+No urgent follow-up — cross-repo cleanup is verified end-to-end (NexusMind 18ab194 + smoke battery green on all 7 filters). Open work, pick by appetite:
+
+1. **#47** — finish uplifting v7 Hub deployment. `filters/uplifting/v7/inference_hub.py` exists (template added); remaining: upload weights via `scripts/deployment/upload_to_huggingface.py`, verify with `verify_filter_package.py --check-hub`, update CLAUDE.md table. ~1 hour.
+2. **#58** — investment-risk inference.py: replace hardcoded `from filters.investment_risk...` with `Path(__file__).parent`-derived dynamic import (mirror the inference_hybrid.py 2026-04-06 fix). 2-line behavioral change. ~30 min.
+3. **#59** — uplifting_v6 mixed-schema dataset: scope test fixture to active versions, OR re-prep the merged-in active-learning rows. Pick the lower-risk path. ~1 hour.
+4. **Solutions broadening** — sustainability_technology v4 from #43 design phase, merging foresight v1 captures. Larger scope, design-first.
+5. **ADR-019 design** — `_is_excluded` per-category exception extension (deferred from #52 review battery). Architectural design, then migration.
+6. **#51** — universal obituary detector. Labeling bottleneck (~1.5 weeks engineer time on labeling).
+
+Open & non-urgent: class-name drift cleanup (sustech V2→V3, NR V1→V2), CD v4 + NR v2 missing `check_content_length`.
 
 ## Next Up (from ROADMAP "Now")
 

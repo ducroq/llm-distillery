@@ -237,7 +237,7 @@ Items surfaced by the multi-agent code review of the migration commits (2026-04-
 
 ---
 
-*Last updated: 2026-04-29*
+*Last updated: 2026-05-05*
 
 ## #52 belonging v1 migration notes (2026-04-29)
 
