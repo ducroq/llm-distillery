@@ -85,11 +85,20 @@ class FilterBaseScorer(ABC):
         return Path(inspect.getfile(type(self))).parent
 
     def _get_filter_dir(self) -> Path:
-        """Backward-compat alias for the public `filter_dir` property.
+        """The concrete subclass's directory (not the common/ dir).
 
-        Subclasses still call `self._get_filter_dir()`; new code should prefer
-        the property. Kept as a method (not removed) to avoid touching every
-        per-filter base_scorer.py at this version bump.
+        Originally introduced as a backward-compat alias for the `filter_dir`
+        property, but post-`18ab194` on NexusMind this method is *also* a
+        load-bearing patch site for cross-repo test fixtures: NexusMind's
+        `_build_scorer` (in `tests/unit/test_shared_infrastructure.py`) has to
+        patch both this method *and* the property to redirect filter-dir
+        resolution at test time, because the property body returns
+        `inspect.getfile(...)` directly rather than delegating through here.
+        Six per-filter `base_scorer.py` subclasses also call this directly.
+
+        Do not remove without coordinating with NexusMind's test fixtures.
+        See gotcha-log "Manifest as Anti-Pattern" closure note (2026-05-05)
+        for full context.
         """
         return self.filter_dir
 
