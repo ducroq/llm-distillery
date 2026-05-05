@@ -40,7 +40,7 @@ class SustainabilityTechnologyPreFilterV2(BasePreFilter):
         # AI/ML infrastructure without sustainability application
         # REMOVED: transformer (electrical transformers), benchmark (ESG benchmarks)
         'ai_ml_infrastructure': [
-            r'\b(attention mechanism|SOTA|state.of.the.art)\b',
+            r'\b(attention mechanism|SOTA|state[\.\- ]of[\.\- ]the[\.\- ]art)\b',
             r'\b(diffusion model|GAN|VAE|autoencoder|neural network architecture)\b',
             r'\b(LLM|language model|GPT-\d|BERT|Llama|Claude|Gemini|Mistral)\b',
             r'\b(fine.?tun|pretrain|inference optimization|token generation)\b',
