@@ -2,7 +2,7 @@
 FilterBaseScorer - Abstract base class for all filter scorers.
 
 Extracted from the 4 production base_scorer.py files (uplifting v6,
-sustainability_technology v3, investment-risk v6, cultural-discovery v4)
+sustainability_technology v3, investment_risk v6, cultural_discovery v4)
 which were ~400 lines each with ~350 lines identical.
 
 Subclasses define constants and _load_prefilter(); everything else lives here.

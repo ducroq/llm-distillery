@@ -1,14 +1,13 @@
 """
-Cultural Discovery Filter v4 - HuggingFace Hub Inference
+Investment Risk Filter v6 - HuggingFace Hub Inference
 
 Loads the model directly from HuggingFace Hub for inference.
 Use this when you don't have local model files or want to use a shared model.
 
 Usage:
-    from importlib import import_module
-    mod = import_module("filters.cultural-discovery.v4.inference_hub")
-    scorer = mod.CulturalDiscoveryScorerHub(
-        repo_id="jeergrvgreg/cultural-discovery-v4",
+    from filters.investment_risk.v6.inference_hub import InvestmentRiskScorerHub
+    scorer = InvestmentRiskScorerHub(
+        repo_id="jeergrvgreg/investment-risk-filter-v6",
         token="hf_..."  # Only needed for private repos
     )
     result = scorer.score_article(article)
@@ -22,31 +21,24 @@ from typing import Optional
 import torch
 
 from filters.common.model_loading import load_lora_hub
-
-# Import base class (handle hyphen in path via importlib)
-import importlib.util
-_base_path = Path(__file__).parent / "base_scorer.py"
-_spec = importlib.util.spec_from_file_location("base_scorer", _base_path)
-_base_module = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_base_module)
-BaseCulturalDiscoveryScorer = _base_module.BaseCulturalDiscoveryScorer
+from .base_scorer import BaseInvestmentRiskScorer
 
 logger = logging.getLogger(__name__)
 
 
-class CulturalDiscoveryScorerHub(BaseCulturalDiscoveryScorer):
+class InvestmentRiskScorerHub(BaseInvestmentRiskScorer):
     """
     Scorer that loads model from HuggingFace Hub.
 
-    Inherits all scoring logic from BaseCulturalDiscoveryScorer.
+    Inherits all scoring logic from BaseInvestmentRiskScorer.
     Only implements Hub-specific model loading.
 
-    For loading from local files, use CulturalDiscoveryScorer instead.
+    For loading from local files, use InvestmentRiskScorer instead.
     """
 
     def __init__(
         self,
-        repo_id: str = "jeergrvgreg/cultural-discovery-v4",
+        repo_id: str = "jeergrvgreg/investment-risk-filter-v6",
         token: Optional[str] = None,
         device: Optional[str] = None,
         use_prefilter: bool = True,
@@ -98,17 +90,24 @@ def main():
         except Exception:
             pass
 
-    print("Loading cultural discovery scorer from HuggingFace Hub...")
-    scorer = CulturalDiscoveryScorerHub(token=token)
+    print("Loading investment-risk scorer from HuggingFace Hub...")
+    scorer = InvestmentRiskScorerHub(token=token)
 
     # Demo article
     demo_article = {
-        "title": "Ancient Silk Road Temple Reveals Unexpected Buddhist-Zoroastrian Syncretism",
+        "title": "Fed Signals Rate Cuts May Come Later Than Expected Amid Sticky Inflation",
         "content": """
-        Excavations at a 4th-century temple in Uzbekistan have uncovered evidence
-        of an unprecedented religious synthesis. The site contains Buddhist statues
-        with distinctly Zoroastrian fire altar iconography, suggesting practitioners
-        of both faiths worshipped together during the height of Silk Road trade.
+        Federal Reserve officials indicated Wednesday that interest rate cuts
+        could be delayed until later in 2025 as inflation remains stubbornly
+        above the central bank's 2% target. The latest FOMC minutes revealed
+        concerns about persistent price pressures in services and housing.
+
+        Markets had been pricing in cuts as early as March, but traders are
+        now adjusting expectations. The S&P 500 fell 1.2% following the release.
+        Bond yields rose as investors recalibrated their outlook.
+
+        For retail investors, this suggests maintaining a defensive posture
+        and avoiding long-duration bonds until the path becomes clearer.
         """
     }
 

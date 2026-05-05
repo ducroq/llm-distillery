@@ -16,7 +16,7 @@ class BaseCulturalDiscoveryScorer(FilterBaseScorer):
         - _load_model(): Load model from local files or Hub
     """
 
-    FILTER_NAME = "cultural-discovery"
+    FILTER_NAME = "cultural_discovery"
     FILTER_VERSION = "4.0"
 
     DIMENSION_NAMES = [

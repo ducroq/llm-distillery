@@ -480,7 +480,7 @@ class BasePreFilter:
         Hook for filter-specific logic that runs after exclusions pass.
 
         Used for things like 'is this article actually about climate?' (sustech)
-        or 'does it mention any in-scope cultural region?' (cultural-discovery).
+        or 'does it mention any in-scope cultural region?' (cultural_discovery).
 
         Default: always pass. Subclasses override and return (False, reason)
         to block at this stage.

@@ -14,8 +14,8 @@ filters = {
     'belonging v1': 'filters/belonging/v1',
     'uplifting v6': 'filters/uplifting/v6',
     'sust_tech v3': 'filters/sustainability_technology/v3',
-    'inv-risk v6': 'filters/investment-risk/v6',
-    'cult-disc v4': 'filters/cultural-discovery/v4',
+    'inv-risk v6': 'filters/investment_risk/v6',
+    'cult-disc v4': 'filters/cultural_discovery/v4',
 }
 
 all_files = {}

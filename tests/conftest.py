@@ -208,7 +208,7 @@ def uplifting_tier_boundaries() -> Dict[str, float]:
 
 @pytest.fixture
 def investment_risk_dimension_names() -> List[str]:
-    """Dimension names for investment-risk filter."""
+    """Dimension names for investment_risk filter."""
     return [
         "risk_domain_type",
         "severity_magnitude",

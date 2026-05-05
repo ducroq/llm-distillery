@@ -7,44 +7,20 @@ using the trained investment risk filter with local model files.
 Pipeline: Article -> Prefilter -> Model -> Calibration -> Gatekeeper -> Tier
 
 Usage:
-    # Python API
-    # Use importlib for the hyphenated dir name:
-    import importlib.util
-    from pathlib import Path
-    spec = importlib.util.spec_from_file_location(
-        "investment_risk_v6_inference",
-        Path("filters/investment-risk/v6/inference.py"),
-    )
-    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
-    scorer = mod.InvestmentRiskScorer()
+    from filters.investment_risk.v6.inference import InvestmentRiskScorer
+    scorer = InvestmentRiskScorer()
     result = scorer.score_article(article)
 
     # CLI
-    python filters/investment-risk/v6/inference.py --input articles.jsonl --output results.jsonl
+    python filters/investment_risk/v6/inference.py --input articles.jsonl --output results.jsonl
 """
 
-import importlib.util
 import logging
 from pathlib import Path
 from typing import Optional
 
 from filters.common.model_loading import load_lora_local
-
-# Deferred import: derive base_scorer path from __file__ so the hyphenated
-# directory name `investment-risk` (not a valid Python identifier) does not
-# break import. Mirrors the pattern used in inference_hybrid.py.
-_base_path = Path(__file__).parent / "base_scorer.py"
-if not _base_path.exists():
-    raise ImportError(
-        f"investment-risk v6: base_scorer.py not found at {_base_path}. "
-        "Filter package may be incomplete (stripped deploy?)."
-    )
-_base_spec = importlib.util.spec_from_file_location(
-    "investment_risk_v6_base_scorer", _base_path
-)
-_base_mod = importlib.util.module_from_spec(_base_spec)
-_base_spec.loader.exec_module(_base_mod)
-BaseInvestmentRiskScorer = _base_mod.BaseInvestmentRiskScorer
+from .base_scorer import BaseInvestmentRiskScorer
 
 logger = logging.getLogger(__name__)
 
@@ -69,15 +45,12 @@ class InvestmentRiskScorer(BaseInvestmentRiskScorer):
         device: Optional[str] = None,
         use_prefilter: bool = True,
     ):
-        # Set model path before calling super().__init__
         if model_path is None:
             model_path = Path(__file__).parent / "model"
         self.model_path = Path(model_path)
 
-        # Initialize base class (sets device, loads prefilter)
         super().__init__(device=device, use_prefilter=use_prefilter)
 
-        # Load the model
         self._load_model()
 
     def _load_model(self):

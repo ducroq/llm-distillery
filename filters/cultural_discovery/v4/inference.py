@@ -7,14 +7,12 @@ using the trained cultural discovery filter with local model files.
 Pipeline: Article -> Prefilter -> Model -> Calibration -> Gatekeeper -> Tier
 
 Usage:
-    # Python API
-    from importlib import import_module
-    mod = import_module("filters.cultural-discovery.v4.inference")
-    scorer = mod.CulturalDiscoveryScorer()
+    from filters.cultural_discovery.v4.inference import CulturalDiscoveryScorer
+    scorer = CulturalDiscoveryScorer()
     result = scorer.score_article(article)
 
     # CLI
-    python filters/cultural-discovery/v4/inference.py --input articles.jsonl --output results.jsonl
+    python filters/cultural_discovery/v4/inference.py --input articles.jsonl --output results.jsonl
 """
 
 import logging
@@ -22,14 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 from filters.common.model_loading import load_lora_local
-
-# Import base class (handle hyphen in directory name via importlib)
-import importlib.util
-_base_path = Path(__file__).parent / "base_scorer.py"
-_spec = importlib.util.spec_from_file_location("base_scorer", _base_path)
-_base_module = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_base_module)
-BaseCulturalDiscoveryScorer = _base_module.BaseCulturalDiscoveryScorer
+from .base_scorer import BaseCulturalDiscoveryScorer
 
 logger = logging.getLogger(__name__)
 

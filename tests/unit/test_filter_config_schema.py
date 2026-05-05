@@ -33,8 +33,8 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 ACTIVE_FILTERS = [
     ("sustainability_technology", "v3"),
     ("uplifting", "v7"),
-    ("cultural-discovery", "v4"),
-    ("investment-risk", "v6"),  # hyphen in llm-distillery (investment_risk in NexusMind)
+    ("cultural_discovery", "v4"),
+    ("investment_risk", "v6"),
     ("belonging", "v1"),
     ("nature_recovery", "v2"),
     ("foresight", "v1"),

@@ -4,7 +4,7 @@
 # v4: Migrated to Gemma-3-1B (from Qwen2.5-1.5B), aligned inference with v6 template
 
 filter:
-  name: cultural-discovery
+  name: cultural_discovery
   version: "4.0"
   created: "2026-02-19"
   description: "Rate content for cultural discovery and cross-cultural connection value"

@@ -16,7 +16,7 @@ Two consumers as of 2026-05-05:
 This module is INTENTIONALLY a regex probe, not a precision detector.
 False-positive rate is acceptable for measurement; recall doesn't need
 to be perfect because the consumer questions are order-of-magnitude
-("does cultural-discovery have an obit problem at all?"), not per-
+("does cultural_discovery have an obit problem at all?"), not per-
 article precision.
 
 If llm-distillery#51 escalates and a trained universal detector ships,

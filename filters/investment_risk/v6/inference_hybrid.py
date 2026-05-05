@@ -17,7 +17,7 @@ Usage:
     # result["stage_used"] -> "stage1_low" or "stage2"
 
     # CLI
-    python filters/investment-risk/v6/inference_hybrid.py --input articles.jsonl --output results.jsonl
+    python filters/investment_risk/v6/inference_hybrid.py --input articles.jsonl --output results.jsonl
 """
 
 import json
@@ -36,7 +36,7 @@ DEFAULT_THRESHOLD = 1.50
 
 class InvestmentRiskHybridScorer(HybridScorer):
     """
-    Two-stage hybrid scorer for investment-risk filter v6.
+    Two-stage hybrid scorer for investment_risk filter v6.
 
     Combines:
     - Stage 1: multilingual-e5-small embeddings + MLP probe (~1.3ms/article)
@@ -67,12 +67,8 @@ class InvestmentRiskHybridScorer(HybridScorer):
         )
         self._threshold = threshold
 
-        # Deferred import: derive module path from __file__ to handle both
-        # hyphenated (investment-risk) and underscored (investment_risk) dir names
         from importlib import import_module
-        _pkg = Path(__file__).parent
-        _module_path = f"filters.{_pkg.parent.name}.{_pkg.name}.inference"
-        self._scorer_module = import_module(_module_path)
+        self._scorer_module = import_module("filters.investment_risk.v6.inference")
 
         super().__init__(device=device, use_prefilter=use_prefilter)
 
@@ -90,7 +86,7 @@ class InvestmentRiskHybridScorer(HybridScorer):
         )
 
     def _get_embedding_stage_config(self) -> Dict:
-        """Return EmbeddingStage configuration for investment-risk v6."""
+        """Return EmbeddingStage configuration for investment_risk v6."""
         return {
             "embedding_model_name": "intfloat/multilingual-e5-small",
             "probe_path": str(self._probe_path),
@@ -104,7 +100,7 @@ def main():
     from importlib import import_module
 
     parser = argparse.ArgumentParser(
-        description="Score articles with investment-risk hybrid scorer (two-stage pipeline)"
+        description="Score articles with investment_risk hybrid scorer (two-stage pipeline)"
     )
     parser.add_argument(
         "--input", "-i", type=Path, help="Input JSONL file with articles"
@@ -175,8 +171,7 @@ def main():
         # Optional comparison with standard scorer
         if args.compare:
             print(f"\nRunning standard scorer for comparison...")
-            _pkg = Path(__file__).parent
-            ir_module = import_module(f"filters.{_pkg.parent.name}.{_pkg.name}.inference")
+            ir_module = import_module("filters.investment_risk.v6.inference")
             standard_scorer = ir_module.InvestmentRiskScorer(
                 use_prefilter=not args.no_prefilter,
             )

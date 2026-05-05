@@ -16,7 +16,7 @@ class BaseInvestmentRiskScorer(FilterBaseScorer):
         - _load_model(): Load model from local files or Hub
     """
 
-    FILTER_NAME = "investment-risk"
+    FILTER_NAME = "investment_risk"
     FILTER_VERSION = "6.0"
 
     DIMENSION_NAMES = [

@@ -297,7 +297,7 @@ def main():
         "--filter",
         type=Path,
         required=True,
-        help="Path to filter directory (e.g., filters/investment-risk/v4)",
+        help="Path to filter directory (e.g., filters/investment_risk/v4)",
     )
     parser.add_argument(
         "--predictions-file",

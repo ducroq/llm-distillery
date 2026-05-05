@@ -10,14 +10,13 @@ are classified as LOW/borderline without running the expensive model.
 Stage 2 (~25ms): Full fine-tuned model scoring for articles that pass Stage 1.
 
 Usage:
-    from importlib import import_module
-    mod = import_module("filters.cultural-discovery.v4.inference_hybrid")
-    scorer = mod.CulturalDiscoveryHybridScorer()
+    from filters.cultural_discovery.v4.inference_hybrid import CulturalDiscoveryHybridScorer
+    scorer = CulturalDiscoveryHybridScorer()
     result = scorer.score_article(article)
     # result["stage_used"] -> "stage1_low" or "stage2"
 
     # CLI
-    python filters/cultural-discovery/v4/inference_hybrid.py --input articles.jsonl --output results.jsonl
+    python filters/cultural_discovery/v4/inference_hybrid.py --input articles.jsonl --output results.jsonl
 """
 
 import json
@@ -42,7 +41,7 @@ DEFAULT_THRESHOLD = 1.25
 
 class CulturalDiscoveryHybridScorer(HybridScorer):
     """
-    Two-stage hybrid scorer for cultural-discovery filter v4.
+    Two-stage hybrid scorer for cultural_discovery filter v4.
 
     Combines:
     - Stage 1: multilingual-e5-small embeddings + MLP probe (~1.3ms/article)
@@ -78,7 +77,7 @@ class CulturalDiscoveryHybridScorer(HybridScorer):
 
         # Deferred import to avoid circular imports with hyphenated package name
         from importlib import import_module
-        self._scorer_module = import_module("filters.cultural-discovery.v4.inference")
+        self._scorer_module = import_module("filters.cultural_discovery.v4.inference")
 
         super().__init__(device=device, use_prefilter=use_prefilter)
 
@@ -96,7 +95,7 @@ class CulturalDiscoveryHybridScorer(HybridScorer):
         )
 
     def _get_embedding_stage_config(self) -> Dict:
-        """Return EmbeddingStage configuration for cultural-discovery v4."""
+        """Return EmbeddingStage configuration for cultural_discovery v4."""
         return {
             "embedding_model_name": "intfloat/multilingual-e5-small",
             "probe_path": str(self._probe_path),
@@ -110,7 +109,7 @@ def main():
     from importlib import import_module
 
     parser = argparse.ArgumentParser(
-        description="Score articles with cultural-discovery hybrid scorer (two-stage pipeline)"
+        description="Score articles with cultural_discovery hybrid scorer (two-stage pipeline)"
     )
     parser.add_argument(
         "--input", "-i", type=Path, help="Input JSONL file with articles"
@@ -181,7 +180,7 @@ def main():
         # Optional comparison with standard scorer
         if args.compare:
             print(f"\nRunning standard scorer for comparison...")
-            cd_module = import_module("filters.cultural-discovery.v4.inference")
+            cd_module = import_module("filters.cultural_discovery.v4.inference")
             standard_scorer = cd_module.CulturalDiscoveryScorer(
                 use_prefilter=not args.no_prefilter,
             )

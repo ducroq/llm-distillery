@@ -67,7 +67,6 @@ def load_scorer(filter_dir: Path):
     """
     Dynamically load the scorer from a filter directory.
 
-    Handles hyphenated filter names (investment-risk, cultural-discovery).
     """
     filter_dir = filter_dir.resolve()
     parts = filter_dir.parts

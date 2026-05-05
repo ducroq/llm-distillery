@@ -2,7 +2,7 @@
 # Gemma-3-1B migration + simplified tier system
 
 filter:
-  name: investment-risk
+  name: investment_risk
   version: "6.0"
   created: "2026-02-21"
   description: "Capital preservation filter with orthogonal dimensions"
