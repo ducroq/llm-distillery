@@ -15,19 +15,31 @@ import pytest
 from pathlib import Path
 
 
+# Datasets known to be retained for historical reference but no longer
+# representative of an active training pipeline. They predate schema
+# requirements the active pipeline now enforces (e.g. mixed-schema rows
+# from a now-defunct ingestion path) and are not worth retroactively
+# rewriting because no current filter trains on them. See llm-distillery#59.
+LEGACY_DATASETS = {
+    "uplifting_v6",  # rows 7+ missing dimension_names; superseded by uplifting v7
+}
+
+
 def find_training_datasets():
-    """Find all training datasets in the project."""
+    """Find all training datasets in the project, skipping legacy ones."""
     project_root = Path(__file__).parent.parent.parent
     datasets_dir = project_root / "datasets" / "training"
 
     if not datasets_dir.exists():
         return []
 
-    # Find directories with train.jsonl
     datasets = []
     for subdir in datasets_dir.iterdir():
-        if subdir.is_dir() and (subdir / "train.jsonl").exists():
-            datasets.append(subdir)
+        if not subdir.is_dir() or not (subdir / "train.jsonl").exists():
+            continue
+        if subdir.name in LEGACY_DATASETS:
+            continue
+        datasets.append(subdir)
 
     return datasets
 
