@@ -45,7 +45,8 @@ Loaded every session. Topic files loaded on demand via triggers below.
 | `scripts/oracle/average_oracle_runs.py` | Multi-run oracle score averaging |
 | `filters/common/score_normalization.py` | Cross-filter percentile normalization (ADR-014) |
 | `scripts/normalization/fit_normalization.py` | Fit normalization CDF from production data |
-| `docs/adr/README.md` | ADR index (001-018) |
+| `docs/adr/README.md` | ADR index (001-019) |
+| `filters/common/obit_signal.py` | Hoisted regex obit probe — used by belonging v1 prefilter and NexusMind#199 cross-lens leak measurement |
 
 ## Cross-Project: NexusMind
 
@@ -85,30 +86,35 @@ Loaded every session. Topic files loaded on demand via triggers below.
 - Thriving v1 paused, bimodal distribution problem — uplifting v6 stays (2026-03-30)
 - Declarative prefilter shape via BasePreFilter extension — ADR-018 (2026-04-28). Per-filter migration COMPLETE 2026-04-29 (#52, all 7 production filters); review-battery follow-ups also landed (RIP guard repair, POSITIVE_PATTERNS shadow rename, CD v4 truncation, uplifting v7 multilingual `\b` boundary sweep, investment-risk cleanups, CD v4 colonial tightening, `_check_domain_exclusions` hoist, `_pre_exclusion_check` hook). Class-name drift cleanup (sustech V2→V3, NR V1→V2) and per-category exception extension to `_is_excluded` (potential ADR-019) deferred — see `docs/TODO.md` "Post-#52 Review-Battery Followups".
 - Cross-repo cleavage rule, post-2026-05-04 manifest-as-anti-pattern incident — production-runtime concerns live in NexusMind wrappers (composition over inheritance), shared math lives in `filters/common/`, `.nexusmind-owns` manifest is the escape hatch (empty by default; entries require tracked issue + deadline). See `memory/gotcha-log.md` "Manifest as Anti-Pattern" entry + closure note for the full lesson and the cross-repo coordination shape that worked.
+- Per-category exclusion overrides via Template Method — ADR-019 (2026-05-05). `BasePreFilter` extended with `CATEGORY_OVERRIDES: Dict[str, CategoryOverrideCfg]` (TypedDict-typed) + `_compound_override_applies()` hook. Subclasses override the narrow hook; base owns the fallback chain (compound → dict → global `_has_override`). Unblocks belonging/foresight/sustech/cultural-discovery from custom `apply_filter()`. Per-filter migrations under #52; belonging v1 is the recommended first migration target. <!-- verify: grep -q 'CATEGORY_OVERRIDES' filters/common/base_prefilter.py && grep -q '_compound_override_applies' filters/common/base_prefilter.py && echo PASS || echo FAIL -->
+- Solutions broadening v4 DRAFT scaffolded — `filters/sustainability_technology/v4/` (2026-05-05). Forks signed off: C (broaden ST v3 in place), combine ST v3 + foresight v1 corpora, foresight retired when v4 supersedes ST v3. 7 dims, weight=1.00, calibration batch spec inline (300 articles, ~$0.30). Awaiting prompt drafting before any oracle spend. <!-- verify: test -f filters/sustainability_technology/v4/config.yaml && echo PASS || echo FAIL -->
 
-## Last Session Recap (2026-05-05)
+## Last Session Recap (2026-05-05, second session)
 
-Cross-repo cleanup of the .nexusmind-owns manifest-anti-pattern landed end-to-end. Scope: extract production-runtime concerns into a NexusMind wrapper (Path B); expose stable wrapper API on shared bases (`filter_dir`, `FILTER_NAME`, `TIER_THRESHOLDS` properties); empty the manifest while keeping the mechanism. Spanned 4 commits across both repos:
+Picked up the 6-item backlog from this morning's "Next Session Pickup". Closed 3 issues, deferred 1 with an upstream measurement issue, drafted 2 design artifacts, ran a multi-agent review battery, applied all major findings, committed and pushed.
 
-- llm-distillery `1b7fef8` — manifest empty, public properties, ADR-014 amended, gotcha-log entry
-- NexusMind `63c62f3 → 3471c82 → 18ab194` — sync, wrapper cleanup, fixture fix
-- llm-distillery `2bdd7bf` — docstring honesty fix on `_get_filter_dir` (load-bearing patch site, not alias)
-- llm-distillery `1085bf0` + addendum on `2bdd7bf` — gotcha-log closure note with the meta-lesson on cross-repo API contract changes and `patch.object` patterns
+- **#58** closed — investment-risk inference.py importlib pattern + existence guard (commit `d466b18`).
+- **#59** closed — `LEGACY_DATASETS` skip-list in test_data_pipeline (commit `a2f3359`).
+- **#47** closed — Option B chosen (NO_HUB sentinel + `verify_filter_package.py` coexistence guard + removed v7 inference_hub.py). Reason: gpu-server file-copy deploy skipped training_metadata/history JSON files needed for the model card; reconstruction risks fabricating MAE numbers. Commit `4f43ed6`.
+- **ADR-019 shipped** — `BasePreFilter` extended with `CATEGORY_OVERRIDES` TypedDict + `_compound_override_applies()` Template Method hook. Commit `a1d73b5`. ADR `019-per-category-exclusion-overrides.md`.
+- **#43 v4 DRAFT scaffolded** — `filters/sustainability_technology/v4/{config.yaml,README.md}` with 7 dims, weight=1.00, calibration batch spec. Commit `17e9079`. Refs #43.
+- **Sustech regex correctness** — escaped dots in `state.of.the.art` patterns (v2 + v3). Commit `bf2e0ad`.
+- **Obit regex hoisted** — `filters/common/obit_signal.py` extracted from belonging v1's `obituary_funeral` patterns. belonging refactored to import. NexusMind#199 will import the same module so there's one canonical pattern source. (separate post-push commit)
+- **#51 deferred** — measurement-as-labeling-pipeline rationale: NexusMind#199 ships regex P(obit) signal in production scoring output, 2-week observation window, then escalate or close based on per-lens leak rate. NexusMind#199 already filed with +2-week reminder comment.
 
-Side effects: filed #58 (investment-risk inference.py hardcoded import — pre-existing) and #59 (uplifting_v6 mixed-schema dataset — pre-existing). Both surfaced by tests during the cleanup; neither caused by it.
+Multi-agent review battery (code-reviewer + refactoring-guide + security-auditor in parallel) caught: (a) `Dict[str, Any]` typo-vulnerability on `CATEGORY_OVERRIDES` → TypedDict fix, (b) Template Method super()-forgetting risk on `_category_override_applies` → `_compound_override_applies` Template Method split with base owning the fallback chain, (c) NO_HUB + inference_hub.py coexistence ambiguity → explicit FAIL guard. All applied before commit.
 
-## Next Session Pickup (set 2026-05-05 EOD)
+Open & non-urgent: NexusMind#199 implementation (cross-repo, when ready), v4 prompt drafting, ADR-019 per-filter migrations under #52, confirm `score_scale_factor` is inert before any v4 corpus re-score.
 
-No urgent follow-up — cross-repo cleanup is verified end-to-end (NexusMind 18ab194 + smoke battery green on all 7 filters). Open work, pick by appetite:
+## Next Session Pickup (set 2026-05-05 EOD, second session)
 
-1. **#47** — finish uplifting v7 Hub deployment. `filters/uplifting/v7/inference_hub.py` exists (template added); remaining: upload weights via `scripts/deployment/upload_to_huggingface.py`, verify with `verify_filter_package.py --check-hub`, update CLAUDE.md table. ~1 hour.
-2. **#58** — investment-risk inference.py: replace hardcoded `from filters.investment_risk...` with `Path(__file__).parent`-derived dynamic import (mirror the inference_hybrid.py 2026-04-06 fix). 2-line behavioral change. ~30 min.
-3. **#59** — uplifting_v6 mixed-schema dataset: scope test fixture to active versions, OR re-prep the merged-in active-learning rows. Pick the lower-risk path. ~1 hour.
-4. **Solutions broadening** — sustainability_technology v4 from #43 design phase, merging foresight v1 captures. Larger scope, design-first.
-5. **ADR-019 design** — `_is_excluded` per-category exception extension (deferred from #52 review battery). Architectural design, then migration.
-6. **#51** — universal obituary detector. Labeling bottleneck (~1.5 weeks engineer time on labeling).
+Pick by appetite:
 
-Open & non-urgent: class-name drift cleanup (sustech V2→V3, NR V1→V2), CD v4 + NR v2 missing `check_content_length`.
+1. **NexusMind#199** — implement the regex P(obit) probe in production scoring output (NexusMind side; this side is ready — `filters/common/obit_signal.py` exposes `loose_obit_signal(article) -> int` and `has_obit_signal(article) -> bool`). +2-week reminder comment is on the issue; calendar that after deploy.
+2. **v4 prompt drafting** — `filters/sustainability_technology/v4/prompt-compressed.md` and `prompt-full.md`. Encode the 7 dimensions' scales + critical filters from `config.yaml`. Run the 300-article calibration batch (~$0.30) once drafted. Decision criteria pre-defined in config.yaml.
+3. **ADR-019 first migration: belonging v1** — drop custom `apply_filter()`, move per-category positive thresholds → `CATEGORY_OVERRIDES`, move obit compound rule → `_compound_override_applies` hook. 20 self-tests are the regression gate. Validates the Template Method shape on the most-tested filter.
+4. **`score_scale_factor` inertness check** — grep current scoring code for `score_scale_factor` reads. Confirm key is parsed but not consumed (per ADR-014 supersession). If consumed, fix before v4 re-score.
+5. Class-name drift cleanup, CD v4 + NR v2 missing `check_content_length` — still queued, still non-urgent.
 
 ## Next Up (from ROADMAP "Now")
 

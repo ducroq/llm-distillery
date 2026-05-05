@@ -405,6 +405,22 @@ Captured outputs (this is the deploy-claim verification trail the rule requires)
 
 ---
 
+## File-Copy Deploy from gpu-server Skips training_metadata.json (2026-05-05)
+
+**Problem**: Tried to upload `filters/uplifting/v7/` to HuggingFace Hub via `scripts/deployment/upload_to_huggingface.py` (closing out #47). Script aborted with `Error: training_history.json or training_metadata.json not found in filters\uplifting\v7`. Both files are required for the model card construction (val_mae from final epoch, train_examples count, model_name, num_parameters, max_length).
+
+**Root cause**: uplifting v7 was rsync'd from gpu-server to NexusMind via `scripts/deploy_to_nexusmind.{sh,ps1}` on 2026-03-08/09 (per `filters/uplifting/v7/README.md` "Oracle Scoring Results"). The deploy chain ships the `model/` directory, calibration.json, normalization.json, prefilter, configs, and inference modules — but NOT the training-run artifacts written by `training/train.py`. Those live on gpu-server filesystem in the training output directory and were never propagated. Git history confirms `training_*.json` was never committed for v7.
+
+**Why this matters now**: Hub upload requires the metadata to construct the model card. Without it, the upload fails. Reconstructing the JSON from README narrative would risk fabricating MAE / sample-count numbers — which violates the `feedback-claim-requires-verify.md` rule (and the same shape that caused #44).
+
+**Fix (immediate, #47)**: Option B from the issue — committed to "no Hub" for v7. Added `filters/uplifting/v7/NO_HUB` sentinel with rationale text. Patched `scripts/deployment/verify_filter_package.py :: check_hub()` to honor the sentinel and skip the Hub freshness check. Added a coexistence guard (FAIL if both NO_HUB and inference_hub.py present — catches copy-paste failure shape when bumping versions). Removed the now-unused inference_hub.py from v7. Verified: 7/7 checks pass with --check-hub. CLAUDE.md row updated to reflect the deliberate no-Hub state.
+
+**Fix (durable, deferred)**: Update `scripts/deploy_to_nexusmind.{sh,ps1}` to also propagate `training_metadata.json` and `training_history.json` from the source filter directory if they exist. ~3 lines of script change. Deferred because (a) v7 is already past the point where these would help, (b) post-2026-04-19 deploys (#44 fix) start at the source-of-truth llm-distillery repo where these files SHOULD already be committed alongside `model/` weights, and (c) the canonical RUNBOOK fix is "commit training_*.json files alongside `model/` weights when training completes" — not "let them live only on gpu-server filesystem".
+
+**Lesson**: A filter package on disk has more required artifacts than its `model/` directory suggests. The Hub-upload path needs metadata that the file-copy-only deploy path doesn't. If a filter is ever expected to be Hub-uploadable, training_metadata.json and training_history.json must be committed to the repo at training time, not produced on demand. Otherwise the metadata is unrecoverable by the time the question arises (gpu-server filesystem may have rotated training output by then). Cross-reference: this is also the failure shape behind why the original #47 framing in the issue assumed "2 minutes of work" — the assumption was inference_hub.py was the only missing piece. It wasn't.
+
+---
+
 ## Manifest as Anti-Pattern: `.nexusmind-owns` Hid an 18-Day Silent Regression (2026-05-04)
 
 **Problem**: NexusMind production was silently dropping cross-filter percentile normalization (ADR-014) for all 7 filters from 2026-04-16 through 2026-05-04. Every article in `filtered_*.jsonl` had `normalization_method: null` and `raw_weighted_average: null`. `weighted_average` was the raw post-calibration score, not the normalized 0–10 percentile. Most acute on `nature_recovery` v2: median 0.0, p90 0.3, only 0.06% of articles ≥ 4.0 vs ~3–19% for peer filters. Cross-filter ranking on ovr.news (the primary downstream consumer) was effectively broken for 18 days; no one noticed because each filter looked self-consistent in isolation.
