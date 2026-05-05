@@ -29,6 +29,7 @@ ADRs are short documents that capture important architectural decisions along wi
 - [ADR-016: Drop Tier Assignments](016-drop-tier-assignments.md) - Filters output pass/block + continuous score only; tiers removed from pipeline (gradual, consumer-first)
 - [ADR-017: Inter-Oracle MAE as Distillation Floor](017-inter-oracle-mae-as-distillation-floor.md) - Frontier LLMs disagree by 0.6-1.0 MAE; distilled models at or below this floor need prompt improvements, not more training
 - [ADR-018: Declarative Prefilter Shape](018-prefilter-shape-harmonization.md) - Extend BasePreFilter with EXCLUSION_PATTERNS / OVERRIDE_KEYWORDS / POSITIVE_PATTERNS; per-filter migration in priority order (#52)
+- [ADR-019: Per-Category Exclusion Overrides](019-per-category-exclusion-overrides.md) - Extend `_is_excluded` with per-category override config dict (`CATEGORY_OVERRIDES`) + `_category_override_applies()` hook so 4/7 filters can drop custom `apply_filter`; unblocks #51 per-filter consumption
 
 ## Format
 

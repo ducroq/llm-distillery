@@ -15,11 +15,21 @@ All filter prefilters should inherit from this base class.
 
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, TypedDict
 
 from filters.common.text_cleaning import sanitize_text_comprehensive, clean_article as clean_article_comprehensive
 
 logger = logging.getLogger(__name__)
+
+
+class CategoryOverrideCfg(TypedDict, total=False):
+    """ADR-019 per-category override entry. All fields optional.
+
+    keywords: substring matches (case-insensitive) that bypass the category.
+    threshold: POSITIVE_PATTERNS match count needed to bypass the category.
+    """
+    keywords: List[str]
+    threshold: int
 
 
 class BasePreFilter:
@@ -71,6 +81,15 @@ class BasePreFilter:
     # Subclasses can either declare the dict directly or build it from
     # per-category lists for stats-friendly access.
     DOMAIN_EXCLUSIONS: Dict[str, List[str]] = {}
+
+    # ADR-019 per-category override registry. Keys are category names from
+    # EXCLUSION_PATTERNS; values are CategoryOverrideCfg dicts (TypedDict —
+    # `keywords` and `threshold` only). Typo'd keys are caught by mypy.
+    # Categories not listed fall back to global OVERRIDE_KEYWORDS /
+    # POSITIVE_THRESHOLD via _has_override (current ADR-018 semantics).
+    # Compound rules that don't fit the dict shape go via the
+    # _compound_override_applies() hook instead — see that method's docstring.
+    CATEGORY_OVERRIDES: Dict[str, CategoryOverrideCfg] = {}
 
     def __init__(self):
         """Compile EXCLUSION_PATTERNS and POSITIVE_PATTERNS once, upfront.
@@ -335,7 +354,7 @@ class BasePreFilter:
         for category, compiled in self._compiled_exclusions.items():
             for pattern in compiled:
                 if pattern.search(combined):
-                    if self._has_override(combined):
+                    if self._category_override_applies(category, combined):
                         # Override applies — skip this category entirely (not just
                         # this pattern; legacy sustech behavior).
                         break
@@ -345,12 +364,14 @@ class BasePreFilter:
 
     def _has_override(self, combined_lower: str) -> bool:
         """
-        Decide whether OVERRIDE_KEYWORDS or POSITIVE_THRESHOLD lets the article
-        bypass exclusions.
+        Decide whether the *global* OVERRIDE_KEYWORDS or POSITIVE_THRESHOLD lets
+        the article bypass exclusions.
 
         OVERRIDE_KEYWORDS are substring matches (case-insensitive). POSITIVE_PATTERNS
         require a total match count >= POSITIVE_THRESHOLD (only consulted when
         POSITIVE_THRESHOLD > 0).
+
+        Per-category overrides live in `_category_override_applies()` (ADR-019).
         """
         if self.OVERRIDE_KEYWORDS:
             if any(kw.lower() in combined_lower for kw in self.OVERRIDE_KEYWORDS):
@@ -360,6 +381,75 @@ class BasePreFilter:
             if count >= self.POSITIVE_THRESHOLD:
                 return True
         return False
+
+    def _category_override_applies(self, category: str, combined_lower: str) -> bool:
+        """
+        Final arbitration on whether the exclusion for `category` is bypassed.
+
+        DO NOT OVERRIDE THIS METHOD. Subclasses with compound rules override
+        `_compound_override_applies` instead — that hook returns Optional[bool],
+        with `None` meaning "I don't handle this category, defer to defaults".
+        This base implementation owns the fallback chain so subclasses cannot
+        accidentally lose the dict + global checks by forgetting `super()`
+        (Template Method pattern).
+
+        ADR-019 precedence:
+          1. _compound_override_applies(category, combined_lower) — subclass
+             hook for compound rules. Returns True/False to short-circuit, or
+             None to defer.
+          2. CATEGORY_OVERRIDES[category]["keywords"] — substring match.
+          3. CATEGORY_OVERRIDES[category]["threshold"] — POSITIVE_PATTERNS
+             match count >= threshold.
+          4. Global `_has_override` (OVERRIDE_KEYWORDS / POSITIVE_THRESHOLD),
+             preserving ADR-018 semantics for filters that declare nothing.
+        """
+        compound = self._compound_override_applies(category, combined_lower)
+        if compound is not None:
+            return compound
+
+        cfg = self.CATEGORY_OVERRIDES.get(category)
+        if cfg:
+            kws = cfg.get("keywords") or []
+            if kws and any(kw.lower() in combined_lower for kw in kws):
+                return True
+            threshold = cfg.get("threshold", 0)
+            if threshold > 0 and self._compiled_positives:
+                count = sum(
+                    len(p.findall(combined_lower)) for p in self._compiled_positives
+                )
+                if count >= threshold:
+                    return True
+        return self._has_override(combined_lower)
+
+    def _compound_override_applies(
+        self, category: str, combined_lower: str
+    ) -> Optional[bool]:
+        """
+        Hook for compound override rules that don't fit `CATEGORY_OVERRIDES`.
+
+        Returns:
+          True  — bypass the exclusion in `category`.
+          False — explicitly do NOT bypass (suppress dict + global fallback).
+                  Use sparingly; the common case for "don't bypass" is to
+                  return None and let the defaults apply.
+          None  — subclass doesn't handle this category. The default fallback
+                  chain (CATEGORY_OVERRIDES dict, then global _has_override)
+                  runs unchanged.
+
+        Subclass shape (cf. belonging v1's obit compound rule):
+            def _compound_override_applies(self, category, combined_lower):
+                if category == 'obituary_funeral':
+                    pos = sum(len(p.findall(combined_lower)) for p in self._compiled_positives)
+                    has_exc = any(p.search(combined_lower) for p in self._compiled_exceptions)
+                    return pos >= 2 or (has_exc and pos >= 1)
+                return None  # defer for every other category
+
+        Note: this hook receives only `combined_lower` — already lowercased
+        title + first 1000 chars of text. Compound rules that need the raw
+        article (case-sensitive title checks, url, metadata) live outside
+        this hook in custom apply_filter() — see ADR-019 Revisit If clause.
+        """
+        return None
 
     def _pre_exclusion_check(self, title: str, text: str) -> Tuple[bool, str]:
         """
