@@ -1,0 +1,23 @@
+uplifting v7 is intentionally not deployed to HuggingFace Hub.
+
+Reason: v7 was rsync'd from gpu-server to NexusMind via file-copy
+(scripts/deploy_to_nexusmind.{sh,ps1}) without the training_metadata.json
+and training_history.json artifacts that scripts/deployment/upload_to_huggingface.py
+needs to construct the model card. Reconstructing those files from the
+README narrative would risk fabricating metrics the Hub model card claims
+as ground truth — see memory/feedback-claim-requires-verify.md.
+
+Production runs v7 from local files via filters/uplifting/v7/inference.py
+(or inference_hybrid.py for two-stage). NexusMind keeps the canonical
+copy of the weights; if backup is needed beyond that, prefer rsync to a
+known location over a half-honest Hub repo.
+
+inference_hub.py is intentionally NOT present in this directory — it was
+removed to keep the deploy state unambiguous. `verify_filter_package.py`
+fails fast if a filter has both NO_HUB and inference_hub.py (catches the
+copy-paste failure shape when bumping to a new version). If a future
+v(N+1) of this filter needs Hub deployment, restore inference_hub.py
+from filters/nature_recovery/v2/ as a template AND delete this NO_HUB
+sentinel — those changes ship together.
+
+Tracked in llm-distillery#47.

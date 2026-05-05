@@ -19,6 +19,8 @@ Hub check (run when --check-hub is passed):
      adapter file (written by training, never by git checkout or data-prep scripts) rather
      than training_history.json (git-tracked, its mtime resets on any checkout and would
      produce false FAILs on fresh clones).
+  Skipped when a `NO_HUB` sentinel file exists in the filter directory — used for filters
+  intentionally deployed via file-copy without a Hub backup (e.g., uplifting v7, see #47).
 
 Known limitations:
   - check_imports detects cross-version references on lines beginning with `from` / `import`
@@ -154,6 +156,29 @@ def check_base_scorer_version(filter_dir: Path, version: str) -> tuple[bool, str
 def check_hub(filter_dir: Path, repo_id: str | None, token: str | None) -> list[tuple[bool, str]]:
     """Verify repo exists on Hub and was updated after local adapter_model.safetensors."""
     results: list[tuple[bool, str]] = []
+
+    # NO_HUB sentinel: filter is intentionally not deployed to Hub. Skip the
+    # check entirely with a clear message so deploy gating doesn't FAIL on
+    # filters that ship via file-copy only (uplifting v7, #47).
+    #
+    # Coexistence guard: if a filter has BOTH NO_HUB and inference_hub.py the
+    # deploy state is ambiguous — inference_hub.py implies "Hub-deployed"
+    # while NO_HUB implies "not Hub-deployed". This usually means a v(N+1)
+    # was copy-pasted from a Hub-deployed v(N) template and someone forgot
+    # to remove one of the two markers. FAIL explicitly so the inconsistency
+    # gets resolved before the next deploy.
+    if (filter_dir / "NO_HUB").exists():
+        if (filter_dir / "inference_hub.py").exists():
+            results.append((
+                False,
+                "hub: NO_HUB sentinel present but inference_hub.py also exists — "
+                "ambiguous deploy state. Either remove NO_HUB (filter is Hub-deployed) "
+                "or remove inference_hub.py (filter is file-copy only)."
+            ))
+            return results
+        results.append((True, "hub: skip — NO_HUB sentinel present (file-copy deploy only)"))
+        return results
+
     if not repo_id:
         results.append((False, "hub: cannot check — no repo_id extracted from inference_hub.py"))
         return results
