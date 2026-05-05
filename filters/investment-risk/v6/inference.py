@@ -8,21 +8,43 @@ Pipeline: Article -> Prefilter -> Model -> Calibration -> Gatekeeper -> Tier
 
 Usage:
     # Python API
-    from filters.investment_risk.v6.inference import InvestmentRiskScorer
-
-    scorer = InvestmentRiskScorer()
+    # Use importlib for the hyphenated dir name:
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location(
+        "investment_risk_v6_inference",
+        Path("filters/investment-risk/v6/inference.py"),
+    )
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    scorer = mod.InvestmentRiskScorer()
     result = scorer.score_article(article)
 
     # CLI
-    python filters/investment_risk/v6/inference.py --input articles.jsonl --output results.jsonl
+    python filters/investment-risk/v6/inference.py --input articles.jsonl --output results.jsonl
 """
 
+import importlib.util
 import logging
 from pathlib import Path
 from typing import Optional
 
 from filters.common.model_loading import load_lora_local
-from filters.investment_risk.v6.base_scorer import BaseInvestmentRiskScorer
+
+# Deferred import: derive base_scorer path from __file__ so the hyphenated
+# directory name `investment-risk` (not a valid Python identifier) does not
+# break import. Mirrors the pattern used in inference_hybrid.py.
+_base_path = Path(__file__).parent / "base_scorer.py"
+if not _base_path.exists():
+    raise ImportError(
+        f"investment-risk v6: base_scorer.py not found at {_base_path}. "
+        "Filter package may be incomplete (stripped deploy?)."
+    )
+_base_spec = importlib.util.spec_from_file_location(
+    "investment_risk_v6_base_scorer", _base_path
+)
+_base_mod = importlib.util.module_from_spec(_base_spec)
+_base_spec.loader.exec_module(_base_mod)
+BaseInvestmentRiskScorer = _base_mod.BaseInvestmentRiskScorer
 
 logger = logging.getLogger(__name__)
 
