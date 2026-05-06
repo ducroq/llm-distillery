@@ -10,9 +10,8 @@ are classified as LOW/borderline without running the expensive model.
 Stage 2 (~20ms): Full fine-tuned model scoring for articles that pass Stage 1.
 
 Usage:
-    from filters.common.hybrid_scorer import HybridScorer  # or use importlib for hyphenated dirs
-    # Use importlib if the directory name has hyphens:
-    scorer = mod.InvestmentRiskHybridScorer()
+    from filters.investment_risk.v6.inference_hybrid import InvestmentRiskHybridScorer
+    scorer = InvestmentRiskHybridScorer()
     result = scorer.score_article(article)
     # result["stage_used"] -> "stage1_low" or "stage2"
 

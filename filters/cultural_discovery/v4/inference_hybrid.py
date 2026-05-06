@@ -75,7 +75,9 @@ class CulturalDiscoveryHybridScorer(HybridScorer):
         )
         self._threshold = threshold
 
-        # Deferred import to avoid circular imports with hyphenated package name
+        # Deferred import keeps the heavy v4.inference module out of the
+        # import chain at class-definition time (super().__init__ eagerly
+        # constructs the embedding stage, but we want stage 2 lazy).
         from importlib import import_module
         self._scorer_module = import_module("filters.cultural_discovery.v4.inference")
 

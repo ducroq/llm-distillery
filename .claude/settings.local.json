@@ -159,7 +159,8 @@
       "Bash(chmod +x .githooks/commit-msg)",
       "Bash(git config *)",
       "PowerShell(Get-Content *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash([ -f \"memory/$f\" ])"
     ],
     "deny": [],
     "ask": []
