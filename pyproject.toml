@@ -2,8 +2,8 @@
 name = "llm-distillery"
 version = "0.1.0"
 description = "Transform large language model expertise into fast, specialized local models"
-authors = ["Your Name <your.email@example.com>"]
-license = "MIT"
+authors = ["Jeroen Veen <jeroen.veen@han.nl>"]
+license = "EUPL-1.2"
 readme = "README.md"
 
 [tool.poetry.dependencies]

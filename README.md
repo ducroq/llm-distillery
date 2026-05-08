@@ -344,7 +344,9 @@ This is a personal research project. Contributions and suggestions welcome via i
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+Licensed under the European Union Public Licence (EUPL) v. 1.2 — see [LICENSE](LICENSE) for the full text.
+
+Copyright (c) 2025-2026 Jeroen Veen.
 
 ## Acknowledgments
 
