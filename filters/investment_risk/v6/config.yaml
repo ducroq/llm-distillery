@@ -14,15 +14,25 @@ filter:
     - Harmonized code with v6 template (calibration, model_loading, error handling)
     - Same training data (10K articles from v5)
 
-# Per-filter source-type allowlist (NexusMind#189). investment-risk is
-# the ONLY filter that keeps firehose_aggregator (GDELT geopolitical /
-# sanctions / conflict feeds are legitimate risk signals). Excludes only
-# code_repo and developer_aggregator. Enforcing from 2026-05-04 12:45
-# CEST after FluxusSource#78 cache-poisoning fix; shadow showed only 5
-# would-be exclusions (0 medium / 0 high) — all GitHub or HN-linked
-# items, none of which carry distinct risk signal vs primary coverage.
+# Per-filter source-type allowlist (NexusMind#189). investment-risk
+# keeps firehose_aggregator (GDELT geopolitical / sanctions / conflict
+# feeds are legitimate risk signals). 2026-05-04 added code_repo,
+# developer_aggregator after FluxusSource#78 cache-poisoning fix;
+# shadow showed only 5 would-be exclusions (0 medium / 0 high).
+#
+# 2026-05-18 added academic, social: empirical audit on
+# filtered_20260518_074246.jsonl (the spike cycle) found arxiv =
+# 957/2209 (43%) of input, scoring 1.5–3.0, sub-routing-threshold
+# noise. arxiv → type_classification:academic, bluesky → :social.
+# Replay against the same input confirms 995 newly blocked (44%) under
+# the expanded list with zero >=4.0-tier loss. (Mastodon items carry
+# type_classification:None and won't be caught here — separate
+# FluxusSource tagging issue.) Note: BLOCKED_SOURCE_PATTERNS in
+# prefilter.py also lists arxiv/mastodon_/bluesky but is unreachable
+# in the GPU path (scorer uses skip_prefilter=True and only receives
+# {title, content}); this config block is the production gate.
 source_filter:
-  excluded_source_types: [code_repo, developer_aggregator]
+  excluded_source_types: [code_repo, developer_aggregator, academic, social]
   shadow_mode: false
 
 # Scoring dimensions and weights (6 orthogonal dimensions, unchanged from v5)
