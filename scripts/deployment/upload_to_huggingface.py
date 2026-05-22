@@ -25,7 +25,7 @@ def create_model_card(
     val_mae = final_epoch['val']['mae']
 
     card = f"""---
-license: mit
+license: eupl-1.2
 language: en
 tags:
 - text-classification
