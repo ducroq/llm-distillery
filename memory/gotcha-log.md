@@ -450,3 +450,13 @@ Captured outputs (this is the deploy-claim verification trail the rule requires)
 
 **Lesson**: when promoting a method to be the implementation behind a property (or vice versa), test patch patterns are part of the API contract. Add "does this break downstream `patch.object(...)` patterns?" to the multi-agent review battery's checklist for any change that touches the public surface of a shared base class. The `_get_filter_dir` docstring on this side has been updated post-`18ab194` to flag the cross-repo patchability constraint, so a future llm-distillery dev considering removal of the method will see the warning.
 
+---
+
+## Prefilter Title/Description Unbounded in `_get_combined_text` (May 2026)
+
+**Problem**: `BasePreFilter._get_combined_text` (`filters/common/base_prefilter.py:497-512`) slices the article body to `MAX_PREFILTER_CONTENT = 2000` chars, but `title` and `description` are appended in full. Regex evaluation cost (and theoretical ReDoS exposure) scales with the unbounded inputs.
+
+**Root cause**: Content was assumed to be the only long field when the slice was added. RSS titles and descriptions are typically short in practice, so the gap went unnoticed.
+
+**Fix (deferred)**: For the current threat model (RSS-sourced, no attacker-controlled feed), the exposure is theoretical — security-auditor classified as low-severity during the 2026-05-22 belonging ADR-019 review battery. If attacker-controlled feeds ever land in scope (raw user submissions, third-party aggregators with low input hygiene), add explicit slices on title/description in `_get_combined_text` (e.g. `title[:200]`, `description[:500]`). Surfaced by review-battery on belonging v1 ADR-019 migration (commit `ba6b7cb`).
+
