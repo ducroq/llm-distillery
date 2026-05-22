@@ -127,6 +127,14 @@
   - All production prefilters verified identical across 3 locations
 
 ### Code Quality
+- [x] **ADR-019 hook-only consolidation for belonging v1** - 2026-05-22 (commits `ba6b7cb` + `c1ebc98`)
+  - Per-category bypass logic moved into `_compound_override_applies` Template Method hook
+  - apply_filter ~65 → ~30 LOC; 20/20 self-tests still green
+  - Multi-agent review battery returned PASS (code-reviewer + refactoring-guide + security-auditor)
+  - Follow-up #66 filed: fully-declarative path via base `EXCLUSION_REASON_PREFIX` attr + domain in `_pre_exclusion_check`
+- [x] **HF Hub model-card relicensing MIT → EUPL-1.2** - 2026-05-22 (commits `fb67d05` + `41d2108`, #65)
+  - Source-side: `upload_to_huggingface.py:28` template fixed
+  - Hub-side: all 14 `jeergrvgreg/*` repos updated via one-shot script
 - [x] **Extract FilterBaseScorer** (issue #10) - 2026-02
   - Shared abstract base class in `filters/common/filter_base_scorer.py`
   - Deduplicated ~1,200 lines across 4 production base_scorer.py files
@@ -154,4 +162,4 @@
 
 ---
 
-*Last updated: 2026-04-29*
+*Last updated: 2026-05-22*
