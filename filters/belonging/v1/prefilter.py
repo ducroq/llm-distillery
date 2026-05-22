@@ -373,9 +373,19 @@ class BelongingPreFilterV1(BasePreFilter):
             # any positive belonging signal must not bypass (#45).
             return pos >= 2 or (has_exc and pos >= 1)
         threshold = self.POSITIVE_COUNT_THRESHOLDS.get(category)
-        if threshold is not None:
+        if threshold is not None and threshold > 0:
             return has_exc or pos >= threshold
-        return None
+        # Belonging declares POSITIVE_COUNT_THRESHOLDS for every non-obit
+        # category in EXCLUSION_PATTERNS today, so this defer path is dead.
+        # If a new category is added without a corresponding threshold (or
+        # with threshold=0, which the guard above treats as missing), this
+        # assert fires loudly instead of silently bypassing via the base
+        # global-fallback chain. See review-battery 2026-05-22 retrospective.
+        assert False, (
+            f"belonging v1: EXCLUSION_PATTERNS category {category!r} has no "
+            "POSITIVE_COUNT_THRESHOLDS entry and is not handled by the obit "
+            "branch. Add one or extend _compound_override_applies."
+        )
 
     @staticmethod
     def _uppercase_rip_in_title(article: Dict) -> bool:

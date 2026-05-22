@@ -436,7 +436,12 @@ class BasePreFilter:
                   chain (CATEGORY_OVERRIDES dict, then global _has_override)
                   runs unchanged.
 
-        Subclass shape (cf. belonging v1's obit compound rule):
+        Subclass shape (cf. belonging v1's obit compound rule — note that
+        belonging compiles its positive signals into a renamed attr
+        `_compiled_positive_signals`, not the base's `_compiled_positives`,
+        to avoid shadowing base's POSITIVE_PATTERNS slot. The example below
+        uses base's compiled attr for simplicity; check the actual filter
+        for its naming convention):
             def _compound_override_applies(self, category, combined_lower):
                 if category == 'obituary_funeral':
                     pos = sum(len(p.findall(combined_lower)) for p in self._compiled_positives)
