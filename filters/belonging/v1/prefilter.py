@@ -1,10 +1,12 @@
 """
 Belonging Pre-Filter v1.0
 
-ADR-018 declarative shape (partial): exclusion patterns are declared as the
-EXCLUSION_PATTERNS category dict and compiled by BasePreFilter.__init__.
-apply_filter() stays custom because belonging uses per-category positive-signal
-thresholds and URL-based domain exclusions that don't fit the base pipeline.
+ADR-018 declarative shape for EXCLUSION_PATTERNS; ADR-019 hook-based
+consolidation for per-category override decisions. `apply_filter()` stays
+custom for URL-domain exclusions (must run first), bare reason strings
+(no `excluded_` prefix — NexusMind tagging matches these directly), and
+the case-sensitive `\\bRIP\\b` raw-title force-fire of `obituary_funeral`
+(ADR-019 "Revisit If": hook signature doesn't expose the raw article).
 
 Blocks content that commodifies or commercializes belonging:
 - Wellness industry (longevity hacks, Blue Zone diet tips, biohacking)
@@ -16,6 +18,12 @@ Blocks content that commodifies or commercializes belonging:
 Passes content showing organic community bonds, intergenerational ties, and rootedness.
 
 History:
+- v1.0 (2026-05-22): ADR-019 hook-only consolidation. Per-category
+  bypass logic (non-obit `has_exc OR pos >= threshold` rule, obit floor
+  `pos >= 2 OR (has_exc AND pos >= 1)`) lifted from the apply_filter
+  loop body into `_compound_override_applies`. apply_filter shrinks
+  from ~65 to ~30 LOC; pos/has_exc precomputes drop from the function
+  scope (the hook computes per category). 20/20 self-tests still green.
 - v1.0 (2026-04-29 #2): RIP guard repair. Removed dead in-list
   `(?-i:\\bRIP\\b)` pattern (inert because text is lowercased before
   pattern matching) and added `_uppercase_rip_in_title()` — case-sensitive
@@ -33,7 +41,7 @@ History:
 """
 
 import re
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 from filters.common.base_prefilter import BasePreFilter
 from filters.common.obit_signal import OBIT_PATTERNS, uppercase_rip_in_title
@@ -42,8 +50,9 @@ from filters.common.obit_signal import OBIT_PATTERNS, uppercase_rip_in_title
 class BelongingPreFilterV1(BasePreFilter):
     """Fast rule-based pre-filter for belonging content.
 
-    v1.0 (declarative-shape exclusion data per ADR-018; custom apply_filter
-    retained for per-category positive-count thresholds and domain blocking).
+    v1.0 (ADR-018 EXCLUSION_PATTERNS shape + ADR-019 hook-based override
+    consolidation; custom apply_filter retained for domain-first ordering,
+    bare reason strings, and the case-sensitive RIP raw-title force-fire).
     """
 
     VERSION = "1.0"
@@ -289,10 +298,15 @@ class BelongingPreFilterV1(BasePreFilter):
         """
         Determine if article should be sent to LLM for labeling.
 
-        Custom flow (not BasePreFilter.apply_filter): per-category positive-
-        count thresholds + URL-based domain exclusions + obituary floor rule
-        don't fit the standard pipeline. ADR-018 explicitly permits custom
-        apply_filter() for filters with non-standard control flow.
+        Custom flow (not BasePreFilter.apply_filter) for three reasons:
+        URL-domain exclusions must run before content patterns; reason
+        strings are bare (no `excluded_` prefix — NexusMind tagging
+        contract); and the `\\bRIP\\b` raw-title force-fire of the
+        `obituary_funeral` category needs the case-sensitive raw title
+        that ADR-019's hook signature doesn't expose.
+
+        Per-category bypass decisions (non-obit thresholds, obit floor)
+        live in `_compound_override_applies` per ADR-019.
 
         Returns:
             (should_label, reason)
@@ -314,44 +328,54 @@ class BelongingPreFilterV1(BasePreFilter):
                 return False, domain_block
 
         combined_text = self._get_combined_clean_text(article)
-
-        positive_count = (
-            self.count_pattern_matches(combined_text, self._compiled_positive_signals)
-            + self.count_pattern_matches(combined_text, self._compiled_multilingual_positives)
-        )
-        has_exception = self.has_any_pattern(combined_text, self._compiled_exceptions)
-
-        # Case-sensitive uppercase-RIP check on the raw title — runs alongside
-        # the obituary_funeral category. See _uppercase_rip_in_title for why
-        # this lives outside EXCLUSION_PATTERNS.
         rip_in_raw_title = self._uppercase_rip_in_title(article)
 
-        # Iterate exclusions in declared order; first blocking category wins.
         for category, compiled_patterns in self._compiled_exclusions.items():
             category_fired = self.has_any_pattern(combined_text, compiled_patterns)
             if category == 'obituary_funeral' and rip_in_raw_title:
                 category_fired = True
             if not category_fired:
                 continue
-
-            if category == 'obituary_funeral':
-                # Obituary/funeral — require at least one *confirming* belonging
-                # positive signal even when an exception keyword is present.
-                # Without the pos>=1 floor, generic exception words like
-                # "generation"/"elder" appearing in cultural-figure obits
-                # (e.g. "post-Rivera generation") would override the obit block
-                # (#45). Heritage funerals carry many positive signals so
-                # remain unaffected.
-                blocked = positive_count < 2 and not (has_exception and positive_count >= 1)
-                if blocked:
-                    return False, "obituary_funeral"
-                continue
-
-            threshold = self.POSITIVE_COUNT_THRESHOLDS[category]
-            if not has_exception and positive_count < threshold:
+            if not self._category_override_applies(category, combined_text):
                 return False, category
 
         return True, "passed"
+
+    def _compound_override_applies(
+        self, category: str, combined_lower: str
+    ) -> Optional[bool]:
+        """ADR-019 hook. Owns the per-category bypass decision for every
+        category belonging declares — `obituary_funeral` uses the floor
+        rule; the rest use the standard `has_exc OR pos >= threshold` rule
+        sourced from `POSITIVE_COUNT_THRESHOLDS`.
+
+        Positive count combines `POSITIVE_SIGNAL_PATTERNS` (English) and
+        `MULTILINGUAL_POSITIVE_PATTERNS` (NL/DE/FR) — both are belonging-
+        affirming signals; their counts are pooled, matching the legacy
+        apply_filter() behavior.
+
+        Returns True/False to short-circuit base's fallback chain. The
+        None-defer path is only reached if a new category is added to
+        EXCLUSION_PATTERNS without a corresponding entry here; we keep
+        the safety net by returning None so base falls back to the dict
+        (empty) and global (also empty) — net effect: block, which is
+        the safe default for an unhandled new exclusion.
+        """
+        pos = (
+            sum(len(p.findall(combined_lower)) for p in self._compiled_positive_signals)
+            + sum(len(p.findall(combined_lower)) for p in self._compiled_multilingual_positives)
+        )
+        has_exc = any(p.search(combined_lower) for p in self._compiled_exceptions)
+        if category == 'obituary_funeral':
+            # Floor: require >= 2 positive signals to bypass, OR an exception
+            # word PLUS at least one positive signal. Generic exception keywords
+            # ("generation"/"elder") leaking into cultural-figure obits without
+            # any positive belonging signal must not bypass (#45).
+            return pos >= 2 or (has_exc and pos >= 1)
+        threshold = self.POSITIVE_COUNT_THRESHOLDS.get(category)
+        if threshold is not None:
+            return has_exc or pos >= threshold
+        return None
 
     @staticmethod
     def _uppercase_rip_in_title(article: Dict) -> bool:
