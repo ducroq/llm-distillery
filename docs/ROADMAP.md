@@ -127,6 +127,11 @@
   - All production prefilters verified identical across 3 locations
 
 ### Code Quality
+- [x] **deploy_to_nexusmind hardening** - 2026-05-23 (commits `4cf75dd` + `dd11727`)
+  - Refuse-on-dirty pre-flight check + `--force-dirty` escape hatch
+  - Explicit `git add $FILTER_PATH filters/common/` replaces blanket `git add -A`
+  - Closes origin-contamination hazard discovered during 2026-05-22 belonging deploy
+  - Printed server-pull instructions corrected to match actual deploy flow
 - [x] **ADR-019 hook-only consolidation for belonging v1** - 2026-05-22 (commits `ba6b7cb` + `c1ebc98`)
   - Per-category bypass logic moved into `_compound_override_applies` Template Method hook
   - apply_filter ~65 → ~30 LOC; 20/20 self-tests still green
@@ -162,4 +167,4 @@
 
 ---
 
-*Last updated: 2026-05-22*
+*Last updated: 2026-05-23*
