@@ -234,11 +234,13 @@ if ($DryRun) {
     Write-Host ""
     Write-Host "=== Deploy commands for servers ===" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "# Sadalsuud:" -ForegroundColor White
-    Write-Host 'ssh user@sadalsuud "cd ~/NexusMind && git pull origin main"' -ForegroundColor Gray
+    Write-Host "# Sadalsuud (pull updated NexusMind from origin):" -ForegroundColor White
+    Write-Host 'ssh sadalsuud "cd ~/local_dev/NexusMind && git pull origin main"' -ForegroundColor Gray
     Write-Host ""
-    Write-Host "# llm-distiller:" -ForegroundColor White
-    Write-Host 'ssh jeroen@llm-distiller "cd ~/NexusMind && git pull origin main"' -ForegroundColor Gray
+    Write-Host "# gpu-server (rsync filters/ + src/ from sadalsuud and restart scorer):" -ForegroundColor White
+    Write-Host "# NOTE: gpu-server's ~/NexusMind is not a git checkout. deploy_filters.sh" -ForegroundColor DarkGray
+    Write-Host "# runs from sadalsuud's checkout and pushes to gpu-server over SSH." -ForegroundColor DarkGray
+    Write-Host 'ssh sadalsuud "cd ~/local_dev/NexusMind && bash scripts/deploy_filters.sh"' -ForegroundColor Gray
 } else {
     Write-Host ""
     Write-Host "5. Skipping push (use -Push flag to push automatically)" -ForegroundColor DarkGray
@@ -248,9 +250,9 @@ if ($DryRun) {
     Write-Host "# Push to origin:" -ForegroundColor White
     Write-Host "cd $NexusMindRoot; git push origin main" -ForegroundColor Gray
     Write-Host ""
-    Write-Host "# Then pull on servers:" -ForegroundColor White
-    Write-Host 'ssh user@sadalsuud "cd ~/NexusMind && git pull origin main"' -ForegroundColor Gray
-    Write-Host 'ssh jeroen@llm-distiller "cd ~/NexusMind && git pull origin main"' -ForegroundColor Gray
+    Write-Host "# Then on servers (sadalsuud first, then gpu-server via sadalsuud):" -ForegroundColor White
+    Write-Host 'ssh sadalsuud "cd ~/local_dev/NexusMind && git pull origin main"' -ForegroundColor Gray
+    Write-Host 'ssh sadalsuud "cd ~/local_dev/NexusMind && bash scripts/deploy_filters.sh"' -ForegroundColor Gray
 }
 
 Pop-Location

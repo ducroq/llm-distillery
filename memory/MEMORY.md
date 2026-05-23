@@ -104,6 +104,15 @@ Refactoring-guide's review surfaced the cleanest insight: the three "blockers" t
 
 Open & non-urgent: NexusMind#199 implementation (cross-repo, when ready), v4 prompt drafting (pickup #2 — explicitly skipped this session as larger appetite), #66 (the consolidated "fully-declarative" follow-up that supersedes 2 of the original 5 pickup items).
 
+### Short follow-up 2026-05-23: deploy-script hardening + printed-instruction correction
+
+Triggered by the 2026-05-22 deploy: `deploy_to_nexusmind.sh --push` swept ~1,400 lines of unrelated NexusMind WIP (the user's in-flight story-dedup #213 work) into commit `7a595c4` under a misleading message. Real hazard reframed as **origin contamination** (publish of unreviewed work to a public remote), not commit-message hygiene.
+
+- **NexusMind side closed out** by parallel session: empty commit `b12d554` documents the bundling in `git log`; memo §P5.5 trainer-provenance line corrected; gotcha-log entry added that side. No force-push needed.
+- **llm-distillery deploy script hardened** (commit `4cf75dd`): two complementary fixes in `deploy_to_nexusmind.{sh,ps1}` — pre-flight `git -C $NEXUSMIND status --porcelain` refuse-on-dirty check with `--force-dirty`/`-ForceDirty` escape hatch, plus explicit `git add $FILTER_PATH filters/common/` instead of blanket `git add -A`. Belt + suspenders: dirty-check fails fast before any cp; explicit staging holds the scope even when --force-dirty is used.
+- **Gotcha-log entry on this side** (in `4cf75dd`) cross-references the NexusMind-side entry. Lesson framed as "defaults that work for single-author case become bugs the moment a second person/session touches the same target; audit any deploy/sync script that does `git add -A` on a directory it doesn't fully own."
+- **Printed server-pull instructions corrected** (commit pending after this update): the script was telling operators to `ssh user@sadalsuud "cd ~/NexusMind && git pull"` and `ssh jeroen@llm-distiller "cd ~/NexusMind && git pull"`. Both wrong — sadalsuud's checkout is at `~/local_dev/NexusMind`, gpu-server isn't a git checkout (deploys via `bash scripts/deploy_filters.sh` run from sadalsuud), and `llm-distiller` is a stale hostname. Instructions now match the actual deploy flow used to verify yesterday's belonging migration.
+
 ## Next Session Pickup (set 2026-05-22 EOD)
 
 Pick by appetite:
