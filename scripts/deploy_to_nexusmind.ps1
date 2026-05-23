@@ -26,7 +26,8 @@ param(
 
     [switch]$Push,
     [switch]$DryRun,
-    [switch]$ForceSkipOwnedDrift
+    [switch]$ForceSkipOwnedDrift,
+    [switch]$ForceDirty
 )
 
 $ErrorActionPreference = "Stop"
@@ -61,6 +62,26 @@ if ($dirtyUnstagedExit -ne 0 -or $dirtyStagedExit -ne 0) {
     Write-Host "ERROR: uncommitted changes in $FilterPath. Commit first, then re-run." -ForegroundColor Red
     git -C $DistilleryRoot status --short $FilterPath | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
     exit 1
+}
+
+# Sanity: NexusMind target tree must be clean before we begin. Prior versions
+# of this script used `git add -A` after copying files in, which would sweep
+# any unrelated WIP sitting in NexusMind's working tree into the deploy commit
+# — and with -Push, straight to origin. The real hazard is unrelated authors'
+# uncommitted work landing on origin without their review. See `memory/
+# gotcha-log.md` "deploy_to_nexusmind.sh swept NexusMind WIP into deploy
+# commit" (2026-05-23). Belt to the explicit-staging suspenders below.
+if (-not $ForceDirty) {
+    $nmStatus = git -C $NexusMindRoot status --porcelain
+    if ($nmStatus) {
+        Write-Host "ERROR: NexusMind working tree is dirty. Refusing to deploy." -ForegroundColor Red
+        Write-Host "       Stash, commit, or revert these changes first:" -ForegroundColor Red
+        git -C $NexusMindRoot status --short | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+        Write-Host ""
+        Write-Host "       Or re-run with -ForceDirty if you know what you're doing" -ForegroundColor Red
+        Write-Host "       (explicit staging below scopes the commit to deploy paths regardless)." -ForegroundColor Red
+        exit 1
+    }
 }
 
 # Step 0: Verify package is internally consistent (issue #44)
@@ -185,7 +206,13 @@ if ($DryRun) {
     Write-Host "   'git -C $NexusMindRoot checkout -- .' if you do not want to keep the changes." -ForegroundColor DarkGray
 } else {
     Write-Host "4. Committing changes..." -ForegroundColor Yellow
-    git add -A
+    # Explicit staging: only commit paths this script intended to touch. Even
+    # with -ForceDirty this scopes the commit to deploy-related files and
+    # leaves unrelated WIP in the working tree for the operator to review.
+    # The 2026-05-23 incident that motivated this hardening had `git add -A`
+    # here, which silently bundled 1,400+ lines of unrelated WIP under a
+    # misleading "Update <filter> ..." commit message.
+    git add $FilterPath "filters/common/"
     $CommitMsg = "Update $FilterName $Version from llm-distillery"
     $commitResult = git commit -m $CommitMsg 2>&1
     if ($LASTEXITCODE -eq 0) {

@@ -30,11 +30,13 @@ VERSION=""
 PUSH_FLAG=""
 DRY_RUN=0
 FORCE_SKIP_OWNED_DRIFT=0
+FORCE_DIRTY=0
 for arg in "$@"; do
     case "$arg" in
         --push)                       PUSH_FLAG="--push" ;;
         --dry-run)                    DRY_RUN=1 ;;
         --force-skip-owned-drift)     FORCE_SKIP_OWNED_DRIFT=1 ;;
+        --force-dirty)                FORCE_DIRTY=1 ;;
         --*)                          echo "ERROR: unknown flag: $arg"; exit 1 ;;
         *)
             if [ -z "$FILTER_NAME" ]; then FILTER_NAME="$arg"
@@ -46,7 +48,7 @@ for arg in "$@"; do
 done
 
 if [ -z "$FILTER_NAME" ] || [ -z "$VERSION" ]; then
-    echo "Usage: $0 <filter_name> <version> [--push] [--dry-run] [--force-skip-owned-drift]"
+    echo "Usage: $0 <filter_name> <version> [--push] [--dry-run] [--force-skip-owned-drift] [--force-dirty]"
     echo ""
     echo "Flags:"
     echo "  --push                      git push origin main on NexusMind after the commit"
@@ -54,6 +56,10 @@ if [ -z "$FILTER_NAME" ] || [ -z "$VERSION" ]; then
     echo "  --force-skip-owned-drift    proceed even if a NexusMind-owned file has drifted"
     echo "                              (use only after inspecting the drift and deciding"
     echo "                              the NexusMind copy is the one to keep)"
+    echo "  --force-dirty               proceed even if NexusMind's working tree has uncommitted"
+    echo "                              changes (see gotcha-log entry on the script's WIP-sweep"
+    echo "                              hazard; even with --force-dirty the explicit staging"
+    echo "                              below limits the commit to deploy paths)"
     echo ""
     echo "Examples:"
     echo "  $0 uplifting v5"
@@ -89,6 +95,28 @@ if ! git -C "$DISTILLERY_ROOT" diff --quiet -- "$FILTER_PATH" \
     echo "ERROR: uncommitted changes in $FILTER_PATH. Commit first, then re-run."
     git -C "$DISTILLERY_ROOT" status --short "$FILTER_PATH" | sed 's/^/  /'
     exit 1
+fi
+
+# Sanity: NexusMind target tree must be clean before we begin. Prior versions
+# of this script used `git add -A` after copying files in, which would sweep
+# any unrelated WIP sitting in NexusMind's working tree into the deploy commit
+# — and with --push, straight to origin. The real hazard isn't a misleading
+# commit message; it's that another author's uncommitted work (sensitive,
+# unreleased, or simply unfinished) can land on origin without their review.
+# See `memory/gotcha-log.md` "deploy_to_nexusmind.sh swept NexusMind WIP into
+# deploy commit" (2026-05-23). Belt to the explicit-staging suspenders below.
+if [ "$FORCE_DIRTY" -ne 1 ]; then
+    if [ -n "$(git -C "$NEXUSMIND_ROOT" status --porcelain)" ]; then
+        echo "ERROR: NexusMind working tree is dirty. Refusing to deploy."
+        echo "       Stash, commit, or revert these changes first:"
+        git -C "$NEXUSMIND_ROOT" status --short | sed 's/^/  /'
+        echo ""
+        echo "       Or re-run with --force-dirty if you know what you're doing"
+        echo "       — the explicit staging below limits the commit to deploy"
+        echo "       paths regardless, but the dirty files stay at risk if any"
+        echo "       future change to this script regresses to git add -A."
+        exit 1
+    fi
 fi
 
 # Step 0: Verify package is internally consistent (issue #44)
@@ -208,7 +236,13 @@ if [ "$DRY_RUN" -eq 1 ]; then
     echo "   'git -C $NEXUSMIND_ROOT checkout -- .' if you do not want to keep the changes."
 else
     echo "4. Committing changes..."
-    git add -A
+    # Explicit staging: only commit paths this script intended to touch. Even
+    # if --force-dirty was used, this scopes the commit to deploy-related files
+    # and leaves any unrelated WIP in the working tree for the operator to
+    # review separately. The 2026-05-23 incident that motivated this hardening
+    # had `git add -A` here, which silently bundled 1,400+ lines of unrelated
+    # WIP under a misleading "Update <filter> ..." commit message.
+    git add "$FILTER_PATH" filters/common/
     COMMIT_MSG="Update ${FILTER_NAME} ${VERSION} from llm-distillery"
     git commit -m "$COMMIT_MSG" || echo "   (No changes to commit)"
 fi

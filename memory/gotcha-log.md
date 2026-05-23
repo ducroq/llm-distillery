@@ -460,3 +460,25 @@ Captured outputs (this is the deploy-claim verification trail the rule requires)
 
 **Fix (deferred)**: For the current threat model (RSS-sourced, no attacker-controlled feed), the exposure is theoretical — security-auditor classified as low-severity during the 2026-05-22 belonging ADR-019 review battery. If attacker-controlled feeds ever land in scope (raw user submissions, third-party aggregators with low input hygiene), add explicit slices on title/description in `_get_combined_text` (e.g. `title[:200]`, `description[:500]`). Surfaced by review-battery on belonging v1 ADR-019 migration (commit `ba6b7cb`).
 
+---
+
+## deploy_to_nexusmind.sh Swept NexusMind WIP into Deploy Commit (2026-05-23)
+
+**Problem**: `scripts/deploy_to_nexusmind.sh belonging v1 --push` was run on 2026-05-22 while NexusMind's working tree had ~1,400 lines of unrelated uncommitted work in flight (story-dedup #213 research: `train_feature_classifier.py` new + `measure_matching_geometry.py` + `docs/investigation/...` + `docs/BACKLOG.md`). The script's `git add -A` swept all of it into a single commit (`7a595c4`) under the message "Update belonging v1 from llm-distillery", then `--push` sent it straight to `origin/main`. Sadalsuud auto-pulled the unrelated work on the next deploy verification step.
+
+**Root cause** — two compounding script defects:
+
+1. **Blanket `git add -A`** on NexusMind's working tree. Whatever was uncommitted at run-time got staged, regardless of whether the deploy script put it there. The original intent was "commit everything the deploy modified" — but `cp -r` on NexusMind's filters/common/ doesn't change `git status` for anything *outside* those paths, so the blanket add was over-broad from day one. The bug was latent until another author was active in NexusMind during a deploy.
+2. **No pre-flight check** on NexusMind's working-tree cleanliness. The script already refuses dirty state in llm-distillery (the source side), but the target side was assumed quiet — a single-author assumption that breaks once two sessions/people touch NexusMind.
+
+**Real hazard framing** (caught by the NexusMind-side review): the headline isn't "commit message is misleading." The headline is **origin contamination** — the script can publish unrelated authors' uncommitted work to a public remote without their review. That could expose unreleased features, sensitive paths, debug forks, anything sitting in the working tree. The misleading commit message is a downstream symptom; the root hazard is the unreviewed publish.
+
+**Fix** (this commit, 2026-05-23): both fixes applied to `deploy_to_nexusmind.sh` and `deploy_to_nexusmind.ps1` (belt + suspenders):
+
+- **Refuse on dirty NexusMind target.** Pre-flight `git -C $NEXUSMIND_ROOT status --porcelain` — non-empty output exits 1 with the dirty paths listed. `--force-dirty` / `-ForceDirty` flag added for the rare case where the operator has reviewed the WIP and is intentionally proceeding (e.g. mid-migration with partial state). Fails fast: refuses before any `cp` runs, so no NexusMind-side cleanup needed.
+- **Explicit staging instead of `git add -A`.** Replaced with `git add $FILTER_PATH filters/common/` — only the paths the deploy is supposed to touch. Even if `--force-dirty` is used, the commit is contained to deploy-relevant scope, and any concurrent WIP stays in the working tree.
+
+**NexusMind-side closure** (separate commit `b12d554`): empty commit on NexusMind's main documenting the bundling explicitly in `git log`. History intact (no force-push), sadalsuud pulled normally. Memo `docs/investigation/story-dedup-feature-augmentation.md` §P5.5 corrected to record that the V1 trainer file first landed in `7a595c4` (bundled, not intentional) with subsequent intentional fixes in `27ccd3a` / `4f03421`.
+
+**Lesson**: defaults that work for the single-author case can become bugs the moment a second person (or a second session) touches the same target. When a script does `git add -A` on a directory it doesn't fully own, the latent failure mode is data exposure on its first multi-author day. Audit any "deploy/sync" script that operates `git add` outside its own repo for the same shape.
+
