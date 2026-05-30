@@ -19,16 +19,19 @@ ssh gpu-server   # configured in ~/.ssh/config
 
 ## File Transfers
 
-Use **scp**, not rsync. rsync fails with dup() errors on this server.
+Use **scp**, not rsync. rsync fails with dup() errors on this server when invoked from Windows Git Bash. (Linux→Linux rsync from sadalsuud works — that's why `deploy_filters.sh` runs on sadalsuud, not on the workstation.)
 
 ```bash
-# Deploy filters to NexusMind
-scp -r filters/common/ gpu-server:~/NexusMind/filters/common/
-scp -r filters/{name}/v{N}/ gpu-server:~/NexusMind/filters/{name}/v{N}/
-
-# Copy training data for training runs
+# Copy training data for training runs (workstation → gpu-server)
 scp -r datasets/training/{name}_v{N}/ gpu-server:~/llm-distillery/datasets/training/
+
+# Copy training output back (gpu-server → workstation)
+scp -r gpu-server:~/llm-distillery/datasets/training/{name}_v{N}/model/ filters/{name}/v{N}/
 ```
+
+### Deploy path (DO NOT direct-scp filters to NexusMind)
+
+As of 2026-05-23 the canonical deploy is `scripts/deploy_to_nexusmind.{sh,ps1}` from the workstation. The script (a) verifies the filter package via `verify_filter_package.py`, (b) refuses if the NexusMind target is dirty (escape: `--force-dirty`), and (c) commits via explicit-staged `git add $FILTER_PATH filters/common/` instead of blanket `git add -A`. From there sadalsuud pulls and runs `bash scripts/deploy_filters.sh`, which rsyncs to gpu-server and restarts the scorer service. Don't bypass with direct `scp -r filters/.../v.../ gpu-server:~/NexusMind/...` — that skips the verify gate (#44) and the origin-contamination guard (#71 / 2026-05-22 incident, see gotcha-log).
 
 ## NexusMind Scorer Service
 

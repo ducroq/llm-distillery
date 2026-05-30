@@ -2,7 +2,7 @@
 
 ## Auto Mapping Issue
 
-`google/gemma-3-1b-pt` uses `Gemma3TextConfig` with `model_type: gemma3_text`, but `AutoModelForSequenceClassification` only maps `gemma3` (multimodal), not `gemma3_text`. Affects transformers 4.55.3.
+`google/gemma-3-1b-pt` uses `Gemma3TextConfig` with `model_type: gemma3_text`, but `AutoModelForSequenceClassification` only maps `gemma3` (multimodal), not `gemma3_text`. Affects all transformers 4.x as of 2026-05-30 (repo pins `transformers>=4.35.0,<5.0.0`). Verify the Auto mapping has not been added in any newer 4.x before assuming the workaround is still required.
 
 **Solution**: `filters/common/model_loading.py` provides `load_base_model_for_seq_cls()`. It tries Auto first, falls back to building a custom `Gemma3TextForSequenceClassification` class using `Gemma3TextModel` + `nn.Linear` head.
 
