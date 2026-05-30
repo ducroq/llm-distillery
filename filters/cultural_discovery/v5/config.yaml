@@ -1,0 +1,70 @@
+# Cultural Discovery Filter - Version 5.0 (DRAFT — in development for #62)
+# v5 retrain target: address discovery-lens leakage via hard-negative cohort + tightened oracle prompt
+# Only the prompt is finalized at this stage. Model/training infra will follow oracle labeling.
+
+filter:
+  name: cultural_discovery
+  version: "5.0-draft"
+  created: "2026-05-29"
+  description: "Rate content for cultural discovery and cross-cultural connection value"
+  focus: "DISCOVERIES about art, culture, history AND CONNECTIONS between peoples/civilizations"
+
+  changelog:
+    - version: "5.0-draft"
+      date: "2026-05-29"
+      changes:
+        - "Prompt v2.0: added 5 pre-classification flags (F, G, H, I, K) for historical-harm reckoning, commemoration, perpetrator-biography, decline-loss, launch-without-outcomes"
+        - "J (personal death/grief) intentionally omitted — handled by universal obit detector (filters/common/obit_signal.py; trained detector per llm-distillery#51)"
+        - "Added KEY PRINCIPLE — TRAJECTORY OVER VOCABULARY block"
+        - "Added 7 contrastive examples (#13-19) covering each new pattern + repatriation carve-out"
+        - "Added 'lowest max_score wins' rule when multiple flags apply"
+        - "Added CAP ENFORCEMENT (HARD RULE) — clamp all dimension scores at max_score (calibration revealed v4-style 'soft cap' fails to enforce arithmetic)"
+        - "Broadened F carve-out: repatriation/restitution INCLUDES wartime looting (Nazi-stolen art, colonial seizures) — calibration revealed model parsed carve-out too narrowly"
+        - "Added 2 validation examples: Pope apology (F cap), Mengele dossier (H cap)"
+        - "Hard-negative cohort for retrain: 49 articles (#62, datasets/raw/cd_v5_hard_negatives_candidates.jsonl)"
+        - "Inherits v4 model loading + dimensional weights pending retrain"
+
+  target_publications:
+    - ovr.news (Discovery tab)
+
+source_filter:
+  excluded_source_types: [code_repo, developer_aggregator, firehose_aggregator]
+  shadow_mode: false
+
+prefilter:
+  enabled: true
+  expected_pass_rate: ~0.15
+  description: "Blocks political conflict framing, tourism fluff, celebrity news, cultural war content"
+
+oracle:
+  recommended: gemini-flash
+  target_model: "Gemini Flash 2.5"
+
+preprocessing:
+  head_tail:
+    enabled: true
+    head_tokens: 256
+    tail_tokens: 256
+    separator: " [...] "
+
+scoring:
+  # score_scale_factor TBD post-retrain. v4 used 1.1364.
+  dimensions:
+    discovery_novelty:
+      weight: 0.25
+      category: discovery
+    heritage_significance:
+      weight: 0.20
+      category: discovery
+    cross_cultural_connection:
+      weight: 0.25
+      category: connection
+    human_resonance:
+      weight: 0.15
+      category: connection
+    evidence_quality:
+      weight: 0.15
+      category: assessment
+      gatekeeper: true
+      gatekeeper_threshold: 3
+      gatekeeper_max_score: 4.0

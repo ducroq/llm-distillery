@@ -71,9 +71,12 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
   - Remaining: ovr.news Foresight tab frontend integration
 
 ### Active Learning In Progress
-- [ ] **cultural-discovery v5** - Training data ready (8,502 articles = v4 8,029 + 473 enrichment)
-  - Oracle scored 473 production MEDIUM+ articles with Gemini Flash
+- [ ] **cultural-discovery v5** - Training data ready (8,551 articles = v4 8,029 + 473 active-learning + 49 hard-negatives via #62)
+  - Oracle-scored 473 production MEDIUM+ articles with Gemini Flash (active-learning lane, 2026-04-06)
   - Smooth distribution (bell curve centered at WA 4.8), no bimodality
+  - 2026-05-29: #62 hard-negatives cohort added — 49 articles labeled with v5 oracle prompt (5 new pre-classification flags F,G,H,I,K)
+  - v5 prompt deltas: TRAJECTORY OVER VOCABULARY principle, CAP ENFORCEMENT clamp rule, F carve-out covers wartime restitution (Modigliani fixed), J intentionally omitted (handled by `filters/common/obit_signal.py` per #51)
+  - Cohort stats: production v4 mean 8.27 → v5 oracle mean 4.05; 44 hard-negatives + 5 calibration-confirmed positives (tagged `_v5_oracle_reclassified`)
   - Next: train on gpu-server, calibrate, retrain probe, deploy
 - [x] **nature_recovery v2** - Trained, calibrated, deployed (2026-04-16)
   - Sample weighting (scale=2) + active learning enrichment (237 articles)

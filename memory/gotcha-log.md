@@ -482,3 +482,31 @@ Captured outputs (this is the deploy-claim verification trail the rule requires)
 
 **Lesson**: defaults that work for the single-author case can become bugs the moment a second person (or a second session) touches the same target. When a script does `git add -A` on a directory it doesn't fully own, the latent failure mode is data exposure on its first multi-author day. Audit any "deploy/sync" script that operates `git add` outside its own repo for the same shape.
 
+---
+
+## Oracle Prompt "Soft Cap" Doesn't Enforce Arithmetically (cd v5, 2026-05-29)
+
+**Problem**: cultural_discovery v5 oracle prompt added 6 new pre-classification flags (F–K) each with a documented `max_score` (e.g. F historical_harm_reckoning → max_score 3.5). First calibration run on 10 articles: every cap test produced weighted_avg ABOVE the stated cap by 0.18–1.62 points. The new flags correctly classified content_type but the cap wasn't being applied to dimension scores.
+
+**Root cause**: The v4-style scoring rule "Apply content-type caps AFTER individual dimension scoring" reads as advisory, not arithmetic. The model dutifully scored each dimension honestly (heritage_significance=6.0 for a topic of major heritage importance) and emitted those values unchanged in the JSON output. The cap was documentation, not enforcement. Same shape exists in v4 production data — political_conflict items also exceed their nominal 3.0 cap. In v4 this didn't matter because the student was trained on the raw (uncapped) labels anyway; in v5, the whole point is to produce LOW labels for the hard-negative cohort, so the cap enforcement IS the deliverable.
+
+**Fix (prompt-only, run_02 calibration)**: Added Scoring Rule #7 as a HARD ARITHMETIC RULE: "When ANY pre-classification flag fires and a max_score applies, NO INDIVIDUAL DIMENSION SCORE in your JSON output may exceed max_score. Clamp ALL FIVE dimensions." Updated validation examples #13–#19 to show clamped scores (heritage_significance of slavery topic explicitly shown as 3.5 in `score` while `evidence` text retains the honest 6.0 assessment). Calibration run_02 result: 4/5 caps now pass on weighted_avg; one dimension (`evidence_quality`) still resists because news articles have objectively good sourcing. Pragmatic accept: 0.18 wavg slack worst-case, still 2–5 points below production leak scores of 6–9. Ship to full 49-article labeling.
+
+**Lesson**: Cap language in oracle prompts must be ARITHMETIC, not advisory. "Apply caps after scoring" describes a behavior; "no dimension may exceed max_score" enforces it. The fix generalises: any time a prompt says "if X then constrain Y", verify the constraint with a calibration sample BEFORE labeling the full cohort. Calibration cost is $0.01; an uncapped labeling pass produces wrong training data that the student then learns. If we'd skipped calibration, the 49-article cohort would have had labels 0.2–1.6 above their target caps and the v5 student would have learned blurry hard-negative boundaries.
+
+**Promoted to**: not promoted; project-local lesson, surfaces during any new filter prompt design.
+
+---
+
+## Carve-out Language Gets Parsed Narrowly (cd v5, 2026-05-29)
+
+**Problem**: cultural_discovery v5 prompt's F flag (historical_harm_reckoning) had a carve-out: "NOT (... | repatriation event with returned objects | ...)". A Modigliani-restitution article (Nazi-looted painting returned to descendants of the original Jewish owner) was incorrectly flagged as historical_harm_reckoning in calibration run_01 — the model parsed "repatriation event with returned objects" as colonial/indigenous-only.
+
+**Root cause**: Abstract carve-out language activates narrower mental categories than the prompt author intends. "Repatriation" reads as "objects returned to their cultural community of origin" — i.e., colonial-era artifact returns, NAGPRA-shape. Nazi-looted art returned to individual descendants is the same FUNCTIONAL shape (physical objects confirmed returned) but a different SURFACE shape. The model couldn't generalise from the abstract category to the specific case.
+
+**Fix (prompt-only, run_02 calibration)**: Enumerated the carve-out explicitly: "...repatriation or restitution event with physical objects confirmed returned — INCLUDING wartime looting cases (Nazi-stolen art, colonial-era seizures, looted artifacts returned to heirs/communities/descendants)...". Added an explicit *Restitution test*: "If physical objects are CONFIRMED returned — regardless of whether the original wrong was colonial, Nazi-looting, or institutional — F does NOT fire." Added contrastive Example #19 (Nazi-looted Modigliani as cultural_discovery, NOT capped). Calibration run_02 verified: Modigliani classified cultural_discovery, wavg=6.28, carve-out fires correctly.
+
+**Lesson**: Carve-out language for cap flags should be EXHAUSTIVELY ENUMERATED, not abstractly described. Categories the prompt author considers "obviously included" may activate narrowly in the model's parsing. Test heuristic: for each carve-out, list 3 concrete surface shapes that should trigger it; if any aren't called out by name, the carve-out may not generalise. Pair with at least one contrastive example showing the carve-out firing. Same shape as the regex-IGNORECASE trap (#feedback-regex-ignorecase-trap) at a different abstraction level — author intent and parser behavior diverge when generality is implicit.
+
+**Promoted to**: not promoted; project-local lesson, surfaces during any new filter prompt design.
+

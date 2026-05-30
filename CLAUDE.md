@@ -49,6 +49,7 @@ framework: agent-ready-projects v1.9.0
 |--------|---------|--------|--------|
 | **thriving** | v1 | PARKED indefinitely — orthogonal lens design caused bimodal distribution (ADR-015); uplifting v7 stays as Thriving tab |  |
 | **sustainability_technology → solutions** | v4 | Design phase — broaden from clean-tech to include governance/community solutions (#43) | ovr.news Solutions tab |
+| **cultural_discovery** | v5 | Oracle labeling complete: 49 hard-negatives + active-learning lane (473), v5 prompt with 5 new flags (F,G,H,I,K) for historical-harm/commemoration/perpetrator/decline/launch shapes. J (death/grief) handled by universal obit detector. Next: gpu-server training (#62) | ovr.news Discovery tab |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring; rename to augmented-engineering at next bump | Separate product (not ovr.news) |
 
 ## Key Decisions
@@ -132,4 +133,4 @@ This project is a source project for [agentic-engineering](https://github.com/du
 
 ---
 
-*Last updated: 2026-05-23*
+*Last updated: 2026-05-29*
