@@ -56,6 +56,9 @@ Planning → Architecture → Validation → Prefilter → Training Data → Tra
 - [ ] **Tier scheme** - How to classify articles (tiers or stages)
 - [ ] **Gatekeepers** - Hard requirements (dimension thresholds that cap overall score)
 - [ ] **Weights** - How important is each dimension? (must sum to 1.0)
+- [ ] **Scaffold STATUS.md** — phase-tracker with empty checkboxes (template: `filters/belonging/v1/STATUS.md`). Updated continuously throughout development.
+- [ ] **Scaffold DEEP_ROOTS.md** — philosophical / scientific grounding for the filter. Why does it exist? What concepts ground it? (templates: `filters/belonging/v1/DEEP_ROOTS.md`, `filters/nature_recovery/v2/DEEP_ROOTS.md`)
+- [ ] **Scaffold README.md** — short summary + index of other docs (template: `filters/cultural_discovery/v5/README.md`)
 
 ### Validation Criteria
 
@@ -91,9 +94,28 @@ Planning → Architecture → Validation → Prefilter → Training Data → Tra
 
 ### Output
 
-**File**: `filters/{filter_name}/v1/config.yaml` (initial draft)
+**Required filter package files** (per the filter-doc-standard adopted 2026-05-31, modeled on belonging v1):
 
-**Example**:
+| File | Purpose | Phase created |
+|---|---|---|
+| `filters/{name}/v{N}/config.yaml` | Dimensions, weights, gatekeeper, version | Phase 1 (now) |
+| `filters/{name}/v{N}/STATUS.md` | Phase-by-phase tracker with checkboxes + decisions + dates | Phase 1, updated continuously |
+| `filters/{name}/v{N}/DEEP_ROOTS.md` | Philosophical / scientific grounding — "why this filter exists, what concepts ground it" | Phase 1 |
+| `filters/{name}/v{N}/README.md` | Short summary + index of other docs | Phase 1 |
+| `filters/{name}/v{N}/prompt-compressed.md` | Oracle prompt | Phase 2 |
+| `filters/{name}/v{N}/prefilter.py` | Rule-based blocker (inherit from prior version if behavior unchanged) | Phase 4 |
+| `filters/{name}/v{N}/calibration_report.md` | Formal Phase 3 oracle calibration artifact (required if complex penalty mechanics or multi-oracle calibration) | Phase 3 |
+| `filters/{name}/v{N}/dimension_analysis/` | PCA + correlation matrix + plots per oracle (generated via `scripts/analyze_dim_redundancy.py`) | Phase 3 |
+| `filters/{name}/v{N}/README_MODEL.md` | Hub model card | Phase 5 |
+| post-training files (model/, probe/, calibration.json, normalization.json, training_history.json, training_metadata.json, base_scorer.py, inference*.py) | Generated during Phase 5+ | — |
+
+**Templates** for the documentation files:
+- STATUS.md template: `filters/belonging/v1/STATUS.md` (most comprehensive)
+- DEEP_ROOTS.md template: `filters/belonging/v1/DEEP_ROOTS.md` or `filters/nature_recovery/v2/DEEP_ROOTS.md`
+- README.md template: `filters/cultural_discovery/v5/README.md` (most recent, with package contents table)
+- calibration_report.md template: `filters/cultural_discovery/v3/calibration_report.md` or `filters/cultural_discovery/v5/calibration_report.md`
+
+**config.yaml example**:
 ```yaml
 filter:
   name: investment-risk
@@ -113,6 +135,8 @@ scoring:
       threshold: 7.0
       condition: "macro_risk >= 7 OR credit_stress >= 7"
 ```
+
+**Why this matters** (cd v5 retrain, 2026-05-31): without STATUS.md, mid-project context decays catastrophically. The cd v5 calibration ran for ~30 hours across 3 prompt iterations and 5 oracle runs; without a phase tracker, anyone (including future-you) cannot pick up where left off. Backfilling these docs mid-stream is much more painful than scaffolding upfront.
 
 ---
 

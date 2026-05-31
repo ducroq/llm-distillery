@@ -1,0 +1,129 @@
+{
+  "filter_name": "cultural_discovery",
+  "filter_version": "5.0-draft",
+  "oracle": "gemini_v3",
+  "n_articles": 522,
+  "dim_names": [
+    "discovery_novelty",
+    "heritage_significance",
+    "cross_cultural_connection",
+    "human_resonance",
+    "evidence_quality"
+  ],
+  "correlation_matrix": [
+    [
+      1.0,
+      0.734,
+      0.704,
+      0.642,
+      0.844
+    ],
+    [
+      0.734,
+      1.0,
+      0.663,
+      0.701,
+      0.765
+    ],
+    [
+      0.704,
+      0.663,
+      1.0,
+      0.644,
+      0.655
+    ],
+    [
+      0.642,
+      0.701,
+      0.644,
+      1.0,
+      0.75
+    ],
+    [
+      0.844,
+      0.765,
+      0.655,
+      0.75,
+      1.0
+    ]
+  ],
+  "pairs_above_abs_r_0.7": [
+    [
+      "discovery_novelty",
+      "heritage_significance",
+      0.734
+    ],
+    [
+      "discovery_novelty",
+      "cross_cultural_connection",
+      0.704
+    ],
+    [
+      "discovery_novelty",
+      "evidence_quality",
+      0.844
+    ],
+    [
+      "heritage_significance",
+      "human_resonance",
+      0.701
+    ],
+    [
+      "heritage_significance",
+      "evidence_quality",
+      0.765
+    ],
+    [
+      "human_resonance",
+      "evidence_quality",
+      0.75
+    ]
+  ],
+  "redundancy_ratio_pct": 60.0,
+  "pca": {
+    "variance_explained_pct": [
+      76.9,
+      7.8,
+      7.3,
+      5.4,
+      2.5
+    ],
+    "loadings": [
+      [
+        0.458,
+        0.45,
+        0.424,
+        0.434,
+        0.469
+      ],
+      [
+        0.129,
+        -0.186,
+        0.82,
+        -0.446,
+        -0.277
+      ],
+      [
+        -0.57,
+        -0.07,
+        0.338,
+        0.678,
+        -0.309
+      ],
+      [
+        0.278,
+        -0.87,
+        0.01,
+        0.275,
+        0.3
+      ],
+      [
+        -0.61,
+        -0.033,
+        0.18,
+        -0.277,
+        0.72
+      ]
+    ]
+  }
+}

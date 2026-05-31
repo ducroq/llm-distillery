@@ -4,7 +4,7 @@
 
 filter:
   name: cultural_discovery
-  version: "5.0-draft"
+  version: "5.0"
   created: "2026-05-29"
   description: "Rate content for cultural discovery and cross-cultural connection value"
   focus: "DISCOVERIES about art, culture, history AND CONNECTIONS between peoples/civilizations"
@@ -23,6 +23,16 @@ filter:
         - "Added 2 validation examples: Pope apology (F cap), Mengele dossier (H cap)"
         - "Hard-negative cohort for retrain: 49 articles (#62, datasets/raw/cd_v5_hard_negatives_candidates.jsonl)"
         - "Inherits v4 model loading + dimensional weights pending retrain"
+        - "G carve-out broadened (2026-05-30) to mirror F's pattern after critical lens-design audit found ~4 v5-scored articles (Antwerp 7-Congolese memorial, Muslim WWII memorial, Stolperstein explainer, Ghanaian genocide monument) hitting G cap despite arguably falling in carve-out intent. Now explicitly INCLUDES: (1) victim names surfaced from local/community/journalistic/descendant-led research, not only academic papers; (2) explainer pieces about commemorative practice mechanics (Stolpersteine, monument design); (3) first-of-kind regional commemorative practices. Replaces the prior narrowing Note ('Memorial unveiled for X victims is reckoning even if names listed') with a forward Test + worked examples. Same parsing-too-narrowly bug F had pre-Modigliani broadening."
+        - "Added validation example #20 (Antwerp 7-Congolese memorial) demonstrating G carve-out application"
+        - "F/G/H/I/K converted from hard max_score caps to SOFT PENALTIES (2026-05-30) per critical lens-design audit + ADR-015 (orthogonal lens design causes MAE cliffs; thriving v1 was parked at MAE 0.94 for this failure mode). Hard caps clamped all dims to a single value (e.g., max_score=3.5 → all dims 3.5), destroying gradient and creating cliff-shaped training labels. New penalty mechanism: subtract penalty from each dim, floor at 0. Preserves dim-to-dim ranking (heritage > novelty stays meaningful for slavery topics) while reducing overall weighted average. Penalty values calibrated to demote borderline content (honest weighted ~5-6) just below the 4.5 display threshold without disappearing high-content articles entirely. Penalty values: F=2.5, G=2.5, H=3.5 (strictest; perpetrator-centered framing should not be promoted on Discovery), I=2.0 (lightest; environmental-decline articles are mostly a prefilter routing problem upstream), K=2.5."
+        - "A–E flags (political_conflict, tourism_fluff, celebrity_art, appropriation_debate, speculation) RETAINED as max_score hard caps — v4-era proven behavior, not affected by ADR-015 concern."
+        - "Validation examples 13-18 + Section 5 full-JSON examples (Pope, Mengele) updated to show penalty math: 'honest X.X; penalty −Y.Y → final Z.Z' format. Examples demonstrate gradient preservation (heritage > novelty for harm-reckoning content)."
+        - "Multi-flag interaction rule updated (Section 3 header + Scoring Rule 6 + Critical Reminder 13): when both max_score and penalty flags fire, apply max_score clamp FIRST then subtract highest penalty."
+        - "Lens-fit context (2026-05-30): Phase 3 lens-fit (ADR-037, ovr.news) is NOT shipping near-term — config slot exists but disabled, no rule file, no scheduled work. v5 penalty mechanism is designed to work WITHOUT lens-fit: capped content stays in the pool with demoted scores rather than disappearing. If lens-fit ships later, harder cap behavior can be reinstated."
+        - "OUT-OF-SCOPE wording restructured (2026-05-31) after 3-way validation (Gemini-hard vs Gemini-soft vs DeepSeek-soft) showed Gemini-soft was under-applying A-E max_score flags (political_conflict, tourism_fluff): articles like 'The Manosphere is Lying About Who Built Society' and 'Murcia hiking trail to Europe's largest noria' got reclassified as cultural_discovery (score 6+) under the soft-penalty prompt vs correctly flagged as A/B under hard-cap. Diagnosis: the new 'OUT OF DISCOVERY — may fit other lenses' framing was being read as a permissive escape from A-E categories. Fix: relabeled the two sections as CATEGORY A (inherently low-substance) and CATEGORY B (high-substance wrong-trajectory) with explicit 'choosing between A and B' guidance. Added Flag E (speculation) to the A list (was implicit). Made it explicit that 'may fit other lenses' is downstream-routing info, NOT an excuse to skip the penalty."
+        - "3-way vendor validation finding (2026-05-31, 522 articles): Gemini-soft fires F-K penalty flags on 60% of articles; DeepSeek-soft on 26% (same prompt, 2.3x difference). content_type agreement 58%. Per-dim Pearson 0.66-0.75 (moderate). No ground truth to declare winner. Sticking with Gemini for retrain (matches v4 lineage); investigating 30 F-K disagreement articles by hand to inform v6 prompt-tightening."
+        - "F-K trigger tightening (2026-05-31) following oracle-calibration agent's hand-judgment of 22 disagreement cases: DeepSeek 12 / Gemini 6 / Unclear 4 — DeepSeek's restraint is more aligned with prompt-as-written. Three over-firing patterns by Gemini fixed: (1) K over-fires on event coverage — added 7 explicit anti-triggers: award ceremonies, individual speeches, diplomatic interviews, opinion essays, book/film/theater reviews of already-released works, retrospective coverage, obituaries; narrowed K's scope to 'future-tense institutional initiatives'. (2) I over-fires on rebound stories — added 'article ENDS on rebound/adaptive-reuse/resurgence' carve-out, paleontological/archaeological prehistoric-extinction exclusion, and READ THE FINAL PARAGRAPHS test; added 4 carve-out examples (oldest American mall, Catholic Mass resurgence, Neanderthal extinction, vanishing Welsh dialects). (3) G over-fires on obituaries — added explicit lead text 'G does NOT fire on obituaries of recently-deceased public figures' with named examples (Theo van Boven, Lionel Jospin); restated upstream obit-detector delegation."
 
   target_publications:
     - ovr.news (Discovery tab)
@@ -48,23 +58,30 @@ preprocessing:
     separator: " [...] "
 
 scoring:
+  score_scale_factor: 1.2829  # 10.0 / 7.79 (calibrated max)
+
   # score_scale_factor TBD post-retrain. v4 used 1.1364.
   dimensions:
     discovery_novelty:
       weight: 0.25
       category: discovery
+      description: "Degree to which the article surfaces a new finding, revelation, or insight — not a known fact rehashed"
     heritage_significance:
       weight: 0.20
       category: discovery
+      description: "Cultural or historical importance of the subject matter — from local interest to UNESCO-level world heritage"
     cross_cultural_connection:
       weight: 0.25
       category: connection
+      description: "Bridges between different peoples, traditions, or civilizations — documented exchange, shared origins, or meaningful dialogue"
     human_resonance:
       weight: 0.15
       category: connection
+      description: "Personal stories, emotional depth, lived experience — connection to human meaning beyond dry facts"
     evidence_quality:
       weight: 0.15
       category: assessment
       gatekeeper: true
       gatekeeper_threshold: 3
       gatekeeper_max_score: 4.0
+      description: "Quality of sources, research depth, and documentation — from clickbait/speculation to peer-reviewed primary sources"

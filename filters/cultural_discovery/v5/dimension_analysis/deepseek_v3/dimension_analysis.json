@@ -1,0 +1,109 @@
+{
+  "filter_name": "cultural_discovery",
+  "filter_version": "5.0-draft",
+  "oracle": "deepseek_v3",
+  "n_articles": 522,
+  "dim_names": [
+    "discovery_novelty",
+    "heritage_significance",
+    "cross_cultural_connection",
+    "human_resonance",
+    "evidence_quality"
+  ],
+  "correlation_matrix": [
+    [
+      1.0,
+      0.69,
+      0.716,
+      0.618,
+      0.841
+    ],
+    [
+      0.69,
+      1.0,
+      0.68,
+      0.557,
+      0.611
+    ],
+    [
+      0.716,
+      0.68,
+      1.0,
+      0.602,
+      0.589
+    ],
+    [
+      0.618,
+      0.557,
+      0.602,
+      1.0,
+      0.585
+    ],
+    [
+      0.841,
+      0.611,
+      0.589,
+      0.585,
+      1.0
+    ]
+  ],
+  "pairs_above_abs_r_0.7": [
+    [
+      "discovery_novelty",
+      "cross_cultural_connection",
+      0.716
+    ],
+    [
+      "discovery_novelty",
+      "evidence_quality",
+      0.841
+    ]
+  ],
+  "redundancy_ratio_pct": 20.0,
+  "pca": {
+    "variance_explained_pct": [
+      72.1,
+      9.7,
+      9.2,
+      6.4,
+      2.7
+    ],
+    "loadings": [
+      [
+        0.483,
+        0.439,
+        0.445,
+        0.413,
+        0.453
+      ],
+      [
+        0.382,
+        -0.162,
+        -0.342,
+        -0.578,
+        0.614
+      ],
+      [
+        -0.03,
+        0.563,
+        0.38,
+        -0.684,
+        -0.265
+      ],
+      [
+        -0.148,
+        0.68,
+        -0.699,
+        0.163,
+        0.037
+      ],
+      [
+        -0.773,
+        0.042,
+        0.229,
+        -0.033,
+        0.589
+      ]
+    ]
+  }
+}
