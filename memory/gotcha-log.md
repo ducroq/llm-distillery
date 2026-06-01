@@ -510,3 +510,31 @@ Captured outputs (this is the deploy-claim verification trail the rule requires)
 
 **Promoted to**: not promoted; project-local lesson, surfaces during any new filter prompt design.
 
+---
+
+## deploy_filters.sh rsync Excludes model/ Subdir (cd v5 deploy, 2026-05-31)
+
+**Problem**: After running `deploy_filters.sh` from sadalsuud to gpu-server for cd v5, the scorer service started but threw `Missing model weights: cultural_discovery/v5/model` on first scoring request. Filter package, config, calibration, probe — all present. Only `model/adapter_model.safetensors` + `tokenizer.json` were missing.
+
+**Root cause**: `deploy_filters.sh` uses `rsync --exclude='model/'` for delivery from sadalsuud → gpu-server. The reasoning is sound on sadalsuud's side (sadalsuud uses Hub inference, no local model/ needed), but applies the same exclude when pushing onward to gpu-server, which DOES need the model/ on disk for local LoRA loading. The model arrived on sadalsuud via the llm-distillery deploy commit but never made the second hop.
+
+**Fix**: scp model files directly from sadalsuud (or local llm-distillery checkout) to `/home/hcl/NexusMind/filters/cultural_discovery/v5/model/`: `scp -p adapter_model.safetensors tokenizer.json tokenizer_config.json adapter_config.json README.md gpu-server:/home/hcl/NexusMind/filters/cultural_discovery/v5/model/`. After scp, scorer restart loaded v5 successfully.
+
+**Lesson**: The two NexusMind hosts have different filter-package requirements (sadalsuud: Hub inference, model/ optional; gpu-server: local LoRA load, model/ required). A single rsync exclude rule can't be right for both. Either (a) split the deploy into two rsync invocations with different exclude lists, or (b) drop the exclude entirely and let model/ replicate everywhere. Worth a fix to `deploy_filters.sh` before the next filter cycle — first-deploy of a new filter version will hit this every time.
+
+**Promoted to**: not promoted yet — file an issue with the proposed `deploy_filters.sh` fix; promote to MEMORY.md if it recurs once more before fix lands.
+
+---
+
+## Hub Upload Fails on Missing per-Dim `description` Field (cd v5, 2026-05-31)
+
+**Problem**: `scripts/deployment/upload_to_huggingface.py --filter filters/cultural_discovery/v5` failed with `KeyError: 'description'` when generating the model card from config.yaml dimensions. v4's config had description fields per dim; v5's initial draft did not.
+
+**Root cause**: The Hub uploader's model-card template assumes every `scoring.dimensions[*]` block has a `description: ...` line. The schema is implicit — no validator catches its absence at filter-package creation time. v5's config was scaffolded from a stripped template that lacked the field.
+
+**Fix**: Added per-dim `description: ...` to `filters/cultural_discovery/v5/config.yaml` (5 dims). Upload then succeeded.
+
+**Lesson**: `description: ...` on each `scoring.dimensions[*]` block is a Hub-upload requirement, not just documentation. Could be hardened in `scripts/deployment/verify_filter_package.py` as a pre-flight check (Phase 7 prerequisite). Belonging v1's standard documentation (filter-doc-standard memory) implicitly assumes this; belt-and-suspenders to make it explicit in the verifier.
+
+**Promoted to**: not promoted yet — fold into `verify_filter_package.py` schema-check task on next cleanup pass.
+

@@ -38,7 +38,7 @@ framework: agent-ready-projects v1.9.0
 | **uplifting** | v7 | — | 5.3K articles | Deployed to NexusMind via file-copy — intentionally no Hub repo (NO_HUB sentinel; v7 file-copy from gpu-server skipped training_metadata.json artifacts needed for the model card, and reconstructing them risks fabricating MAE numbers). Hybrid inference added. |
 | **sustainability_technology** | v3 | 0.72 | 10.6K articles | Deployed (HF Hub, private) |
 | **investment-risk** | v6 | 0.47 | 10.4K articles | Deployed (HF Hub, private) |
-| **cultural-discovery** | v4 | 0.74 | 8K articles | Deployed (HF Hub, private) |
+| **cultural-discovery** | v5 | 0.70 | 8.5K articles | Deployed (HF Hub + gpu-server, private) — resolves #62 discovery-lens leakage via F-K soft-penalty flags; DeepSeek oracle (first non-Gemini) |
 | **belonging** | v1 | 0.49 | 7.4K articles | Deployed (HF Hub, private) |
 | **nature_recovery** | v2 | 0.53 | 3.5K articles | Deployed (HF Hub, private) — v1 had no discrimination (#41), v2 uses sample weighting |
 | **foresight** | v1 | 0.75 | 3.5K articles | PARKED — captures governance solutions, not foresight; merging into broadened Solutions lens (#43) |
@@ -49,7 +49,6 @@ framework: agent-ready-projects v1.9.0
 |--------|---------|--------|--------|
 | **thriving** | v1 | PARKED indefinitely — orthogonal lens design caused bimodal distribution (ADR-015); uplifting v7 stays as Thriving tab |  |
 | **sustainability_technology → solutions** | v4 | Design phase — broaden from clean-tech to include governance/community solutions (#43) | ovr.news Solutions tab |
-| **cultural_discovery** | v5 | Oracle labeling complete: 49 hard-negatives + active-learning lane (473), v5 prompt with 5 new flags (F,G,H,I,K) for historical-harm/commemoration/perpetrator/decline/launch shapes. J (death/grief) handled by universal obit detector. Next: gpu-server training (#62) | ovr.news Discovery tab |
 | **ai-engineering-practice** | v2 | Ready for oracle scoring; rename to augmented-engineering at next bump | Separate product (not ovr.news) |
 
 ## Key Decisions
@@ -133,4 +132,4 @@ This project is a source project for [agentic-engineering](https://github.com/du
 
 ---
 
-*Last updated: 2026-05-29*
+*Last updated: 2026-05-31*

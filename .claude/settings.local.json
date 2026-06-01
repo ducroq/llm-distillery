@@ -160,7 +160,15 @@
       "Bash(git config *)",
       "PowerShell(Get-Content *)",
       "Bash(git *)",
-      "Bash([ -f \"memory/$f\" ])"
+      "Bash([ -f \"memory/$f\" ])",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api-docs.deepseek.com)",
+      "WebFetch(domain:cdn.deepseek.com)",
+      "Bash(pkill -f \"validate_deepseek_oracle\")",
+      "Bash(PYTHONIOENCODING=utf-8 python scripts/compare_3way_softpenalty.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python *)",
+      "Bash(curl -s http://gpu-server:11434/api/tags)",
+      "Read(//tmp/**)"
     ],
     "deny": [],
     "ask": []

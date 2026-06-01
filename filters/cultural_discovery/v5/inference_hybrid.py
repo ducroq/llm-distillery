@@ -97,7 +97,7 @@ class CulturalDiscoveryHybridScorer(HybridScorer):
         )
 
     def _get_embedding_stage_config(self) -> Dict:
-        """Return EmbeddingStage configuration for cultural_discovery v4."""
+        """Return EmbeddingStage configuration for cultural_discovery v5."""
         return {
             "embedding_model_name": "intfloat/multilingual-e5-small",
             "probe_path": str(self._probe_path),

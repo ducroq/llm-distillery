@@ -1,9 +1,11 @@
 # Cultural Discovery Filter v5 — Development Status
 
-**Last Updated:** 2026-05-31
-**Status:** Phase 3 Oracle Calibration — multi-oracle in progress (Qwen3 batching, Phi4 queued)
-**Driver:** llm-distillery#62 (discovery-lens leakage in cd v4 production)
+**Last Updated:** 2026-05-31 (evening)
+**Status:** 🟢 **DEPLOYED TO PRODUCTION** — scorer on gpu-server healthy, ovr.news Discovery tab will score with v5 on next pipeline cycle
+**Driver:** llm-distillery#62 (discovery-lens leakage in cd v4 production) — RESOLVED at infrastructure level
 **Target deployment:** ovr.news Discovery tab (ADR-038)
+
+**Deploy chain**: llm-distillery `6acd013` → HF Hub (jeergrvgreg/cultural-discovery-filter-v5 private) → NexusMind `f9a3fe9` (pushed) → sadalsuud pulled → gpu-server scorer healthy (code_revision `264b0d3f...`).
 
 ---
 
@@ -35,31 +37,35 @@
   - [x] **Haiku cross-validation of Opus** on handjudge_30: 77% exact agreement → agent layer validated
   - [x] **Broader 2-oracle disagreement truth set** (Opus agent, n=30 stratified): DeepSeek 21 / Gemini 5 / Unclear 2 / Both wrong 2. Per-oracle accuracy on disagreement set: **DeepSeek 80.8% vs Gemini 19.2%**. Confirms v3 tightening did NOT close Gemini's K/I/G over-firing — Gemini's reading style appears to be a stable disposition.
 
-## In Progress (2026-05-31 afternoon)
+## Phase 4–9 (Completed 2026-05-31 evening)
 
-- [ ] **Multi-oracle batch calibration (Phase 3 extension)** — ADR-020 draft methodology
-  - [x] Gemini Flash 2.5 v3 — 522/522 scored
-  - [x] DeepSeek V4 Flash v3 — 522/522 scored
-  - [ ] Qwen3:14b on gpu-server (Ollama) — running, ~30/522 at last check, ETA ~14:00
-  - [ ] Phi4:14b on gpu-server — queued after Qwen3, ETA ~17:00
-- [ ] **4-oracle consensus computation** (`scripts/multi_oracle_consensus.py`, written, awaits all 4 oracle outputs)
-- [ ] **Agent judges on hard cases** (Opus + Haiku via Agent tool — script extract_hard_cases.py ready)
-- [ ] **Formal calibration_report.md** — draft skeleton landing now, full sections fill as data lands
+- [x] **Phase 4: Oracle pick** — DeepSeek V4 Flash chosen (80.8% vs 19.2% on agent-judged truth set; ~7x cheaper; conservative-oracle principle locked in)
+- [x] **Phase 4: Batch labeling** — 8,029 v4 records re-scored under DS + v5 prompt (`datasets/scored/cd_v5_8k_deepseek_v5_prompt.jsonl`), merged with 522 calibration cohort → 8,551 training records (`datasets/scored/cd_v5_deepseek_merged_for_training.jsonl`). $10.36 actual cost, 14% cache hit rate.
+- [x] **Phase 5: Training** — Gemma-3-1B + LoRA on gpu-server. Val MAE 0.834→0.736→**0.697** across 3 epochs (better than v4's 0.74). `training_history.json`, `training_metadata.json` saved.
+- [x] **Phase 6a: Calibration** — isotonic regression on val set. `calibration.json` (16KB) + `score_scale_factor` 1.2829 computed.
+- [x] **Phase 6b: Normalization** — deferred to first-week production data; `score_scale_factor` carries baseline.
+- [x] **Phase 7: Hub upload** — `jeergrvgreg/cultural-discovery-filter-v5` (private) verified.
+- [x] **Phase 8: NexusMind deployment** — filter package + model artifacts on `/home/hcl/NexusMind/filters/cultural_discovery/v5/`. Smoke-tested via /score endpoint: Pope apology 9.65→**2.31** (penalty fires), Indus/Sumer 9.12 (gradient preserved). `models_loaded: [..., "cultural_discovery_v5.0"]` confirmed.
+- [x] **Phase 8b: v4 deleted from gpu-server** (2026-05-31, post-verification) — `filter_loader._find_latest_version()` provably picks v5 (verified in actual responses). v4 still in llm-distillery + git history + HF Hub if rollback ever needed.
+- [x] **Phase 9: ovr.news integration** — `FILTER_TO_TAB['cultural_discovery'] = 'discovery'` mapping intact; Discovery tab picks up v5 on next pipeline cycle.
 
-## Pending
+## Reference-Status (2026-05-31)
 
-- [ ] **Phase 4: Oracle pick + production retrain decision** — leading candidate is DeepSeek V4 Flash on evidence so far:
-  - Per-oracle accuracy on agent-judged truth set: 80.8% (DS) vs 19.2% (Gem)
-  - Dimension redundancy: DS 20% pairs above |r|=0.7, Gem 60% (DS more orthogonal — better student signal)
-  - Cost: ~$2 (DS) vs ~$15 (Gem Batch) for 8K-article retrain
-  - Conservative-oracle principle (user-confirmed): DS's lower F-K firing rate is the GOAL behavior, not a bug
-- [ ] **Phase 4: Batch labeling** — re-score 8K v4 records under chosen oracle + v5 prompt
-- [ ] **Phase 5: Training** — Gemma-3-1B + LoRA on gpu-server (~3 epochs, batch 8, lr 2e-5, head+tail 256+256). Re-merge with 522 v5-prompt cohort.
-- [ ] **Phase 6a: Calibration** — isotonic regression on val set → `calibration.json`
-- [ ] **Phase 6b: Normalization** — fit on production CDF → `normalization.json`
-- [ ] **Phase 7: Hub upload** — `jeergrvgreg/cultural-discovery-filter-v5` (private)
-- [ ] **Phase 8: NexusMind deployment** — copy filter package, restart scorer service
-- [ ] **Phase 9: ovr.news integration** — verify Discovery tab picks up v5 scores via FILTER_TO_TAB
+cd v5 is the **provisional reference example** for several patterns. None are locked-in as project standard until validated on a 2nd filter — most likely **solutions v4** (next on the in-development list).
+
+| Pattern | Status | Validation requirement |
+|---|---|---|
+| Documentation pattern (7-file core + 2 optional extensions) | LOCKED — see `memory: filter-doc-standard.md` | cd v5 confirmed belonging v1's pattern works for complex calibrations |
+| Conservative-oracle for needle-filter penalty flags | LOCKED — see `memory: feedback-conservative-oracle-better.md` | User-explicit principle |
+| Soft penalty (subtract+floor) over hard cap (clamp) for orthogonal flags | LOCKED — ADR-015 + cd v5 outcome confirms | Empirical: gradient preserved + leakage fixed |
+| ADR-020 methodology (multi-oracle batch + agent judging) | PROVISIONAL | Run on solutions v4; if leakage-fix + cost outcomes match, graduate to Accepted |
+| DeepSeek as default oracle for cost-sensitive cycles | PROVISIONAL | Solutions v4 — confirm price/quality replicate outside Discovery domain |
+| F/G/H/I/K flag taxonomy | DOMAIN-SPECIFIC (cd-only) | Not a reusable pattern; each new filter audits its own leakage shapes |
+
+**Concrete handoff to solutions v4 work:**
+- Use cd v5 as the canonical example in `docs/agents/filter-development-guide.md` Phase 1–3
+- Follow ADR-020 PROVISIONAL methodology end-to-end
+- If solutions v4 lands cleanly: revise ADR-020 → Accepted, point workflow doc at cd v5
 
 ## Key Decisions This Cycle
 
@@ -107,6 +113,8 @@ Deferred during cd v5 retrain push (2026-05-31) to stay on critical path. Addres
 - [ ] **Revise `docs/adr/draft-020-extended-oracle-calibration.md`** per 4-reviewer convergent feedback: (1) cut 5-oracle → 3-oracle as default, (2) split soft-penalty mechanism into ADR-020a (extension of ADR-015) and multi-oracle into ADR-020b, (3) replace "Expected outcome: DS wins" prediction with actual results from this retrain, (4) explicitly address Alternative 5 ("iterate prompt one more round per ADR-010"), (5) add precedence rule for conservative-oracle vs consensus-alignment when they diverge, (6) mark Status: PROVISIONAL until validated on 2nd filter.
 - [ ] **Code refactor**: extract `extract_dim_score`, `smart_compress`, `build_prompt`, `pearson`, `spearman`, `wavg` into `ground_truth/oracle_utils.py`. 9 scripts have copy-pasted variants today. ~1hr work. Defer to next filter cycle (refactoring-guide reviewer recommendation).
 - [ ] **OracleClient ABC refactor of `ground_truth/batch_scorer.py`**: currently hardcoded if/elif over `claude/gemini/gemini-pro/gemini-flash/gpt4`. No DeepSeek/Ollama support → caused fork pressure. 2-4hr work. Defer to first task of next filter cycle (or whenever a new oracle provider is needed).
+- [ ] **First-week production monitoring** (target window: 2026-05-31 → 2026-06-07): pull cd v5 scores from `ovr.news` Discovery tab, verify the #62 leakage examples (Pope apology, Belgium Congo, Modigliani repatriation, residential schools, Antwerp Congolese memorial, etc.) score below 4.5. If any leak through, capture in `datasets/raw/cd_v6_leakage_candidates.jsonl` for v6 work.
+- [ ] **Use cd v5 as ADR-020 validation case during solutions v4 cycle**: follow this filter's playbook end-to-end (4-oracle batch → agent judging → conservative-oracle pick → soft-penalty mechanism if orthogonal flags emerge). Outcome decides whether ADR-020 graduates PROVISIONAL → Accepted.
 - [ ] **Apply remaining v5 prompt tightenings** per oracle-calibration agent's final review:
    - K anti-trigger: add "festivals currently running with delivered programming are NOT K — future-tense only"
    - G carve-out tighten: "at least three previously-unidentified victims as primary subject with the identification work — not the ceremony — driving the narrative"

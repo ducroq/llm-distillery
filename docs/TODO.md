@@ -42,11 +42,16 @@ See `filters/common/commerce_prefilter/docs/` for full documentation.
 - [x] **investment-risk v5** - Superseded by v6
   - Test MAE: 0.484 (excellent)
   - 10,000 training articles
-- [x] **cultural-discovery v4** - Deployed on HuggingFace Hub (private)
+- [x] **cultural-discovery v5** - Deployed on HuggingFace Hub + gpu-server (private) — 2026-05-31
+  - Val MAE: 0.697 (v4 was 0.74), Gemma-3-1B
+  - 8,551 training articles, DeepSeek V4 Flash oracle (first non-Gemini lineage)
+  - Resolves llm-distillery#62 discovery-lens leakage via F/G/H/I/K soft-penalty flags (historical_harm_reckoning, commemoration, perpetrator_biography, decline, launch)
+  - Provisional reference example for ADR-020 methodology (multi-oracle calibration + agent judging)
+  - Target: ovr.news Discovery tab
+- [x] **cultural-discovery v4** - Superseded by v5; on disk locally + git + HF Hub for rollback if needed
   - Calibrated test MAE: 0.74 (v3 was 0.77), Gemma-3-1B
   - 8,029 training articles (v3 7,827 + 202 active learning enrichment)
   - All 3 inference paths verified (local, Hub, hybrid)
-  - Target: ovr.news (Wisdom tab), Busara
 - [x] **cultural-discovery v3** - Superseded by v4
 
 ### In Active Development (priority: ovr.news tabs)

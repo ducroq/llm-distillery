@@ -91,8 +91,23 @@ Loaded every session. Topic files loaded on demand via triggers below.
 - HF Hub model-card license consistency — fixed 2026-05-22 (#65, commits `fb67d05` + `41d2108`). Source-side template patched (`upload_to_huggingface.py:28` declares `eupl-1.2`); all 14 `jeergrvgreg/*` Hub repos relicensed in place via one-shot script. Repo LICENSE + pyproject + upload template + 14 Hub model cards all carry EUPL-1.2 consistently. <!-- verify: grep -q "license: eupl-1.2" scripts/deployment/upload_to_huggingface.py && echo PASS || echo FAIL -->
 - Deploy-script hardening — fail-closed defaults for `deploy_to_nexusmind.{sh,ps1}` (2026-05-23, commits `4cf75dd` + `dd11727`). Refuse-on-dirty pre-flight check + `--force-dirty`/`-ForceDirty` escape hatch; explicit `git add $FILTER_PATH filters/common/` replaces blanket `git add -A`. Closes origin-contamination hazard from 2026-05-22 incident. Printed server-pull instructions also corrected to match real deploy flow (sadalsuud at `~/local_dev/NexusMind` + gpu-server via `deploy_filters.sh` from sadalsuud, no git pull). <!-- verify: grep -q "FORCE_DIRTY" scripts/deploy_to_nexusmind.sh && grep -q 'git add "\$FILTER_PATH" filters/common/' scripts/deploy_to_nexusmind.sh && echo PASS || echo FAIL -->
 - Solutions broadening v4 DRAFT scaffolded — `filters/sustainability_technology/v4/` (2026-05-05). Forks signed off: C (broaden ST v3 in place), combine ST v3 + foresight v1 corpora, foresight retired when v4 supersedes ST v3. 7 dims, weight=1.00, calibration batch spec inline (300 articles, ~$0.30). Awaiting prompt drafting before any oracle spend. <!-- verify: test -f filters/sustainability_technology/v4/config.yaml && echo PASS || echo FAIL -->
+- cultural_discovery v5 DEPLOYED 2026-05-31 — resolves #62 discovery-lens leakage. Val MAE 0.697 (v4 was 0.74). Soft-penalty F/G/H/I/K flags (historical_harm_reckoning, commemoration_memorial, perpetrator_biography, decline_loss, launch_announcement). DeepSeek V4 Flash oracle (first non-Gemini lineage in production, ~7x cheaper). End-to-end verified: Pope apology 9.65→2.31, Indus/Sumer 9.12 (gradient preserved). v4 deleted from gpu-server post-verification; still in llm-distillery + git + HF Hub for rollback. **Provisional reference example for ADR-020 methodology** (multi-oracle batch + agent judging) and DeepSeek-as-default-oracle; solutions v4 is the validation case. <!-- verify: ssh gpu-server "curl -fs http://localhost:8000/health > /dev/null && curl -fs http://localhost:8000/models/status | python3 -c 'import sys,json; d=json.load(sys.stdin); assert \"cultural_discovery\" in d[\"available_filters\"], d; print(\"OK\")'" > /dev/null 2>&1 && echo PASS || echo FAIL -->
 
-## Last Session Recap (2026-05-29 / 30)
+## Last Session Recap (2026-05-31)
+
+Shipped cultural_discovery v5 to production — closes the cd v5 retrain arc (started 2026-05-29). #62 leakage resolved end-to-end: Pope apology 9.65 → 2.31, Indus/Sumer trade discovery 9.12 (gradient preserved). Filter is live on gpu-server scorer, ovr.news Discovery tab picks it up on next pipeline cycle.
+
+- **Oracle pick + 8K batch labeling**. Chose DeepSeek V4 Flash over Gemini after multi-oracle calibration (4 oracles: Gemini Flash 2.5, DeepSeek V4 Flash, Qwen3:14b, Phi4:14b) + Opus/Haiku agent judging on 30-article disagreement set. DeepSeek won 80.8% vs Gemini 19.2%; conservative-oracle principle (under-firing better than over-firing on penalty flags) locked in. Re-scored full 8,029 v4-prompt corpus + merged with 522 calibration cohort → **8,551 training records** at `datasets/scored/cd_v5_deepseek_merged_for_training.jsonl`. Actual cost $10.36, 14% cache hit rate. First non-Gemini lineage in production.
+- **Training**. Gemma-3-1B + LoRA on gpu-server. Val MAE 0.834 → 0.736 → **0.697** across 3 epochs (better than v4's 0.74). Hyperparams unchanged from v4 (3 epochs, batch 8, lr 2e-5, head+tail 256+256).
+- **Calibration + Hub + NexusMind deploy**. Isotonic regression per dim → `calibration.json` + `score_scale_factor` 1.2829. Hub upload `jeergrvgreg/cultural-discovery-filter-v5` (private). Deploy chain: llm-distillery `6acd013` → HF Hub → NexusMind `f9a3fe9` → sadalsuud → gpu-server. v4 deleted from gpu-server post-verification (provably picked v5 via `_find_latest_version()` + actual response `filter_version: "5.0"`); still recoverable from llm-distillery + git + HF Hub.
+- **End-to-end verification** (addressed "things have gone badly wrong before"). Triggered actual `/score` requests on gpu-server: Pope apology (9.65 under v4) → **2.31** (F penalty fires, demoted below 4.5 threshold), Indus/Sumer trade discovery → **9.12** (no penalty, tier "high"). Health endpoint confirms `cultural_discovery_v5.0` loaded.
+- **Documentation standard locked in** (`memory: filter-doc-standard.md`). Belonging v1's 7-file core (config + prompt + prefilter + STATUS + DEEP_ROOTS + README + README_MODEL) is the project standard from 2026-05-31. cd v5 adds 2 optional extensions for complex calibrations: `calibration_report.md` + `dimension_analysis/`.
+- **6 new memory entries**: `filter-doc-standard.md`, `feedback-conservative-oracle-better.md`, `feedback-oracle-not-ground-truth.md`, `feedback-oracle-selection-criteria.md`, `ovr-lens-set-current.md`, `cd-v5-reference-status.md`. ADR-020 DRAFT (`docs/adr/draft-020-extended-oracle-calibration.md`) drafted but marked PROVISIONAL pending solutions v4 validation.
+- **2 new gotchas** (see `memory/gotcha-log.md`): "deploy_filters.sh rsync Excludes model/ Subdir" + "Hub Upload Fails on Missing per-Dim description Field". Both surfaced during cd v5 deploy; both have a clear fix path for next filter cycle.
+
+Cost this session: ~$10.50 (DeepSeek 8K labeling ~$10.36 + Gemini calibration ~$0.10). v4 → v5 development total: ~$11 (vs v4's ~$25 under Gemini, validating DeepSeek economics).
+
+## Previous Session Recap (2026-05-29 / 30)
 
 Took ducroq/llm-distillery#62 (cultural_discovery v5 hard-negatives) from issue body to oracle-labeled cohort + drafted v5 prompt, ready for tomorrow's gpu-server training.
 
@@ -105,21 +120,23 @@ Took ducroq/llm-distillery#62 (cultural_discovery v5 hard-negatives) from issue 
 
 Cost this session: ~$0.07 total (2 calibration runs at $0.01 each + 49-article batch at $0.05).
 
-## Next Session Pickup (set 2026-05-30 EOD)
+## Next Session Pickup (set 2026-05-31 EOD)
 
-**gpu-server training for cd v5.** Merge the 49 oracle-labeled hard-negatives into the existing v5 training corpus (v4 8,029 + active-learning 473 + #62 49 = **8,551 articles**), regenerate train/val/test splits, train on gpu-server.
+**cd v5 post-ship cleanup + solutions v4 prompt drafting.** cd v5 ship is complete; first-week monitoring runs in parallel.
 
-Concrete steps:
-1. **Merge labeled cohort** with existing v5 training data. Source files: `datasets/scored/cd_v5_hard_negatives/cultural_discovery/scored_batch_*.jsonl` (49 rows) + active-learning lane `datasets/scored/active_learning_cd_v5/cultural-discovery/scored_batch_*.jsonl` (473 rows) + v4 training data. Watch the `_v5_oracle_reclassified` tag on the 5 carve-out positives — treat as positives, not hard-negatives.
-2. **Regenerate splits**: `PYTHONPATH=. python training/prepare_data.py --filter filters/cultural_discovery/v5 --data-source <merged jsonl>`. ADR-010 template (belonging v1) preserved.
-3. **Train on gpu-server**: copy splits via scp (not rsync, see gotchas), `ssh gpu-server "cd ~/llm-distillery && source venv/bin/activate && PYTHONPATH=. HF_HUB_OFFLINE=1 python training/train.py --filter filters/cultural_discovery/v5"`. Hyperparams from v4 config (6 epochs, batch 8, lr 2e-5).
-4. **Fit calibration + normalization** on val + production data (ADR-008, ADR-014). Then probe retrain for hybrid (ADR-006).
-5. **Deploy**: HuggingFace Hub upload + `scripts/deploy_to_nexusmind.sh`. Per #44 + #65 + #50 discipline: verify Hub freshness via `verify_filter_package.py --check-hub`, deploy script will refuse-on-dirty target.
+Priority TODOs (in order):
+1. **First-week #62 leakage monitoring** (2026-05-31 → 2026-06-07). Pull cd v5 scores from ovr.news Discovery tab. Verify the #62 leakage examples (Pope apology, Belgium Congo, Modigliani repatriation, residential schools, Antwerp Congolese memorial) score below 4.5. Any leak → capture in `datasets/raw/cd_v6_leakage_candidates.jsonl`.
+2. **Revise `docs/adr/draft-020-extended-oracle-calibration.md`** per 4-reviewer convergent feedback: mark PROVISIONAL, cut 5→3 oracles default, split soft-penalty into separate ADR (extension of ADR-015), replace "Expected outcome: DS wins" with actual results, address Alternative 5, add conservative-oracle vs consensus-alignment precedence rule.
+3. **Solutions v4 prompt drafting** (`filters/sustainability_technology/v4/prompt-compressed.md`) — 7 dims encoded, calibration batch ready (~$0.30). **This is the ADR-020 validation case**: follow cd v5's playbook end-to-end. If it lands cleanly, ADR-020 graduates PROVISIONAL → Accepted; if it hits issues, capture divergence in ADR-020 revision.
+4. **Code refactor**: extract `extract_dim_score`, `smart_compress`, `build_prompt`, `pearson`, `spearman`, `wavg` into `ground_truth/oracle_utils.py` (9 scripts have copy-pasted variants). ~1hr work.
+5. **OracleClient ABC refactor of `ground_truth/batch_scorer.py`**: currently hardcoded if/elif over `claude/gemini/gemini-pro/gemini-flash/gpt4`. No DeepSeek/Ollama support → caused fork pressure during cd v5. 2-4hr work.
+6. **Apply remaining v5 prompt tightenings** per oracle-calibration agent final review (K/G/I anti-triggers) — defer to v6.
+7. **Fix v3→v4 prefilter regression** (`check_content_length()` skip) — defer to v6.
 
-Carry-over from earlier pickups (still applicable, lower priority than cd v5):
-- **Solutions v4 prompt drafting** (`filters/sustainability_technology/v4/prompt-compressed.md`) — 7 dims encoded, calibration batch ready (~$0.30).
-- **#66 fully-declarative migration** — base `EXCLUSION_REASON_PREFIX` attr + URL-domain into `_pre_exclusion_check`. Unblocks CD v4 / uplifting v7 / foresight v1 / NR v2.
+Carry-over from earlier pickups (still applicable, lower priority):
+- **#66 fully-declarative migration** — base `EXCLUSION_REASON_PREFIX` attr + URL-domain into `_pre_exclusion_check`. Unblocks CD v5 / uplifting v7 / foresight v1 / NR v2.
 - **NexusMind#199** — regex P(obit) probe in production scoring (this side ready via `filters/common/obit_signal.py`).
+- **`deploy_filters.sh` rsync exclude fix** (new gotcha 2026-05-31) — model/ excluded on hop to gpu-server, requires manual scp. File issue with proposed fix.
 
 ## Next Up (from ROADMAP "Now")
 
