@@ -522,7 +522,7 @@ Captured outputs (this is the deploy-claim verification trail the rule requires)
 
 **Lesson**: The two NexusMind hosts have different filter-package requirements (sadalsuud: Hub inference, model/ optional; gpu-server: local LoRA load, model/ required). A single rsync exclude rule can't be right for both. Either (a) split the deploy into two rsync invocations with different exclude lists, or (b) drop the exclude entirely and let model/ replicate everywhere. Worth a fix to `deploy_filters.sh` before the next filter cycle — first-deploy of a new filter version will hit this every time.
 
-**Promoted to**: not promoted yet — file an issue with the proposed `deploy_filters.sh` fix; promote to MEMORY.md if it recurs once more before fix lands.
+**Promoted to**: not promoted yet — tracked as #67 with proposed fix (Option B: drop the model/ exclude, add post-deploy /score smoke test). Promote to MEMORY.md if it recurs before fix lands.
 
 ---
 
@@ -536,5 +536,5 @@ Captured outputs (this is the deploy-claim verification trail the rule requires)
 
 **Lesson**: `description: ...` on each `scoring.dimensions[*]` block is a Hub-upload requirement, not just documentation. Could be hardened in `scripts/deployment/verify_filter_package.py` as a pre-flight check (Phase 7 prerequisite). Belonging v1's standard documentation (filter-doc-standard memory) implicitly assumes this; belt-and-suspenders to make it explicit in the verifier.
 
-**Promoted to**: not promoted yet — fold into `verify_filter_package.py` schema-check task on next cleanup pass.
+**Promoted to**: not promoted yet — tracked as #68 (verify_filter_package.py schema check for per-dim description + weight fields, before --check-hub round-trip).
 

@@ -115,6 +115,9 @@ Deferred during cd v5 retrain push (2026-05-31) to stay on critical path. Addres
 - [ ] **OracleClient ABC refactor of `ground_truth/batch_scorer.py`**: currently hardcoded if/elif over `claude/gemini/gemini-pro/gemini-flash/gpt4`. No DeepSeek/Ollama support → caused fork pressure. 2-4hr work. Defer to first task of next filter cycle (or whenever a new oracle provider is needed).
 - [ ] **First-week production monitoring** (target window: 2026-05-31 → 2026-06-07): pull cd v5 scores from `ovr.news` Discovery tab, verify the #62 leakage examples (Pope apology, Belgium Congo, Modigliani repatriation, residential schools, Antwerp Congolese memorial, etc.) score below 4.5. If any leak through, capture in `datasets/raw/cd_v6_leakage_candidates.jsonl` for v6 work.
 - [ ] **Use cd v5 as ADR-020 validation case during solutions v4 cycle**: follow this filter's playbook end-to-end (4-oracle batch → agent judging → conservative-oracle pick → soft-penalty mechanism if orthogonal flags emerge). Outcome decides whether ADR-020 graduates PROVISIONAL → Accepted.
+- [ ] **Tooling debt surfaced by this filter's deploy** — both have proposed fixes in their issue bodies:
+  - #67: `deploy_filters.sh` excludes `model/` on hop to gpu-server (manual scp required for first deploy of new filter version)
+  - #68: `verify_filter_package.py` should check config.yaml schema (per-dim `description` field) before `--check-hub` round-trip
 - [ ] **Apply remaining v5 prompt tightenings** per oracle-calibration agent's final review:
    - K anti-trigger: add "festivals currently running with delivered programming are NOT K — future-tense only"
    - G carve-out tighten: "at least three previously-unidentified victims as primary subject with the identification work — not the ceremony — driving the narrative"

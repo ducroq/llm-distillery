@@ -136,7 +136,8 @@ Priority TODOs (in order):
 Carry-over from earlier pickups (still applicable, lower priority):
 - **#66 fully-declarative migration** — base `EXCLUSION_REASON_PREFIX` attr + URL-domain into `_pre_exclusion_check`. Unblocks CD v5 / uplifting v7 / foresight v1 / NR v2.
 - **NexusMind#199** — regex P(obit) probe in production scoring (this side ready via `filters/common/obit_signal.py`).
-- **`deploy_filters.sh` rsync exclude fix** (new gotcha 2026-05-31) — model/ excluded on hop to gpu-server, requires manual scp. File issue with proposed fix.
+- **`deploy_filters.sh` rsync exclude fix** — model/ excluded on hop to gpu-server, requires manual scp (#67 filed 2026-05-31).
+- **`verify_filter_package.py` schema check for per-dim `description`** — catches Hub-upload prerequisite (#68 filed 2026-05-31).
 
 ## Next Up (from ROADMAP "Now")
 
